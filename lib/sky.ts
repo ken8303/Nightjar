@@ -8,3 +8,15 @@ export function moonInfo(date:Date,p:Place){const phase=A.MoonPhase(date),illumi
 export function scoreAt(cloud:number,date:Date,p:Place){const sun=bodyPosition(A.Body.Sun,date,p).altitude,moon=moonInfo(date,p);if(sun>-6)return 0;return Math.round(Math.max(0,Math.min(100,(100-cloud)*.8+Math.min(1,(-sun-6)/12)*20-(moon.altitude>0?moon.illumination*20:0))))}
 export function timeLabel(date:Date,tz?:string){return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:tz||'UTC'}).format(date)}
 export {A};
+export function observingMilestones(date:Date,p:Place){
+ const obs=observer(p);
+ const rise=(body:A.Body,direction:number)=>A.SearchRiseSet(body,obs,direction,date,2)?.date||null;
+ return [
+  {label:'Next sunset',date:rise(A.Body.Sun,-1)},
+  {label:'Full darkness begins',date:A.SearchAltitude(A.Body.Sun,obs,-1,date,2,-18)?.date||null},
+  {label:'Full darkness ends',date:A.SearchAltitude(A.Body.Sun,obs,1,date,2,-18)?.date||null},
+  {label:'Next sunrise',date:rise(A.Body.Sun,1)},
+  {label:'Next moonrise',date:rise(A.Body.Moon,1)},
+  {label:'Next moonset',date:rise(A.Body.Moon,-1)},
+ ];
+}
