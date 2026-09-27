@@ -13,6 +13,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
 - Named equipment setups saved on this device.
 - Small-field mosaic planner with overlap, rotated panel centres and CSV export.
+- Interactive 3D Moon with NASA surface imagery, labelled landmarks, phase lighting and a lunar phase timeline.
 - A feature-detected WebMCP location tool.
 
 ## Run locally
@@ -32,7 +33,7 @@ Weather and place search are fetched server-side from Open-Meteo; no API key is 
 
 The planning score is a transparent heuristic, not astronomical seeing or transparency. There is no terrain horizon correction. The star catalogue is a small bright-star selection with approximate fixed coordinates; this is not a navigation instrument. Meteor peaks are typical annual dates, not year-specific forecasts. The annual calendar links to IMO for detailed current bulletins.
 
-Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), AR, full deep-sky catalogue, sky-photo recognition, 3D Moon, full-sky framing overlays, cloud accounts and push notifications.
+Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), AR, full deep-sky catalogue, sky-photo recognition, full-sky framing overlays, cloud accounts and push notifications.
 
 ## Sources
 
@@ -44,3 +45,5 @@ Not implemented: light pollution data, multi-model comparison, aurora alerts (th
 Aurora: https://www.spaceweather.gov/products/aurora-30-minute-forecast. The polar grid is sampled for display; the local estimate uses the nearest full-resolution cell. Aurora is always the latest feed, independent of the planner date.
 
 Mosaic centres use a tangent-plane projection around the supplied equatorial target. The supplied coordinate epoch is preserved; no precession, mount control, exact spherical overlap or per-panel camera-angle correction is provided. Fields are limited to 10 degrees and target declination to ±75 degrees.
+
+Moon texture: NASA’s Scientific Visualization Studio / LRO, https://svs.gsfc.nasa.gov/4720/. Landmark centres: IAU/USGS Gazetteer of Planetary Nomenclature. The smooth globe approximates phase lighting; it does not model libration, local sky orientation, elevation, terrain shadows or eclipses.
