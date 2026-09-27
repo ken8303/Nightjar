@@ -10,7 +10,9 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
 - Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events.
-- Camera field-of-view and 35 mm equivalent focal-length calculations.
+- Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
+- Named equipment setups saved on this device.
+- Small-field mosaic planner with overlap, rotated panel centres and CSV export.
 - A feature-detected WebMCP location tool.
 
 ## Run locally
@@ -30,7 +32,7 @@ Weather and place search are fetched server-side from Open-Meteo; no API key is 
 
 The planning score is a transparent heuristic, not astronomical seeing or transparency. There is no terrain horizon correction. The star catalogue is a small bright-star selection with approximate fixed coordinates; this is not a navigation instrument. Meteor peaks are typical annual dates, not year-specific forecasts. The annual calendar links to IMO for detailed current bulletins.
 
-Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), AR, full deep-sky catalogue, sky-photo recognition, 3D Moon, mosaics, cloud accounts and push notifications.
+Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), AR, full deep-sky catalogue, sky-photo recognition, 3D Moon, full-sky framing overlays, cloud accounts and push notifications.
 
 ## Sources
 
@@ -40,3 +42,5 @@ Not implemented: light pollution data, multi-model comparison, aurora alerts (th
 - https://www.imo.net/resources/calendar/
 
 Aurora: https://www.spaceweather.gov/products/aurora-30-minute-forecast. The polar grid is sampled for display; the local estimate uses the nearest full-resolution cell. Aurora is always the latest feed, independent of the planner date.
+
+Mosaic centres use a tangent-plane projection around the supplied equatorial target. The supplied coordinate epoch is preserved; no precession, mount control, exact spherical overlap or per-panel camera-angle correction is provided. Fields are limited to 10 degrees and target declination to ±75 degrees.
