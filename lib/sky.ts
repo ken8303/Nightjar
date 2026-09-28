@@ -20,3 +20,21 @@ export function observingMilestones(date:Date,p:Place){
   {label:'Next moonset',date:rise(A.Body.Moon,-1)},
  ];
 }
+
+export function photographyLightWindows(date:Date,p:Place){
+ const definitions=[{name:'Morning blue hour',tone:'blue',direction:1,startAltitude:-6,endAltitude:-4},{name:'Morning golden hour',tone:'gold',direction:1,startAltitude:-4,endAltitude:6},{name:'Evening golden hour',tone:'gold',direction:-1,startAltitude:6,endAltitude:-4},{name:'Evening blue hour',tone:'blue',direction:-1,startAltitude:-4,endAltitude:-6}];
+ const obs=observer(p),limit=+date+48*3600000;
+ return definitions.map(def=>{
+  let cursor=date;
+  for(let attempt=0;attempt<3&&+cursor<limit;attempt++){
+   const start=A.SearchAltitude(A.Body.Sun,obs,def.direction,cursor,(limit-+cursor)/86400000,def.startAltitude)?.date;
+   if(!start)break;
+   const after=new Date(+start+1000);
+   const end=A.SearchAltitude(A.Body.Sun,obs,def.direction,after,1,def.endAltitude)?.date;
+   const reversal=A.SearchAltitude(A.Body.Sun,obs,-def.direction,after,1,def.startAltitude)?.date;
+   if(end&&(!reversal||+end<+reversal))return {...def,start,end};
+   cursor=new Date(+start+60000);
+  }
+  return {...def,start:null,end:null};
+ });
+}

@@ -1,0 +1,9 @@
+'use client';
+import {useMemo} from 'react';
+import {ArrowUpRight,Sun} from 'lucide-react';
+import {photographyLightWindows,Place,timeLabel} from '@/lib/sky';
+export default function PhotographyLight({date,place,onDate}:{date:Date;place:Place;onDate:(date:Date)=>void}){
+ const windows=useMemo(()=>photographyLightWindows(date,place),[date,place]);
+ const tz=place.timezone||'UTC',day=(d:Date)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:tz}).format(d);
+ return <section className="panel photography-light"><div className="section-label"><span>PLAN THE LIGHT</span><Sun size={18}/></div><p className="muted">Next complete morning and evening windows beginning after your observing time, at {place.name}. Times in {tz}.</p><div className="light-window-grid">{windows.map(w=><article className={`light-window ${w.tone}`} key={w.name}><h3>{w.name}</h3>{w.start&&w.end?<><p className="light-window-time">{timeLabel(w.start,tz)} – {timeLabel(w.end,tz)}</p><p className="muted">{day(w.start)}{day(w.start)!==day(w.end)?` – ${day(w.end)}`:''}</p><p className="muted">{Math.round((+w.end-+w.start)/60000)} minutes</p><button className="text-button" onClick={()=>onDate(new Date((+w.start! + +w.end!)/2))}>Explore midpoint <ArrowUpRight size={16}/></button></>:<p className="muted">No complete window starts in the next 48 hours. This can happen at high latitudes.</p>}</article>)}</div><p className="footnote">Planning definitions: blue hour −6° to −4° Sun altitude; golden hour −4° to +6°. Definitions vary, and neither period is necessarily an hour long. Times use the Sun’s centre and an ideal horizon; clouds, terrain and atmospheric colour are not simulated. A window already in progress is skipped. <a href="https://www.photopills.com/sites/default/files/ebooks/photopills-magic-hours-en.pdf" target="_blank" rel="noreferrer">About these light windows ↗</a></p></section>;
+}

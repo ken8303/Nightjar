@@ -11,6 +11,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
 - Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events.
+- Golden-hour and blue-hour windows for morning/evening, based on Sun altitude and the shared observing time.
 - Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
 - Named equipment setups saved on this device.
 - Small-field mosaic planner with overlap, rotated panel centres and CSV export.
