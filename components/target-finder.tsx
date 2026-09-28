@@ -1,0 +1,13 @@
+'use client';
+import {useMemo,useState} from 'react';
+import {Search, X} from 'lucide-react';
+import {Checkbox} from '@/components/ui/checkbox';
+import {Place,skyTargets} from '@/lib/sky';
+export default function TargetFinder({date,place,selected,onSelect}:{date:Date;place:Place;selected:string;onSelect:(name:string)=>void}){
+ const [query,setQuery]=useState(''),[aboveOnly,setAboveOnly]=useState(false);
+ const targets=useMemo(()=>skyTargets(date,place).sort((a,b)=>b.altitude-a.altitude),[date,place]);
+ const matches=targets.filter(t=>t.name.toLowerCase().includes(query.trim().toLowerCase())&&(!aboveOnly||t.altitude>0));
+ const target=targets.find(t=>t.name===selected);
+ const direction=(az:number)=>['N','NE','E','SE','S','SW','W','NW'][Math.round(az/45)%8];
+ return <section className="panel target-finder"><div className="section-label"><span>FIND A TARGET</span><Search size={18}/></div><div className="target-search"><label htmlFor="target-search">Star, planet or Moon<input id="target-search" type="search" placeholder="Try Vega, Saturn or Polaris…" value={query} maxLength={100} onChange={e=>setQuery(e.target.value)}/></label><label className="target-filter"><Checkbox checked={aboveOnly} onCheckedChange={v=>setAboveOnly(v===true)} aria-label="Above horizon only"/>Above horizon only</label></div><p className="muted target-count" role="status">{matches.length} of {targets.length} catalogue targets · highest first</p><div className="target-results">{matches.map(t=><button key={t.name} aria-pressed={selected===t.name} className={selected===t.name?'active':''} onClick={()=>onSelect(t.name)}><strong>{t.name}</strong><span>{t.planet?t.name==='Moon'?'Moon':'Planet':'Star'} · {t.altitude.toFixed(1)}° · {t.altitude>0?direction(t.azimuth):'Below horizon'}</span></button>)}</div>{!matches.length&&<p className="muted">No matching target in this small catalogue. Try another name or turn off the horizon filter.</p>}{target&&<div className="target-detail" role="status"><div><h3>{target.name}</h3><p>{target.altitude.toFixed(1)}° altitude · {target.azimuth.toFixed(1)}° azimuth ({direction(target.azimuth)})</p><p className="muted">{target.altitude>0?'Highlighted with a ring on the sky chart below.':'Below your ideal horizon at this time, so it is not drawn on the sky chart. Change the observing time to check again.'}</p></div><button className="text-button" onClick={()=>onSelect('')} aria-label="Clear selected target"><X size={18}/></button></div>}<p className="footnote">Includes the existing bright-star selection and five solar-system targets. Star positions are approximate. Above the horizon does not imply naked-eye visibility; daylight, weather and obstructions still matter.</p></section>;
+}

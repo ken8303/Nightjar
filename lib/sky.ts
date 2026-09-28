@@ -38,3 +38,10 @@ export function photographyLightWindows(date:Date,p:Place){
   return {...def,start:null,end:null};
  });
 }
+
+export function skyTargets(date:Date,place:Place){
+ const obs=observer(place);
+ const fixed=stars.map(([name,ra,dec,mag])=>({name,...A.Horizon(date,obs,ra,dec,'normal'),mag,planet:false}));
+ const planets=[A.Body.Moon,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn].map(body=>({name:String(body),...bodyPosition(body,date,place),mag:-1,planet:true}));
+ return [...fixed,...planets];
+}

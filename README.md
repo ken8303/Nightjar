@@ -8,6 +8,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Low/middle/high cloud cover, near-surface visibility, dew point and temperature margin for the selected forecast hour. Dew guidance is a heuristic; visibility is not astronomical seeing or transparency.
 - Location search, coordinates, optional browser geolocation, an OpenStreetMap view, and device-local saved places.
 - Shared observing time in UTC with local-time display; bright-star sky chart and calculated planetary positions.
+- Search the 39 existing sky targets by name, filter by horizon visibility, inspect altitude/azimuth, and highlight a target in the atlas.
 - Twelve-hour Moon/bright-planet altitude table, daylight context and highest-after-civil-twilight sample shortcuts.
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
