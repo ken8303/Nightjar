@@ -5,6 +5,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 ## Included in this beta
 
 - Live hourly Open-Meteo weather, an explained planning score, and a best-hour recommendation.
+- Low/middle/high cloud cover, near-surface visibility, dew point and temperature margin for the selected forecast hour. Dew guidance is a heuristic; visibility is not astronomical seeing or transparency.
 - Location search, coordinates, optional browser geolocation, an OpenStreetMap view, and device-local saved places.
 - Shared observing time in UTC with local-time display; bright-star sky chart and calculated planetary positions.
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
