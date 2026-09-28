@@ -53,3 +53,10 @@ Aurora: https://www.spaceweather.gov/products/aurora-30-minute-forecast. The pol
 Mosaic centres use a tangent-plane projection around the supplied equatorial target. The supplied coordinate epoch is preserved; no precession, mount control, exact spherical overlap or per-panel camera-angle correction is provided. Fields are limited to 10 degrees and target declination to ±75 degrees.
 
 Moon texture: NASA’s Scientific Visualization Studio / LRO, https://svs.gsfc.nasa.gov/4720/. Landmark centres: IAU/USGS Gazetteer of Planetary Nomenclature. The smooth globe approximates phase lighting; it does not model libration, local sky orientation, elevation, terrain shadows or eclipses.
+
+
+### Mobile and PWA
+- Phone navigation displays every section in a two-row grid. Controls use larger touch targets, 16px form text and safe-area padding; data tables scroll inside their own panel.
+- `/manifest.webmanifest` provides standalone launch and 192/512px icons; Apple touch icon included. Installation help is at the bottom of the page. Supported browsers can offer a native install prompt.
+- Production registers `/sw.js`. Navigation is network-first with a cached `/offline` fallback; the hosting asset server canonicalizes `offline.html` to `/offline`. No authenticated app documents or forecasts are cached. The full planner requires internet when reopening; saved places/equipment stay in local storage.
+- Browser installation and private-site sign-in should also be checked on a physical iPhone/Android device.

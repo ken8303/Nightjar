@@ -1,5 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import PwaSupport from "@/components/pwa-support";
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0b1115" };
 
 export const metadata: Metadata = {
   title: "Nightjar — Stargazing planner",
@@ -7,7 +10,10 @@ export const metadata: Metadata = {
   other: {
     "codex-preview": "development",
   },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Nightjar", statusBarStyle: "black-translucent" },
   icons: {
+    apple: "/icons/apple-touch-icon.png",
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
@@ -20,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">{children}<PwaSupport /></body>
     </html>
   );
 }
