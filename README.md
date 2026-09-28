@@ -60,3 +60,5 @@ Moon texture: NASA’s Scientific Visualization Studio / LRO, https://svs.gsfc.n
 - `/manifest.webmanifest` provides standalone launch and 192/512px icons; Apple touch icon included. Installation help is at the bottom of the page. Supported browsers can offer a native install prompt.
 - Production registers `/sw.js`. Navigation is network-first with a cached `/offline` fallback; the hosting asset server canonicalizes `offline.html` to `/offline`. No authenticated app documents or forecasts are cached. The full planner requires internet when reopening; saved places/equipment stay in local storage.
 - Browser installation and private-site sign-in should also be checked on a physical iPhone/Android device.
+
+Mobile visibility uses an object picker and a three-column hourly card grid. Desktop retains the comparison table. The header links directly to expanded installation instructions.
