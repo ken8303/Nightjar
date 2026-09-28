@@ -4,7 +4,7 @@ import { ArrowUpRight, Moon } from 'lucide-react';
 import { A, Place, bodyPosition } from '@/lib/sky';
 
 export default function LunarEclipses({date,place,onDate}:{date:Date;place:Place;onDate:(date:Date)=>void}) {
- const events=useMemo(()=>{let event=A.SearchLunarEclipse(new Date(date.getTime()-60000));return Array.from({length:3},()=>{const item=event;event=A.NextLunarEclipse(item.peak);return item})},[date]);
+ const events=useMemo(()=>{let event=A.SearchLunarEclipse(new Date(date.getTime()-86400000));if(event.peak.date.getTime()<date.getTime()-60000)event=A.NextLunarEclipse(event.peak);return Array.from({length:3},()=>{const item=event;event=A.NextLunarEclipse(item.peak);return item})},[date]);
  const [index,setIndex]=useState(0);
  const eclipse=events[index]||events[0];
  const contacts=[{label:'Penumbral begins',minutes:-eclipse.sd_penum},...(eclipse.sd_partial>0?[{label:'Partial begins',minutes:-eclipse.sd_partial}]:[]),...(eclipse.sd_total>0?[{label:'Totality begins',minutes:-eclipse.sd_total}]:[]),{label:'Greatest eclipse',minutes:0},...(eclipse.sd_total>0?[{label:'Totality ends',minutes:eclipse.sd_total}]:[]),...(eclipse.sd_partial>0?[{label:'Partial ends',minutes:eclipse.sd_partial}]:[]),{label:'Penumbral ends',minutes:eclipse.sd_penum}].map(c=>{const time=new Date(eclipse.peak.date.getTime()+c.minutes*60000);return {...c,time,altitude:bodyPosition(A.Body.Moon,time,place).altitude}});
