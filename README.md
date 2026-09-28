@@ -15,6 +15,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Small-field mosaic planner with overlap, rotated panel centres and CSV export.
 - Interactive 3D Moon with NASA surface imagery, labelled landmarks, phase lighting and a lunar phase timeline.
 - Compare up to four saved/current locations at the same UTC forecast hour, with weather, Moon visibility and an explained planning score.
+- Upcoming lunar eclipses with global contact times and local Moon altitude at each contact.
 - A feature-detected WebMCP location tool.
 
 ## Run locally
