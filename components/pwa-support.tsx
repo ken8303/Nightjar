@@ -40,5 +40,6 @@ export default function PwaSupport() {
     {offline && <p className="offline-notice" role="status">You’re offline. Live conditions cannot refresh; any displayed forecast may be out of date.</p>}
     {!installed && <details open><summary>Take Nightjar with you · Install app</summary><p>Add Nightjar to your home screen for a standalone view.</p>{prompt && <button className="button primary" onClick={install}>Install Nightjar</button>}<p>On iPhone or iPad, open this site in Safari, choose Share, then Add to Home Screen. On Android or desktop, look for Install app or Add to Home screen in your browser menu.</p><p className="muted">An internet connection is needed to open the planner and get live conditions. If disconnected, an offline page helps you reconnect. Installation availability depends on your browser.</p></details>}
     {message && <p role="status">{message}</p>}
+    <a className="back-to-top" href="#page-top" aria-label="Back to navigation">↑ <span>Navigation</span></a>
   </aside>;
 }

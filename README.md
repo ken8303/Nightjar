@@ -62,3 +62,5 @@ Moon texture: NASA’s Scientific Visualization Studio / LRO, https://svs.gsfc.n
 - Browser installation and private-site sign-in should also be checked on a physical iPhone/Android device.
 
 Mobile visibility uses an object picker and a three-column hourly card grid. Desktop retains the comparison table. The header links directly to expanded installation instructions.
+
+Mobile observing navigation includes a fixed return-to-navigation link, a selected-target chart shortcut and a return-to-search link. Anchor destinations are keyboard-focusable.
