@@ -64,3 +64,7 @@ Moon texture: NASA’s Scientific Visualization Studio / LRO, https://svs.gsfc.n
 Mobile visibility uses an object picker and a three-column hourly card grid. Desktop retains the comparison table. The header links directly to expanded installation instructions.
 
 Mobile observing navigation includes a fixed return-to-navigation link, a selected-target chart shortcut and a return-to-search link. Anchor destinations are keyboard-focusable.
+
+## Cloudflare deployment from GitHub
+
+See [CLOUDFLARE.md](./CLOUDFLARE.md) for Workers Builds settings. Build with `npm run build`, deploy with `npm run deploy`, and validate packaging without publishing with `npm run deploy:check`.
