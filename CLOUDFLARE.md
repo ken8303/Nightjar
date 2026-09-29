@@ -38,3 +38,5 @@ The existing ChatGPT-hosted site's owner-only access does **not** transfer to a 
 After the first successful deployment, check the home page, API requests, `/manifest.webmanifest`, `/sw.js`, and `/offline`. PWA installation needs HTTPS. Install the PWA from the final Cloudflare URL. Full planner startup and live conditions require internet; the service worker provides a cached offline fallback page.
 
 References: https://developers.cloudflare.com/workers/ci-cd/builds/ and https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
+
+The compatibility date is pinned to `2026-05-15`, supported by the locked Wrangler runtime. Compatibility flags are declared only in `wrangler.jsonc` to avoid duplicate flags in generated builds.

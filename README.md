@@ -68,3 +68,5 @@ Mobile observing navigation includes a fixed return-to-navigation link, a select
 ## Cloudflare deployment from GitHub
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for Workers Builds settings. Build with `npm run build`, deploy with `npm run deploy`, and validate packaging without publishing with `npm run deploy:check`.
+
+Optional red-light display mode tints the page, including charts and Moon imagery, and remembers the setting in browser local storage. It does not control screen brightness or browser/OS surfaces; colour-coded charts change appearance while enabled.

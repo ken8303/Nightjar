@@ -46,3 +46,8 @@ button.button,.text-button,.round-button,.notice button,.target-detail button,.s
 
 #sky-chart,#target-finder{scroll-margin-top:16px}.chart-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.target-detail .button{margin-top:14px;white-space:normal;text-align:left}.back-to-top{display:none}
 @media(max-width:700px){.back-to-top{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;gap:8px;padding:12px 16px;min-height:44px;background:#20332c;color:#d8e9bd;border:1px solid #617c51;border-radius:24px;box-shadow:0 4px 16px #0005;font-size:13px}.pwa-support{padding-bottom:calc(90px + env(safe-area-inset-bottom))}.chart-actions{align-items:flex-start;flex-direction:column;gap:4px}}
+
+.viewing-mode{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:18px}.viewing-mode .button{min-height:44px;font-size:13px;flex-shrink:0}.viewing-mode p{font-size:12px;line-height:1.6;color:#a9bdc7;max-width:440px;margin:0}.viewing-mode button[aria-pressed=true]{border-color:#c1df93;background:#25372c}
+/* A viewport overlay keeps fixed mobile navigation fixed while tinting every rendered surface. */
+html[data-red-light=on]::after{content:"";position:fixed;inset:0;z-index:2147483647;pointer-events:none;background:#ff1616;mix-blend-mode:multiply}html[data-red-light=on]{background:#090000}
+@media(max-width:700px){.viewing-mode{align-items:flex-start;flex-direction:column;gap:8px;margin-top:14px}.viewing-mode .button{width:100%}}
