@@ -1,5 +1,5 @@
 // Cache only the public offline page. Never cache authenticated HTML or live forecasts.
-const CACHE = 'nightjar-offline-v1';
+const CACHE = 'nightjar-offline-v2';
 const OFFLINE = '/offline';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(async cache => {

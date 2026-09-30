@@ -45,3 +45,28 @@ export function skyTargets(date:Date,place:Place){
  const planets=[A.Body.Moon,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn].map(body=>({name:String(body),...bodyPosition(body,date,place),mag:-1,planet:true}));
  return [...fixed,...planets];
 }
+
+// NASA's Hubble position for the Galactic Centre. This is a direction on the sky,
+// not a point source that is visible to the naked eye.
+export const galacticCentre={ra:17+45/60+36/3600,dec:-(28+55/60+58.8/3600)};
+export function galacticCentrePosition(date:Date,place:Place){
+ return A.Horizon(date,observer(place),galacticCentre.ra,galacticCentre.dec,'normal');
+}
+export function milkyWayPlanning(date:Date,place:Place){
+ const current=galacticCentrePosition(date,place);
+ const opportunities=[] as {date:Date;altitude:number;azimuth:number;moonAltitude:number;moonIllumination:number}[];
+ for(let minute=0;minute<=24*60;minute+=15){
+  const sampleDate=new Date(+date+minute*60000);
+  if(bodyPosition(A.Body.Sun,sampleDate,place).altitude>-18)continue;
+  const position=galacticCentrePosition(sampleDate,place);
+  if(position.altitude<10)continue;
+  const moon=moonInfo(sampleDate,place);
+  opportunities.push({date:sampleDate,altitude:position.altitude,azimuth:position.azimuth,moonAltitude:moon.altitude,moonIllumination:moon.illumination});
+ }
+ const best=opportunities.reduce<(typeof opportunities)[number]|null>((highest,item)=>!highest||item.altitude>highest.altitude?item:highest,null);
+ const bestIndex=best?opportunities.indexOf(best):-1;
+ let start=bestIndex,end=bestIndex;
+ while(start>0&&+opportunities[start].date-+opportunities[start-1].date===15*60000)start--;
+ while(end>=0&&end<opportunities.length-1&&+opportunities[end+1].date-+opportunities[end].date===15*60000)end++;
+ return {current,first:start>=0?opportunities[start]:null,last:end>=0?opportunities[end]:null,best};
+}

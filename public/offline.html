@@ -1,1 +1,91 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1115"><title>Nightjar · Offline</title><style>body{margin:0;background:#0b1115;color:#e9eeef;font:18px/1.7 system-ui;padding: max(24px,env(safe-area-inset-top)) 24px}main{max-width:480px;margin:15vh auto}h1{font-size:34px;line-height:1.2;font-weight:500}p{color:#a9bdc7}a{display:inline-block;background:#c1df93;color:#152218;border-radius:8px;padding:12px 24px;text-decoration:none}small{display:block;margin-top:28px;color:#a9bdc7}</style></head><body><main><span style="color:#c1df93">✦ nightjar.</span><h1>A moment off the grid.</h1><p>Reconnect to open your sky planner and refresh the latest conditions. Live weather, location search and aurora forecasts need internet access.</p><a href="/">Try again</a><small>Your saved places and equipment stay in this browser unless you clear its site data.</small></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1115">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>Nightjar · Offline</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#0b1115;color:#e9eeef;font:16px/1.6 system-ui,sans-serif;padding:max(22px,env(safe-area-inset-top)) 20px max(30px,env(safe-area-inset-bottom))}
+    main{max-width:680px;margin:clamp(24px,8vh,80px) auto}
+    .brand{color:#c1df93;font-size:20px;font-weight:600;letter-spacing:-.04em}
+    h1{font-size:clamp(32px,8vw,48px);line-height:1.1;font-weight:500;margin:18px 0}
+    h2{font-size:18px;font-weight:500;margin:0 0 14px}
+    p{color:#a9bdc7;margin:12px 0}
+    .intro{max-width:560px}
+    .retry{display:inline-flex;align-items:center;justify-content:center;min-height:48px;background:#c1df93;color:#152218;border-radius:8px;padding:10px 22px;text-decoration:none;font-weight:600;margin:14px 0 20px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+    section{min-width:0;background:#142129;border:1px solid #334851;border-radius:10px;padding:18px}
+    section:first-child{grid-column:1/-1}
+    ul{list-style:none;padding:0;margin:0}
+    li{border-top:1px solid #2b414b;padding:11px 0;overflow-wrap:anywhere}
+    li:first-child{border-top:0;padding-top:0}
+    li:last-child{padding-bottom:0}
+    strong{display:block;font-size:15px;font-weight:500;color:#e8f0ec}
+    small{display:block;color:#9cb3be;font-size:12px;line-height:1.5;margin-top:3px;overflow-wrap:anywhere}
+    .empty{font-size:14px;margin:0}
+    .note{color:#c9d6c3}
+    footer{font-size:13px;color:#91a8b3;margin-top:26px;max-width:580px}
+    @media(max-width:600px){.grid{grid-template-columns:1fr}section:first-child{grid-column:auto}section{padding:16px}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">✦ nightjar.</div>
+    <h1>A moment off the grid.</h1>
+    <p class="intro">Your plans saved on this device are below. Reconnect to open the full sky planner and refresh live conditions.</p>
+    <a class="retry" href="/">Try again online</a>
+    <div class="grid">
+      <section aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
+      <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
+      <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
+    </div>
+    <footer>Offline details are stored only in this browser. Positions, visibility and forecasts are not updated here; weather, location search and aurora forecasts require internet.</footer>
+  </main>
+  <script>
+    (() => {
+      const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { return fallback; } };
+      const safeText = value => typeof value === 'string' ? value.trim().slice(0, 300) : '';
+      const add = (id, title, detail, note) => {
+        const item = document.createElement('li');
+        const heading = document.createElement('strong');
+        heading.textContent = title;
+        item.append(heading);
+        if (detail) { const meta = document.createElement('small'); meta.textContent = detail; item.append(meta); }
+        if (note) { const text = document.createElement('small'); text.className = 'note'; text.textContent = note; item.append(text); }
+        document.getElementById(id).append(item);
+      };
+      const showEmpty = id => { document.getElementById(id + '-empty').hidden = Boolean(document.getElementById(id).children.length); };
+
+      const targets = read('nightjar-targets-v1', []);
+      const notes = read('nightjar-target-notes-v1', {});
+      if (Array.isArray(targets)) for (const name of targets.slice(0, 39)) {
+        const title = safeText(name);
+        if (title) add('targets', title, '', notes && typeof notes === 'object' ? safeText(notes[title]) : '');
+      }
+      showEmpty('targets');
+
+      const currentPlace = read('nightjar-place', null);
+      const places = read('nightjar-places', []);
+      const placeList = Array.isArray(places) ? places.slice(0, 30) : [];
+      if (currentPlace && typeof currentPlace === 'object' && !placeList.some(place => place && place.latitude === currentPlace.latitude && place.longitude === currentPlace.longitude)) placeList.unshift(currentPlace);
+      for (const place of placeList) {
+        if (!place || typeof place !== 'object') continue;
+        const name = safeText(place.name), lat = Number(place.latitude), lon = Number(place.longitude);
+        if (name && Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) add('places', name, lat.toFixed(3) + '°, ' + lon.toFixed(3) + '°');
+      }
+      showEmpty('places');
+
+      const equipment = read('nightjar-equipment', []);
+      if (Array.isArray(equipment)) for (const setup of equipment.slice(0, 30)) {
+        if (!setup || typeof setup !== 'object') continue;
+        const name = safeText(setup.name), focal = Number(setup.focal), width = Number(setup.width), height = Number(setup.height);
+        if (name && [focal,width,height].every(value => Number.isFinite(value) && value > 0)) add('equipment', name, focal + ' mm focal length · ' + width + ' × ' + height + ' mm sensor');
+      }
+      showEmpty('equipment');
+    })();
+  </script>
+</body>
+</html>

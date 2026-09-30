@@ -58,7 +58,7 @@ Moon texture: NASA’s Scientific Visualization Studio / LRO, https://svs.gsfc.n
 ### Mobile and PWA
 - Phone navigation displays every section in a two-row grid. Controls use larger touch targets, 16px form text and safe-area padding; data tables scroll inside their own panel.
 - `/manifest.webmanifest` provides standalone launch and 192/512px icons; Apple touch icon included. Installation help is at the bottom of the page. Supported browsers can offer a native install prompt.
-- Production registers `/sw.js`. Navigation is network-first with a cached `/offline` fallback; the hosting asset server canonicalizes `offline.html` to `/offline`. No authenticated app documents or forecasts are cached. The full planner requires internet when reopening; saved places/equipment stay in local storage.
+- Production registers `/sw.js`. Navigation is network-first with a cached `/offline` fallback; the hosting asset server canonicalizes `offline.html` to `/offline`. The fallback reads saved targets and notes, the last selected site and saved places, and imaging setups from this browser's local storage. It does not update positions, visibility, or forecasts offline. No authenticated app documents or forecasts are cached. The full planner requires internet when reopening.
 - Browser installation and private-site sign-in should also be checked on a physical iPhone/Android device.
 
 Mobile visibility uses an object picker and a three-column hourly card grid. Desktop retains the comparison table. The header links directly to expanded installation instructions.
@@ -72,3 +72,15 @@ See [CLOUDFLARE.md](./CLOUDFLARE.md) for Workers Builds settings. Build with `np
 Optional red-light display mode tints the page, including charts and Moon imagery, and remembers the setting in browser local storage. It does not control screen brightness or browser/OS surfaces; colour-coded charts change appearance while enabled.
 
 Sky atlas saved targets: save/remove catalogue objects locally, with current altitude and horizon status. The list persists across reloads and remains visible independently of search/horizon filters.
+
+Saved sky targets can be downloaded as a plain-text observing checklist with UTC and local time, coordinates, altitude, azimuth, horizon status and space for notes. The list is a snapshot of the selected observing time and place.
+
+Each sky target supports up to 2,000 characters of personal notes, automatically saved on the current browser and included when exporting favourites. Removing a favourite retains its notes; clearing the notes field removes that note. Notes do not sync between devices or hosting domains.
+
+The full sky atlas offers independent star-pattern line and object-label display controls. Hiding labels retains the selected target label and cardinal directions. The small bright-star chart remains an approximate planning view.
+
+Visible stars, planets and the Moon can be selected directly from the full sky chart by pointer or keyboard. Selection highlights the object and links back to its details; the small dashboard preview remains a static overview.
+
+The Sky atlas also has a separate Milky Way planner. Its optional dashed marker shows the direction of the galactic centre when above the horizon, using NASA's published position. The card reports altitude and azimuth at the chosen time, then samples the next 24 hours in 15-minute steps for fully dark periods with the direction at least 10° up. It shows the best contiguous dark window, the highest sampled point, Moon status, and a shortcut to that observing time. This is a sightline for planning, not a visible point source or a full Milky Way map; local obstructions, clouds and light pollution are not modelled.
+
+The meteor calendar sorts the next annual occurrences after the selected observing time. For each typical local peak date pair, it samples hourly astronomical darkness and Moon-below-horizon conditions, identifies the longest contiguous Moon-free window, and shows an average cloud forecast when that date is covered by the seven-day weather data. Shower rates remain ideal reference values; radiant height and the exact annual peak are not calculated. Calendar downloads retain their typical overnight all-day window.
