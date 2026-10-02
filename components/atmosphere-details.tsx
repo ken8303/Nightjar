@@ -1,10 +1,11 @@
 'use client';
 import { Cloud, Droplets, Eye } from 'lucide-react';
 import { timeLabel } from '@/lib/sky';
+import {forecastHourIndex} from '@/lib/weather-hours';
 type Hourly = {time:number[];[key:string]:(number|null)[]};
 const valid=(n:unknown):n is number=>typeof n==='number'&&Number.isFinite(n);
 export default function AtmosphereDetails({hourly,date,timezone,loading}:{hourly?:Hourly;date:Date;timezone:string;loading:boolean}){
- const hour=Math.floor(+date/3600000)*3600,index=hourly?.time.indexOf(hour)??-1;
+ const index=forecastHourIndex(hourly?.time,date),hour=index>=0?hourly!.time[index]:+date/1000;
  const get=(key:string)=>index>=0?hourly?.[key]?.[index]:undefined;
  const temp=get('temperature_2m'),dew=get('dew_point_2m'),visibility=get('visibility');
  const margin=valid(temp)&&valid(dew)?temp-dew:null;

@@ -3,10 +3,10 @@ import {useEffect,useState} from 'react';
 
 const key='nightjar-red-light';
 export default function ViewingMode(){
- const [enabled,setEnabled]=useState(false);
+ const [enabled,setEnabled]=useState(()=>{try{return localStorage.getItem(key)==='on'}catch{return false}});
  const [storageError,setStorageError]=useState(false);
  useEffect(()=>{
-  try{const value=localStorage.getItem(key)==='on';setEnabled(value);document.documentElement.dataset.redLight=value?'on':'off'}catch{}
+  try{document.documentElement.dataset.redLight=localStorage.getItem(key)==='on'?'on':'off'}catch{}
   const sync=(event:StorageEvent)=>{if(event.key===key){const value=event.newValue==='on';setEnabled(value);document.documentElement.dataset.redLight=value?'on':'off'}};
   window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
  },[]);

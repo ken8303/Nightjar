@@ -1,5 +1,9 @@
 export type Equipment={name:string;width:number;height:number;focal:number;pixel:number};
-export function validEquipment(e:Equipment){return typeof e.name==='string'&&e.name.trim().length>0&&e.name.length<=80&&[e.width,e.height,e.focal,e.pixel].every(v=>Number.isFinite(v)&&v>0)&&e.width<=100&&e.height<=100&&e.focal<=20000&&e.pixel<=100}
+export function validEquipment(value:unknown):value is Equipment{
+ if(!value||typeof value!=='object')return false;
+ const e=value as Record<string,unknown>;
+ return typeof e.name==='string'&&e.name.trim().length>0&&e.name.length<=80&&[e.width,e.height,e.focal,e.pixel].every(v=>typeof v==='number'&&Number.isFinite(v)&&v>0)&&typeof e.width==='number'&&e.width<=100&&typeof e.height==='number'&&e.height<=100&&typeof e.focal==='number'&&e.focal<=20000&&typeof e.pixel==='number'&&e.pixel<=100;
+}
 export function fieldOfView(sensor:number,focal:number){return 2*Math.atan(sensor/(2*focal))*180/Math.PI}
 export function imageScale(pixel:number,focal:number){return 206.264806*pixel/focal}
 export function mosaic(ra:number,dec:number,width:number,height:number,cols:number,rows:number,overlap:number,rotation:number){

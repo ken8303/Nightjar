@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./professional.css";
 import PwaSupport from "@/components/pwa-support";
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0b1115" };
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}<PwaSupport /></body>
+      <body className="antialiased"><a className="skip-link" href="#main-content">Skip to planner</a>{children}<PwaSupport /></body>
     </html>
   );
 }

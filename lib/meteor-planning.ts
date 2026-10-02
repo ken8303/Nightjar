@@ -1,4 +1,5 @@
-import {A, Place, bodyPosition, moonInfo} from './sky';
+import {A, Place, hourBelowAltitude, moonInfo} from './sky';
+import {forecastHourIndex} from './weather-hours';
 
 export const meteorEvents=[
  {name:'Quadrantids',date:'January 3–4',month:0,day:4,rate:'Up to 120',note:'A short, sharp peak. Best suited to northern latitudes.'},
@@ -32,8 +33,8 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
   const date=new Date(Date.UTC(year,event.month,event.day)+hour*3600000);
   const local=localDateHour(date,dayFormatter);
   if(!((local.day===firstDay&&local.hour>=12)||(local.day===lastDay&&local.hour<12)))continue;
-  if(bodyPosition(A.Body.Sun,date,place).altitude>-18)continue;
-  dark.push({date,moonBelow:bodyPosition(A.Body.Moon,date,place).altitude<0});
+  if(!hourBelowAltitude(A.Body.Sun,date,place,-18))continue;
+  dark.push({date,moonBelow:hourBelowAltitude(A.Body.Moon,date,place,0)});
  }
  const moonFree=dark.filter(sample=>sample.moonBelow);
  let longest:{start:Date;end:Date}|null=null;
@@ -45,9 +46,9 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
  }
  const sampleForWeather=moonFree.length?moonFree:dark;
  const cloudValues=sampleForWeather.flatMap(sample=>{
-  const index=hourly?.time?.findIndex(time=>Math.abs(time*1000-+sample.date)<=30*60000)??-1;
-  const cloud=index>=0?hourly?.cloud_cover[index]:null;
-  return typeof cloud==='number'&&Number.isFinite(cloud)?[cloud]:[];
+  const index=forecastHourIndex(hourly?.time,sample.date);
+  const cloud=index>=0?hourly?.cloud_cover?.[index]:null;
+  return typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?[cloud]:[];
  });
  const moon=moonInfo(new Date(Date.UTC(year,event.month,event.day,12)),place);
  return {darkHours:dark.length,moonFreeHours:moonFree.length,window:longest,moonIllumination:moon.illumination,cloudCover:cloudValues.length?Math.round(cloudValues.reduce((sum,n)=>sum+n,0)/cloudValues.length):null};
