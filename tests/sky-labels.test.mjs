@@ -24,3 +24,11 @@ test('selected target remains named in a dense cluster with ordinary labels disa
  const labels=layoutSkyLabels(points,[],'Object 29');assert.deepEqual([...labels.keys()],['Object 29']);
  assert.equal(layoutSkyLabels(points,[]).size,0);
 });
+test('pointer selection chooses the nearest object in overlapping tap areas',async()=>{
+ const {nearestSkyPoint}=await vite.ssrLoadModule('/lib/sky-labels.ts');
+ const points=[{name:'Mizar',x:250,y:125,mag:2},{name:'Alkaid',x:260,y:133,mag:1.8}];
+ assert.equal(nearestSkyPoint(points,250,125),'Mizar');
+ assert.equal(nearestSkyPoint(points,259,133),'Alkaid');
+ assert.equal(nearestSkyPoint(points,400,350),undefined,'empty chart space must not select a distant target');
+ assert.equal(nearestSkyPoint(points,NaN,125),undefined);
+});

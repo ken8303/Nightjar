@@ -10,7 +10,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Optional, user-entered Bortle class (1–9) for observing sites, shown in saved places, comparisons and the offline plan. It is separate from the weather score and is not a light-pollution map measurement.
 - Shared observing time in UTC with local-time display; bright-star sky chart and calculated planetary positions. On first open, the time starts at the next astronomical-dark period for the restored site, or evening civil twilight when full darkness is unavailable in the next two days. If neither occurs, it starts at the next hour.
 - Search the 39 existing sky targets by name, filter by horizon visibility, inspect altitude/azimuth, and highlight a target in the atlas.
-- Twelve-hour Moon/bright-planet altitude table, daylight context and highest-after-civil-twilight sample shortcuts.
+- Twelve-hour Moon/bright-planet altitude table: only objects with a sample above 30° are shown, ordered by peak altitude. Peak-hour jumps, daylight context and above-30° shortcuts after civil twilight share target selection with the atlas. Mobile controls browse the same order; chart/details links preserve the selected object and time.
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
 - Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events.
@@ -83,7 +83,9 @@ Each sky target supports up to 2,000 characters of personal notes, automatically
 
 The full sky atlas offers independent star-pattern line and object-label display controls. Hiding labels retains the selected target label and cardinal directions. The small bright-star chart remains an approximate planning view.
 
-Visible stars, planets and the Moon can be selected directly from the full sky chart by pointer or keyboard. Selection highlights the object and links back to its details; the small dashboard preview remains a static overview.
+Visible stars, planets and the Moon can be selected directly from the full sky chart by pointer or keyboard. Selection highlights the object and links back to its details; the small dashboard preview remains a static overview. Overlapping tap areas resolve to the nearest plotted object, and pointer selection focuses that object for subsequent keyboard actions.
+
+Expand sky atlas opens an accessible full-screen viewer on phones and a larger dialog on desktop. Zoom controls run from 100% to 300%; the chart has its own native scroll area for touch, trackpad and keyboard navigation. Opening the viewer resets zoom, while target selection remains shared with the main atlas. View target details closes the viewer and focuses the selected object’s details; Escape or Close returns focus to the expand control. The viewer preserves the chosen chart layers, observing site and time.
 
 The Sky atlas also has a separate Milky Way planner. Its optional dashed marker shows the direction of the galactic centre when above the horizon, using NASA's published position. The card reports altitude and azimuth at the chosen time, then samples the next 24 hours in 15-minute steps for fully dark periods with the direction at least 10° up. It shows the best contiguous dark window, the highest sampled point, Moon status, and a shortcut to that observing time. This is a sightline for planning, not a visible point source or a full Milky Way map; local obstructions, clouds and light pollution are not modelled.
 
@@ -108,3 +110,14 @@ Offline recovery retains the selected UTC instant when Try again online is used.
 Sky atlas also offers Download print-ready plan for saved targets. The self-contained HTML file includes interactive checkboxes, full notes and blank note space, exact UTC and site-local time with UTC offset, site coordinates/Bortle rating, snapshot Sun/Moon conditions and validated saved equipment. It opens without external resources and offers the browser's Print or save as PDF action. Tick marks persist only while the file stays open. Print styles remove the controls and use a paper layout; live weather is not included. Names and notes are escaped as plain text. The HTML checklist does not replace the JSON data backup.
 
 Run `npm test` for all repository regression tests, or `npm run test:plan` for standalone observing-plan export checks.
+
+
+The full Sky atlas now opens in an interactive 3D horizon dome, with the 2D overhead chart available beside it. Both views use the same target positions, time, site, selected object, pattern lines, label setting and galactic-core direction. Orientation guidance and the expand control follow the active view. A photo-and-details shortcut above either chart scrolls to and focuses the selected target details. The dome can be rotated, tilted, zoomed and expanded using pointer, touch gestures or keyboard controls. A Centre selected object control brings an above-horizon target into the middle of the view, including when ordinary labels are hidden. Selected-target status shows altitude and azimuth; centring is disabled below the horizon. Reset view restores the whole-dome camera. It renders on demand and releases its WebGL resources on unmount. If WebGL is unavailable or its context is lost, the 2D chart is shown. The dome is a schematic direction model: object sizes and distances are not represented to scale.
+
+Selected target details include reference photos with credits and source links. Moon/planet images come from NASA/JPL spacecraft archives; enhanced or false colour and mosaics are labelled. Bright stars use 15 × 15 arcminute archival DSS red-band photographic fields centred on catalogue coordinates, not resolved stellar surfaces. DSS images are provided by STScI with survey copyrights and acknowledgements linked. Images load only for the selected object, require a connection, and have an explicit retry state on failure. They do not follow the selected time or Moon phase.
+
+Reference photos can be opened in an accessible enlarged viewer with 100–300% zoom, native scrolling, Escape-to-close and focus restoration. Opening it again resets zoom. Captions, source links and archival-image limitations remain available in portrait and landscape layouts. Enlargement uses the original reference URL and does not increase image resolution.
+
+The expanded 3D atlas includes the same object-label, star-pattern and core-direction display controls as the main chart. Settings are shared for the current visit and apply when switching back to 2D.
+
+The When to look calculations live in `lib/visibility-window.ts`. Regression coverage checks strict altitude above 30°, descending peak ranking, daylight versus after-civil-twilight opportunities, a London astronomical fixture, an empty polar window, and distinct UTC samples through the repeated UK local hour.

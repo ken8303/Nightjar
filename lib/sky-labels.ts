@@ -24,3 +24,13 @@ export function layoutSkyLabels(points:readonly SkyLabelPoint[],visibleNames:rea
  }
  return labels;
 }
+
+/** Resolve overlapping hit areas using the pointer's actual chart coordinates. */
+export function nearestSkyPoint(points:readonly SkyLabelPoint[],x:number,y:number,maxDistance=22){
+ let nearest:SkyLabelPoint|undefined,distance=maxDistance;
+ for(const point of points){
+  const candidate=Math.hypot(point.x-x,point.y-y);
+  if(candidate<=distance&&(!nearest||candidate<distance)){nearest=point;distance=candidate}
+ }
+ return nearest?.name;
+}
