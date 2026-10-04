@@ -4,6 +4,7 @@ import Image from 'next/image';
 import {objectPhoto} from '@/lib/object-photos';
 import {Camera,Compass,MapPin,Square,Star,Maximize2,Minimize2} from 'lucide-react';
 import ViewingMode from '@/components/viewing-mode';
+import {layoutCameraLabels} from '@/lib/camera-labels';
 import {createCameraLocation} from '@/lib/camera-location';
 import {cameraSkyContext} from '@/lib/camera-context';
 import {watchCameraLifecycle} from '@/lib/camera-lifecycle';
@@ -30,6 +31,7 @@ export default function CameraSky(props:Props){
  const [wake,setWake]=useState<'off'|'requesting'|'on'>('off'),[wakeNotice,setWakeNotice]=useState('');
  const wakeSessionRef=useRef<ReturnType<typeof createCameraWakeLock>|null>(null);
  const [showPhotos,setShowPhotos]=useState(true);
+ const [previousLabels,setPreviousLabels]=useState<string[]>([]);
  const returnFocusRef=useRef<'stage'|'settings'|null>(null),wasFullScreenRef=useRef(false);
  const [labelMode,setLabelMode]=useState<'all'|'selected'|'hidden'>('all');
  const [locating,setLocating]=useState(false),[locationError,setLocationError]=useState('');
@@ -142,19 +144,20 @@ export default function CameraSky(props:Props){
   if(!canLabel||labelMode==='hidden')return [];
   const frame=cameraImageFrame(size.width,size.height,ratio);if(!frame.width||!frame.height)return [];
   const labelWidth=showPhotos?160:120;
-  const placed:{name:string;x:number;y:number}[]=[];
-  const ordered=[...targets].sort((a,b)=>Number(b.name===props.selected)-Number(a.name===props.selected)||a.mag-b.mag);
-  for(const target of ordered){
+  const candidates=[];
+  for(const target of targets){
    if(labelMode==='selected'&&target.name!==props.selected)continue;
    const point=projectSkyTarget(target.altitude,target.azimuth,basis,frame.width/frame.height,fov);if(!point)continue;
-   const localX=point.x*frame.width,localY=point.y*frame.height;
-   const x=localX+frame.left,y=localY+frame.top;
-   if(localX<labelWidth/2+2||localX>frame.width-labelWidth/2-2||localY<24||localY>frame.height-24||placed.some(item=>Math.abs(item.x-x)<labelWidth+4&&Math.abs(item.y-y)<48))continue;
-   placed.push({name:target.name,x,y});if(placed.length===8)break;
+   candidates.push({name:target.name,mag:target.mag,x:point.x*frame.width+frame.left,y:point.y*frame.height+frame.top});
   }
-  return placed;
+  return layoutCameraLabels(candidates,frame,labelWidth,props.selected,previousLabels);
  }
  const labels=projectedLabels();
+ const names=labels.map(label=>label.name);
+ // Guarded render-time adjustment avoids an effect painting an unstable layout
+ // first. Only identity changes update history; fresh coordinates never do.
+ if(names.join('|')!==previousLabels.join('|'))setPreviousLabels(names);
+
  const trackingReady=tracking&&!!sensor&&(sensor.absolute||aligned);
  const trackingLabel=!tracking?'MOTION OFF':!sensor?'WAITING FOR MOTION':!trackingReady?'ALIGNMENT NEEDED':sensorQuiet?'LAST ORIENTATION':'DISCOVERY';
  const alignment=sensor&&selected?cameraHeadingAlignment(sensor.basis,selected.altitude,selected.azimuth):null;
