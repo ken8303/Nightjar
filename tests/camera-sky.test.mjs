@@ -108,3 +108,16 @@ test('live and opening cameras never display fixed manual labels; motion needs a
   assert.equal(canShowCameraLabels(state,true,true,{absolute:true},true),false);
  }
 });
+
+test('full-screen projection uses the uncropped camera image inside portrait and landscape letterboxing',async()=>{
+ const {cameraImageFrame}=await vite.ssrLoadModule('/lib/camera-sky.ts');
+ const portrait=cameraImageFrame(390,700,16/9);near(portrait.width,390);near(portrait.height,219.375);near(portrait.left,0);near(portrait.top,(700-219.375)/2);
+ const landscape=cameraImageFrame(844,280,.75);near(landscape.width,210);near(landscape.height,280);near(landscape.left,317);near(landscape.top,0);
+ for(const frame of [portrait,landscape]){
+  const centre=projectSkyTarget(30,0,manualCameraBasis(0,30),frame.width/frame.height,60);
+  near(centre.x*frame.width+frame.left,frame.left+frame.width/2);near(centre.y*frame.height+frame.top,frame.top+frame.height/2);
+ }
+ assert.deepEqual(cameraImageFrame(360,480,.75),{width:360,height:480,left:0,top:0});
+ assert.deepEqual(cameraImageFrame(0,480,.75),{width:0,height:0,left:0,top:0});
+ assert.equal(cameraImageFrame(360,480,NaN).width,0);
+});

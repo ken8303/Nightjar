@@ -122,3 +122,16 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 
 .camera-sky-discovery-notice{position:absolute;z-index:3;inset:48px 12px auto;display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--line);border-radius:6px;background:#061018eb;font-size:12px;line-height:1.5}
 .camera-sky-discovery-notice .button{min-height:44px;align-self:start}.camera-sky-discovery-notice span{color:var(--text-secondary)}
+
+.camera-sky-label-photo{width:160px;display:flex;align-items:center;gap:8px;padding:4px 8px;text-align:left}.camera-sky-label-photo>span:last-child{flex:1;min-width:0}
+.camera-sky-thumbnail{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;border-radius:4px;overflow:hidden;background:#03070b;color:var(--accent-soft)}.camera-sky-thumbnail img{width:36px;height:36px;object-fit:contain}
+.camera-sky-tools .camera-sky-photo-toggle{flex-direction:row;align-items:center;justify-content:space-between;min-height:44px}.camera-sky-photo-toggle input{width:20px;height:20px;accent-color:var(--accent-soft)}
+.camera-sky-dialog.camera-sky-fullscreen{inset:0;width:100%;height:100dvh;padding:0;border:0;border-radius:0;overflow:hidden;background:#03070b}
+.camera-sky-fullscreen .camera-sky-header{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%)}
+.camera-sky-fullscreen .camera-sky-header button{visibility:hidden}
+.camera-sky-fullscreen .camera-sky-layout{display:block;height:100%}.camera-sky-fullscreen .camera-sky-quick-controls,.camera-sky-fullscreen .camera-sky-tools{display:none}
+.camera-sky-fullscreen .camera-sky-main{display:flex;flex-direction:column;height:100%;min-height:0}.camera-sky-fullscreen .camera-sky-stage{flex:1;min-height:0;max-width:none;margin:0;aspect-ratio:auto!important;border:0;border-radius:0;background:#03070b}
+.camera-sky-fullscreen .camera-sky-main>.camera-sky-direction,.camera-sky-fullscreen .camera-sky-main>.muted,.camera-sky-fullscreen .camera-sky-target-guide{display:none}
+.camera-sky-fullscreen-controls{flex-shrink:0;padding:8px max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:var(--surface);border-top:1px solid var(--line)}.camera-sky-fullscreen-controls>div{display:flex;gap:8px;flex-wrap:wrap}.camera-sky-fullscreen-controls .button{min-height:44px;flex:1;font-size:12px;white-space:normal}.camera-sky-fullscreen-controls p{font-size:11px;line-height:1.5;margin:6px 0 0;color:var(--text-secondary)}
+.camera-sky-fullscreen .camera-sky-badge{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left))}.camera-sky-fullscreen .camera-sky-discovery-notice{top:calc(max(10px,env(safe-area-inset-top)) + 38px)}
+@media(max-width:500px){.camera-sky-fullscreen-controls .button{flex-basis:calc(50% - 8px)}}

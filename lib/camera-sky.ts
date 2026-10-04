@@ -78,3 +78,9 @@ export function stopCameraStream(stream:Pick<MediaStream,'getTracks'>|null){stre
 export function canShowCameraLabels(camera:'off'|'starting'|'on',paused:boolean,tracking:boolean,sensor:{absolute:boolean}|null,aligned:boolean){
  return !paused&&(tracking?!!sensor&&(sensor.absolute||aligned):camera==='off');
 }
+
+export function cameraImageFrame(width:number,height:number,ratio:number){
+ if(!(width>0)||!(height>0)||!(ratio>0)||![width,height,ratio].every(Number.isFinite))return {width:0,height:0,left:0,top:0};
+ const frameWidth=Math.min(width,height*ratio),frameHeight=frameWidth/ratio;
+ return {width:frameWidth,height:frameHeight,left:(width-frameWidth)/2,top:(height-frameHeight)/2};
+}
