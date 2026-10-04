@@ -87,3 +87,19 @@ test('an upright initial pose has no invented north anchor and invalid orientati
  h.setTime(200);h.read({alpha:null,webkitCompassHeading:180,webkitCompassAccuracy:5});assert.equal(h.result.reading,null);
  h.setTime(300);h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,false);h.dispose();
 });
+
+
+test('invalid secondary relative events cannot erase a preferred absolute pose or keep it falsely fresh',()=>{
+ const h=harness();h.read({alpha:270},'deviceorientationabsolute');const pose=h.result.reading;
+ h.setTime(100);h.read({alpha:null});
+ assert.equal(h.result.reading,pose);assert.deepEqual(h.result.unavailable,[]);
+ h.setTime(3900);h.read({alpha:45});h.advance(100);
+ assert.equal(h.result.quiet,true);assert.equal(h.result.reading,pose);
+ h.read({alpha:260},'deviceorientationabsolute');assert.equal(h.result.quiet,false);assert.equal(h.result.reads,2);
+ h.read({alpha:null},'deviceorientationabsolute');assert.equal(h.result.reading,null);assert.equal(h.result.unavailable.at(-1),'invalid');h.dispose();
+});
+test('secondary relative data cannot restore a pose after screen rotation while absolute data is preferred',()=>{
+ const h=harness();h.read({alpha:270},'deviceorientationabsolute');h.rotate(90);
+ h.setTime(100);h.read({alpha:45});assert.equal(h.result.reading,null);
+ h.read({alpha:270},'deviceorientationabsolute');assert(h.result.reading);assert.equal(h.result.reading.absolute,true);h.dispose();
+});

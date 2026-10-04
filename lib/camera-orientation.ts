@@ -14,6 +14,9 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   if(disposed)return;
   const event=raw as DeviceOrientationEvent & {webkitCompassHeading?:number;webkitCompassAccuracy?:number};
   const safari=typeof event.webkitCompassHeading==='number';
+  // Some browsers emit both streams. Once absolute data is preferred, a
+  // secondary relative event must not clear its pose or refresh its quiet timer.
+  if(absolutePreferred&&!safari&&!event.absolute&&event.type!=='deviceorientationabsolute')return;
   const compass=safari&&Number.isFinite(event.webkitCompassHeading)&&event.webkitCompassHeading!>=0&&event.webkitCompassHeading!<360&&Number.isFinite(event.webkitCompassAccuracy)&&event.webkitCompassAccuracy!>=0;
   const relative=deviceCameraBasis(event.alpha,event.beta,event.gamma,options.angle());
   if(!relative){compassOffset=null;available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
