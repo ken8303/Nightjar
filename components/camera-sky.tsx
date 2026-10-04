@@ -4,7 +4,7 @@ import Image from 'next/image';
 import {objectPhoto} from '@/lib/object-photos';
 import {Camera,Compass,MapPin,Square,Star,Maximize2,Minimize2} from 'lucide-react';
 import ViewingMode from '@/components/viewing-mode';
-import {layoutCameraLabels} from '@/lib/camera-labels';
+import {layoutCameraLabels,type CameraLabelObstacle} from '@/lib/camera-labels';
 import {createCameraLocation} from '@/lib/camera-location';
 import {cameraSkyContext} from '@/lib/camera-context';
 import {watchCameraLifecycle} from '@/lib/camera-lifecycle';
@@ -32,6 +32,8 @@ export default function CameraSky(props:Props){
  const wakeSessionRef=useRef<ReturnType<typeof createCameraWakeLock>|null>(null);
  const [showPhotos,setShowPhotos]=useState(true);
  const [previousLabels,setPreviousLabels]=useState<string[]>([]);
+ const badgeRef=useRef<HTMLSpanElement>(null);
+ const [badgeBounds,setBadgeBounds]=useState<CameraLabelObstacle|null>(null);
  const returnFocusRef=useRef<'stage'|'settings'|'alignment'|null>(null),wasFullScreenRef=useRef(false);
  const [labelMode,setLabelMode]=useState<'all'|'selected'|'hidden'>('all');
  const [locating,setLocating]=useState(false),[locationError,setLocationError]=useState('');
@@ -143,7 +145,7 @@ export default function CameraSky(props:Props){
   return `${tracking?'Turn':'Adjust manual direction'}${steps.length?` ${steps.join(' · ')}`:' towards the object'} · ${Math.round(guide.separation)}° from centre.`;
  }
  function projectedLabels(){
-  if(!canLabel||labelMode==='hidden')return [];
+  if(!canLabel||labelMode==='hidden'||!badgeBounds)return [];
   const frame=cameraImageFrame(size.width,size.height,ratio);if(!frame.width||!frame.height)return [];
   const labelWidth=showPhotos?160:120;
   const candidates=[];
@@ -152,8 +154,17 @@ export default function CameraSky(props:Props){
    const point=projectSkyTarget(target.altitude,target.azimuth,basis,frame.width/frame.height,fov);if(!point)continue;
    candidates.push({name:target.name,mag:target.mag,x:point.x*frame.width+frame.left,y:point.y*frame.height+frame.top});
   }
-  return layoutCameraLabels(candidates,frame,labelWidth,props.selected,previousLabels);
+  return layoutCameraLabels(candidates,frame,labelWidth,props.selected,previousLabels,[badgeBounds]);
  }
+ useEffect(()=>{
+  const badge=badgeRef.current,stage=stageRef.current;if(!badge||!stage)return;
+  const measure=()=>{
+   const bounds={left:badge.offsetLeft,top:badge.offsetTop,width:badge.offsetWidth,height:badge.offsetHeight};
+   setBadgeBounds(previous=>previous&&Object.keys(bounds).every(key=>previous[key as keyof CameraLabelObstacle]===bounds[key as keyof CameraLabelObstacle])?previous:bounds);
+  };
+  const observer=new ResizeObserver(measure);observer.observe(badge);observer.observe(stage);measure();
+  return()=>observer.disconnect();
+ },[props.fullScreen]);
  const labels=projectedLabels();
  const names=labels.map(label=>label.name);
  // Guarded render-time adjustment avoids an effect painting an unstable layout
@@ -177,7 +188,7 @@ export default function CameraSky(props:Props){
   {camera==='on'&&!trackingReady&&<div className="camera-sky-discovery-notice"><strong>{!tracking?'Camera only · motion is off':!sensor?'Waiting for phone direction':'Align phone direction'}</strong><span>{!tracking?'Names follow your phone after enabling motion.':!sensor?'Move the phone slightly. Names stay hidden until direction is available.':'Choose a known object, then align the phone to show names.'}</span><button className="button" disabled={motionPending} onClick={!tracking?startMotion:!sensor?startMotion:checkAlignment}>{motionPending?'Waiting for motion permission…':!tracking?'Enable phone discovery':!sensor?'Retry phone motion':'Check alignment'}</button></div>}
   <span className="camera-sky-reticle" aria-hidden="true"/>
   {labels.map(label=><button key={label.name} className={`camera-sky-label${showPhotos?' camera-sky-label-photo':''}`} title={showPhotos?`${label.name} · reference image; open photo details for source credits`:undefined} style={{left:label.x,top:label.y}} aria-pressed={props.selected===label.name} onClick={()=>props.onSelect(label.name)}>{showPhotos&&<CameraThumbnail name={label.name}/>}<span>{label.name}</span></button>)}
-  <span className="camera-sky-badge">{cameraPaused?'CAMERA PAUSED':camera==='on'?'LIVE CAMERA':'CAMERA OFF'} · {camera==='off'&&!tracking?'MANUAL PREVIEW':trackingLabel}</span>
+  <span ref={badgeRef} className="camera-sky-badge">{cameraPaused?'CAMERA PAUSED':camera==='on'?'LIVE CAMERA':'CAMERA OFF'} · {camera==='off'&&!tracking?'MANUAL PREVIEW':trackingLabel}</span>
  </div>{props.fullScreen&&<div className="camera-sky-fullscreen-controls"><div><button className="button" onClick={()=>leaveFullScreen()}><Minimize2 size={16}/>Exit full screen</button><button className="button" onClick={camera!=='off'?stopCamera:startDiscovery}><Camera size={16}/>{camera==='on'?'Stop camera':camera==='starting'?'Cancel camera request':'Start discovery'}</button><button className="button" onClick={tracking||motionPending?manualMode:startMotion}><Compass size={16}/>{motionPending?'Cancel motion request':tracking?'Use manual direction':'Enable motion'}</button><button className="button" onClick={()=>leaveFullScreen(true)}>Settings</button>{tracking&&<button className="button" onClick={checkAlignment}>Check alignment</button>}</div><p>{place.name} · {trackingLabel} · {tracking&&!sensor?'Waiting for phone direction':`${Math.round(direction.bearing)}° ${tracking&&sensor&&!sensor.absolute&&!aligned?'relative bearing':'bearing'} · ${Math.round(direction.altitude)}° elevation`}</p><p role="status">{cameraError||sensorError||sessionNotice||(motionPending?'Waiting for motion permission…':labelStatus)}</p>{selected&&<p>{guidance()}</p>}</div>}<p className="camera-sky-direction">{tracking&&!sensor?'Waiting for phone direction…':`Centre: ${Math.round(direction.bearing)}° ${tracking&&sensor&&!sensor.absolute&&!aligned?'relative bearing':'bearing'} · ${Math.round(direction.altitude)}° elevation`}</p><p className="muted" role="status">{labelStatus}</p><div className="camera-sky-target-guide"><strong>{selected?`Find ${selected.name}`:'Find an object'}</strong><p>{guidance()}</p>{selected&&<small>Target now: {Math.round(selected.azimuth)}° bearing · {Math.round(selected.altitude)}° elevation</small>}</div></div>
  <div className="camera-sky-tools" ref={settingsRef} role="region" aria-label="Camera settings" tabIndex={-1}><button className="button camera-sky-return" onClick={()=>focusPanel(stageRef.current)}>Back to sky view</button><ViewingMode inline/><label className="camera-sky-photo-toggle"><span>Reference thumbnails</span><input type="checkbox" checked={showPhotos} onChange={event=>setShowPhotos(event.target.checked)}/></label><small>NASA spacecraft images and DSS star fields. Reference images need internet; turn them off for a clearer view. Select a name, then open its photo & details for credits.</small><label>Object labels<select aria-label="Object labels" aria-describedby="camera-label-help" value={labelMode} onChange={event=>setLabelMode(event.target.value as typeof labelMode)}><option value="all">All objects</option><option value="selected">Selected object only</option><option value="hidden">Hide names</option></select><small id="camera-label-help">Reduce clutter over the camera. Direction guidance stays available; labels use predicted sky positions.</small></label>
  <div className="camera-sky-context" ref={siteRef} tabIndex={-1} role="region" aria-label="Camera observing site"><strong>{place.name}</strong><span>{place.latitude.toFixed(3)}°, {place.longitude.toFixed(3)}°</span><span>Live positions · {now.toISOString().slice(0,19).replace('T',' ')} UTC</span><button className="text-button" onClick={locate} disabled={locating}><MapPin size={15}/>{locating?'Finding your location…':'Use current location'}</button>{locating&&<button className="text-button" onClick={keepSite}>Keep displayed site</button>}{siteChanged&&<button className="text-button" onClick={restoreSite}>Use planner site: {props.place.name}</button>}{locationError&&<p role="status">{locationError}</p>}<small>Uses the selected observing site until you choose your device location. Location changes here apply only to this viewer.</small></div>

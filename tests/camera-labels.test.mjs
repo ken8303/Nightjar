@@ -52,3 +52,23 @@ test('a selected object uses edge hysteresis while preserving fresh coordinates'
   visible=names(labels);
  }
 });
+
+
+test('status badges exclude labels even when selected or retained',()=>{
+ const badge={left:30,top:50,width:180,height:24};
+ const near=item('Polaris',150,40);
+ for(const selected of ['', 'Polaris'])for(const previous of [[], ['Polaris']]){
+  assert.deepEqual(layoutCameraLabels([near],frame,160,selected,previous,[badge]),[]);
+ }
+ // A target beside the badge remains available; do not reserve the entire row.
+ assert.deepEqual(names(layoutCameraLabels([item('Vega',310,40)],frame,120,'',[],[badge])),['Vega']);
+});
+test('badge entry and exit clearance resist jitter and use updated stage bounds',()=>{
+ const badge={left:30,top:50,width:180,height:24};
+ // Bottom of badge is 74; label half-height is 24.
+ assert.deepEqual(layoutCameraLabels([item('A',150,60)],frame,160,'',[],[badge]),[]);
+ assert.deepEqual(names(layoutCameraLabels([item('A',150,60)],frame,160,'',['A'],[badge])),['A']);
+ assert.deepEqual(layoutCameraLabels([item('A',150,59)],frame,160,'',['A'],[badge]),[]);
+ assert.deepEqual(names(layoutCameraLabels([item('A',150,68)],frame,160,'',[],[badge])),['A']);
+ assert.deepEqual(layoutCameraLabels([item('A',150,68)],frame,160,'',['A'],[{...badge,top:90}]),[]);
+});
