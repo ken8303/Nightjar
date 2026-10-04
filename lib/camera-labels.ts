@@ -7,7 +7,7 @@ export function layoutCameraLabels(candidates:Candidate[],frame:Frame,width:numb
  const ordered=[...candidates].sort((a,b)=>Number(b.name===selected)-Number(a.name===selected)||Number(retained.has(b.name))-Number(retained.has(a.name))||a.mag-b.mag||a.name.localeCompare(b.name));
  for(const target of ordered){
   if(!Number.isFinite(target.x)||!Number.isFinite(target.y)||placed.some(item=>item.name===target.name))continue;
-  const established=retained.has(target.name)||target.name===selected;
+  const established=retained.has(target.name);
   const margin=established?2:10,vertical=established?24:32;
   const x=target.x-frame.left,y=target.y-frame.top;
   if(x<width/2+margin||x>frame.width-width/2-margin||y<vertical||y>frame.height-vertical)continue;

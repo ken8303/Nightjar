@@ -26,7 +26,8 @@ test('existing labels keep priority over a brighter newcomer until a clear gap e
 test('selecting an overlapping object takes priority immediately',()=>{
  const a=item('A',200),b=item('B',210,300,0);
  assert.deepEqual(names(layoutCameraLabels([a,b],frame,160,'B',['A'])),['B']);
- assert.deepEqual(names(layoutCameraLabels([item('Selected',82)],frame,160,'Selected',[])),['Selected']);
+ assert.deepEqual(names(layoutCameraLabels([item('Selected',82)],frame,160,'Selected',[])),[]);
+ assert.deepEqual(names(layoutCameraLabels([item('Selected',90)],frame,160,'Selected',[])),['Selected']);
 });
 test('retained objects always use new positions and disappear when not in the candidate list',()=>{
  const result=layoutCameraLabels([item('A',210,250)],frame,120,'',['A','Missing']);
@@ -39,4 +40,15 @@ test('layout stays bounded, ignores invalid coordinates and duplicates, and adap
  assert.deepEqual(names(layoutCameraLabels([item('A',68),item('Bad',NaN)],frame,120,'',[])),[]);
  assert.deepEqual(names(layoutCameraLabels([item('A',70),item('A',200)],frame,120,'',[])),['A']);
  assert.deepEqual(names(layoutCameraLabels([item('A',70)],frame,160,'',[])),[]);
+});
+
+
+test('a selected object uses edge hysteresis while preserving fresh coordinates',()=>{
+ let visible=[];
+ for(const [x,expected] of [[91,true],[87,true],[81,false],[85,false],[89,false],[90,true]]){
+  const labels=layoutCameraLabels([item('Selected',x)],frame,160,'Selected',visible);
+  assert.equal(labels.length,expected?1:0);
+  if(expected)assert.equal(labels[0].x,x+frame.left);
+  visible=names(labels);
+ }
 });
