@@ -61,6 +61,12 @@ export function targetDirectionGuide(basis:CameraBasis,altitude:number,azimuth:n
  const dot=target.reduce((sum,value,i)=>sum+value*basis.forward[i],0);
  return {below:false,separation:Math.acos(Math.max(-1,Math.min(1,dot)))/rad,bearingDelta:bearingDifference(azimuth,direction.bearing),elevationDelta:altitude-direction.altitude};
 }
+// The calibrated long side stays the same when an uncropped image rotates.
+// Derive the vertical angle from that lens angle and the actual video shape.
+export function cameraVerticalFov(longEdgeFov:number,aspect:number){
+ if(!Number.isFinite(longEdgeFov)||longEdgeFov<=0||longEdgeFov>=180||!Number.isFinite(aspect)||aspect<=0)return null;
+ return 2*Math.atan(Math.tan(longEdgeFov*rad/2)/Math.max(1,aspect))/rad;
+}
 export function projectSkyTarget(altitude:number,azimuth:number,basis:CameraBasis,aspect:number,verticalFov:number){
  if(!Number.isFinite(altitude)||!Number.isFinite(azimuth)||altitude<=0||!(aspect>0)||!Number.isFinite(aspect)||verticalFov<=0||verticalFov>=180||!Number.isFinite(verticalFov))return null;
  const v=skyVector(altitude,azimuth),dot=(axis:Vector)=>v.reduce((sum,value,i)=>sum+value*axis[i],0);

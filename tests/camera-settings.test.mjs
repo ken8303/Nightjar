@@ -23,3 +23,13 @@ test('corrupt or unavailable storage safely defaults and invalid fields do not d
  assert.equal(saveCameraSettings({fov:100,showPhotos:true},{setItem:()=>{throw Error('Quota')}}),false);
  for(const fov of [NaN,Infinity,29,101,45.5])assert.equal(saveCameraSettings({fov,showPhotos:true},{setItem:()=>assert.fail('Invalid value written')}),false);
 });
+
+
+test('older vertical-FOV settings preserve photos without guessing the calibration orientation',()=>{
+ const data=new Map([['nightjar-camera-settings-v1',JSON.stringify({fov:90,showPhotos:false})]]);
+ const storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};
+ assert.deepEqual(readCameraSettings(storage),{fov:60,showPhotos:false});
+ saveCameraSettings({fov:75,showPhotos:true},storage);
+ assert.deepEqual(readCameraSettings(storage),{fov:75,showPhotos:true});
+ assert.equal(data.has('nightjar-camera-settings-v2'),true);
+});

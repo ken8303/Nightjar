@@ -121,3 +121,19 @@ test('full-screen projection uses the uncropped camera image inside portrait and
  assert.deepEqual(cameraImageFrame(0,480,.75),{width:0,height:0,left:0,top:0});
  assert.equal(cameraImageFrame(360,480,NaN).width,0);
 });
+
+
+test('rotating the camera image swaps field-of-view axes without changing lens scale',async()=>{
+ const {cameraVerticalFov}=await vite.ssrLoadModule('/lib/camera-sky.ts');
+ const portrait=cameraVerticalFov(60,9/16),landscape=cameraVerticalFov(60,16/9);
+ near(portrait,60);near(2*Math.atan(Math.tan(landscape*Math.PI/360)*(16/9))*180/Math.PI,60);
+ const centre=manualCameraBasis(0,45);
+ // Verify an off-centre target remains projectable with the derived angle.
+ const right=projectSkyTarget(45,20,centre,16/9,landscape);
+ assert(right);assert(landscape<60);
+ const rotated={forward:centre.forward,right:centre.up,up:centre.right.map(value=>-value)};
+ const after=projectSkyTarget(45,20,rotated,9/16,portrait);
+ assert(after);near(after.x,1-right.y);near(after.y,right.x);
+ near(cameraVerticalFov(60,1),60);
+ for(const [fov,aspect] of [[0,1],[180,1],[60,0],[NaN,1],[60,Infinity]])assert.equal(cameraVerticalFov(fov,aspect),null);
+});
