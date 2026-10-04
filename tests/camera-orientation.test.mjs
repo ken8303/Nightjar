@@ -58,7 +58,32 @@ test('Safari compass heading anchors relative orientation and moving the phone u
 });
 test('Safari unusable compass readings fall back to relative alignment and recover without keeping an old correction',()=>{
  const h=harness();h.read({alpha:0,beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);
- h.setTime(10);h.read({alpha:20,beta:120,webkitCompassHeading:0,webkitCompassAccuracy:-1});assert.equal(h.result.reading.absolute,false);
- h.setTime(20);h.read({alpha:20,beta:120,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,2);
- h.setTime(30);h.read({beta:90,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,false);h.dispose();
+ h.setTime(501);h.read({alpha:20,beta:120,webkitCompassHeading:0,webkitCompassAccuracy:-1});assert.equal(h.result.reading.absolute,false);
+ h.setTime(520);h.read({alpha:20,beta:120,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,2);
+ h.setTime(600);h.read({beta:90,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);h.dispose();
+});
+
+
+test('upright Safari poses retain north alignment while fresh gyro readings keep turning the camera',()=>{
+ const h=harness();h.read({alpha:40,beta:120,webkitCompassHeading:140,webkitCompassAccuracy:5});
+ h.setTime(100);h.read({alpha:40,beta:90,webkitCompassHeading:140,webkitCompassAccuracy:5});
+ const first=h.result.reading.basis.forward;assert.equal(h.result.reading.absolute,true);
+ h.setTime(200);h.read({alpha:130,beta:90,webkitCompassHeading:140,webkitCompassAccuracy:5});
+ const second=h.result.reading.basis.forward;assert.equal(h.result.reading.absolute,true);
+ assert(Math.abs(first[0]*second[0]+first[1]*second[1])<1e-10);assert.equal(h.result.absolute,1);
+ h.setTime(5000);h.read({alpha:140,beta:90,webkitCompassHeading:140,webkitCompassAccuracy:5});
+ h.setTime(5100);h.read({alpha:150,beta:90,webkitCompassHeading:-1,webkitCompassAccuracy:-1});assert.equal(h.result.reading.absolute,true);h.dispose();
+});
+test('brief Safari compass dropouts do not blink labels, but sustained loss requires alignment',()=>{
+ const h=harness();h.read({alpha:0,beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});
+ h.setTime(100);h.read({alpha:10,beta:120,webkitCompassHeading:-1,webkitCompassAccuracy:-1});assert.equal(h.result.reading.absolute,true);
+ h.setTime(200);h.read({alpha:20,beta:120,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,1);
+ h.setTime(701);h.read({alpha:30,beta:120,webkitCompassHeading:-1,webkitCompassAccuracy:-1});assert.equal(h.result.reading.absolute,false);
+ h.setTime(800);h.read({alpha:30,beta:120,webkitCompassHeading:210,webkitCompassAccuracy:5});assert.equal(h.result.absolute,2);h.dispose();
+});
+test('an upright initial pose has no invented north anchor and invalid orientation clears an old anchor',()=>{
+ const h=harness();h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,false);
+ h.setTime(100);h.read({beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);
+ h.setTime(200);h.read({alpha:null,webkitCompassHeading:180,webkitCompassAccuracy:5});assert.equal(h.result.reading,null);
+ h.setTime(300);h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,false);h.dispose();
 });

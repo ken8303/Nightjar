@@ -23,14 +23,17 @@ export function deviceCameraBasis(alpha:number|null,beta:number|null,gamma:numbe
 }
 // Safari compass heading follows the device's top edge, not the rear lens.
 // Rotate the entire relative basis to that heading, preserving pitch and roll.
-export function safariCameraBasis(alpha:number|null,beta:number|null,gamma:number|null,heading:number,screenAngle=0):CameraBasis|null{
+export function safariHeadingOffset(alpha:number|null,beta:number|null,gamma:number|null,heading:number):number|null{
  const device=deviceCameraBasis(alpha,beta,gamma,0);
  if(!device||!Number.isFinite(heading)||heading<0||heading>=360)return null;
  const [east,north]=device.up;
- if(Math.hypot(east,north)<.1)return null; // Top edge is almost vertical.
- const topBearing=wrapBearing(Math.atan2(east,north)/rad);
- const screen=deviceCameraBasis(alpha,beta,gamma,screenAngle)!;
- return rotateCameraBearing(screen,bearingDifference(heading,topBearing));
+ if(Math.hypot(east,north)<.1)return null;
+ return bearingDifference(heading,wrapBearing(Math.atan2(east,north)/rad));
+}
+export function safariCameraBasis(alpha:number|null,beta:number|null,gamma:number|null,heading:number,screenAngle=0):CameraBasis|null{
+ const offset=safariHeadingOffset(alpha,beta,gamma,heading);
+ const screen=deviceCameraBasis(alpha,beta,gamma,screenAngle);
+ return offset===null||!screen?null:rotateCameraBearing(screen,offset);
 }
 export function rotateCameraBearing(basis:CameraBasis,offset:number):CameraBasis{
  const a=offset*rad,c=Math.cos(a),s=Math.sin(a);
