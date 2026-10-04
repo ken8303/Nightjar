@@ -8,12 +8,15 @@ type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>vo
 export function watchCameraOrientation(events:Events,screenEvents:Events|null,callbacks:Callbacks,options:Options){
  const now=options.now??(()=>performance.now());
  let lastReading=now(),lastRender=-Infinity,available=false,absolutePreferred=false,lastAbsolute=false,quiet=false,disposed=false;
- let compassOffset:number|null=null,lastCompass=-Infinity;
+ let compassOffset:number|null=null,lastCompass=-Infinity,safariStream=false;
  const setQuiet=(next:boolean)=>{if(quiet!==next){quiet=next;callbacks.onQuiet(next)}};
  const read=(raw:Event)=>{
   if(disposed)return;
   const event=raw as DeviceOrientationEvent & {webkitCompassHeading?:number;webkitCompassAccuracy?:number};
-  const safari=typeof event.webkitCompassHeading==='number';
+  if(typeof event.webkitCompassHeading==='number')safariStream=true;
+  // Safari can temporarily omit compass fields while still delivering gyro
+  // poses on its primary stream. Keep treating those as compass dropouts.
+  const safari=typeof event.webkitCompassHeading==='number'||(safariStream&&event.type==='deviceorientation');
   // Some browsers emit both streams. Once absolute data is preferred, a
   // secondary relative event must not clear its pose or refresh its quiet timer.
   if(absolutePreferred&&!safari&&!event.absolute&&event.type!=='deviceorientationabsolute')return;

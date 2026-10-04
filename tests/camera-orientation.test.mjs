@@ -103,3 +103,23 @@ test('secondary relative data cannot restore a pose after screen rotation while 
  h.setTime(100);h.read({alpha:45});assert.equal(h.result.reading,null);
  h.read({alpha:270},'deviceorientationabsolute');assert(h.result.reading);assert.equal(h.result.reading.absolute,true);h.dispose();
 });
+
+
+test('Safari motion still turns the view when a brief event omits its compass fields',()=>{
+ const h=harness();h.read({alpha:40,beta:120,webkitCompassHeading:140,webkitCompassAccuracy:5});
+ const first=h.result.reading.basis.forward;
+ h.setTime(100);h.read({alpha:130,beta:120});
+ assert.equal(h.result.reading.absolute,true);assert.equal(h.result.reads,2);
+ const moved=h.result.reading.basis.forward;
+ assert(Math.abs(first[0]*moved[0]+first[1]*moved[1])<1e-10);
+ h.setTime(501);h.read({alpha:140,beta:120});assert.equal(h.result.reading.absolute,false);
+ h.setTime(520);h.read({alpha:140,beta:120,webkitCompassHeading:240,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,2);h.dispose();
+});
+test('missing Safari heading fields do not fabricate an anchor and invalid gyro data still clears it',()=>{
+ const h=harness();h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});
+ h.setTime(100);h.read({alpha:20,beta:90});assert.equal(h.result.reading.absolute,false);
+ h.setTime(200);h.read({beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});
+ h.setTime(300);h.read({alpha:null});assert.equal(h.result.reading,null);
+ h.setTime(400);h.read({beta:90});assert.equal(h.result.reading.absolute,false);h.dispose();
+});
