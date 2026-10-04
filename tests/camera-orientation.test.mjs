@@ -7,9 +7,9 @@ const vite=await createServer({configFile:false,root,server:{middlewareMode:true
 after(()=>vite.close());
 const {watchCameraOrientation}=await vite.ssrLoadModule('/lib/camera-orientation.ts');
 function harness(){
- const events=new EventTarget(),screen=new EventTarget(),result={reading:null,quiet:false,unavailable:[],absolute:0,reads:0,cancelled:false};
+ const events=new EventTarget(),screen=new EventTarget(),result={reading:null,quiet:false,unavailable:[],absolute:0,relative:0,reads:0,cancelled:false};
  let time=0,angle=0,tick,deferred=null;
- const dispose=watchCameraOrientation(events,screen,{onReading:reading=>{result.reading=reading;result.reads++},onQuiet:quiet=>result.quiet=quiet,onUnavailable:reason=>{result.reading=null;result.unavailable.push(reason)},onAbsolute:()=>result.absolute++},{angle:()=>angle,now:()=>time,schedule:callback=>{tick=callback;return()=>{result.cancelled=true}},defer:(callback,delay)=>{const work={callback,due:time+delay};deferred=work;return()=>{if(deferred===work)deferred=null}}});
+ const dispose=watchCameraOrientation(events,screen,{onReading:reading=>{result.reading=reading;result.reads++},onQuiet:quiet=>result.quiet=quiet,onUnavailable:reason=>{result.reading=null;result.unavailable.push(reason)},onAbsolute:()=>result.absolute++,onRelative:()=>result.relative++},{angle:()=>angle,now:()=>time,schedule:callback=>{tick=callback;return()=>{result.cancelled=true}},defer:(callback,delay)=>{const work={callback,due:time+delay};deferred=work;return()=>{if(deferred===work)deferred=null}}});
  function read(values={},type='deviceorientation'){
   const event=Object.assign(new Event(type),{alpha:0,beta:90,gamma:0,absolute:false},values);events.dispatchEvent(event);
  }
@@ -170,4 +170,29 @@ test('an immediate absolute source transition cancels queued relative data',()=>
  h.setTime(30);h.read({alpha:270},'deviceorientationabsolute');
  const pose=h.result.reading;assert.equal(pose.absolute,true);assert.equal(h.result.reads,2);
  h.advance(100);assert.equal(h.result.reading,pose);assert.equal(h.result.reads,2);h.dispose();
+});
+
+
+test('compass loss invalidates north-based calibration before delivering the relative fallback pose',()=>{
+ const events=new EventTarget();let time=0,calibration={aligned:false,offset:0},reading=null;const order=[];
+ const dispose=watchCameraOrientation(events,null,{
+  onReading:value=>{reading=value;order.push('reading');if(!value.absolute)assert.deepEqual(calibration,{aligned:false,offset:0})},
+  onQuiet:()=>{},onUnavailable:()=>{},
+  onAbsolute:()=>{calibration={aligned:false,offset:0}},
+  onRelative:()=>{order.push('reset');calibration={aligned:false,offset:0}},
+ },{angle:()=>0,now:()=>time,schedule:()=>()=>{}});
+ const send=values=>events.dispatchEvent(Object.assign(new Event('deviceorientation'),{alpha:0,beta:120,gamma:0,absolute:false},values));
+ send({webkitCompassHeading:180,webkitCompassAccuracy:5});calibration={aligned:true,offset:25};
+ time=100;send({webkitCompassHeading:-1,webkitCompassAccuracy:-1});
+ assert.equal(reading.absolute,true);assert.equal(calibration.offset,25);
+ order.length=0;time=501;send({webkitCompassHeading:-1,webkitCompassAccuracy:-1});
+ assert.equal(reading.absolute,false);assert.deepEqual(order,['reset','reading']);dispose();
+});
+test('relative-source reset fires once per compass loss and does not erase ordinary relative alignment',()=>{
+ const h=harness();h.read();h.setTime(100);h.read({alpha:30});assert.equal(h.result.relative,0);
+ h.setTime(200);h.read({alpha:30,beta:120,webkitCompassHeading:210,webkitCompassAccuracy:5});
+ h.setTime(701);h.read({alpha:40,beta:120});assert.equal(h.result.relative,1);
+ h.setTime(800);h.read({alpha:50,beta:120});assert.equal(h.result.relative,1);
+ h.setTime(900);h.read({alpha:50,beta:120,webkitCompassHeading:230,webkitCompassAccuracy:5});
+ h.setTime(1401);h.read({alpha:60,beta:120});assert.equal(h.result.relative,2);h.dispose();
 });

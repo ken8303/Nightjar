@@ -1,7 +1,7 @@
 import {deviceCameraBasis,safariHeadingOffset,rotateCameraBearing,type CameraBasis} from './camera-sky';
 type Events=Pick<EventTarget,'addEventListener'|'removeEventListener'>;
 type Reading={basis:CameraBasis;absolute:boolean};
-type Callbacks={onReading:(reading:Reading)=>void;onQuiet:(quiet:boolean)=>void;onUnavailable:(reason:'waiting'|'invalid'|'rotated'|'compass')=>void;onAbsolute:()=>void};
+type Callbacks={onReading:(reading:Reading)=>void;onQuiet:(quiet:boolean)=>void;onUnavailable:(reason:'waiting'|'invalid'|'rotated'|'compass')=>void;onAbsolute:()=>void;onRelative:()=>void};
 type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>void;defer?:(tick:()=>void,delay:number)=>()=>void};
 // Orientation events can be change-driven. Silence is not proof of failure:
 // retain the last pose and mark it explicitly; never reuse it after rotation.
@@ -49,6 +49,9 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   const changedSource=absolute&&!lastAbsolute;
   const sourceTransition=absolute!==lastAbsolute;lastAbsolute=absolute;
   if(changedSource){absolutePreferred=true;callbacks.onAbsolute()}
+  // A correction calibrated against north cannot be reused against raw gyro
+  // bearings. Clear it before delivering the first relative fallback pose.
+  else if(sourceTransition)callbacks.onRelative();
   const refresh=quiet||!available||sourceTransition;
   lastReading=now();available=true;setQuiet(false);
   const reading={basis,absolute};

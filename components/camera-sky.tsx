@@ -77,6 +77,7 @@ export default function CameraSky(props:Props){
   const stopMotion=watchCameraOrientation(window,window.screen.orientation??null,{
    onReading:reading=>{setSensor(reading);setSensorError('')},onQuiet:setSensorQuiet,
    onAbsolute:()=>{setAligned(false);setAlignmentError(null);setOffset(0)},
+   onRelative:()=>{setAligned(false);setAlignmentError(null);setOffset(0)},
    onUnavailable:reason=>{setSensor(null);setSensorError(reason==='rotated'?'Phone rotated. Move it slightly to refresh orientation before labels resume.':reason==='compass'?'Compass direction is unavailable. Tilt the phone slightly away from vertical, then move it again. If it stays unavailable, use manual preview.':reason==='invalid'?'Orientation data is unavailable. Use manual direction or retry phone motion.':'No orientation reading yet. Move the phone slightly, use manual direction or retry phone motion.')},
   },{angle:()=>window.screen.orientation?.angle??(window as Window & {orientation?:number}).orientation??0});
   motionStopRef.current=stopMotion;
