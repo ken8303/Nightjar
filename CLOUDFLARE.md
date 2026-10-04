@@ -40,3 +40,5 @@ After the first successful deployment, check the home page, API requests, `/mani
 References: https://developers.cloudflare.com/workers/ci-cd/builds/ and https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
 
 The compatibility date is pinned to `2026-05-15`, supported by the locked Wrangler runtime. Compatibility flags are declared only in `wrangler.jsonc` to avoid duplicate flags in generated builds.
+
+`npm run build` stamps `dist/client/sw.js` with a deterministic release fingerprint. Client bundle changes, worker changes and offline-page changes produce new worker bytes without changing `/sw.js`. Deploy that generated file with the other generated assets; do not replace it with `public/sw.js`. Existing clients can then receive the app's Update and reload prompt. After deploying a subsequent release, verify that prompt and saved-plan preservation in the installed PWA on the final origin.
