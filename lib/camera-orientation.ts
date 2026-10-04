@@ -2,13 +2,17 @@ import {deviceCameraBasis,safariHeadingOffset,rotateCameraBearing,type CameraBas
 type Events=Pick<EventTarget,'addEventListener'|'removeEventListener'>;
 type Reading={basis:CameraBasis;absolute:boolean};
 type Callbacks={onReading:(reading:Reading)=>void;onQuiet:(quiet:boolean)=>void;onUnavailable:(reason:'waiting'|'invalid'|'rotated'|'compass')=>void;onAbsolute:()=>void};
-type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>void};
+type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>void;defer?:(tick:()=>void,delay:number)=>()=>void};
 // Orientation events can be change-driven. Silence is not proof of failure:
 // retain the last pose and mark it explicitly; never reuse it after rotation.
 export function watchCameraOrientation(events:Events,screenEvents:Events|null,callbacks:Callbacks,options:Options){
  const now=options.now??(()=>performance.now());
  let lastReading=now(),lastRender=-Infinity,available=false,absolutePreferred=false,lastAbsolute=false,quiet=false,disposed=false;
  let compassOffset:number|null=null,lastCompass=-Infinity,safariStream=false,verticalCompass=false;
+ const defer=options.defer??((callback,delay)=>{const timer=setTimeout(callback,delay);return()=>clearTimeout(timer)});
+ let pending:Reading|null=null,cancelPending:(()=>void)|null=null;
+ const clearPending=()=>{cancelPending?.();cancelPending=null;pending=null};
+ const emit=(reading:Reading)=>{lastRender=now();callbacks.onReading(reading)};
  const setQuiet=(next:boolean)=>{if(quiet!==next){quiet=next;callbacks.onQuiet(next)}};
  const read=(raw:Event)=>{
   if(disposed)return;
@@ -22,7 +26,7 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   if(absolutePreferred&&!safari&&!event.absolute&&event.type!=='deviceorientationabsolute')return;
   const compass=safari&&Number.isFinite(event.webkitCompassHeading)&&event.webkitCompassHeading!>=0&&event.webkitCompassHeading!<360&&Number.isFinite(event.webkitCompassAccuracy)&&event.webkitCompassAccuracy!>=0;
   const relative=deviceCameraBasis(event.alpha,event.beta,event.gamma,options.angle());
-  if(!relative){compassOffset=null;verticalCompass=false;available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
+  if(!relative){clearPending();compassOffset=null;verticalCompass=false;available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
   const time=now();
   // Heading becomes unstable as the device top edge approaches vertical.
   // Resume correction farther from that cutoff than where we suspend it.
@@ -47,10 +51,20 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   if(changedSource){absolutePreferred=true;callbacks.onAbsolute()}
   const refresh=quiet||!available||sourceTransition;
   lastReading=now();available=true;setQuiet(false);
-  if(!refresh&&lastReading-lastRender<80)return;
-  lastRender=lastReading;callbacks.onReading({basis,absolute});
+  const reading={basis,absolute};
+  // Coalesce busy sensor events, but deliver the final pose even if the phone
+  // stops moving before another event arrives. Never replay it after invalidation.
+  if(!refresh&&lastReading-lastRender<80){
+   pending=reading;
+   if(!cancelPending)cancelPending=defer(()=>{
+    const latest=pending;cancelPending=null;pending=null;
+    if(!disposed&&available&&latest)emit(latest);
+   },80-(lastReading-lastRender));
+   return;
+  }
+  clearPending();emit(reading);
  };
- const rotated=()=>{if(disposed)return;available=false;lastReading=now();lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable('rotated')};
+ const rotated=()=>{if(disposed)return;clearPending();available=false;lastReading=now();lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable('rotated')};
  let warned=false;
  const tick=()=>{
   if(disposed)return;
@@ -61,5 +75,5 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
  const schedule=options.schedule??(callback=>{const timer=setInterval(callback,1000);return()=>clearInterval(timer)});
  events.addEventListener('deviceorientation',read);events.addEventListener('deviceorientationabsolute',read);events.addEventListener('orientationchange',rotated);screenEvents?.addEventListener('change',rotated);
  const cancelTimer=schedule(tick);
- return ()=>{disposed=true;cancelTimer();events.removeEventListener('deviceorientation',read);events.removeEventListener('deviceorientationabsolute',read);events.removeEventListener('orientationchange',rotated);screenEvents?.removeEventListener('change',rotated)};
+ return ()=>{disposed=true;clearPending();cancelTimer();events.removeEventListener('deviceorientation',read);events.removeEventListener('deviceorientationabsolute',read);events.removeEventListener('orientationchange',rotated);screenEvents?.removeEventListener('change',rotated)};
 }

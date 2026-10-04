@@ -8,12 +8,12 @@ after(()=>vite.close());
 const {watchCameraOrientation}=await vite.ssrLoadModule('/lib/camera-orientation.ts');
 function harness(){
  const events=new EventTarget(),screen=new EventTarget(),result={reading:null,quiet:false,unavailable:[],absolute:0,reads:0,cancelled:false};
- let time=0,angle=0,tick;
- const dispose=watchCameraOrientation(events,screen,{onReading:reading=>{result.reading=reading;result.reads++},onQuiet:quiet=>result.quiet=quiet,onUnavailable:reason=>{result.reading=null;result.unavailable.push(reason)},onAbsolute:()=>result.absolute++},{angle:()=>angle,now:()=>time,schedule:callback=>{tick=callback;return()=>{result.cancelled=true}}});
+ let time=0,angle=0,tick,deferred=null;
+ const dispose=watchCameraOrientation(events,screen,{onReading:reading=>{result.reading=reading;result.reads++},onQuiet:quiet=>result.quiet=quiet,onUnavailable:reason=>{result.reading=null;result.unavailable.push(reason)},onAbsolute:()=>result.absolute++},{angle:()=>angle,now:()=>time,schedule:callback=>{tick=callback;return()=>{result.cancelled=true}},defer:(callback,delay)=>{const work={callback,due:time+delay};deferred=work;return()=>{if(deferred===work)deferred=null}}});
  function read(values={},type='deviceorientation'){
   const event=Object.assign(new Event(type),{alpha:0,beta:90,gamma:0,absolute:false},values);events.dispatchEvent(event);
  }
- return {events,screen,result,dispose,read,advance:delta=>{time+=delta;tick()},setTime:value=>time=value,rotate:value=>{angle=value;screen.dispatchEvent(new Event('change'))}};
+ return {events,screen,result,dispose,read,advance:delta=>{time+=delta;if(deferred&&time>=deferred.due){const work=deferred;deferred=null;work.callback()}tick()},setTime:value=>time=value,rotate:value=>{angle=value;screen.dispatchEvent(new Event('change'))}};
 }
 test('a quiet stationary phone retains its pose and marks the last reading instead of losing labels',()=>{
  const h=harness();h.read({absolute:true});const pose=h.result.reading;
@@ -146,4 +146,28 @@ test('upright hysteresis preserves fresh turning and works independently of scre
  // Invalid gyro data removes both the cached anchor and its hysteresis state.
  h.setTime(400);h.read({alpha:0,beta:97,webkitCompassHeading:180,webkitCompassAccuracy:5});
  assert.equal(h.result.reading.absolute,true);assert(h.result.reading.basis.forward[1]>.99);h.dispose();
+});
+
+
+test('the final throttled pose is delivered even when the phone stops generating events',()=>{
+ const h=harness();h.read({alpha:0});h.setTime(20);h.read({alpha:30});h.setTime(40);h.read({alpha:90});
+ assert.equal(h.result.reads,1);h.advance(39);assert.equal(h.result.reads,1);
+ h.advance(1);assert.equal(h.result.reads,2);assert(h.result.reading.basis.forward[0]<-.99);
+ h.advance(100);assert.equal(h.result.reads,2);h.dispose();
+});
+test('queued poses cannot restore labels after invalid data, rotation or disposal',()=>{
+ for(const invalidate of ['invalid','rotation','dispose']){
+  const h=harness();h.read();h.setTime(20);h.read({alpha:90});
+  if(invalidate==='invalid')h.read({alpha:null});
+  if(invalidate==='rotation')h.rotate(90);
+  if(invalidate==='dispose')h.dispose();
+  const pose=h.result.reading;h.advance(80);
+  assert.equal(h.result.reads,1);assert.equal(h.result.reading,pose);h.dispose();
+ }
+});
+test('an immediate absolute source transition cancels queued relative data',()=>{
+ const h=harness();h.read();h.setTime(20);h.read({alpha:90});
+ h.setTime(30);h.read({alpha:270},'deviceorientationabsolute');
+ const pose=h.result.reading;assert.equal(pose.absolute,true);assert.equal(h.result.reads,2);
+ h.advance(100);assert.equal(h.result.reading,pose);assert.equal(h.result.reads,2);h.dispose();
 });
