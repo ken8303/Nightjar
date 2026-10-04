@@ -21,6 +21,17 @@ export function deviceCameraBasis(alpha:number|null,beta:number|null,gamma:numbe
  const forward:Vector=[-cg*sa*sb-ca*sg,-sa*sg+ca*cg*sb,-cb*cg];
  return {forward,right:x.map((v,i)=>v*Math.cos(s)+y[i]*Math.sin(s)) as Vector,up:y.map((v,i)=>v*Math.cos(s)-x[i]*Math.sin(s)) as Vector};
 }
+// Safari compass heading follows the device's top edge, not the rear lens.
+// Rotate the entire relative basis to that heading, preserving pitch and roll.
+export function safariCameraBasis(alpha:number|null,beta:number|null,gamma:number|null,heading:number,screenAngle=0):CameraBasis|null{
+ const device=deviceCameraBasis(alpha,beta,gamma,0);
+ if(!device||!Number.isFinite(heading)||heading<0||heading>=360)return null;
+ const [east,north]=device.up;
+ if(Math.hypot(east,north)<.1)return null; // Top edge is almost vertical.
+ const topBearing=wrapBearing(Math.atan2(east,north)/rad);
+ const screen=deviceCameraBasis(alpha,beta,gamma,screenAngle)!;
+ return rotateCameraBearing(screen,bearingDifference(heading,topBearing));
+}
 export function rotateCameraBearing(basis:CameraBasis,offset:number):CameraBasis{
  const a=offset*rad,c=Math.cos(a),s=Math.sin(a);
  const rotate=([e,n,u]:Vector):Vector=>[e*c+n*s,n*c-e*s,u];
@@ -63,3 +74,7 @@ export function cameraErrorMessage(error:unknown){
  return 'The camera could not start. Try again, or use manual direction preview.';
 }
 export function stopCameraStream(stream:Pick<MediaStream,'getTracks'>|null){stream?.getTracks().forEach(track=>track.stop())}
+
+export function canShowCameraLabels(camera:'off'|'starting'|'on',paused:boolean,tracking:boolean,sensor:{absolute:boolean}|null,aligned:boolean){
+ return !paused&&(tracking?!!sensor&&(sensor.absolute||aligned):camera==='off');
+}

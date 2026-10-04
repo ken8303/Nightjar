@@ -48,3 +48,17 @@ test('high-frequency readings are throttled and disposal removes listeners and t
  const pose=h.result.reading;h.read({alpha:30});h.rotate(90);h.events.dispatchEvent(new Event('orientationchange'));h.advance(10000);
  assert.equal(h.result.reading,pose);assert.equal(h.result.reads,2);assert.equal(h.result.quiet,false);assert.equal(h.result.cancelled,true);
 });
+
+test('Safari compass heading anchors relative orientation and moving the phone updates sky direction',()=>{
+ const h=harness();h.read({alpha:42,beta:120,gamma:0,webkitCompassHeading:180,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,1);
+ const first=h.result.reading.basis.forward;assert(Math.abs(first[0])<1e-10);assert(first[1]>.8);assert(first[2]>.4);
+ h.setTime(100);h.read({alpha:42,beta:120,gamma:0,webkitCompassHeading:270,webkitCompassAccuracy:5});
+ const moved=h.result.reading.basis.forward;assert(moved[0]>.8);assert(Math.abs(moved[1])<1e-10);assert.equal(h.result.absolute,1);h.dispose();
+});
+test('Safari unusable compass readings fall back to relative alignment and recover without keeping an old correction',()=>{
+ const h=harness();h.read({alpha:0,beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);
+ h.setTime(10);h.read({alpha:20,beta:120,webkitCompassHeading:0,webkitCompassAccuracy:-1});assert.equal(h.result.reading.absolute,false);
+ h.setTime(20);h.read({alpha:20,beta:120,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,2);
+ h.setTime(30);h.read({beta:90,webkitCompassHeading:200,webkitCompassAccuracy:5});assert.equal(h.result.reading.absolute,false);h.dispose();
+});

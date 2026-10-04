@@ -119,3 +119,6 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .viewing-mode-inline{display:flex;flex-direction:column;gap:8px;min-width:0}
 .viewing-mode-inline .button{align-self:start}
 .viewing-mode-inline p{position:static;width:auto;margin:0;padding:0;border:0;background:none;box-shadow:none;font-size:12px;line-height:1.6;color:var(--text-secondary)}
+
+.camera-sky-discovery-notice{position:absolute;z-index:3;inset:48px 12px auto;display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--line);border-radius:6px;background:#061018eb;font-size:12px;line-height:1.5}
+.camera-sky-discovery-notice .button{min-height:44px;align-self:start}.camera-sky-discovery-notice span{color:var(--text-secondary)}

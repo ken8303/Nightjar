@@ -1,24 +1,28 @@
-import {deviceCameraBasis,type CameraBasis} from './camera-sky';
+import {deviceCameraBasis,safariCameraBasis,type CameraBasis} from './camera-sky';
 type Events=Pick<EventTarget,'addEventListener'|'removeEventListener'>;
 type Reading={basis:CameraBasis;absolute:boolean};
-type Callbacks={onReading:(reading:Reading)=>void;onQuiet:(quiet:boolean)=>void;onUnavailable:(reason:'waiting'|'invalid'|'rotated')=>void;onAbsolute:()=>void};
+type Callbacks={onReading:(reading:Reading)=>void;onQuiet:(quiet:boolean)=>void;onUnavailable:(reason:'waiting'|'invalid'|'rotated'|'compass')=>void;onAbsolute:()=>void};
 type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>void};
 // Orientation events can be change-driven. Silence is not proof of failure:
 // retain the last pose and mark it explicitly; never reuse it after rotation.
 export function watchCameraOrientation(events:Events,screenEvents:Events|null,callbacks:Callbacks,options:Options){
  const now=options.now??(()=>performance.now());
- let lastReading=now(),lastRender=-Infinity,available=false,absolutePreferred=false,quiet=false,disposed=false;
+ let lastReading=now(),lastRender=-Infinity,available=false,absolutePreferred=false,lastAbsolute=false,quiet=false,disposed=false;
  const setQuiet=(next:boolean)=>{if(quiet!==next){quiet=next;callbacks.onQuiet(next)}};
  const read=(raw:Event)=>{
   if(disposed)return;
-  const event=raw as DeviceOrientationEvent;
-  const absolute=event.absolute||event.type==='deviceorientationabsolute';
-  if(absolutePreferred&&!absolute)return;
-  const basis=deviceCameraBasis(event.alpha,event.beta,event.gamma,options.angle());
-  if(!basis){available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable('invalid');return}
-  const changedSource=absolute&&!absolutePreferred;
+  const event=raw as DeviceOrientationEvent & {webkitCompassHeading?:number;webkitCompassAccuracy?:number};
+  const safari=typeof event.webkitCompassHeading==='number';
+  const compass=safari&&Number.isFinite(event.webkitCompassAccuracy)&&event.webkitCompassAccuracy!>=0;
+  const compassBasis=compass?safariCameraBasis(event.alpha,event.beta,event.gamma,event.webkitCompassHeading!,options.angle()):null;
+  const absolute=safari?!!compassBasis:event.absolute||event.type==='deviceorientationabsolute';
+  if(absolutePreferred&&!absolute&&!safari)return;
+  const basis=compassBasis??deviceCameraBasis(event.alpha,event.beta,event.gamma,options.angle());
+  if(!basis){available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
+  const changedSource=absolute&&!lastAbsolute;
+  const sourceTransition=absolute!==lastAbsolute;lastAbsolute=absolute;
   if(changedSource){absolutePreferred=true;callbacks.onAbsolute()}
-  const refresh=quiet||!available||changedSource;
+  const refresh=quiet||!available||sourceTransition;
   lastReading=now();available=true;setQuiet(false);
   if(!refresh&&lastReading-lastRender<80)return;
   lastRender=lastReading;callbacks.onReading({basis,absolute});

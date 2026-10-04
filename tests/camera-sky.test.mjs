@@ -85,3 +85,26 @@ test('heading calibration requires pitch agreement before applying the shortest 
  const high=cameraHeadingAlignment(manualCameraBasis(90,84),84,270);
  assert.equal(high.reason,'ready');near(Math.abs(high.offset),180);
 });
+
+test('Safari top-edge heading preserves rear-camera pitch and screen roll across compass directions',async()=>{
+ const {safariCameraBasis}=await vite.ssrLoadModule('/lib/camera-sky.ts');
+ for(const heading of [0,90,180,270,359]){
+  const basis=safariCameraBasis(42,120,0,heading,0),direction=cameraDirection(basis);
+  near(direction.altitude,30);near(bearingDifference(direction.bearing,heading+180),0);
+  const landscape=safariCameraBasis(42,120,0,heading,90);near(cameraDirection(landscape).bearing,direction.bearing);near(cameraDirection(landscape).altitude,30);
+ }
+ assert.equal(safariCameraBasis(0,90,0,0),null);assert.equal(safariCameraBasis(0,120,0,-1),null);assert.equal(safariCameraBasis(0,120,0,NaN),null);
+});
+
+test('live and opening cameras never display fixed manual labels; motion needs a heading or explicit alignment',async()=>{
+ const {canShowCameraLabels}=await vite.ssrLoadModule('/lib/camera-sky.ts');
+ assert.equal(canShowCameraLabels('off',false,false,null,false),true);
+ for(const state of ['starting','on']){
+  assert.equal(canShowCameraLabels(state,false,false,{absolute:true},true),false);
+  assert.equal(canShowCameraLabels(state,false,true,null,false),false);
+  assert.equal(canShowCameraLabels(state,false,true,{absolute:false},false),false);
+  assert.equal(canShowCameraLabels(state,false,true,{absolute:false},true),true);
+  assert.equal(canShowCameraLabels(state,false,true,{absolute:true},false),true);
+  assert.equal(canShowCameraLabels(state,true,true,{absolute:true},true),false);
+ }
+});
