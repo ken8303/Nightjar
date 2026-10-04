@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'vite';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
-const {parsePlannerBackup,makePlannerBackup,readSavedPlan,mergeSavedPlans,restorePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
+const {parsePlannerBackup,makePlannerBackup,readSavedPlan,mergeSavedPlans,restorePlannerBackup,previewPlannerMerge}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 after(()=>vite.close());
 const empty=()=>({places:[],targets:[],notes:{},equipment:[]});
 const site={name:'Dark field',latitude:51,longitude:-1,timezone:'Europe/London',bortle:3};
@@ -47,4 +47,15 @@ test('quota failure rolls back all successful writes and preserves originally ab
 test('rollback failures report possible partial changes honestly',()=>{
  const current=storage();let writes=0;const set=current.setItem;current.setItem=(key,value)=>{if(++writes>=2)throw Error('Storage blocked');set(key,value)};
  assert.throws(()=>restorePlannerBackup(current,parsePlannerBackup(file({places:[site],targets:['Vega'],notes:{},equipment:[]}))),/some changes could not be undone/);
+});
+
+test('import preview distinguishes additions, changed conflicts and identical records',()=>{
+ const existing={places:[site],targets:['Vega'],notes:{Vega:'My note'},equipment:[camera]};
+ const incoming={places:[{...site,name:'Renamed'},{...site,name:'New site',latitude:53}],targets:['Vega','Saturn'],notes:{Vega:'Different note',Saturn:'New note'},equipment:[{...camera,focal:800},{...camera,name:'New camera'}]};
+ const review=previewPlannerMerge(existing,incoming);
+ assert.deepEqual(review.added,{places:1,targets:1,notes:1,equipment:1});
+ assert.deepEqual(review.kept,{places:['Dark field'],notes:['Vega'],equipment:['Camera']});
+ assert.deepEqual(review.merged,mergeSavedPlans(existing,incoming));
+ assert.deepEqual(previewPlannerMerge(existing,existing).kept,{places:[],notes:[],equipment:[]});
+ assert.deepEqual(previewPlannerMerge(existing,existing).added,{places:0,targets:0,notes:0,equipment:0});
 });

@@ -5,7 +5,7 @@ import {createServer} from 'vite';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
-const {horizonVector,nearestProjectedTarget}=await vite.ssrLoadModule('/lib/sky-dome.ts');
+const {horizonVector,nearestProjectedTarget,zoomCameraPosition}=await vite.ssrLoadModule('/lib/sky-dome.ts');
 const close=(actual,expected)=>actual.forEach((value,i)=>assert(Math.abs(value-expected[i])<1e-10));
 test('3D horizon frame preserves cardinal directions, altitude and unit radius',()=>{
  close(horizonVector(0,0),[0,0,-1]);close(horizonVector(0,90),[1,0,0]);close(horizonVector(0,180),[0,0,1]);close(horizonVector(0,270),[-1,0,0]);close(horizonVector(90,42),[0,1,0]);
@@ -21,4 +21,22 @@ test('star photos use catalogue coordinates and planetary photos retain source a
  assert(new URL(objectPhoto('Sirius').src).searchParams.get('d').startsWith('-16:'));
  for(const name of ['Moon','Venus','Mars','Jupiter','Saturn']){const photo=objectPhoto(name);assert(photo.credit.includes('NASA'));assert(photo.source.startsWith('https://science.nasa.gov/'));assert(!photo.survey)}
  assert.equal(objectPhoto('Unknown'),undefined);assert.equal(objectPhoto('constructor'),undefined);
+});
+
+test('camera zoom measures distance from the selected orbit centre and preserves its direction',()=>{
+ const target=[0.8,0.6,0],position=[2.24,2.52,0];
+ const zoomed=zoomCameraPosition(position,target,.8);
+ close(zoomed,[1.952,2.136,0]);
+ assert(Math.abs(Math.hypot(...zoomed.map((v,i)=>v-target[i]))-1.92)<1e-10);
+ // Translating both camera and target cannot change zoom behaviour.
+ const translation=[4,-2,3];
+ close(zoomCameraPosition(position.map((v,i)=>v+translation[i]),target.map((v,i)=>v+translation[i]),.8),zoomed.map((v,i)=>v+translation[i]));
+ close(zoomCameraPosition(zoomed,target,1.25),position);
+});
+test('camera zoom clamps orbit distance and stays stable at both limits',()=>{
+ const target=[.8,.6,0];
+ const near=[2.6,.6,0],far=[5.8,.6,0];
+ close(zoomCameraPosition(near,target,.8),near);close(zoomCameraPosition(far,target,1.25),far);
+ close(zoomCameraPosition([3.2,.6,0],target,.1),near);close(zoomCameraPosition([3.2,.6,0],target,10),far);
+ close(zoomCameraPosition(target,target,.8),target);
 });

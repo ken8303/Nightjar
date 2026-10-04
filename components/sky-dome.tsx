@@ -4,7 +4,7 @@ import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ArrowLeft,ArrowRight,ArrowUp,ArrowDown,Minus,Plus,RotateCcw,Crosshair} from 'lucide-react';
 import {skyTargets,lines,galacticCentrePosition} from '@/lib/sky';
-import {horizonVector,nearestProjectedTarget} from '@/lib/sky-dome';
+import {horizonVector,nearestProjectedTarget,zoomCameraPosition} from '@/lib/sky-dome';
 import SkyChart from '@/components/sky-chart';
 import type {SkyAtlasProps} from '@/components/sky-atlas-viewer';
 type Actions={sync:()=>void;rotate:(angle:number)=>void;tilt:(angle:number)=>void;zoom:(factor:number)=>void;reset:()=>void;focus:()=>void};
@@ -66,7 +66,7 @@ export default function SkyDome(props:SkyAtlasProps){
     render();
    }
    const reset=()=>{camera.position.set(1.65,1.8,2.2);controls.target.set(0,.3,0);camera.up.set(0,1,0);controls.update();render()};
-   actions.current={sync,reset,focus:()=>{const chosen=coordinates.find(point=>point.name===latest.current.props.selected);if(!chosen)return;controls.target.copy(chosen.vector);const direction=new T.Spherical().setFromVector3(chosen.vector);direction.radius=2.4;direction.phi=T.MathUtils.clamp(direction.phi,.12,Math.PI/2);camera.position.setFromSpherical(direction).add(controls.target);controls.update();render()},rotate:angle=>{camera.position.sub(controls.target).applyAxisAngle(new T.Vector3(0,1,0),angle).add(controls.target);controls.update();render()},tilt:angle=>{const spherical=new T.Spherical().setFromVector3(camera.position.clone().sub(controls.target));spherical.phi=T.MathUtils.clamp(spherical.phi+angle,.12,Math.PI/2);camera.position.setFromSpherical(spherical).add(controls.target);controls.update();render()},zoom:factor=>{camera.position.sub(controls.target).setLength(T.MathUtils.clamp(camera.position.length()*factor,1.8,5)).add(controls.target);controls.update();render()}};
+   actions.current={sync,reset,focus:()=>{const chosen=coordinates.find(point=>point.name===latest.current.props.selected);if(!chosen)return;controls.target.copy(chosen.vector);const direction=new T.Spherical().setFromVector3(chosen.vector);direction.radius=2.4;direction.phi=T.MathUtils.clamp(direction.phi,.12,Math.PI/2);camera.position.setFromSpherical(direction).add(controls.target);controls.update();render()},rotate:angle=>{camera.position.sub(controls.target).applyAxisAngle(new T.Vector3(0,1,0),angle).add(controls.target);controls.update();render()},tilt:angle=>{const spherical=new T.Spherical().setFromVector3(camera.position.clone().sub(controls.target));spherical.phi=T.MathUtils.clamp(spherical.phi+angle,.12,Math.PI/2);camera.position.setFromSpherical(spherical).add(controls.target);controls.update();render()},zoom:factor=>{camera.position.set(...zoomCameraPosition(camera.position.toArray(),controls.target.toArray(),factor));controls.update();render()}};
    const resize=()=>{if(!el.clientWidth||!el.clientHeight)return;camera.aspect=el.clientWidth/el.clientHeight;camera.fov=camera.aspect<1?2*Math.atan(Math.tan(44*Math.PI/360)/camera.aspect)*180/Math.PI:44;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight);render()};
    const observer=new ResizeObserver(resize);observer.observe(el);disposers.push(()=>observer.disconnect());controls.addEventListener('change',render);disposers.push(()=>controls.removeEventListener('change',render));
    let down:{x:number;y:number}|null=null;

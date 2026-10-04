@@ -32,6 +32,19 @@ export function mergeSavedPlans(existing:SavedPlan,incoming:SavedPlan):SavedPlan
  const equipment=[...existing.equipment];for(const e of incoming.equipment)if(!equipment.some(setup=>setup.name.trim()===e.name.trim()))equipment.push(e);
  return plan({places,equipment,targets:[...new Set([...existing.targets,...incoming.targets])],notes:{...incoming.notes,...existing.notes}});
 }
+export function previewPlannerMerge(existing:SavedPlan,incoming:SavedPlan){
+ const merged=mergeSavedPlans(existing,incoming);
+ const different=(a:unknown,b:unknown)=>JSON.stringify(a)!==JSON.stringify(b);
+ return {
+  merged,
+  added:{places:merged.places.length-existing.places.length,targets:merged.targets.length-existing.targets.length,notes:Object.keys(merged.notes).length-Object.keys(existing.notes).length,equipment:merged.equipment.length-existing.equipment.length},
+  kept:{
+   places:incoming.places.flatMap(site=>{const saved=existing.places.find(p=>Math.abs(site.latitude-p.latitude)<.0001&&Math.abs(site.longitude-p.longitude)<.0001);return saved&&different(saved,site)?[saved.name]:[]}),
+   notes:Object.keys(incoming.notes).filter(key=>Object.hasOwn(existing.notes,key)&&existing.notes[key]!==incoming.notes[key]),
+   equipment:incoming.equipment.flatMap(setup=>{const saved=existing.equipment.find(e=>setup.name.trim()===e.name.trim());return saved&&different(saved,setup)?[saved.name]:[]})
+  }
+ };
+}
 export function restorePlannerBackup(storage:StorageAccess,backup:PlannerBackup):SavedPlan{
  // Revalidate even when called outside the file picker, and read the latest
  // local data so imports preserve edits made after the preview was opened.
