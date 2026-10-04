@@ -123,3 +123,27 @@ test('missing Safari heading fields do not fabricate an anchor and invalid gyro 
  h.setTime(300);h.read({alpha:null});assert.equal(h.result.reading,null);
  h.setTime(400);h.read({beta:90});assert.equal(h.result.reading.absolute,false);h.dispose();
 });
+
+
+test('compass correction does not flip north while oscillating around the upright cutoff',()=>{
+ const h=harness();h.read({alpha:0,beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});
+ h.setTime(100);h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});
+ for(const [time,beta,heading] of [[200,97,0],[300,94,270],[400,98,90],[500,96,0]]){
+  h.setTime(time);h.read({beta,webkitCompassHeading:heading,webkitCompassAccuracy:5});
+  const direction=h.result.reading.basis.forward;
+  assert.equal(h.result.reading.absolute,true);assert(Math.abs(direction[0])<1e-10);assert(direction[1]>.98);
+ }
+ // Once tilted far enough, a usable compass correction is applied again.
+ h.setTime(600);h.read({beta:105,webkitCompassHeading:270,webkitCompassAccuracy:5});
+ assert(h.result.reading.basis.forward[0]>.96);assert(Math.abs(h.result.reading.basis.forward[1])<1e-10);h.dispose();
+});
+test('upright hysteresis preserves fresh turning and works independently of screen rotation',()=>{
+ const h=harness();h.read({alpha:0,beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5});
+ h.setTime(100);h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});h.rotate(90);
+ h.setTime(200);h.read({alpha:90,beta:97,webkitCompassHeading:0,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,true);assert(h.result.reading.basis.forward[0]<-.99);
+ h.setTime(300);h.read({alpha:null});assert.equal(h.result.reading,null);
+ // Invalid gyro data removes both the cached anchor and its hysteresis state.
+ h.setTime(400);h.read({alpha:0,beta:97,webkitCompassHeading:180,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,true);assert(h.result.reading.basis.forward[1]>.99);h.dispose();
+});

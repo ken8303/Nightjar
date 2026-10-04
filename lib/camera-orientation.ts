@@ -8,7 +8,7 @@ type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>vo
 export function watchCameraOrientation(events:Events,screenEvents:Events|null,callbacks:Callbacks,options:Options){
  const now=options.now??(()=>performance.now());
  let lastReading=now(),lastRender=-Infinity,available=false,absolutePreferred=false,lastAbsolute=false,quiet=false,disposed=false;
- let compassOffset:number|null=null,lastCompass=-Infinity,safariStream=false;
+ let compassOffset:number|null=null,lastCompass=-Infinity,safariStream=false,verticalCompass=false;
  const setQuiet=(next:boolean)=>{if(quiet!==next){quiet=next;callbacks.onQuiet(next)}};
  const read=(raw:Event)=>{
   if(disposed)return;
@@ -22,9 +22,17 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   if(absolutePreferred&&!safari&&!event.absolute&&event.type!=='deviceorientationabsolute')return;
   const compass=safari&&Number.isFinite(event.webkitCompassHeading)&&event.webkitCompassHeading!>=0&&event.webkitCompassHeading!<360&&Number.isFinite(event.webkitCompassAccuracy)&&event.webkitCompassAccuracy!>=0;
   const relative=deviceCameraBasis(event.alpha,event.beta,event.gamma,options.angle());
-  if(!relative){compassOffset=null;available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
+  if(!relative){compassOffset=null;verticalCompass=false;available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
   const time=now();
-  const correction=compass?safariHeadingOffset(event.alpha,event.beta,event.gamma,event.webkitCompassHeading!):null;
+  // Heading becomes unstable as the device top edge approaches vertical.
+  // Resume correction farther from that cutoff than where we suspend it.
+  if(safari){
+   const device=deviceCameraBasis(event.alpha,event.beta,event.gamma,0)!;
+   const horizontal=Math.hypot(device.up[0],device.up[1]);
+   if(horizontal<.1)verticalCompass=true;
+   else if(horizontal>=.2)verticalCompass=false;
+  }
+  const correction=compass&&!verticalCompass?safariHeadingOffset(event.alpha,event.beta,event.gamma,event.webkitCompassHeading!):null;
   if(correction!==null)compassOffset=correction;
   if(compass)lastCompass=time;
   // The device top edge has no stable horizontal heading when upright.
