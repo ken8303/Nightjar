@@ -21,7 +21,7 @@ test('backup diary merge keeps local conflicts and supports legacy files without
  const review=previewPlannerMerge({...empty,diary:[entry]},incoming);assert.equal(review.added.diary,1);assert.equal(review.kept.diary.length,1);assert.equal(mergeDiary([entry],incoming.diary)[0].notes,entry.notes);
  const backup=parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:3,exportedAt:'2026-10-05T21:00Z',data:incoming}));
  assert.equal(restorePlannerBackup(current,backup).diary.length,2);const exported=makePlannerBackup(current);assert.equal(exported.version,3);assert.deepEqual(parsePlannerBackup(JSON.stringify(exported)).data.diary,readDiary(current));
- const {diary:_legacyDiary,...legacy}=empty;for(const version of [1,2])assert.deepEqual(parsePlannerBackup(JSON.stringify({...backup,version,data:legacy})).data.diary,[]);
+ const legacy={...empty};delete legacy.diary;for(const version of [1,2])assert.deepEqual(parsePlannerBackup(JSON.stringify({...backup,version,data:legacy})).data.diary,[]);
  assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...empty,diary:null}})));
  assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...empty,diary:[{...entry,target:'bad'}]}})));
 });
