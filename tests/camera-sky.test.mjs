@@ -137,3 +137,20 @@ test('rotating the camera image swaps field-of-view axes without changing lens s
  near(cameraVerticalFov(60,1),60);
  for(const [fov,aspect] of [[0,1],[180,1],[60,0],[NaN,1],[60,Infinity]])assert.equal(cameraVerticalFov(fov,aspect),null);
 });
+
+
+test('landscape manual preview uses its full canvas while live video retains fitted bounds',async()=>{
+ const {cameraOverlayFrame,cameraVerticalFov}=await vite.ssrLoadModule('/lib/camera-sky.ts');
+ const {layoutCameraLabels}=await vite.ssrLoadModule('/lib/camera-labels.ts');
+ const preview=cameraOverlayFrame('off',844,167,.75);
+ near(preview.width,844);near(preview.height,167);near(preview.left,0);near(preview.top,0);
+ const centre=projectSkyTarget(51,0,manualCameraBasis(0,51),preview.width/preview.height,cameraVerticalFov(60,preview.width/preview.height));
+ const candidate={name:'Polaris',mag:2,x:centre.x*preview.width,y:centre.y*preview.height};
+ assert.equal(layoutCameraLabels([candidate],preview,160,'Polaris',[]).length,1);
+ for(const mode of ['on','starting']){
+  const live=cameraOverlayFrame(mode,844,167,.75);
+  near(live.width,125.25);near(live.height,167);near(live.left,(844-125.25)/2);
+ }
+ assert.equal(cameraOverlayFrame('off',0,167,.75).width,0);
+ assert.equal(cameraOverlayFrame('off',844,0,.75).height,0);
+});

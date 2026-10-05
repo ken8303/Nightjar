@@ -93,3 +93,9 @@ export function cameraImageFrame(width:number,height:number,ratio:number){
  const frameWidth=Math.min(width,height*ratio),frameHeight=frameWidth/ratio;
  return {width:frameWidth,height:frameHeight,left:(width-frameWidth)/2,top:(height-frameHeight)/2};
 }
+
+// Without a live image the entire stage is the preview canvas. Live/starting
+// camera sessions keep the video's fitted rectangle so labels cannot drift into bars.
+export function cameraOverlayFrame(camera:'off'|'starting'|'on',width:number,height:number,ratio:number){
+ return cameraImageFrame(width,height,camera==='off'?width/height:ratio);
+}

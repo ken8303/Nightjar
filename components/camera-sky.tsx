@@ -14,7 +14,7 @@ import {createCameraSession} from '@/lib/camera-session';
 import {watchCameraPlayback} from '@/lib/camera-playback';
 import {createCameraWakeLock} from '@/lib/camera-wake-lock';
 import {skyTargets,type Place} from '@/lib/sky';
-import {cameraImageFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide,type CameraBasis} from '@/lib/camera-sky';
+import {cameraOverlayFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide,type CameraBasis} from '@/lib/camera-sky';
 
 function CameraThumbnail({name}:{name:string}){
  const photo=objectPhoto(name),[status,setStatus]=useState<'loading'|'loaded'|'failed'>('loading');
@@ -151,7 +151,8 @@ export default function CameraSky(props:Props){
  const orderedTargets=useMemo(()=>[...targets].sort((a,b)=>b.altitude-a.altitude||a.name.localeCompare(b.name)),[targets]);
  const targetOptions=<><option value="">Explore all objects</option>{[true,false].map(above=><optgroup key={String(above)} label={above?'Above horizon now · highest first':'Below horizon now'}>{orderedTargets.filter(target=>(target.altitude>0)===above).map(target=><option key={target.name} value={target.name}>{target.name} · {Math.round(target.altitude)}°{target.altitude<=0?' · below horizon':''}</option>)}</optgroup>)}</>;
  const basis=tracking&&sensor?rotateCameraBearing(sensor.basis,offset):manualCameraBasis(bearing,altitude);
- const verticalFov=cameraVerticalFov(fov,ratio)??fov;
+ const overlayFrame=cameraOverlayFrame(camera,size.width,size.height,ratio);
+ const verticalFov=cameraVerticalFov(fov,overlayFrame.width/overlayFrame.height)??fov;
  const direction=cameraDirection(basis),canLabel=canShowCameraLabels(camera,cameraPaused,tracking,sensor,aligned);
  const guide=selected&&canLabel?targetDirectionGuide(basis,selected.altitude,selected.azimuth):null;
  function guidance(){
@@ -168,7 +169,7 @@ export default function CameraSky(props:Props){
  }
  function projectedLabels(){
   if(!canLabel||labelMode==='hidden'||!badgeBounds)return [];
-  const frame=cameraImageFrame(size.width,size.height,ratio);if(!frame.width||!frame.height)return [];
+  const frame=overlayFrame;if(!frame.width||!frame.height)return [];
   const labelWidth=showPhotos?160:120;
   const candidates=[];
   for(const target of targets){
