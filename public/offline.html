@@ -43,6 +43,7 @@
     <div class="grid">
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
+      <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
       <section class="targets-card" id="other-notes-card" aria-labelledby="other-notes-title" hidden><h2 id="other-notes-title">Notes for other targets</h2><ul id="other-notes"></ul></section>
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
@@ -88,6 +89,10 @@
       for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(name),'',safeNote(note));
       document.getElementById('other-notes-card').hidden=!document.getElementById('other-notes').children.length;
       showEmpty('targets');
+
+      const deepTargets=read('nightjar-deep-targets-v1',[]);
+      if(Array.isArray(deepTargets))for(const id of Array.from(new Set(deepTargets.filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id)))).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
+      showEmpty('deep-targets');
 
       const places = read('nightjar-places', []);
       const placeList = Array.isArray(places) ? places.slice(0, 100) : [];

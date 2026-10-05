@@ -45,3 +45,8 @@ test('unavailable storage leaves a warning and usable retry control',()=>{
  const page=load({},true);assert.equal(page.elements.get('storage-warning').hidden,false);assert.equal(page.elements.get('targets-empty').hidden,false);assert.doesNotThrow(()=>page.elements.get('retry').listeners.get('click')());
  const invalid=load({'nightjar-observing-time':'bad date'});invalid.elements.get('retry').listeners.get('click')();assert.equal(invalid.session.size,0);
 });
+
+test('offline deep-sky lists show only distinct catalogue identifiers without making position claims',()=>{
+ const page=load({'nightjar-deep-targets-v1':['M31','M45','M31','M102','<script>','M110']});
+ assert.equal(page.elements.get('deep-targets').children.length,3);assert(page.elements.get('deep-targets').textContent.includes('M45'));assert(!page.elements.get('deep-targets').textContent.includes('<script>'));assert(page.elements.get('deep-targets').textContent.includes('Reconnect for object details and positions.'));assert.equal(page.elements.get('deep-targets-empty').hidden,true);
+});
