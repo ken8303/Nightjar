@@ -11,6 +11,7 @@ import {cameraSkyContext} from '@/lib/camera-context';
 import {watchCameraLifecycle} from '@/lib/camera-lifecycle';
 import {watchCameraOrientation} from '@/lib/camera-orientation';
 import {createCameraSession} from '@/lib/camera-session';
+import {watchCameraPlayback} from '@/lib/camera-playback';
 import {createCameraWakeLock} from '@/lib/camera-wake-lock';
 import {skyTargets,type Place} from '@/lib/sky';
 import {cameraImageFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide,type CameraBasis} from '@/lib/camera-sky';
@@ -23,7 +24,9 @@ function CameraThumbnail({name}:{name:string}){
 type Props={fullScreen:boolean;onFullScreenChange:(full:boolean)=>void;place:Place;selected:string;onSelect:(name:string)=>void;onDetails:(date:Date,place:Place)=>void};
 export default function CameraSky(props:Props){
  const [place,setPlace]=useState(props.place),[now,setNow]=useState(()=>new Date());
- const [camera,setCamera]=useState<'off'|'starting'|'on'>('off'),[cameraError,setCameraError]=useState(''),[cameraPaused,setCameraPaused]=useState(false);
+ const [camera,setCamera]=useState<'off'|'starting'|'on'>('off'),[cameraError,setCameraError]=useState(''),[trackPaused,setTrackPaused]=useState(false);
+ const [playbackPaused,setPlaybackPaused]=useState(false);
+ const cameraPaused=camera!=='off'&&(trackPaused||playbackPaused);
  const [tracking,setTracking]=useState(false),[sensor,setSensor]=useState<{basis:CameraBasis;absolute:boolean}|null>(null),[sensorError,setSensorError]=useState(''),[aligned,setAligned]=useState(false),[offset,setOffset]=useState(0);
  const [sensorQuiet,setSensorQuiet]=useState(false),[motionSession,setMotionSession]=useState(0);
  const [motionPending,setMotionPending]=useState(false),[alignmentError,setAlignmentError]=useState<{target:string;message:string}|null>(null);
@@ -66,7 +69,7 @@ export default function CameraSky(props:Props){
  function updateVideoRatio(){const video=videoRef.current;if(video?.videoWidth&&video.videoHeight)setRatio(video.videoWidth/video.videoHeight)}
  useEffect(()=>{
   const cameraSession=createCameraSession({
-   attach:stream=>{if(videoRef.current)videoRef.current.srcObject=stream},onState:setCamera,onPaused:setCameraPaused,
+   attach:stream=>{if(videoRef.current)videoRef.current.srcObject=stream},onState:setCamera,onPaused:setTrackPaused,
    onError:error=>setCameraError(cameraErrorMessage(error)),onEnded:()=>setCameraError('Camera access ended. Start the camera again to resume.'),
   });
   cameraSessionRef.current=cameraSession;
@@ -83,6 +86,7 @@ export default function CameraSky(props:Props){
   });
   return ()=>{clearInterval(clock);stopLifecycle();motionStopRef.current?.();invalidate();locationSessionRef.current=null;wakeSession.stop(false);wakeSessionRef.current=null;cameraSession.stop(false);cameraSessionRef.current=null};
  },[]);
+ useEffect(()=>{const video=videoRef.current;if(!video)return;return watchCameraPlayback(video,setPlaybackPaused)},[]);
  useEffect(()=>{
   const el=stageRef.current;if(!el)return;
   const observer=new ResizeObserver(([entry])=>setSize({width:entry.contentRect.width,height:entry.contentRect.height}));observer.observe(el);return ()=>observer.disconnect();
