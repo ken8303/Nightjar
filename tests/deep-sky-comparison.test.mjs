@@ -10,7 +10,7 @@ const place={name:'London',latitude:51.508,longitude:-.126,timezone:'Europe/Lond
 test('comparison uses the same astronomical samples, sorts highest eligible peaks first and limits computation',()=>{
  const targets=['M31','M45','M57'].map(id=>findDeepSky(id,'')[0]),rows=compareDeepSky(targets,date,place);
  assert.equal(rows.length,3);
- for(const row of rows){const reference=deepSkyWindow(row.target,date,place);assert.deepEqual(row.samples,reference);assert.deepEqual(row.best,bestDeepSkySample(reference));assert.equal(row.samples.length,97)}
+ for(const row of rows){const reference=deepSkyWindow(row.target,date,place);assert.deepEqual(row.samples.map(sample=>{const original={...sample};delete original.moonAltitude;return original}),reference);const best=bestDeepSkySample(reference);assert.equal(row.best?.altitude,best?.altitude);assert.equal(+row.best?.time,+best?.time);assert.equal(row.samples.length,97)}
  for(let i=1;i<rows.length;i++)assert((rows[i-1].best?.altitude??-Infinity)>=(rows[i].best?.altitude??-Infinity));
  assert.throws(()=>compareDeepSky(Array(7).fill(targets[0]),date,place));assert.deepEqual(compareDeepSky([],date,place),[]);
  assert(compareDeepSky(targets,new Date('2026-06-21T12:00Z'),{name:'North pole',latitude:89,longitude:0}).every(row=>!row.best&&row.minutes===0));
