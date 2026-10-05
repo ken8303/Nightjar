@@ -1,5 +1,5 @@
 import {stars} from '@/lib/sky';
-export type ObjectPhoto={src:string;alt:string;caption:string;credit:string;source:string;survey?:boolean};
+export type ObjectPhoto={src:string;alt:string;caption:string;credit:string;source:string;survey?:boolean;title?:string};
 const nasa=(path:string)=>`https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/${path}?fit=clip&w=800&h=800`;
 const planets:Record<string,ObjectPhoto>={
  Moon:{src:nasa('pia00/pia00405/PIA00405.jpg'),alt:'Earth’s Moon photographed by Galileo',caption:'Galileo, 1992 · enhanced-colour reference image; does not match the selected lunar phase.',credit:'NASA/JPL/USGS',source:'https://science.nasa.gov/photojournal/earths-moon/'},
@@ -12,6 +12,9 @@ function sexagesimal(value:number,signed=false){const total=Math.round(Math.abs(
 export function objectPhoto(name:string):ObjectPhoto|undefined{
  if(Object.hasOwn(planets,name))return planets[name];
  const star=stars.find(item=>item[0]===name);if(!star)return;
- const params=new URLSearchParams({v:'poss2ukstu_red',r:sexagesimal(star[1]),d:sexagesimal(star[2],true),e:'J2000',h:'15',w:'15',f:'gif',c:'none'});
- return{src:`https://archive.stsci.edu/cgi-bin/dss_search?${params}`,alt:`Photographic sky-survey field centred on the catalogue position of ${name}`,caption:'Archival red-band photographic field, 15 × 15 arcminutes. Bright stars may saturate; this is a sky field, not a resolved stellar surface or a live view.',credit:'Digitized Sky Survey / STScI · survey plates: Caltech, AAO, UK SERC/PPARC; digitisation: AURA',source:'https://archive.stsci.edu/dss/copyright.html',survey:true};
+ return skySurveyPhoto(name,star[1],star[2]);
+}
+export function skySurveyPhoto(name:string,ra:number,dec:number,field=15):ObjectPhoto{
+ const params=new URLSearchParams({v:'poss2ukstu_red',r:sexagesimal(ra),d:sexagesimal(dec,true),e:'J2000',h:String(field),w:String(field),f:'gif',c:'none'});
+ return{src:`https://archive.stsci.edu/cgi-bin/dss_search?${params}`,alt:`Photographic sky-survey field centred on the catalogue position of ${name}`,caption:`Archival red-band photographic field, ${field} × ${field} arcminutes. Bright stars may saturate; this is a sky field, not a resolved stellar surface or a live view.`,credit:'Digitized Sky Survey / STScI · survey plates: Caltech, AAO, UK SERC/PPARC; digitisation: AURA',source:'https://archive.stsci.edu/dss/copyright.html',survey:true};
 }

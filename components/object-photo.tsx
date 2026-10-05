@@ -16,10 +16,10 @@ function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
  </div>;
 }
 function PhotoCaption({photo}:{photo:Photo}){
- return <><strong>{photo.survey?'Photographic star field':'Spacecraft reference photo'}</strong><p>{photo.caption}</p><p>{photo.credit} · <a href={photo.source} target="_blank" rel="noreferrer">Image source ↗</a></p><small>Reference imagery does not represent today’s appearance, apparent size, or visibility. Internet access is required.</small></>;
+ return <><strong>{photo.title||(photo.survey?'Photographic star field':'Spacecraft reference photo')}</strong><p>{photo.caption}</p><p>{photo.credit} · <a href={photo.source} target="_blank" rel="noreferrer">Image source ↗</a></p><small>Reference imagery does not represent today’s appearance, apparent size, or visibility. Internet access is required.</small></>;
 }
-export default function ObjectPhoto({name}:{name:string}){
- const photo=objectPhoto(name),[zoom,setZoom]=useState(1);
+export default function ObjectPhoto({name,reference}:{name:string;reference?:Photo}){
+ const photo=reference??objectPhoto(name),[zoom,setZoom]=useState(1);
  if(!photo)return null;
  return <figure className="object-photo">
   <PhotoImage photo={photo}/>

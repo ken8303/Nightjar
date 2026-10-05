@@ -32,3 +32,22 @@ test('best-time recommendation honours darkness, strict altitude threshold and h
  for(let m=0;m<=1440;m+=15){const d=new Date(+date+m*60000);if(bodyPosition(A.Body.Sun,d,place).altitude<=-18)assert(deepSkyPosition(target,d,place).altitude<=best.altitude+1e-9)}
  assert.equal(bestDeepSkyTime(target,new Date('2026-06-21T12:00:00Z'),{name:'North pole',latitude:89,longitude:0}),null);
 });
+test('deep-sky survey images use source J2000 coordinates and label cropped large targets',async()=>{
+ const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const m31=deepSkyPhoto(findDeepSky('M31','')[0]),url=new URL(m31.src);
+ assert.equal(url.searchParams.get('r'),'0:42:44');assert.equal(url.searchParams.get('d'),'+41:16:09');assert.equal(url.searchParams.get('e'),'J2000');
+ assert.equal(url.searchParams.get('w'),'60');assert.equal(url.searchParams.get('h'),'60');assert.match(m31.caption,/extends beyond/);assert(m31.credit.includes('STScI'));
+ const compact=deepSkyPhoto(findDeepSky('M57','')[0]);assert.equal(new URL(compact.src).searchParams.get('w'),'15');assert(!compact.caption.includes('extends beyond'));
+ for(const target of messierCatalogue){const photo=deepSkyPhoto(target);const size=Number(new URL(photo.src).searchParams.get('w'));assert(size>=15&&size<=60)}
+});
+test('altitude timeline preserves UTC spacing through the repeated London clock-change hour',async()=>{
+ const {deepSkyWindow,bestDeepSkySample}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const start=new Date('2026-10-25T00:00:00Z'),samples=deepSkyWindow(findDeepSky('M31','')[0],start,place);
+ assert.equal(samples.length,97);assert.equal(+samples.at(-1).time-+samples[0].time,86400000);
+ for(let i=1;i<samples.length;i++)assert.equal(+samples[i].time-+samples[i-1].time,900000);
+ const format=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London',timeZoneName:'shortOffset'});
+ assert.notEqual(format.format(samples[0].time),format.format(samples[4].time));
+ assert.equal(bestDeepSkySample([{...samples[0],sun:-18,altitude:30}]),null);
+ assert.equal(bestDeepSkySample([{...samples[0],sun:-17.99,altitude:70}]),null);
+ assert.equal(bestDeepSkySample([{...samples[0],sun:-18,altitude:30.01}]).altitude,30.01);
+});
