@@ -50,3 +50,9 @@ test('offline deep-sky lists show only distinct catalogue identifiers without ma
  const page=load({'nightjar-deep-targets-v1':['M31','M45','M31','M102','<script>','M110']});
  assert.equal(page.elements.get('deep-targets').children.length,3);assert(page.elements.get('deep-targets').textContent.includes('M45'));assert(!page.elements.get('deep-targets').textContent.includes('<script>'));assert(page.elements.get('deep-targets').textContent.includes('Reconnect for object details and positions.'));assert.equal(page.elements.get('deep-targets-empty').hidden,true);
 });
+
+test('offline diary renders snapshot notes as text and skips malformed observations',()=>{
+ const entry={target:'M31',observedAt:'2026-10-05T20:00:00.000Z',place:{name:'London',latitude:51.5,longitude:0},outcome:'seen',equipment:'Binoculars',notes:'Line one\n<img src=x>'};
+ const page=load({'nightjar-observing-diary-v1':[entry,{...entry,target:'M102'},{...entry,observedAt:'bad'},{...entry,place:{name:'bad',latitude:null,longitude:0}}]});
+ assert.equal(page.elements.get('diary').children.length,1);assert(page.elements.get('diary').textContent.includes('2026-10-05 20:00 UTC'));assert(page.elements.get('diary').textContent.includes('Line one\n<img src=x>'));assert.equal(page.elements.get('diary-empty').hidden,true);
+});

@@ -44,6 +44,7 @@
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
+      <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
       <section class="targets-card" id="other-notes-card" aria-labelledby="other-notes-title" hidden><h2 id="other-notes-title">Notes for other targets</h2><ul id="other-notes"></ul></section>
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
@@ -93,6 +94,13 @@
       const deepTargets=read('nightjar-deep-targets-v1',[]);
       if(Array.isArray(deepTargets))for(const id of Array.from(new Set(deepTargets.filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id)))).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
       showEmpty('deep-targets');
+
+      const diary=read('nightjar-observing-diary-v1',[]);
+      if(Array.isArray(diary))for(const entry of diary.slice(0,200).filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&typeof entry.observedAt==='string'&&Number.isFinite(+new Date(entry.observedAt))&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180)).sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
+        const outcome={'seen':'Seen','not-seen':'Not seen','imaged':'Imaged'}[entry.outcome];
+        add('diary',entry.target+' · '+outcome,new Date(entry.observedAt).toISOString().slice(0,16).replace('T',' ')+' UTC · '+safeText(entry.place.name)+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
+      }
+      showEmpty('diary');
 
       const places = read('nightjar-places', []);
       const placeList = Array.isArray(places) ? places.slice(0, 100) : [];
