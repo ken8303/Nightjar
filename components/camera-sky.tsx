@@ -17,8 +17,8 @@ import {skyTargets,type Place} from '@/lib/sky';
 import {cameraImageFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide,type CameraBasis} from '@/lib/camera-sky';
 
 function CameraThumbnail({name}:{name:string}){
- const photo=objectPhoto(name),[failed,setFailed]=useState(false);
- return <span className="camera-sky-thumbnail" aria-hidden="true">{photo&&!failed?<Image unoptimized src={photo.src} alt="" width={36} height={36} referrerPolicy="no-referrer" onError={()=>setFailed(true)}/>:<Star size={20}/>}</span>;
+ const photo=objectPhoto(name),[status,setStatus]=useState<'loading'|'loaded'|'failed'>('loading');
+ return <span className="camera-sky-thumbnail" aria-hidden="true">{(!photo||status!=='loaded')&&<Star size={20}/>} {photo&&status!=='failed'&&<Image unoptimized src={photo.src} alt="" width={36} height={36} referrerPolicy="no-referrer" className={status==='loaded'?'camera-sky-thumbnail-loaded':'camera-sky-thumbnail-loading'} onLoad={()=>setStatus('loaded')} onError={()=>setStatus('failed')}/>}</span>;
 }
 
 type Props={fullScreen:boolean;onFullScreenChange:(full:boolean)=>void;place:Place;selected:string;onSelect:(name:string)=>void;onDetails:(date:Date,place:Place)=>void};
