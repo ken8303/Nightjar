@@ -9,7 +9,8 @@
     "dec": 22.01447222222222,
     "magnitude": 8.4,
     "major": 8.0,
-    "minor": 4.0
+    "minor": 4.0,
+    "positionAngle": null
   },
   {
     "id": "M2",
@@ -21,7 +22,8 @@
     "dec": -0.8233055555555555,
     "magnitude": 6.25,
     "major": 8.4,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M3",
@@ -33,7 +35,8 @@
     "dec": 28.375444444444444,
     "magnitude": 6.39,
     "major": 16.2,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M4",
@@ -45,7 +48,8 @@
     "dec": -26.52552777777778,
     "magnitude": 5.4,
     "major": 28.2,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M5",
@@ -57,7 +61,8 @@
     "dec": 2.082694444444445,
     "magnitude": 5.95,
     "major": 15.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M6",
@@ -69,7 +74,8 @@
     "dec": -32.25416666666667,
     "magnitude": 4.2,
     "major": 15.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M7",
@@ -81,7 +87,8 @@
     "dec": -34.792833333333334,
     "magnitude": 3.3,
     "major": 22.2,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M8",
@@ -93,7 +100,8 @@
     "dec": -24.380166666666668,
     "magnitude": 5.8,
     "major": 45.0,
-    "minor": 30.0
+    "minor": 30.0,
+    "positionAngle": null
   },
   {
     "id": "M9",
@@ -105,7 +113,8 @@
     "dec": -18.51625,
     "magnitude": 8.42,
     "major": 6.9,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M10",
@@ -117,7 +126,8 @@
     "dec": -4.099333333333333,
     "magnitude": 4.98,
     "major": 9.3,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M11",
@@ -129,7 +139,8 @@
     "dec": -6.270027777777778,
     "magnitude": 5.8,
     "major": 9.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M12",
@@ -141,7 +152,8 @@
     "dec": -1.9478333333333333,
     "magnitude": 6.07,
     "major": 11.1,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M13",
@@ -153,7 +165,8 @@
     "dec": 36.46130555555556,
     "magnitude": 5.8,
     "major": 16.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M14",
@@ -165,7 +178,8 @@
     "dec": -3.2459166666666666,
     "magnitude": 5.73,
     "major": 9.9,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M15",
@@ -177,7 +191,8 @@
     "dec": 12.166833333333333,
     "magnitude": 6.3,
     "major": 11.1,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M16",
@@ -189,7 +204,8 @@
     "dec": -13.807222222222222,
     "magnitude": 6.0,
     "major": 120.0,
-    "minor": 25.0
+    "minor": 25.0,
+    "positionAngle": null
   },
   {
     "id": "M17",
@@ -201,7 +217,8 @@
     "dec": -16.17152777777778,
     "magnitude": 7.0,
     "major": 12.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M18",
@@ -213,7 +230,8 @@
     "dec": -17.101972222222223,
     "magnitude": 6.9,
     "major": 6.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M19",
@@ -225,7 +243,8 @@
     "dec": -26.267944444444442,
     "magnitude": 5.57,
     "major": 7.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M20",
@@ -237,7 +256,8 @@
     "dec": -22.971888888888888,
     "magnitude": 8.5,
     "major": 28.0,
-    "minor": 28.0
+    "minor": 28.0,
+    "positionAngle": null
   },
   {
     "id": "M21",
@@ -249,7 +269,8 @@
     "dec": -22.490055555555557,
     "magnitude": 5.9,
     "major": 6.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M22",
@@ -261,7 +282,8 @@
     "dec": -23.903416666666665,
     "magnitude": 6.17,
     "major": 12.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M23",
@@ -273,7 +295,8 @@
     "dec": -18.985333333333333,
     "magnitude": 5.5,
     "major": 16.8,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M24",
@@ -285,7 +308,8 @@
     "dec": -18.514555555555557,
     "magnitude": 4.5,
     "major": 120.0,
-    "minor": 60.0
+    "minor": 60.0,
+    "positionAngle": 90.0
   },
   {
     "id": "M25",
@@ -297,7 +321,8 @@
     "dec": -19.114944444444447,
     "magnitude": 4.6,
     "major": 14.1,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M26",
@@ -309,7 +334,8 @@
     "dec": -9.38361111111111,
     "magnitude": 8.87,
     "major": 6.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M27",
@@ -321,7 +347,8 @@
     "dec": 22.721027777777778,
     "magnitude": 7.4,
     "major": 6.7,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M28",
@@ -333,7 +360,8 @@
     "dec": -24.869833333333332,
     "magnitude": 6.9,
     "major": 5.1,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M29",
@@ -345,7 +373,8 @@
     "dec": 38.507666666666665,
     "magnitude": 6.6,
     "major": 3.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M30",
@@ -357,7 +386,8 @@
     "dec": -23.179083333333335,
     "magnitude": 7.1,
     "major": 9.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M31",
@@ -369,7 +399,8 @@
     "dec": 41.26905555555555,
     "magnitude": 3.44,
     "major": 177.83,
-    "minor": 69.66
+    "minor": 69.66,
+    "positionAngle": 35.0
   },
   {
     "id": "M32",
@@ -381,7 +412,8 @@
     "dec": 40.86527777777778,
     "magnitude": 8.13,
     "major": 7.74,
-    "minor": 4.86
+    "minor": 4.86,
+    "positionAngle": 170.0
   },
   {
     "id": "M33",
@@ -393,7 +425,8 @@
     "dec": 30.66022222222222,
     "magnitude": 5.79,
     "major": 62.09,
-    "minor": 36.73
+    "minor": 36.73,
+    "positionAngle": 23.0
   },
   {
     "id": "M34",
@@ -405,7 +438,8 @@
     "dec": 42.74613888888889,
     "magnitude": 5.2,
     "major": 22.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M35",
@@ -417,7 +451,8 @@
     "dec": 24.338638888888887,
     "magnitude": 5.1,
     "major": 24.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M36",
@@ -429,7 +464,8 @@
     "dec": 34.14075,
     "magnitude": 6.0,
     "major": 7.2,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M37",
@@ -441,7 +477,8 @@
     "dec": 32.553,
     "magnitude": 5.6,
     "major": 11.4,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M38",
@@ -453,7 +490,8 @@
     "dec": 35.85491666666667,
     "magnitude": 6.4,
     "major": 9.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M39",
@@ -465,7 +503,8 @@
     "dec": 48.43816666666666,
     "magnitude": 4.6,
     "major": 19.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M40",
@@ -477,7 +516,8 @@
     "dec": 58.08444444444444,
     "magnitude": 8.0,
     "major": null,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M41",
@@ -489,7 +529,8 @@
     "dec": -20.75422222222222,
     "magnitude": 4.5,
     "major": 12.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M42",
@@ -501,7 +542,8 @@
     "dec": -5.389666666666667,
     "magnitude": 4.0,
     "major": 90.0,
-    "minor": 60.0
+    "minor": 60.0,
+    "positionAngle": null
   },
   {
     "id": "M43",
@@ -513,7 +555,8 @@
     "dec": -5.2674722222222226,
     "magnitude": 9.0,
     "major": 20.0,
-    "minor": 15.0
+    "minor": 15.0,
+    "positionAngle": null
   },
   {
     "id": "M44",
@@ -525,7 +568,8 @@
     "dec": 19.672055555555556,
     "magnitude": 3.1,
     "major": 108.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M45",
@@ -537,7 +581,8 @@
     "dec": 24.10527777777778,
     "magnitude": 1.2,
     "major": 150.0,
-    "minor": 150.0
+    "minor": 150.0,
+    "positionAngle": 90.0
   },
   {
     "id": "M46",
@@ -549,7 +594,8 @@
     "dec": -14.81,
     "magnitude": 6.1,
     "major": 21.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M47",
@@ -561,7 +607,8 @@
     "dec": -14.482611111111112,
     "magnitude": 4.4,
     "major": 19.8,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M48",
@@ -573,7 +620,8 @@
     "dec": -5.750444444444445,
     "magnitude": 5.8,
     "major": 28.2,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M49",
@@ -585,7 +633,8 @@
     "dec": 8.000472222222223,
     "magnitude": 8.28,
     "major": 10.21,
-    "minor": 8.38
+    "minor": 8.38,
+    "positionAngle": 156.0
   },
   {
     "id": "M50",
@@ -597,7 +646,8 @@
     "dec": -8.364027777777778,
     "magnitude": 5.9,
     "major": 14.1,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M51",
@@ -609,7 +659,8 @@
     "dec": 47.195166666666665,
     "magnitude": 8.36,
     "major": 13.71,
-    "minor": 11.67
+    "minor": 11.67,
+    "positionAngle": 163.0
   },
   {
     "id": "M52",
@@ -621,7 +672,8 @@
     "dec": 61.59316666666667,
     "magnitude": 6.9,
     "major": 9.9,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M53",
@@ -633,7 +685,8 @@
     "dec": 18.16911111111111,
     "magnitude": 7.79,
     "major": 9.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M54",
@@ -645,7 +698,8 @@
     "dec": -30.478499999999997,
     "magnitude": 7.7,
     "major": 5.1,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M55",
@@ -657,7 +711,8 @@
     "dec": -30.962083333333332,
     "magnitude": 6.49,
     "major": 12.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M56",
@@ -669,7 +724,8 @@
     "dec": 30.1845,
     "magnitude": 8.4,
     "major": 5.8,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M57",
@@ -681,7 +737,8 @@
     "dec": 33.02858333333333,
     "magnitude": 8.8,
     "major": 1.27,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M58",
@@ -693,7 +750,8 @@
     "dec": 11.818194444444444,
     "magnitude": 10.3,
     "major": 5.01,
-    "minor": 3.84
+    "minor": 3.84,
+    "positionAngle": 90.0
   },
   {
     "id": "M59",
@@ -705,7 +763,8 @@
     "dec": 11.647027777777778,
     "magnitude": 9.56,
     "major": 4.55,
-    "minor": 3.21
+    "minor": 3.21,
+    "positionAngle": 165.0
   },
   {
     "id": "M60",
@@ -717,7 +776,8 @@
     "dec": 11.552694444444445,
     "magnitude": 8.79,
     "major": 6.78,
-    "minor": 5.45
+    "minor": 5.45,
+    "positionAngle": 105.0
   },
   {
     "id": "M61",
@@ -729,7 +789,8 @@
     "dec": 4.473638888888889,
     "magnitude": 10.25,
     "major": 6.89,
-    "minor": 6.56
+    "minor": 6.56,
+    "positionAngle": 20.0
   },
   {
     "id": "M62",
@@ -741,7 +802,8 @@
     "dec": -30.112361111111113,
     "magnitude": 7.39,
     "major": 7.8,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M63",
@@ -753,7 +815,8 @@
     "dec": 42.02927777777778,
     "magnitude": 8.61,
     "major": 11.83,
-    "minor": 7.16
+    "minor": 7.16,
+    "positionAngle": 103.0
   },
   {
     "id": "M64",
@@ -765,7 +828,8 @@
     "dec": 21.682972222222222,
     "magnitude": 8.52,
     "major": 10.52,
-    "minor": 5.33
+    "minor": 5.33,
+    "positionAngle": 114.0
   },
   {
     "id": "M65",
@@ -777,7 +841,8 @@
     "dec": 13.092361111111112,
     "magnitude": 9.32,
     "major": 7.64,
-    "minor": 1.97
+    "minor": 1.97,
+    "positionAngle": 173.0
   },
   {
     "id": "M66",
@@ -789,7 +854,8 @@
     "dec": 12.991527777777778,
     "magnitude": 8.92,
     "major": 10.28,
-    "minor": 4.61
+    "minor": 4.61,
+    "positionAngle": 168.0
   },
   {
     "id": "M67",
@@ -801,7 +867,8 @@
     "dec": 11.811944444444444,
     "magnitude": 6.9,
     "major": 33.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M68",
@@ -813,7 +880,8 @@
     "dec": -26.74302777777778,
     "magnitude": 7.96,
     "major": 6.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M69",
@@ -825,7 +893,8 @@
     "dec": -32.347972222222225,
     "magnitude": 8.31,
     "major": 5.7,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M70",
@@ -837,7 +906,8 @@
     "dec": -32.291888888888884,
     "magnitude": 9.06,
     "major": 6.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M71",
@@ -849,7 +919,8 @@
     "dec": 18.778388888888887,
     "magnitude": 6.1,
     "major": 6.9,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M72",
@@ -861,7 +932,8 @@
     "dec": -12.537055555555556,
     "magnitude": 8.96,
     "major": 4.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M73",
@@ -873,7 +945,8 @@
     "dec": -12.6355,
     "magnitude": 8.9,
     "major": null,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M74",
@@ -885,7 +958,8 @@
     "dec": 15.783666666666667,
     "magnitude": 9.31,
     "major": 9.89,
-    "minor": 9.33
+    "minor": 9.33,
+    "positionAngle": 87.0
   },
   {
     "id": "M75",
@@ -897,7 +971,8 @@
     "dec": -21.922222222222224,
     "magnitude": 8.26,
     "major": 3.6,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M76",
@@ -909,7 +984,8 @@
     "dec": 51.575472222222224,
     "magnitude": 10.1,
     "major": 1.12,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M77",
@@ -921,7 +997,8 @@
     "dec": -0.013277777777777777,
     "magnitude": 9.29,
     "major": 6.11,
-    "minor": 5.61
+    "minor": 5.61,
+    "positionAngle": 12.0
   },
   {
     "id": "M78",
@@ -933,7 +1010,8 @@
     "dec": 0.07930555555555556,
     "magnitude": 8.0,
     "major": 4.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M79",
@@ -945,7 +1023,8 @@
     "dec": -24.52422222222222,
     "magnitude": 8.16,
     "major": 7.2,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M80",
@@ -957,7 +1036,8 @@
     "dec": -22.975111111111108,
     "magnitude": 7.3,
     "major": 5.7,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M81",
@@ -969,7 +1049,8 @@
     "dec": 69.06530555555555,
     "magnitude": 6.92,
     "major": 21.63,
-    "minor": 11.25
+    "minor": 11.25,
+    "positionAngle": 157.0
   },
   {
     "id": "M82",
@@ -981,7 +1062,8 @@
     "dec": 69.6793888888889,
     "magnitude": 8.3,
     "major": 10.99,
-    "minor": 5.11
+    "minor": 5.11,
+    "positionAngle": 66.0
   },
   {
     "id": "M83",
@@ -993,7 +1075,8 @@
     "dec": -29.86541666666667,
     "magnitude": 7.21,
     "major": 13.61,
-    "minor": 13.21
+    "minor": 13.21,
+    "positionAngle": 45.0
   },
   {
     "id": "M84",
@@ -1005,7 +1088,8 @@
     "dec": 12.886972222222221,
     "magnitude": 9.79,
     "major": 7.41,
-    "minor": 6.44
+    "minor": 6.44,
+    "positionAngle": 133.0
   },
   {
     "id": "M85",
@@ -1017,7 +1101,8 @@
     "dec": 18.1915,
     "magnitude": 9.05,
     "major": 6.95,
-    "minor": 5.35
+    "minor": 5.35,
+    "positionAngle": 12.0
   },
   {
     "id": "M86",
@@ -1029,7 +1114,8 @@
     "dec": 12.946222222222222,
     "magnitude": 8.86,
     "major": 11.53,
-    "minor": 8.43
+    "minor": 8.43,
+    "positionAngle": 128.0
   },
   {
     "id": "M87",
@@ -1041,7 +1127,8 @@
     "dec": 12.39111111111111,
     "magnitude": 9.0,
     "major": 7.11,
-    "minor": 6.67
+    "minor": 6.67,
+    "positionAngle": 153.0
   },
   {
     "id": "M88",
@@ -1053,7 +1140,8 @@
     "dec": 14.420388888888889,
     "magnitude": 10.33,
     "major": 8.65,
-    "minor": 4.38
+    "minor": 4.38,
+    "positionAngle": 138.0
   },
   {
     "id": "M89",
@@ -1065,7 +1153,8 @@
     "dec": 12.556333333333335,
     "magnitude": 10.08,
     "major": 8.13,
-    "minor": 8.0
+    "minor": 8.0,
+    "positionAngle": 150.0
   },
   {
     "id": "M90",
@@ -1077,7 +1166,8 @@
     "dec": 13.162944444444445,
     "magnitude": 9.54,
     "major": 9.12,
-    "minor": 3.82
+    "minor": 3.82,
+    "positionAngle": 22.0
   },
   {
     "id": "M91",
@@ -1089,7 +1179,8 @@
     "dec": 14.496333333333332,
     "magnitude": 10.96,
     "major": 5.55,
-    "minor": 4.52
+    "minor": 4.52,
+    "positionAngle": 150.0
   },
   {
     "id": "M92",
@@ -1101,7 +1192,8 @@
     "dec": 43.13652777777778,
     "magnitude": 6.52,
     "major": 14.4,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M93",
@@ -1113,7 +1205,8 @@
     "dec": -23.853083333333334,
     "magnitude": 6.2,
     "major": 15.0,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M94",
@@ -1125,7 +1218,8 @@
     "dec": 41.120444444444445,
     "magnitude": 8.24,
     "major": 7.74,
-    "minor": 6.68
+    "minor": 6.68,
+    "positionAngle": 105.0
   },
   {
     "id": "M95",
@@ -1137,7 +1231,8 @@
     "dec": 11.703805555555554,
     "magnitude": 9.77,
     "major": 7.23,
-    "minor": 4.45
+    "minor": 4.45,
+    "positionAngle": 11.0
   },
   {
     "id": "M96",
@@ -1149,7 +1244,8 @@
     "dec": 11.819944444444443,
     "magnitude": 9.21,
     "major": 8.26,
-    "minor": 5.51
+    "minor": 5.51,
+    "positionAngle": 5.0
   },
   {
     "id": "M97",
@@ -1161,7 +1257,8 @@
     "dec": 55.01902777777778,
     "magnitude": 9.9,
     "major": 3.58,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M98",
@@ -1173,7 +1270,8 @@
     "dec": 14.900333333333334,
     "magnitude": 10.84,
     "major": 11.04,
-    "minor": 2.66
+    "minor": 2.66,
+    "positionAngle": 152.0
   },
   {
     "id": "M99",
@@ -1185,7 +1283,8 @@
     "dec": 14.416500000000001,
     "magnitude": 9.84,
     "major": 5.04,
-    "minor": 4.74
+    "minor": 4.74,
+    "positionAngle": 23.0
   },
   {
     "id": "M100",
@@ -1197,7 +1296,8 @@
     "dec": 15.821805555555555,
     "magnitude": 9.47,
     "major": 6.1,
-    "minor": 5.62
+    "minor": 5.62,
+    "positionAngle": 108.0
   },
   {
     "id": "M101",
@@ -1209,7 +1309,8 @@
     "dec": 54.34894444444445,
     "magnitude": 7.9,
     "major": 23.99,
-    "minor": 23.07
+    "minor": 23.07,
+    "positionAngle": 28.0
   },
   {
     "id": "M103",
@@ -1221,7 +1322,8 @@
     "dec": 60.658,
     "magnitude": 7.4,
     "major": 4.5,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M104",
@@ -1233,7 +1335,8 @@
     "dec": -11.623055555555556,
     "magnitude": 8.59,
     "major": 8.45,
-    "minor": 4.91
+    "minor": 4.91,
+    "positionAngle": 90.0
   },
   {
     "id": "M105",
@@ -1245,7 +1348,8 @@
     "dec": 12.58161111111111,
     "magnitude": 9.27,
     "major": 4.89,
-    "minor": 4.25
+    "minor": 4.25,
+    "positionAngle": 71.0
   },
   {
     "id": "M106",
@@ -1257,7 +1361,8 @@
     "dec": 47.30397222222222,
     "magnitude": 9.29,
     "major": 16.98,
-    "minor": 7.24
+    "minor": 7.24,
+    "positionAngle": 150.0
   },
   {
     "id": "M107",
@@ -1269,7 +1374,8 @@
     "dec": -13.053638888888889,
     "magnitude": 8.85,
     "major": 7.8,
-    "minor": null
+    "minor": null,
+    "positionAngle": null
   },
   {
     "id": "M108",
@@ -1281,7 +1387,8 @@
     "dec": 55.67411111111111,
     "magnitude": 10.05,
     "major": 3.98,
-    "minor": 1.66
+    "minor": 1.66,
+    "positionAngle": 79.0
   },
   {
     "id": "M109",
@@ -1293,7 +1400,8 @@
     "dec": 53.37452777777778,
     "magnitude": 9.88,
     "major": 8.07,
-    "minor": 5.64
+    "minor": 5.64,
+    "positionAngle": 78.0
   },
   {
     "id": "M110",
@@ -1305,6 +1413,7 @@
     "dec": 41.68530555555555,
     "magnitude": 8.15,
     "major": 16.22,
-    "minor": 9.59
+    "minor": 9.59,
+    "positionAngle": 170.0
   }
 ]
