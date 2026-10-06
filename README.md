@@ -22,6 +22,14 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Compare up to four saved/current locations at the same UTC forecast hour, with weather, Moon visibility and an explained planning score. Each site also shows its best remaining dark forecast window and can open the Tonight planner at that site and time.
 - Upcoming lunar eclipses with global contact times and local Moon altitude at each contact, plus UTC-safe calendar downloads containing the full event and contact notes.
 - A feature-detected WebMCP location tool.
+- Interactive 3D bright-sky atlas and optional camera overlay with predicted labels, thumbnails, manual alignment and full-screen controls. Camera alignment still requires real-phone verification.
+- A 109-object Messier explorer with archival reference fields, precessed coordinates, 24-hour altitude planning and imaging handoff.
+- Saved deep-sky shortlists, six-object observing-window comparisons and Moon-down filtering.
+- An observing diary with recoverable unfinished forms, search/result/UTC date filters, printable reports and CSV downloads.
+- Versioned saved-plan backups, legacy-file import and a PWA fallback that displays local saved records after network/server failures.
+- Local release verification and GitHub checks; deployment preparation is documented in [CLOUDFLARE.md](./CLOUDFLARE.md).
+
+For current release gates and phone checks, see [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
 ## Run locally
 
@@ -40,7 +48,7 @@ Weather and place search are fetched server-side from Open-Meteo; no API key is 
 
 The planning score is a transparent heuristic, not astronomical seeing or transparency. There is no terrain horizon correction. The star catalogue is a small bright-star selection with approximate fixed coordinates; this is not a navigation instrument. Meteor peaks are typical annual dates, not year-specific forecasts. The annual calendar links to IMO for detailed current bulletins.
 
-Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), AR, full deep-sky catalogue, sky-photo recognition, full-sky framing overlays, cloud accounts and push notifications.
+Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), automatic camera-lens calibration, full deep-sky catalogue, sky-photo recognition, full-sky framing overlays, cloud accounts and push notifications.
 
 ## Sources
 
@@ -282,3 +290,6 @@ Reference-photo recovery: a photo visible in the viewport for 15 seconds without
 Validation: all 168 tests, type checking, lint and production build pass. Three new tests cover visible/hidden timer behavior, one-shot delay offers, observer fallback, unmount cancellation and queued callbacks after disposal. Browser QA used the real photo component through an isolated loopback proxy replacing only DSS request URLs with labelled test fixtures. A 28-second image response showed the delay message at 15 seconds and later completed without retry. A failed response showed retry, and changing the fixture to success loaded the image after retry. Mobile 390 × 844 and small-phone 320 × 568 checks confirmed readable messages and accessible controls/source links without document overflow; the small enlarged-viewer recovery canvas used the full 269-pixel available width. The fixture's successful image was a one-pixel GIF, so no astronomical-image authenticity or real provider performance is claimed. Test worker/cache registrations and servers were cleaned up. Physical-phone photo downloads and old-browser CSS fallbacks remain device checks.
 
 Weather API coordinate validation: blank and whitespace-only query values no longer become numeric zero. Requests now require valid finite decimal/scientific coordinate values within latitude ±90° and longitude ±180°, while preserving legitimate zero and boundary values. Missing, malformed, hexadecimal and out-of-range coordinates return 400 before contacting Open-Meteo. Three route/parser tests verify rejected requests make no provider call and valid zero coordinates preserve the existing response/cache contract. All 171 tests, type checking, lint and production build pass. The generated TypeScript incremental cache is now ignored and removed from version control while remaining available locally, preventing routine checks from dirtying the checkout.
+
+
+Observing-time input boundaries: invalid zones and incomplete/invalid dates now return no candidate rather than raising an input-handler exception. Years are padded for the form, year zero is rejected, and offset samples crossing the four-digit year range are ignored instead of creating Invalid Date values. Four new tests cover UTC/quarter-hour zones, London spring gaps/autumn repeated hours, four-digit year boundaries and invalid input/zone handling. All 175 tests, type checking, lint and production build pass. These parser checks do not extend the astronomy model's physical accuracy to arbitrary historical or far-future dates.
