@@ -12,6 +12,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - The actual service worker recovered from server errors and stalled navigation on an isolated browser test origin.
 - The actual app recovered from delayed town search and photo responses using isolated local test fixtures.
 - Relevant UI flows were checked at desktop, 390-pixel mobile and 320-pixel compact widths. This is not a claim that every screen was tested at every width.
+- The latest built-app smoke check confirmed update-and-reload recovery, retained saved targets/diary records, mobile tab navigation and compact photo-tool/atlas layouts without horizontal page overflow. Camera manual target centring, thumbnail display, full-screen entry/exit and closing were checked at 320 × 568; no camera or motion permission was requested.
 
 ## After the next GitHub Desktop push
 
