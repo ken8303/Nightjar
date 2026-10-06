@@ -48,3 +48,6 @@ next-env.d.ts
 # Local Cloudflare secrets
 .dev.vars
 .dev.vars.*
+
+# Generated TypeScript incremental cache
+*.tsbuildinfo
