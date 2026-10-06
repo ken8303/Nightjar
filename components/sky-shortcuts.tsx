@@ -12,13 +12,16 @@ export default function SkyShortcuts({onCamera}:{onCamera:(launcher:HTMLButtonEl
   if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
   pending.current?.();pending.current=null;setStatus('');
   if(document.getElementById(id))return;
-  event.preventDefault();setStatus(`Waiting for ${label.toLowerCase()} to load…`);
+  event.preventDefault();const launcher=event.currentTarget;setStatus(`Waiting for ${label.toLowerCase()} to load…`);
   const observer=new MutationObserver(find);
   const timeout=setTimeout(()=>{stop();setStatus(`${label} has not loaded. Check your connection and try the shortcut again, or use the section's reload control.`)},15000);
   function stop(){observer.disconnect();clearTimeout(timeout);pending.current=null}
   function find(){
    const section=document.getElementById(id);if(!section)return;
-   stop();setStatus('');history.pushState(null,'',`#${id}`);
+   stop();setStatus('');
+   // A later action takes priority over the earlier deferred jump.
+   if(document.activeElement!==launcher)return;
+   history.pushState(history.state,'',`#${id}`);
    section.focus({preventScroll:true});section.scrollIntoView({block:'start',behavior:'instant'});
   }
   pending.current=stop;observer.observe(document.getElementById('main-content')??document.body,{childList:true,subtree:true});find();
