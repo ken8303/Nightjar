@@ -24,12 +24,12 @@ export default function DeepSkyFinder({date,place,onDate,onFrame}:{date:Date;pla
  const [removed,setRemoved]=useState<{name:string}|null>(null);
  const savedHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{
-  const read=()=>{try{setSaved(readDeepSkyList(localStorage));setListStatus('')}catch{setListStatus('Saved list could not be loaded. Changes may apply to this visit only.')}setListReady(true)};
+  const read=()=>{try{setSaved(readDeepSkyList(localStorage));setListStatus('')}catch{setListStatus('Saved list could not be loaded. Changes may remain only while Sky atlas is open.')}setListReady(true)};
   read();const sync=(event:StorageEvent)=>{if(event.key===deepSkyListKey||event.key===null)read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
  },[]);
  const savedTargets=useMemo(()=>messierCatalogue.filter(target=>saved.includes(target.id)).map(target=>({...target,...deepSkyPosition(target,date,place)})).sort((a,b)=>b.altitude-a.altitude),[saved,date,place]);
- function toggleSaved(id:string){if(saved.includes(id))setRemoved({name:id});const next=saved.includes(id)?saved.filter(value=>value!==id):[...saved,id];setSaved(next);try{saveDeepSkyList(next,localStorage);setListStatus('Deep-sky list saved on this browser.')}catch{setListStatus('Changes apply to this visit only because the list could not be saved.')}}
- function undoRemoval(){if(!removed)return;if(saved.includes(removed.name)){setListStatus(`${removed.name} is already saved. Your current list was kept.`)}else{const next=[...saved,removed.name];setSaved(next);try{saveDeepSkyList(next,localStorage);setListStatus(`${removed.name} restored to your deep-sky list.`)}catch{setListStatus(`${removed.name} restored for this visit only because the list could not be saved.`)}}setRemoved(null);savedHeading.current?.focus()}
+ function toggleSaved(id:string){if(saved.includes(id))setRemoved({name:id});const next=saved.includes(id)?saved.filter(value=>value!==id):[...saved,id];setSaved(next);try{saveDeepSkyList(next,localStorage);setListStatus('Deep-sky list saved on this browser.')}catch{setListStatus('The list could not be saved. Changes remain while Sky atlas is open; leaving this tab or reloading may lose them.')}}
+ function undoRemoval(){if(!removed)return;if(saved.includes(removed.name)){setListStatus(`${removed.name} is already saved. Your current list was kept.`)}else{const next=[...saved,removed.name];setSaved(next);try{saveDeepSkyList(next,localStorage);setListStatus(`${removed.name} restored to your deep-sky list.`)}catch{setListStatus(`${removed.name} restored while Sky atlas is open. The list could not be saved; leaving this tab or reloading may lose this change.`)}}setRemoved(null);savedHeading.current?.focus()}
  function downloadPlan(){
   try{
    let equipment:Equipment[]=[],equipmentUnavailable=false;

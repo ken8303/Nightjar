@@ -83,6 +83,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 
 ## Saved data and recovery
 
+- If saving bright-target notes fails, the text remains while Sky atlas is open and a Retry saving notes button is available. Leaving the tab or reloading may lose unsaved edits; retry can save them after storage becomes available. Camera preference failures likewise apply only while that viewer remains open.
 - Saved places and equipment setups are limited to 100 each, matching backup validation. Existing entries can be updated at capacity. An addition or Undo that would exceed capacity shows a message without silently dropping records. Oversized legacy lists remain available for manual cleanup.
 - Saved places offer Undo for the latest removal until another place is removed or the page reloads. Equipment Undo lasts while Photo tools is open. Both target lists offer Undo while Sky atlas is open. Recovery preserves a record already re-saved and keeps current settings, notes and diary records.
 - Diary records and unfinished forms are separate. Drafts retain their original site/time until explicitly changed and are excluded from backups, offline listings and downloads. The app stores no cloud account data.

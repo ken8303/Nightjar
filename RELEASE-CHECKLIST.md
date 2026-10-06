@@ -16,6 +16,9 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Camera shortcuts restore launch-button focus; delayed diary navigation, 15-second timeout and retry were checked on isolated local origins. A late section load does not move focus after timeout.
 
+- An isolated browser origin was filled to its actual local-storage quota. Target-note, deep-list and camera-preference failures showed accurate temporary-state messages; freeing space and retrying saved the existing note without retyping, and reload retained it. Test data and cache registrations were removed.
+- New filters and camera manual/fullscreen/settings controls were checked at 800 × 400 landscape without document overflow. Hardware permissions were not requested.
+
 ## After the next GitHub Desktop push
 
 1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.
