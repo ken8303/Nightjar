@@ -23,7 +23,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Upcoming lunar eclipses with global contact times and local Moon altitude at each contact, plus UTC-safe calendar downloads containing the full event and contact notes.
 - A feature-detected WebMCP location tool.
 - Interactive 3D bright-sky atlas and optional camera overlay with predicted labels, thumbnails, manual alignment and full-screen controls. Camera alignment still requires real-phone verification.
-- A 109-object Messier explorer with archival reference fields, precessed coordinates, 24-hour altitude planning and imaging handoff.
+- A 109-object Messier explorer with archival reference fields, precessed coordinates, 24-hour altitude planning and imaging handoff. An optional dark-sky filter keeps only objects with a sampled altitude above 30° during full darkness in the next 24 hours, ranked by their highest qualifying altitude.
 - Saved deep-sky shortlists, six-object observing-window comparisons and Moon-down filtering.
 - An observing diary with recoverable unfinished forms, search/result/UTC date filters, printable reports and CSV downloads.
 - Versioned saved-plan backups, legacy-file import and a PWA fallback that displays local saved records after network/server failures.
@@ -94,7 +94,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 185 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 188 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 

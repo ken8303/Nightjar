@@ -33,3 +33,17 @@ export function deepSkyPhoto(target:DeepSkyObject){
  const photo=skySurveyPhoto(target.id,target.ra,target.dec,field);
  return {...photo,title:'Deep-sky survey field',caption:`Archival red-band photographic field, ${field} × ${field} arcminutes, centred on ${target.id}. ${target.major!==null&&target.major>field?'This shows the central region; the catalogue object extends beyond the frame.':'A survey reference, not a live view or a prediction of visual appearance.'}`};
 }
+
+// Share the Sun samples across the catalogue; search text does not need to
+// recalculate the same 24-hour opportunity window for each keystroke.
+export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
+ if(targets.length>109)throw Error('Plan up to 109 deep-sky targets at once.');
+ const darkTimes=Array.from({length:97},(_,index)=>new Date(+date+index*900000)).filter(time=>bodyPosition(A.Body.Sun,time,place).altitude<=-18);
+ const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();
+ for(const target of targets){
+  let best:{date:Date;altitude:number;azimuth:number}|null=null;
+  for(const time of darkTimes){const position=deepSkyPosition(target,time,place);if(position.altitude>30&&(!best||position.altitude>best.altitude))best={date:time,altitude:position.altitude,azimuth:position.azimuth}}
+  if(best)recommendations.set(target.id,best);
+ }
+ return recommendations;
+}

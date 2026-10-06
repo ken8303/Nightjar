@@ -110,3 +110,5 @@ html[data-red-light=on]::after{content:"";position:fixed;inset:0;z-index:2147483
 .place-removal-undo{display:grid;gap:8px;margin:12px 0}.place-removal-undo .button{justify-self:start;white-space:normal;overflow-wrap:anywhere;max-width:100%;min-height:44px}
 
 .sky-shortcuts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}.sky-shortcuts .button{min-height:44px;text-decoration:none;white-space:normal}.sky-shortcuts a{color:#d9e7e9}.sky-shortcuts a:focus-visible{outline:2px solid #c1df93;outline-offset:3px}#deep-sky-finder,#observing-diary{scroll-margin-top:24px}@media(max-width:420px){.sky-shortcuts{display:grid;grid-template-columns:1fr 1fr}.sky-shortcuts .button{justify-content:center;text-align:center;font-size:13px;padding:10px;min-width:0}}
+
+.deep-sky-results button>span:first-child{flex:1}.deep-sky-results button>span:last-child{max-width:48%;flex-shrink:1}
