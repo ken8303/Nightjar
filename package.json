@@ -18,7 +18,8 @@
     "test:backup": "node --test tests/planner-backup.test.mjs",
     "test:offline": "node --test tests/offline-page.test.mjs",
     "test:plan": "node --test tests/observing-plan.test.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run deploy:check"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

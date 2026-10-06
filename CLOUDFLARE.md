@@ -11,7 +11,7 @@ Create or select a Worker named **nightjar**, then connect the GitHub repository
 | Repository | `ken8303/Nightjar` |
 | Production branch | `main` |
 | Root directory | Repository root (`/`) |
-| Build command | `npm run build` |
+| Build command | `npm run verify` |
 | Deploy command | `npm run deploy` |
 | Non-production branch deploy command, if enabled | `npx wrangler versions upload --config dist/server/wrangler.json` |
 | Node version | `22.16.0` (also in `.node-version`) |
@@ -22,10 +22,10 @@ Cloudflare installs npm dependencies using the committed lockfile. The build use
 
 ```sh
 npm ci
-npm run typecheck
-npm run build
-npm run deploy:check
+npm run verify
 ```
+
+`verify` runs type checking, lint, automated tests, production build and `deploy:check` in sequence; any failed step stops it. Use it as the Workers Builds build command to validate before Cloudflare executes the deploy command. The repository GitHub Actions workflow runs the same validation on main pushes, pull requests and manual runs. GitHub validation by itself does not block an independently configured Cloudflare build; the Workers Builds build command must be `npm run verify` for that pipeline to run these checks.
 
 `deploy:check` packages without publishing. `npm run deploy` publishes an already built version and requires Cloudflare credentials; Workers Builds provides deployment authentication. Do not commit API tokens or local `.dev.vars` files.
 
