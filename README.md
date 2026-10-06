@@ -95,11 +95,11 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 194 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 195 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
-Catalogue lists, comparisons and imaging selectors use the first common name for readability. Alternate names remain searchable and appear in the object details; raw catalogue data is retained.
+Catalogue lists, comparisons and imaging selectors use the first common name for readability. Alternate names remain searchable and appear in the object details; raw catalogue data is retained. Downloaded deep-sky plans include aliases, catalogue identity and full constellation names in their notes.
 
 ## Deep-sky attribution
 

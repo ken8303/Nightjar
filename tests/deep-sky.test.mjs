@@ -72,3 +72,11 @@ test('primary display names keep aliases searchable and leave catalogue records 
  for(const name of [names.primary,...names.aliases])assert(findDeepSky(name,'').some(t=>t.id===target.id));assert.deepEqual(target,original);
  assert.equal(deepSkyName({name:'',catalogue:'NGC1234',id:'M1'}),'NGC1234');assert.equal(deepSkyName({name:'',catalogue:'',id:'M1'}),'M1');assert.deepEqual(deepSkyNames({name:' One ,Two, One,, Three ',catalogue:'',id:'M1'}),{primary:'One',aliases:['Two','Three']});
 });
+
+test('offline plan notes preserve catalogue identity and aliases alongside angular context',async()=>{
+ const {deepSkyPlanNotes}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const target=findDeepSky('M76','')[0],notes=deepSkyPlanNotes(target);
+ assert(notes.includes('Perseus (Per)'));assert(notes.includes('Catalogue: NGC0650'));assert(notes.includes('Also known as: Cork Nebula, Little Dumbbell Nebula'));assert(notes.includes('J2000: RA'));assert(notes.includes('Visual magnitude: 10.1'));
+ const {printableObservingPlan}=await vite.ssrLoadModule('/lib/observing-plan.ts');const html=printableObservingPlan({date:new Date('2026-10-06T20:00Z'),place,targets:[{name:'M76 · Barbell Nebula',altitude:45,azimuth:60}],notes:{'M76 · Barbell Nebula':notes},equipment:[]});assert(html.includes('Cork Nebula, Little Dumbbell Nebula'));assert(html.includes('Perseus (Per)'));assert(html.includes('NGC0650'));
+ const missing=deepSkyPlanNotes({...target,name:'',major:null,magnitude:null});assert(missing.includes('Visual magnitude: not listed'));assert(missing.includes('Angular major axis: not listed'));assert(!missing.includes('Also known as:'));
+});

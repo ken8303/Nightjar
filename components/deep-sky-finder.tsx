@@ -9,7 +9,7 @@ import {deepSkyMoon} from '@/lib/deep-sky-moon';
 import DeepSkyComparison from '@/components/deep-sky-comparison';
 import ObservingDiary from '@/components/observing-diary';
 import DeepSkyTimeline from '@/components/deep-sky-timeline';
-import {messierCatalogue,deepSkyName,deepSkyNames,findDeepSky,deepSkyRecommendations,deepSkyPosition,deepSkyWindow,bestDeepSkySample,deepSkyPhoto,type DeepSkyObject} from '@/lib/deep-sky';
+import {messierCatalogue,deepSkyName,deepSkyNames,deepSkyPlanNotes,findDeepSky,deepSkyRecommendations,deepSkyPosition,deepSkyWindow,bestDeepSkySample,deepSkyPhoto,type DeepSkyObject} from '@/lib/deep-sky';
 import {deepSkyListKey,readDeepSkyList,saveDeepSkyList} from '@/lib/deep-sky-list';
 import {printableObservingPlan} from '@/lib/observing-plan';
 import {validEquipment,type Equipment} from '@/lib/photography';
@@ -35,7 +35,7 @@ export default function DeepSkyFinder({date,place,onDate,onFrame}:{date:Date;pla
    let equipment:Equipment[]=[],equipmentUnavailable=false;
    try{const raw:unknown=JSON.parse(localStorage.getItem('nightjar-equipment')||'[]');if(!Array.isArray(raw))throw Error();equipment=raw.filter(validEquipment).slice(0,100)}catch{equipmentUnavailable=true}
    const targets=savedTargets.map(target=>({name:`${target.id} · ${deepSkyName(target)}`.slice(0,100),altitude:target.altitude,azimuth:target.azimuth}));
-   const notes=Object.fromEntries(savedTargets.map((target,index)=>[targets[index].name,`${target.type} · ${target.constellation}\nJ2000: RA ${target.ra.toFixed(5)} h · Dec ${target.dec.toFixed(5)}°\nVisual magnitude: ${target.magnitude??'not listed'}\nAngular major axis: ${target.major===null?'not listed':`${target.major} arcminutes`}`]));
+   const notes=Object.fromEntries(savedTargets.map((target,index)=>[targets[index].name,deepSkyPlanNotes(target)]));
    const html=printableObservingPlan({date,place,targets,notes,equipment,equipmentUnavailable,catalogueNotice:'Deep-sky data: OpenNGC by Mattia Verga and contributors, adapted under CC BY-SA 4.0. Positions are precessed from J2000 to the selected date.'});
    const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=`nightjar-deep-sky-plan-${date.toISOString().slice(0,10)}.html`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setListStatus('Deep-sky plan prepared. Open the HTML file offline, then print or save as PDF. This is a snapshot, not a backup.');
   }catch{setListStatus('The deep-sky plan could not be created. Please try again.')}
