@@ -4,6 +4,7 @@ import {skySurveyPhoto} from '@/lib/object-photos';
 import {A,observer,bodyPosition,type Place} from '@/lib/sky';
 export const messierCatalogue=catalogue;
 export type DeepSkyObject=(typeof catalogue)[number];
+export {deepSkyName,deepSkyNames} from './deep-sky-names';
 export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
  const vector=A.VectorFromSphere(new A.Spherical(target.dec,target.ra*15,1),date);
  const equator=A.EquatorFromVector(A.RotateVector(A.Rotation_EQJ_EQD(date),vector));

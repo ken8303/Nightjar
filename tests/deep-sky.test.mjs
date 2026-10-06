@@ -64,3 +64,11 @@ test('altitude timeline preserves UTC spacing through the repeated London clock-
  assert.equal(bestDeepSkySample([{...samples[0],sun:-17.99,altitude:70}]),null);
  assert.equal(bestDeepSkySample([{...samples[0],sun:-18,altitude:30.01}]).altitude,30.01);
 });
+
+test('primary display names keep aliases searchable and leave catalogue records unchanged',async()=>{
+ const {deepSkyName,deepSkyNames}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const target=findDeepSky('M76','')[0],original=structuredClone(target),names=deepSkyNames(target);
+ assert.equal(names.primary,'Barbell Nebula');assert.deepEqual(names.aliases,['Cork Nebula','Little Dumbbell Nebula']);assert.equal(deepSkyName(target),'Barbell Nebula');
+ for(const name of [names.primary,...names.aliases])assert(findDeepSky(name,'').some(t=>t.id===target.id));assert.deepEqual(target,original);
+ assert.equal(deepSkyName({name:'',catalogue:'NGC1234',id:'M1'}),'NGC1234');assert.equal(deepSkyName({name:'',catalogue:'',id:'M1'}),'M1');assert.deepEqual(deepSkyNames({name:' One ,Two, One,, Three ',catalogue:'',id:'M1'}),{primary:'One',aliases:['Two','Three']});
+});
