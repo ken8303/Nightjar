@@ -108,3 +108,5 @@ html[data-red-light=on]::after{content:"";position:fixed;inset:0;z-index:2147483
 .diary-search-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0}.diary-search-filters input,.diary-search-filters select{min-height:44px}.diary-search-filters input{font-size:16px!important}@media(max-width:600px){.diary-search-filters{grid-template-columns:1fr}}
 
 .place-removal-undo{display:grid;gap:8px;margin:12px 0}.place-removal-undo .button{justify-self:start;white-space:normal;overflow-wrap:anywhere;max-width:100%;min-height:44px}
+
+.sky-shortcuts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}.sky-shortcuts .button{min-height:44px;text-decoration:none;white-space:normal}.sky-shortcuts a{color:#d9e7e9}.sky-shortcuts a:focus-visible{outline:2px solid #c1df93;outline-offset:3px}#deep-sky-finder,#observing-diary{scroll-margin-top:24px}@media(max-width:420px){.sky-shortcuts{display:grid;grid-template-columns:1fr 1fr}.sky-shortcuts .button{justify-content:center;text-align:center;font-size:13px;padding:10px;min-width:0}}
