@@ -305,3 +305,5 @@ Sky atlas now has top-of-tab shortcuts for camera discovery, the sky chart, deep
 Atlas shortcuts wait up to 15 seconds for a deferred section on a slow connection, then focus and scroll to it when ready. A loading failure leaves a retry message instead of an apparently inert link; leaving Sky atlas cancels the pending jump. Location-selection callbacks are stable, with explicit effect dependencies for browser location and the page tool. Lint now has no warnings.
 
 Automated test files use isolated temporary Vite caches, cleaned after their servers close. This avoids parallel test workers regenerating the same default dependency cache or interfering with a running developer server. The complete 183-test suite passed three consecutive runs after isolating caches.
+
+Both deep-sky and bright-star saved lists offer Undo for the latest removal until another target is removed or Sky atlas is left. Notes and diary records remain intact. Undo keeps a target that has already been re-saved, and returns focus to the saved-list heading. Restoring a removed target does not change the selected observing time or site.
