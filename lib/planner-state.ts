@@ -18,3 +18,11 @@ export function readPlannerSetup(now=new Date()){
  try{const value:unknown=JSON.parse(sessionStorage.getItem('nightjar-recovery-time-v1')||'null');if(typeof value==='string'){const date=new Date(value);if(Number.isFinite(+date))recovery=date}}catch{}
  return {place,saved,date:recovery||nextObservingTime(now,place)};
 }
+
+export function samePlaceCoordinates(a:Place,b:Place){return Math.abs(a.latitude-b.latitude)<.0001&&Math.abs(a.longitude-b.longitude)<.0001}
+export function resolveObservingPlace(candidate:Place,saved:Place[],current?:Place):Place{
+ if(!validPlace(candidate))throw Error('Invalid observing place.');
+ const known=saved.find(site=>samePlaceCoordinates(site,candidate));
+ const active=current&&samePlaceCoordinates(current,candidate)?current:undefined;
+ return {...candidate,country:candidate.country??known?.country??active?.country,timezone:candidate.timezone??known?.timezone??active?.timezone,bortle:candidate.bortle??known?.bortle??active?.bortle};
+}
