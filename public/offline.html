@@ -121,7 +121,7 @@
       }
       showEmpty('equipment');
       const connection=document.getElementById('connection');
-      const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. Tap Try again online to refresh the planner.'};
+      const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
       document.getElementById('retry').addEventListener('click',()=>{
         try{const value=localStorage.getItem('nightjar-observing-time');const time=JSON.parse(value||'null');if(typeof time==='string'&&Number.isFinite(+new Date(time)))sessionStorage.setItem('nightjar-recovery-time-v1',value)}catch{/* Reopening still works when session storage is unavailable. */}
