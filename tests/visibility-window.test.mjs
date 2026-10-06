@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());

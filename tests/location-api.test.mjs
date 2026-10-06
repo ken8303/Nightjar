@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {GET}=await vite.ssrLoadModule('/app/api/locations/route.ts');
 test('invalid town searches do not contact the provider and names retain literal punctuation',async()=>{

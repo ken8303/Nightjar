@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {diaryReport,diaryCSV}=await vite.ssrLoadModule('/lib/diary-export.ts');
 const entry={id:'night-1',target:'M31',observedAt:'2026-10-25T00:30:00.000Z',place:{name:'London <site>',latitude:51.508,longitude:-.126,timezone:'Europe/London',bortle:4},outcome:'seen',equipment:'Binoculars "10×50"',notes:'First line\n星空 <img src=x onerror=alert(1)>'};

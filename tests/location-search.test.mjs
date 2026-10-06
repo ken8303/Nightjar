@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {searchLocations}=await vite.ssrLoadModule('/lib/location-search.ts');
 const place={id:1,name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'};

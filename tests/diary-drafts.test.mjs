@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
 const entry={id:'draft-M31',target:'M31',observedAt:'2026-10-06T20:00:00.000Z',place:{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},outcome:'seen',equipment:'',notes:'Unfinished\n星空'};

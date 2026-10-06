@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {normalizeDiary,readDiary,saveDiary,mergeDiary}=await vite.ssrLoadModule('/lib/observing-diary.ts');
 const {makePlannerBackup,parsePlannerBackup,restorePlannerBackup,previewPlannerMerge}=await vite.ssrLoadModule('/lib/planner-backup.ts');

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {watchPhotoDelay}=await vite.ssrLoadModule('/lib/photo-delay.ts');
 function fixture(){const element={},timers=new Map();let callback,disconnected=0,id=0;class Observer{constructor(cb){callback=cb}observe(target){assert.equal(target,element)}disconnect(){disconnected++}}return {element,timers,Observer,schedule:(callback,delay)=>{timers.set(++id,{callback,delay});return id},cancel:id=>timers.delete(id),emit:visible=>callback([{target:element,isIntersecting:visible}]),disconnected:()=>disconnected}}

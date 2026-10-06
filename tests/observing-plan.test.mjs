@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';import {test,after} from 'node:test';import {fileURLToPath} from 'node:url';import {createServer} from 'vite';
+import assert from 'node:assert/strict';import {test,after} from 'node:test';import {fileURLToPath} from 'node:url';import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {printableObservingPlan}=await vite.ssrLoadModule('/lib/observing-plan.ts');
 const input=()=>({date:new Date('2026-10-25T01:30:00Z'),place:{name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London',bortle:4},targets:[{name:'Below',altitude:-12,azimuth:90},{name:'Vega',altitude:35,azimuth:270}],notes:{Vega:'First line\nSecond line'},equipment:[{name:'Camera',width:36,height:24,focal:400,pixel:3.76}]});

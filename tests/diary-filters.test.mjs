@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {filterDiary,diaryDateInput,emptyDiaryFilters}=await vite.ssrLoadModule('/lib/diary-filters.ts');
 const first={id:'night-1',target:'M31',observedAt:'2026-10-05T23:30:00.000Z',place:{name:'Dark field',latitude:51,longitude:0,timezone:'Europe/London'},outcome:'seen',equipment:'10×50 binoculars',notes:'Faint oval glow\n星空'};

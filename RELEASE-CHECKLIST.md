@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 183 automated tests pass; TypeScript, lint and production build pass.
+- 183 automated tests pass, including three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -13,6 +13,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - The actual app recovered from delayed town search and photo responses using isolated local test fixtures.
 - Relevant UI flows were checked at desktop, 390-pixel mobile and 320-pixel compact widths. This is not a claim that every screen was tested at every width.
 - The latest built-app smoke check confirmed update-and-reload recovery, retained saved targets/diary records, mobile tab navigation and compact photo-tool/atlas layouts without horizontal page overflow. Camera manual target centring, thumbnail display, full-screen entry/exit and closing were checked at 320 × 568; no camera or motion permission was requested.
+
+- Camera shortcuts restore launch-button focus; delayed diary navigation, 15-second timeout and retry were checked on isolated local origins. A late section load does not move focus after timeout.
 
 ## After the next GitHub Desktop push
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {createServer} from 'vite';
+import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {parseAurora,validateAuroraFeed,nearestAurora,auroraIsStale}=await vite.ssrLoadModule('/lib/aurora.ts');
 const now=new Date('2026-10-06T20:00:00Z'),cells=Array.from({length:100},(_,i)=>[i,60,20]);
