@@ -20,6 +20,7 @@ import SevenNightOutlook from '@/components/seven-night-outlook';
 import SiteDarkness from '@/components/site-darkness';
 import {weatherHours,parseWeatherForecast,type WeatherForecast} from '@/lib/weather-hours';
 import {validPlace,readPlannerSetup} from '@/lib/planner-state';
+import {upsertSavedPlace,savedPlacesLimit} from '@/lib/saved-collections';
 import {useClientReady} from '@/hooks/use-client-ready';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
@@ -98,10 +99,10 @@ function Planner(){
   return()=>{stopped=true;clearTimeout(timeout);controller.abort()};
  },[place.latitude,place.longitude,forecastKey,siteKey]);
 
- function savePlace(){const next=saved.some(p=>same(p,place))?saved.map(p=>same(p,place)?{...p,...place,bortle:place.bortle??p.bortle}:p):saved.concat(place);setSaved(next);try{localStorage.setItem('nightjar-places',JSON.stringify(next));setNotice('Place saved on this device.')}catch{setNotice('Storage is unavailable; this place is saved for this visit only.')}}
+ function savePlace(){let next:Place[];try{next=upsertSavedPlace(saved,place)}catch(error){setNotice(error instanceof Error?error.message:'This place could not be saved.');return}setSaved(next);try{localStorage.setItem('nightjar-places',JSON.stringify(next));setNotice('Place saved on this device.')}catch{setNotice('Storage is unavailable; this place is saved for this visit only.')}}
  function persistPlaceRemoval(next:Place[],message:string){setSaved(next);savedRef.current=next;try{localStorage.setItem('nightjar-places',JSON.stringify(next));setNotice(message)}catch{setNotice(`${message} Storage is unavailable; this change applies to this visit only.`)}}
  function removePlace(index:number){const item=savedRef.current[index];if(!item)return;setRemovedPlace({place:item,index});persistPlaceRemoval(savedRef.current.filter((_,i)=>i!==index),`${item.name} removed from saved places. You can undo during this visit.`)}
- function undoPlaceRemoval(){if(!removedPlace)return;const current=savedRef.current;if(current.some(item=>same(item,removedPlace.place))){setNotice('This place is already saved. Its current settings were kept.')}else{const next=[...current];next.splice(Math.min(removedPlace.index,next.length),0,removedPlace.place);persistPlaceRemoval(next,`${removedPlace.place.name} restored to saved places.`)}setRemovedPlace(null);savedHeadingRef.current?.focus()}
+ function undoPlaceRemoval(){if(!removedPlace)return;const current=savedRef.current;if(current.some(item=>same(item,removedPlace.place))){setNotice('This place is already saved. Its current settings were kept.')}else{if(current.length>=savedPlacesLimit){setNotice(`Your ${savedPlacesLimit}-place list is full. This removal cannot be undone until there is space.`);return}const next=[...current];next.splice(Math.min(removedPlace.index,next.length),0,removedPlace.place);persistPlaceRemoval(next,`${removedPlace.place.name} restored to saved places.`)}setRemovedPlace(null);savedHeadingRef.current?.focus()}
  function setSiteDarkness(bortle:number|undefined){const next={...place,bortle};const nextSaved=saved.map(item=>same(item,place)?{...item,bortle}:item);setPlace(next);setSaved(nextSaved);try{localStorage.setItem('nightjar-place',JSON.stringify(next));localStorage.setItem('nightjar-places',JSON.stringify(nextSaved));setNotice(bortle?`Bortle class ${bortle} saved for ${place.name} on this device.`:`Sky darkness rating cleared for ${place.name}.`)}catch{setNotice('Storage is unavailable; this rating is saved for this visit only.')}}
  async function search(e:React.FormEvent){
   e.preventDefault();if(query.trim().length<2){setSearchError('Enter at least two letters.');return}

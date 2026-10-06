@@ -3,6 +3,7 @@ import {deepSkyListKey,validDeepSkyList} from './deep-sky-list';
 import {type Place} from './sky';
 import {validPlace} from './planner-state';
 import {type Equipment,validEquipment} from './photography';
+import {savedPlacesLimit,equipmentProfilesLimit} from './saved-collections';
 
 export type SavedPlan={places:Place[];targets:string[];notes:Record<string,string>;equipment:Equipment[];deepTargets?:string[];diary?:Observation[]};
 export type PlannerBackup={format:'nightjar-backup';version:3;exportedAt:string;data:SavedPlan};
@@ -12,7 +13,7 @@ const record=(value:unknown):value is Record<string,unknown>=>Boolean(value&&typ
 const name=(value:unknown):value is string=>typeof value==='string'&&value.trim().length>0&&value.length<=100&&!['__proto__','constructor','prototype'].includes(value);
 function plan(value:unknown):SavedPlan{
  if(record(value)&&value.deepTargets!==undefined&&!validDeepSkyList(value.deepTargets))throw Error('This backup contains invalid deep-sky targets. Nothing has been imported.');
- if(!record(value)||!Array.isArray(value.places)||value.places.length>100||!value.places.every(validPlace)||!Array.isArray(value.targets)||value.targets.length>39||!value.targets.every(name)||!record(value.notes)||Object.keys(value.notes).length>100||!Object.entries(value.notes).every(([key,text])=>name(key)&&typeof text==='string'&&text.length<=2000)||!Array.isArray(value.equipment)||value.equipment.length>100||!value.equipment.every(validEquipment))throw Error('This backup contains invalid saved plans. Nothing has been imported.');
+ if(!record(value)||!Array.isArray(value.places)||value.places.length>savedPlacesLimit||!value.places.every(validPlace)||!Array.isArray(value.targets)||value.targets.length>39||!value.targets.every(name)||!record(value.notes)||Object.keys(value.notes).length>100||!Object.entries(value.notes).every(([key,text])=>name(key)&&typeof text==='string'&&text.length<=2000)||!Array.isArray(value.equipment)||value.equipment.length>equipmentProfilesLimit||!value.equipment.every(validEquipment))throw Error('This backup contains invalid saved plans. Nothing has been imported.');
  return {
   diary:normalizeDiary(value.diary===undefined?[]:value.diary),places:value.places.map(p=>({name:p.name,latitude:p.latitude,longitude:p.longitude,...(p.country!==undefined?{country:p.country}:{}),...(p.timezone!==undefined?{timezone:p.timezone}:{}),...(p.bortle!==undefined?{bortle:p.bortle}:{})})),
   deepTargets:[...new Set((value.deepTargets||[]) as string[])],targets:[...new Set(value.targets)],notes:Object.fromEntries(Object.entries(value.notes).map(([key,text])=>[key,text as string])),
