@@ -9,7 +9,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Location search, coordinates, optional browser geolocation, an OpenStreetMap view, and device-local saved places.
 - Optional, user-entered Bortle class (1–9) for observing sites, shown in saved places, comparisons and the offline plan. It is separate from the weather score and is not a light-pollution map measurement.
 - Shared observing time in UTC with local-time display; bright-star sky chart and calculated planetary positions. On first open, the time starts at the next astronomical-dark period for the restored site, or evening civil twilight when full darkness is unavailable in the next two days. If neither occurs, it starts at the next hour.
-- Search the 39 existing sky targets by name, filter by horizon visibility, inspect altitude/azimuth, and highlight a target in the atlas.
+- Search the 39 existing sky targets by name, including Unicode-compatible and spaced text. Filter by horizon visibility or a strict altitude above 30°, inspect altitude/azimuth, and highlight a target in the atlas.
 - Twelve-hour Moon/bright-planet altitude table: only objects with a sample above 30° are shown, ordered by peak altitude. Peak-hour jumps, daylight context and above-30° shortcuts after civil twilight share target selection with the atlas. Mobile controls browse the same order; chart/details links preserve the selected object and time.
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
@@ -94,7 +94,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 189 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 191 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
