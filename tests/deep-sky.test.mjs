@@ -8,6 +8,19 @@ after(()=>vite.close());
 const {messierCatalogue,findDeepSky,deepSkyPosition,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {A,bodyPosition}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'London',latitude:51.508,longitude:-.126,timezone:'Europe/London'};
+test('full constellation names and Unicode identifiers work without losing catalogue codes',async()=>{
+ const {constellationName}=await vite.ssrLoadModule('/lib/constellations.ts');
+ for(const code of new Set(messierCatalogue.map(t=>t.constellation)))assert(code==='Leo'||constellationName(code)!==code);
+ assert.equal(constellationName('Se1'),'Serpens Caput');assert.equal(constellationName('Se2'),'Serpens Cauda');assert.equal(constellationName('XYZ'),'XYZ');
+ const result=findDeepSky('Ursa Major','');assert(result.length);assert(result.every(t=>t.constellation==='UMa'));const serpens=findDeepSky('Serpens','');assert(serpens.length);assert(serpens.every(t=>['Se1','Se2'].includes(t.constellation)));assert.equal(findDeepSky('Ｍ ０３１','')[0].id,'M31');
+});
+test('constellation and magnitude filters compose with catalogue search and object type',()=>{
+ const andromeda=findDeepSky('','Galaxy',{constellation:'And',maximumMagnitude:9});assert(andromeda.some(target=>target.id==='M31'));assert(andromeda.every(target=>target.constellation==='And'&&target.type==='Galaxy'&&target.magnitude<=9));assert.deepEqual(findDeepSky('M31','',{constellation:'And',maximumMagnitude:6}).map(t=>t.id),['M31']);assert.equal(findDeepSky('M31','',{constellation:'Cyg'}).length,0);assert.equal(findDeepSky('M31','',{maximumMagnitude:0}).length,0);
+});
+test('unknown magnitudes remain in unfiltered searches and cannot pass a brightness limit',()=>{
+ const original=messierCatalogue[0],unknown={...original,magnitude:null};messierCatalogue[0]=unknown;
+ try{assert(findDeepSky(unknown.id,'').some(target=>target.id===unknown.id));assert(!findDeepSky(unknown.id,'',{maximumMagnitude:15}).some(target=>target.id===unknown.id));assert.equal(findDeepSky('','',{maximumMagnitude:NaN}).length,0);assert.equal(findDeepSky('','',{maximumMagnitude:Infinity}).length,0)}finally{messierCatalogue[0]=original}
+});
 test('Messier search handles common names, spaced identifiers and object-type filters',()=>{
  assert.equal(messierCatalogue.length,109);assert.equal(new Set(messierCatalogue.map(t=>t.id)).size,109);
  assert.equal(findDeepSky('M 31','')[0].name,'Andromeda Galaxy');

@@ -1,4 +1,5 @@
 import catalogue from '@/data/messier.json';
+import {constellationName} from './constellations';
 import {skySurveyPhoto} from '@/lib/object-photos';
 import {A,observer,bodyPosition,type Place} from '@/lib/sky';
 export const messierCatalogue=catalogue;
@@ -8,10 +9,10 @@ export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
  const equator=A.EquatorFromVector(A.RotateVector(A.Rotation_EQJ_EQD(date),vector));
  return A.Horizon(date,observer(place),equator.ra,equator.dec,'normal');
 }
-export function findDeepSky(query:string,type:string){
- const normalize=(value:string)=>value.toLowerCase().replace(/\s+/g,'').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
+export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude}:{constellation?:string;maximumMagnitude?:number}={}){
+ const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
  const normalized=normalize(query.trim());
- return catalogue.filter(target=>(!type||target.type===type)&&[target.id,target.catalogue,target.name,target.constellation].some(value=>normalize(value).includes(normalized)));
+ return catalogue.filter(target=>(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation)].some(value=>normalize(value).includes(normalized)));
 }
 export function deepSkyWindow(target:DeepSkyObject,date:Date,place:Place){
  return Array.from({length:97},(_,index)=>{
