@@ -19,7 +19,7 @@ export function normalizeDiaryDrafts(value:unknown):DiaryDraftState{
  return {drafts,edit};
 }
 export function readDiaryDrafts(storage?:Pick<Storage,'getItem'>):{state:DiaryDraftState;status:string}{
- try{const raw=(storage??localStorage).getItem(diaryDraftKey);if(raw===null)return {state:emptyDiaryDrafts(),status:''};if(raw.length>1024*1024)throw Error();return {state:normalizeDiaryDrafts(JSON.parse(raw)),status:'Unfinished diary forms restored from this browser.'}}
+ try{const raw=(storage??localStorage).getItem(diaryDraftKey);if(raw===null)return {state:emptyDiaryDrafts(),status:''};if(raw.length>1024*1024)throw Error();const state=normalizeDiaryDrafts(JSON.parse(raw));return {state,status:state.drafts.length||state.edit?'Unfinished diary forms restored from this browser.':''}}
  catch{return {state:emptyDiaryDrafts(),status:'Unfinished forms could not be restored. Existing stored drafts stay untouched until you edit a form.'}}
 }
 export function saveDiaryDrafts(state:DiaryDraftState,storage?:Pick<Storage,'setItem'>){try{(storage??localStorage).setItem(diaryDraftKey,JSON.stringify({version:1,...normalizeDiaryDrafts({version:1,...state})}));return true}catch{return false}}

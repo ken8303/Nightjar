@@ -8,6 +8,7 @@ const entry={id:'draft-M31',target:'M31',observedAt:'2026-10-06T20:00:00.000Z',p
 test('new and edit drafts retain original metadata and unfinished text without touching saved observations',()=>{
  const values=new Map([['nightjar-observing-diary-v1','existing saved records']]),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
  assert.deepEqual(readDiaryDrafts(storage).state,{drafts:[],edit:null});const state={drafts:[entry],edit:{original:{...entry,id:'record-1'},draft:{...entry,id:'record-1',notes:'Pending edit'}}};assert(saveDiaryDrafts(state,storage));assert.deepEqual(readDiaryDrafts(storage).state,state);assert.equal(values.get('nightjar-observing-diary-v1'),'existing saved records');assert(!sameObservation(state.edit.original,state.edit.draft));assert(sameObservation(entry,{...entry,ignored:'extra'}));
+ assert(readDiaryDrafts(storage).status.includes('restored'));assert(saveDiaryDrafts({drafts:[],edit:null},storage));assert.equal(readDiaryDrafts(storage).status,'');
 });
 test('corrupt, future or oversized drafts remain untouched and blocked storage reports failure',()=>{
  for(const raw of ['{',JSON.stringify({version:2,drafts:[],edit:null}),'x'.repeat(1024*1024+1)]){const result=readDiaryDrafts({getItem:()=>raw});assert.equal(result.state.drafts.length,0);assert(result.status.includes('could not'))}
