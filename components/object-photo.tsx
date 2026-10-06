@@ -1,17 +1,21 @@
 'use client';
-import {useState,type CSSProperties} from 'react';
+import {useEffect,useRef,useState,type CSSProperties} from 'react';
 import Image from 'next/image';
 import {Dialog} from 'radix-ui';
 import {Maximize2,Minus,Plus,RotateCcw,X} from 'lucide-react';
 import {objectPhoto,type ObjectPhoto as Photo} from '@/lib/object-photos';
+import {watchPhotoDelay} from '@/lib/photo-delay';
 import {viewerZoomKey} from '@/lib/viewer-zoom';
 
 function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
- const [failed,setFailed]=useState(false),[loaded,setLoaded]=useState(false),[retry,setRetry]=useState(0);
- return <div className={enlarged?'photo-enlarged-image':'object-photo-image'}>
-  {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button className="button" onClick={()=>{setFailed(false);setLoaded(false);setRetry(value=>value+1)}}>Retry photo</button></div>:<>
-   <Image key={retry} unoptimized src={photo.src} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
-   {!loaded&&<span role="status">Loading reference photo…</span>}
+ const [failed,setFailed]=useState(false),[loaded,setLoaded]=useState(false),[retry,setRetry]=useState(0),[slow,setSlow]=useState(false);
+ const frame=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(loaded||failed||!frame.current)return;return watchPhotoDelay(frame.current,()=>setSlow(true))},[loaded,failed,retry]);
+ const retryPhoto=()=>{setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1)};
+ return <div ref={frame} className={`${enlarged?'photo-enlarged-image':'object-photo-image'}${failed||(!loaded&&slow)?' photo-recovery-active':''}`}>
+  {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<>
+   <Image key={retry} unoptimized src={photo.src} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
+   {!loaded&&(slow?<div className="photo-slow-message" role="status"><p>The reference photo is taking longer than expected. It may still load; you can retry or open the image source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<span role="status">Loading reference photo…</span>)}
   </>}
  </div>;
 }
@@ -22,7 +26,7 @@ export default function ObjectPhoto({name,reference}:{name:string;reference?:Pho
  const photo=reference??objectPhoto(name),[zoom,setZoom]=useState(1);
  if(!photo)return null;
  return <figure className="object-photo">
-  <PhotoImage photo={photo}/>
+  <PhotoImage key={photo.src} photo={photo}/>
   <figcaption><PhotoCaption photo={photo}/>
    <Dialog.Root onOpenChange={open=>{if(open)setZoom(1)}}>
     <Dialog.Trigger className="button photo-expand-trigger"><Maximize2 size={16}/>View larger {name} photo</Dialog.Trigger>
@@ -34,7 +38,7 @@ export default function ObjectPhoto({name,reference}:{name:string;reference?:Pho
       <button className="button" disabled={zoom>=3} onClick={()=>setZoom(value=>Math.min(3,value+.5))} aria-label="Zoom in photo"><Plus size={18}/></button>
       <button className="button" onClick={()=>setZoom(1)}><RotateCcw size={16}/>Reset photo zoom</button>
      </div>
-     <div className="photo-viewer-viewport" tabIndex={0} role="region" aria-label={`Scrollable ${name} photo`} onKeyDown={event=>{if(event.target!==event.currentTarget||event.ctrlKey||event.metaKey||event.altKey)return;const next=viewerZoomKey(zoom,event.key);if(next!==undefined){event.preventDefault();setZoom(next)}}}><div className="photo-viewer-canvas" style={{'--photo-zoom':zoom} as CSSProperties}><PhotoImage photo={photo} enlarged/></div></div>
+     <div className="photo-viewer-viewport" tabIndex={0} role="region" aria-label={`Scrollable ${name} photo`} onKeyDown={event=>{if(event.target!==event.currentTarget||event.ctrlKey||event.metaKey||event.altKey)return;const next=viewerZoomKey(zoom,event.key);if(next!==undefined){event.preventDefault();setZoom(next)}}}><div className="photo-viewer-canvas" style={{'--photo-zoom':zoom} as CSSProperties}><PhotoImage key={photo.src} photo={photo} enlarged/></div></div>
      <div className="photo-viewer-caption"><PhotoCaption photo={photo}/></div>
     </Dialog.Content></Dialog.Portal>
    </Dialog.Root>
