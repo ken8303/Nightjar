@@ -9,10 +9,18 @@ export function parseWeatherForecast(value:unknown):WeatherForecast{
  const raw=value as Record<string,unknown>,data=raw.hourly;
  if(!data||typeof data!=='object')throw new Error(typeof raw.error==='string'?raw.error:'Forecast unavailable');
  const fields=data as Record<string,unknown>;
- if(!Array.isArray(fields.time)||!fields.time.every(time=>finite(time)&&Number.isFinite(+new Date(time*1000))))throw new Error('Forecast timestamps are unavailable');
- const hourly:HourlyForecast={time:fields.time,cloud_cover:[]};
- for(const [name,samples] of Object.entries(fields)){
-  if(name!=='time'&&Array.isArray(samples))hourly[name]=samples.map(value=>finite(value)?value:null);
+ const times=fields.time;
+ if(!Array.isArray(times)||times.length===0||times.length>240||!times.every((time,index)=>finite(time)&&Number.isFinite(+new Date(time*1000))&&(index===0||time-times[index-1]>=3600))||times[times.length-1]-times[0]>240*3600)throw new Error('Forecast timestamps are unavailable. Please retry.');
+ if(!Array.isArray(fields.cloud_cover)||fields.cloud_cover.length!==times.length)throw new Error('Forecast cloud coverage is unavailable. Please retry.');
+ const hourly:HourlyForecast={time:[...times],cloud_cover:[]};
+ const allowed=['cloud_cover','temperature_2m','relative_humidity_2m','wind_speed_10m','cloud_cover_low','cloud_cover_mid','cloud_cover_high','dew_point_2m','visibility'];
+ for(const name of allowed){
+  const samples=fields[name];
+  if(samples===undefined)continue;
+  if(!Array.isArray(samples)||samples.length!==times.length)throw new Error('Forecast samples do not match their timestamps. Please retry.');
+  const percentage=name.startsWith('cloud_cover')||name==='relative_humidity_2m';
+  const nonnegative=name==='wind_speed_10m'||name==='visibility';
+  hourly[name]=samples.map(value=>finite(value)&&(!percentage||value>=0&&value<=100)&&(!nonnegative||value>=0)?value:null);
  }
  let timezone:string|undefined;
  if(typeof raw.timezone==='string'){try{new Intl.DateTimeFormat('en',{timeZone:raw.timezone});timezone=raw.timezone}catch{}}
