@@ -428,3 +428,10 @@ Messier details now open the chosen object directly in the camera viewer. The in
 ## 7 October 2026 — release handoff consistency
 
 README and release checks now describe the direct Messier camera shortcut, its current-time/site semantics and explicit hardware actions. Historical 148-object browser evidence is labelled as the catalogue size at that stage, with the present 151-object count identified. Added a physical-phone acceptance case for the shortcut and documented the latest 273-test verification. Documentation-only review; no extra hardware, publication or repository push performed.
+
+
+## 7 October 2026 — share camera catalogue coordinate transforms
+
+Messier camera refreshes now construct one observing-date rotation and observer per catalogue pass instead of repeating both for each of 109 objects. The projector captures its own date and observing coordinates so later input mutation cannot change its frame. Selection, order, names, magnitudes and photo metadata retain their existing contracts.
+
+274 tests, TypeScript, lint without warnings, production build and Cloudflare packaging passed. New numerical regression coverage compares all 109 shared directions to individual explorer calculations at years 2000/2026/2100 and latitudes −89/0/+89, preserving source catalogue records and a captured frame after date/site mutation. This calculation-only change reuses the verified camera UI; no new hardware accuracy claim or timing benchmark is made. README/release headline test counts now match the current suite.

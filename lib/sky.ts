@@ -13,6 +13,10 @@ function catalogueHorizon(ra:number,dec:number,date:Date,obs:A.Observer,rotation
  const {altitude,azimuth}=A.Horizon(date,obs,equator.ra,equator.dec,'normal');
  return {altitude,azimuth};
 }
+export function j2000Projector(date:Date,place:Place){
+ const instant=new Date(+date),obs=observer(place),rotation=A.Rotation_EQJ_EQD(instant);
+ return (ra:number,dec:number)=>catalogueHorizon(ra,dec,instant,obs,rotation);
+}
 export function j2000Position(ra:number,dec:number,date:Date,place:Place){
  return catalogueHorizon(ra,dec,date,observer(place),A.Rotation_EQJ_EQD(date));
 }

@@ -54,3 +54,15 @@ test('a below-horizon preset retains the target with safe manual defaults, while
  assert(deepSkyPosition(messierCatalogue.find(target=>target.id==='M42'),time,place).altitude<0);assert.equal(view.mode,'deep-sky');assert.equal(view.selected,'M42');assert.equal(view.bearing,0);assert.equal(view.altitude,30);
  for(const id of [undefined,'M102','Not a catalogue object']){const ordinary=initialCameraView(time,place,id);assert.equal(ordinary.mode,'bright');assert.equal(ordinary.selected,'');assert.equal(ordinary.bearing,0)}
 });
+
+
+test('shared camera catalogue transforms preserve individual directions across epochs and polar sites',async()=>{
+ const {j2000Projector,j2000Position}=await vite.ssrLoadModule('/lib/sky.ts');
+ for(const iso of ['2000-01-01T12:00Z','2026-10-07T20:00Z','2100-06-21T00:00Z'])for(const latitude of [-89,0,89]){
+  const time=new Date(iso),site={name:'Coordinate fixture',latitude,longitude:179},before=structuredClone(messierCatalogue);
+  const shared=cameraCatalogueTargets(time,site,'deep-sky');
+  shared.forEach((target,index)=>{const position=deepSkyPosition(messierCatalogue[index],time,site);assert.equal(target.altitude,position.altitude);assert.equal(target.azimuth,position.azimuth)});
+  const project=j2000Projector(time,site),expected=j2000Position(1,20,time,site);time.setUTCFullYear(1900);site.latitude=30;
+  assert.deepEqual(project(1,20),expected);assert.deepEqual(messierCatalogue,before);
+ }
+});
