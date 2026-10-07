@@ -12,7 +12,10 @@ type Hourly={time:number[];cloud_cover:(number|null)[]};
 export default function SevenNightOutlook({hourly,place,loading,selectedDate,onDate}:{hourly?:Hourly;place:Place;loading:boolean;selectedDate:Date|null;onDate:(date:Date)=>void}){
  const now=usePlanningClock();
  const nights=useMemo(()=>hourly?.time?.length?sevenNightOutlook(hourly,place,new Date(now)):[],[hourly,place,now]);
- const [downloadStatus,setDownloadStatus]=useState('');
+ const [downloadResult,setDownloadResult]=useState<{context:string;text:string}|null>(null);
+ const downloadContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone]);
+ const downloadStatus=downloadResult?.context===downloadContext?downloadResult.text:'';
+ const setDownloadStatus=(text:string)=>setDownloadResult({context:downloadContext,text});
  const timezone=place.timezone||'UTC';
  const dateLabel=(key:string)=>new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(`${key}T12:00:00Z`));
  const timeFormatter=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:timezone,timeZoneName:'shortOffset'});
@@ -21,7 +24,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
   if(!night.best)return;
   try{
    const best=night.best;
-   const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination});
+   const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination});
    downloadFile(new Blob([data],{type:'text/calendar;charset=utf-8'}),`nightjar-${night.key}.ics`);
    setDownloadStatus(`${dateLabel(night.key)} calendar file ready. Open it in your calendar app to add the window.`);
   }catch{setDownloadStatus('The calendar file could not be created. Please try again.')}

@@ -23,25 +23,36 @@ function foldCalendarLine(line:string){
  for(const char of line){const size=new TextEncoder().encode(char).length;if(bytes+size>75){output+=part+'\r\n';part=' ';bytes=1}part+=char;bytes+=size}
  return output+part;
 }
-export function lunarEclipseCalendar(input:{kind:string;peak:Date;place:string;contacts:{label:string;time:Date;altitude:number}[]},created=new Date()){
- const {contacts,peak,kind,place}=input;
- if(contacts.length<2)throw new Error('Eclipse contacts are required');
+type CalendarCoordinates={latitude?:number;longitude?:number};
+function calendarSite(input:CalendarCoordinates){
+ if(input.latitude===undefined&&input.longitude===undefined)return null;
+ if(typeof input.latitude!=='number'||!Number.isFinite(input.latitude)||Math.abs(input.latitude)>90||typeof input.longitude!=='number'||!Number.isFinite(input.longitude)||Math.abs(input.longitude)>180)throw Error('Invalid calendar observing coordinates.');
+ return {latitude:input.latitude,longitude:input.longitude};
+}
+const calendarDateValid=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
+function calendarIdentity(text:string){let hash=2166136261;for(const char of text)hash=Math.imul(hash^char.codePointAt(0)!,16777619)>>>0;return hash.toString(16)}
+export function lunarEclipseCalendar(input:{kind:string;peak:Date;place:string;timezone?:string;contacts:{label:string;time:Date;altitude:number}[]}&CalendarCoordinates,created=new Date()){
+ const {contacts,peak,kind,place}=input,site=calendarSite(input);
+ if(contacts.length<2||contacts.length>20)throw new Error('Eclipse contacts are required');
  const start=contacts[0].time,end=contacts[contacts.length-1].time;
- if(!Number.isFinite(+peak)||!Number.isFinite(+start)||!Number.isFinite(+end)||+end<=+start)throw new Error('Invalid eclipse interval');
- const description=[`Greatest eclipse: ${peak.toISOString()} (UTC).`,...contacts.map(c=>`${c.label}: ${c.time.toISOString()} (UTC); Moon altitude ${c.altitude.toFixed(1)} degrees, ${c.altitude>0?'above':'below'} horizon at ${place}.`),'Times calculated by Astronomy Engine. Horizon visibility does not include weather, terrain or buildings.'].join('\n');
- return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Lunar Eclipse Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:lunar-eclipse-${calendarTime(peak)}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(start)}`,`DTEND:${calendarTime(end)}`,`SUMMARY:${calendarText(`${kind[0].toUpperCase()+kind.slice(1)} lunar eclipse`)}`,`LOCATION:${calendarText(place)}`,`DESCRIPTION:${calendarText(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+ if(!calendarDateValid(peak)||!calendarDateValid(start)||!calendarDateValid(end)||!calendarDateValid(created)||+end<=+start||+peak<+start||+peak>+end||!['penumbral','partial','total'].includes(kind)||!place.trim()||place.length>=200||contacts.some((contact,index)=>!calendarDateValid(contact.time)||!Number.isFinite(contact.altitude)||Math.abs(contact.altitude)>90||!contact.label.trim()||contact.label.length>100||(index>0&&+contact.time<=+contacts[index-1].time)))throw new Error('Invalid eclipse interval');
+ const eventStart=new Date(Math.floor(+start/1000)*1000),eventEnd=new Date(Math.ceil(+end/1000)*1000);
+ if(!calendarDateValid(eventStart)||!calendarDateValid(eventEnd))throw Error('Eclipse interval exceeds the supported calendar years.');
+ const description=[`Greatest eclipse: ${peak.toISOString()} (UTC).`,...contacts.map(c=>`${c.label}: ${c.time.toISOString()} (UTC); Moon altitude ${c.altitude.toFixed(1)} degrees, ${c.altitude>0?'above':'below'} horizon at ${place}.`),...(site?[`Observing coordinates: latitude ${site.latitude}, longitude ${site.longitude}; timezone ${input.timezone||'UTC'}.`]:[]),'Times calculated by Astronomy Engine. Horizon visibility does not include weather, terrain or buildings.'].join('\n');
+ const identity=site?`-${calendarIdentity(`${place}|${site.latitude}|${site.longitude}`)}`:'';
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Lunar Eclipse Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:lunar-eclipse-${calendarTime(peak)}${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(`${kind[0].toUpperCase()+kind.slice(1)} lunar eclipse`)}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
 
-export function observingWindowCalendar(input:{start:Date;hours:number;place:string;timezone:string;score:number;cloud:number;moonAbove:boolean;moonIllumination:number},created=new Date()){
- const {start,hours,place,timezone,score,cloud,moonAbove,moonIllumination}=input;
- if(!Number.isFinite(+start)||!Number.isFinite(+created)||!Number.isInteger(hours)||hours<1||hours>2||!Number.isFinite(score)||score<0||score>100||!Number.isFinite(cloud)||cloud<0||cloud>100||!Number.isFinite(moonIllumination)||moonIllumination<0||moonIllumination>1||!place.trim())throw new Error('Invalid observing window');
+export function observingWindowCalendar(input:{start:Date;hours:number;place:string;timezone:string;score:number;cloud:number;moonAbove:boolean;moonIllumination:number}&CalendarCoordinates,created=new Date()){
+ const {start,hours,place,timezone,score,cloud,moonAbove,moonIllumination}=input,site=calendarSite(input);
+ if(!calendarDateValid(start)||!calendarDateValid(created)||!Number.isInteger(hours)||hours<1||hours>2||!Number.isFinite(score)||score<0||score>100||!Number.isFinite(cloud)||cloud<0||cloud>100||!Number.isFinite(moonIllumination)||moonIllumination<0||moonIllumination>1||!place.trim()||place.length>=200)throw new Error('Invalid observing window');
  const end=new Date(+start+hours*3600000);
- let siteHash=2166136261;
- for(const char of `${place}|${timezone}`)siteHash=Math.imul(siteHash^char.charCodeAt(0),16777619)>>>0;
- const description=[`Planning score: ${score}/100; forecast cloud cover: ${cloud}%.`,moonAbove?`Moon above the horizon at the start, ${Math.round(moonIllumination*100)}% illuminated.`:'Moon below the horizon at the start.',`Observing site: ${place} (${timezone}).`,'Forecast and Moon conditions are estimates. Check weather and local conditions before leaving.'].join('\n');
- return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Observing Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:observing-${calendarTime(start)}-${siteHash.toString(16)}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(start)}`,`DTEND:${calendarTime(end)}`,`SUMMARY:${calendarText('Stargazing window at '+place)}`,`LOCATION:${calendarText(place)}`,`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+ if(!calendarDateValid(end))throw Error('Observing interval exceeds the supported calendar years.');
+ const eventStart=new Date(Math.ceil(+start/1000)*1000),eventEnd=new Date(Math.floor(+end/1000)*1000);
+ const identity=calendarIdentity(`${place}|${timezone}${site?`|${site.latitude}|${site.longitude}`:''}`);
+ const description=[`Planning score: ${score}/100; forecast cloud cover: ${cloud}%.`,moonAbove?`Moon above the horizon at the start, ${Math.round(moonIllumination*100)}% illuminated.`:'Moon below the horizon at the start.',`Observing site: ${place} (${timezone}).`,...(site?[`Latitude ${site.latitude}, longitude ${site.longitude}.`]:[]),'Forecast and Moon conditions are estimates. Check weather and local conditions before leaving.'].join('\n');
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Observing Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:observing-${calendarTime(start)}-${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText('Stargazing window at '+place)}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
-
 
 export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;start:Date;end:Date;samples:(DeepSkySample&{moonAltitude?:number})[];moonBelowOnly:boolean},created=new Date()){
  const {target,place,start,end,samples,moonBelowOnly}=input;

@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 291 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 296 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -85,6 +85,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Deep-sky comparison windows prepare tentative UTC calendar events after validating all adjacent eligible samples. Mobile/desktop checks verified target/interval selection, Moon-filtered bounds and scoped confirmations. Calendar text/DST/Unicode bounds pass automated checks; native receipt and phone calendar import remain pending.
 
 - Camera thumbnail retry recovered controlled failed images manually and after a simulated connection-return event, preserving the followed ID. Photo-off disabled retry/rendering; 320/390-pixel guidance fit without overflow or console errors. Actual phone network transitions remain pending.
+
+- Forecast/eclipse event identities now distinguish same-named observing sites and include coordinates. UTC/DST, fractional boundaries, contact validation and Unicode tests pass. Browser checks prepared real penumbral/partial/total events and reset messages after site/date changes at 320/390 pixels without overflow/errors. Native import remains pending.
 
 ## After the next GitHub Desktop push
 
