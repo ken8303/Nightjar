@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 280 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 282 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -77,6 +77,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Unfinished diary forms preserve newer unrelated object drafts and refuse conflicting edits. Two-tab and actual-quota retry checks retained 1800 characters and unrelated equipment/notes through reload at 320 pixels; no console errors or overflow. Test resources were cleaned.
 
 - Conflicting unfinished diary forms can be reviewed side by side in selectable note fields. Both version choices retain unrelated peer forms, and stale local/saved reviews refuse overwriting. Two-tab 320-pixel mobile/1280-pixel desktop checks passed without overflow or console errors; reviewed local copies remained available after choosing stored text.
+
+- M13/M31 featured mission references and smaller camera thumbnails decoded in a disposable browser. Survey switching retained the J2000 request; enlarged zoom and processed/core captions were verified at 320/390-pixel portrait and 800 × 400 landscape without overflow or console errors. Hardware alignment remains pending.
 
 ## After the next GitHub Desktop push
 

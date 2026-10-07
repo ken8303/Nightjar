@@ -1,5 +1,5 @@
 import {stars} from '@/lib/sky';
-export type ObjectPhoto={src:string;alt:string;caption:string;credit:string;source:string;survey?:boolean;title?:string};
+export type ObjectPhoto={src:string;thumbnailSrc?:string;alt:string;caption:string;credit:string;source:string;survey?:boolean;title?:string};
 const nasa=(path:string)=>`https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/${path}?fit=clip&w=800&h=800`;
 const planets:Record<string,ObjectPhoto>={
  Moon:{src:nasa('pia00/pia00405/PIA00405.jpg'),alt:'Earth’s Moon photographed by Galileo',caption:'Galileo, 1992 · enhanced-colour reference image; does not match the selected lunar phase.',credit:'NASA/JPL/USGS',source:'https://science.nasa.gov/photojournal/earths-moon/'},

@@ -47,11 +47,11 @@ test('best-time recommendation honours darkness, strict altitude threshold and h
 });
 test('deep-sky survey images use source J2000 coordinates and label cropped large targets',async()=>{
  const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
- const m31=deepSkyPhoto(findDeepSky('M31','')[0]),url=new URL(m31.src);
+ const m31=deepSkyPhoto(findDeepSky('M31','')[0],'survey'),url=new URL(m31.src);
  assert.equal(url.searchParams.get('r'),'0:42:44');assert.equal(url.searchParams.get('d'),'+41:16:09');assert.equal(url.searchParams.get('e'),'J2000');
  assert.equal(url.searchParams.get('w'),'60');assert.equal(url.searchParams.get('h'),'60');assert.match(m31.caption,/extends beyond/);assert(m31.credit.includes('STScI'));
  const compact=deepSkyPhoto(findDeepSky('M57','')[0]);assert.equal(new URL(compact.src).searchParams.get('w'),'15');assert(!compact.caption.includes('extends beyond'));
- for(const target of messierCatalogue){const photo=deepSkyPhoto(target);const size=Number(new URL(photo.src).searchParams.get('w'));assert(size>=15&&size<=60)}
+ for(const target of messierCatalogue){const photo=deepSkyPhoto(target,'survey');const size=Number(new URL(photo.src).searchParams.get('w'));assert(size>=15&&size<=60)}
 });
 test('altitude timeline preserves UTC spacing through the repeated London clock-change hour',async()=>{
  const {deepSkyWindow,bestDeepSkySample}=await vite.ssrLoadModule('/lib/deep-sky.ts');
@@ -92,4 +92,12 @@ test('adding current horizontal positions preserves catalogue J2000 coordinates 
   assert.equal(deepSkyPhoto(saved).src,deepSkyPhoto(target).src);
   assert.deepEqual(target,before);
  }
+});
+
+
+test('featured deep-sky photos distinguish processed/core views and retain an explicit source-coordinate survey alternative',async()=>{
+ const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ for(const id of ['M13','M31']){const target=findDeepSky(id,'').find(t=>t.id===id),reference=deepSkyPhoto(target),survey=deepSkyPhoto(target,'survey'),before=structuredClone(target);assert.equal(new URL(reference.src).hostname,'assets.science.nasa.gov');assert.equal(new URL(reference.src).searchParams.get('w'),'800');assert.equal(new URL(reference.thumbnailSrc).searchParams.get('w'),'200');assert.equal(new URL(reference.source).hostname,'science.nasa.gov');assert(!reference.survey);assert(survey.survey);assert.equal(new URL(survey.src).searchParams.get('e'),'J2000');assert.notEqual(reference.src,survey.src);assert.deepEqual(target,before)}
+ assert.match(deepSkyPhoto(findDeepSky('M13','')[0]).caption,/core of M13/);assert.match(deepSkyPhoto(findDeepSky('M31','')[0]).caption,/infrared mosaic/);
+ const other=findDeepSky('M57','')[0];assert.deepEqual(deepSkyPhoto(other),deepSkyPhoto(other,'survey'));
 });

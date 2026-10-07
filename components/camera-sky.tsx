@@ -21,7 +21,7 @@ import {cameraOverlayFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAl
 
 function CameraThumbnail({name}:{name:string}){
  const photo=cameraCataloguePhoto(name),[status,setStatus]=useState<'loading'|'loaded'|'failed'>('loading');
- return <span className="camera-sky-thumbnail" aria-hidden="true">{(!photo||status!=='loaded')&&<Star size={20}/>} {photo&&status!=='failed'&&<Image unoptimized src={photo.src} alt="" width={36} height={36} referrerPolicy="no-referrer" className={status==='loaded'?'camera-sky-thumbnail-loaded':'camera-sky-thumbnail-loading'} onLoad={()=>setStatus('loaded')} onError={()=>setStatus('failed')}/>}</span>;
+ return <span className="camera-sky-thumbnail" aria-hidden="true">{(!photo||status!=='loaded')&&<Star size={20}/>} {photo&&status!=='failed'&&<Image unoptimized src={photo.thumbnailSrc??photo.src} alt="" width={36} height={36} referrerPolicy="no-referrer" className={status==='loaded'?'camera-sky-thumbnail-loaded':'camera-sky-thumbnail-loading'} onLoad={()=>setStatus('loaded')} onError={()=>setStatus('failed')}/>}</span>;
 }
 
 type Props={initialDeepTarget?:string;fullScreen:boolean;onFullScreenChange:(full:boolean)=>void;place:Place;selected:string;onSelect:(name:string)=>void;onDetails:(date:Date,place:Place,deepSkyId?:string)=>void};

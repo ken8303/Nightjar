@@ -1,5 +1,6 @@
 import catalogue from '@/data/messier.json';
 import {constellationName} from './constellations';
+import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
 import {A,j2000Position,bodyPosition,type Place} from '@/lib/sky';
 export const messierCatalogue=catalogue;
@@ -30,7 +31,8 @@ export function bestDeepSkyTime(target:DeepSkyObject,date:Date,place:Place){
  const best=bestDeepSkySample(deepSkyWindow(target,date,place));
  return best?{date:best.time,altitude:best.altitude,azimuth:best.azimuth}:null;
 }
-export function deepSkyPhoto(target:DeepSkyObject){
+export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='reference'){
+ const featured=mode==='reference'?featuredDeepSkyPhoto(target.id):undefined;if(featured)return featured;
  const field=Math.min(60,Math.max(15,Math.ceil((target.major??12)*1.25)));
  const photo=skySurveyPhoto(target.id,target.ra,target.dec,field);
  return {...photo,title:'Deep-sky survey field',caption:`Archival red-band photographic field, ${field} × ${field} arcminutes, centred on ${target.id}. ${target.major!==null&&target.major>field?'This shows the central region; the catalogue object extends beyond the frame.':'A survey reference, not a live view or a prediction of visual appearance.'}`};

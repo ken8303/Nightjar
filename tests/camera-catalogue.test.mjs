@@ -23,8 +23,8 @@ test('deep camera directions agree with explorer date-frame positions while reta
  });
 });
 test('camera reference photos retain survey coordinates and source attribution for Messier selections',()=>{
- const photo=cameraCataloguePhoto('M31'),params=new URL(photo.src).searchParams;
- assert.equal(params.get('e'),'J2000');assert.equal(params.get('r'),'0:42:44');assert(photo.caption.includes('M31'));assert(photo.source.includes('stsci.edu'));assert(photo.survey);
+ const photo=cameraCataloguePhoto('M33'),params=new URL(photo.src).searchParams;
+ assert.equal(params.get('e'),'J2000');assert.equal(params.get('r'),'1:33:51');assert(photo.caption.includes('M33'));assert(photo.source.includes('stsci.edu'));assert(photo.survey);
  assert.equal(cameraCataloguePhoto('Unknown object'),undefined);assert(cameraCataloguePhoto('Polaris').survey);assert(cameraCataloguePhoto('Moon').credit.includes('NASA'));
 });
 
@@ -65,4 +65,9 @@ test('shared camera catalogue transforms preserve individual directions across e
   const project=j2000Projector(time,site),expected=j2000Position(1,20,time,site);time.setUTCFullYear(1900);site.latitude=30;
   assert.deepEqual(project(1,20),expected);assert.deepEqual(messierCatalogue,before);
  }
+});
+
+test('camera thumbnails share attributed featured references with the explorer at a smaller requested size',async()=>{
+ const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ for(const id of ['M13','M31']){const target=messierCatalogue.find(t=>t.id===id),photo=cameraCataloguePhoto(id);assert.deepEqual(photo,deepSkyPhoto(target));assert.equal(new URL(photo.thumbnailSrc).searchParams.get('w'),'200');assert.match(photo.credit,/NASA/)}
 });
