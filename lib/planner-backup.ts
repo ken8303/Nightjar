@@ -1,20 +1,20 @@
 import {diaryKey,normalizeDiary,mergeDiary,type Observation} from './observing-diary';
 import {deepSkyListKey,validDeepSkyList} from './deep-sky-list';
-import {type Place} from './sky';
+import {type Place,skyTargetLimit} from './sky';
 import {validPlace} from './planner-state';
 import {type Equipment,validEquipment} from './photography';
 import {savedPlacesLimit,equipmentProfilesLimit} from './saved-collections';
 
 export const plannerBackupMaxBytes=5*1024*1024;
 export type SavedPlan={places:Place[];targets:string[];notes:Record<string,string>;equipment:Equipment[];deepTargets?:string[];diary?:Observation[]};
-export type PlannerBackup={format:'nightjar-backup';version:3;exportedAt:string;data:SavedPlan};
+export type PlannerBackup={format:'nightjar-backup';version:4;exportedAt:string;data:SavedPlan};
 const keys=['nightjar-places','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-equipment',deepSkyListKey,diaryKey] as const;
 type StorageAccess=Pick<Storage,'getItem'|'setItem'|'removeItem'>;
 const record=(value:unknown):value is Record<string,unknown>=>Boolean(value&&typeof value==='object'&&!Array.isArray(value));
 const name=(value:unknown):value is string=>typeof value==='string'&&value.trim().length>0&&value.length<=100&&!['__proto__','constructor','prototype'].includes(value);
 function plan(value:unknown):SavedPlan{
  if(record(value)&&value.deepTargets!==undefined&&!validDeepSkyList(value.deepTargets))throw Error('This backup contains invalid deep-sky targets. Nothing has been imported.');
- if(!record(value)||!Array.isArray(value.places)||value.places.length>savedPlacesLimit||!value.places.every(validPlace)||!Array.isArray(value.targets)||value.targets.length>39||!value.targets.every(name)||!record(value.notes)||Object.keys(value.notes).length>100||!Object.entries(value.notes).every(([key,text])=>name(key)&&typeof text==='string'&&text.length<=2000)||!Array.isArray(value.equipment)||value.equipment.length>equipmentProfilesLimit||!value.equipment.every(validEquipment))throw Error('This backup contains invalid saved plans. Nothing has been imported.');
+ if(!record(value)||!Array.isArray(value.places)||value.places.length>savedPlacesLimit||!value.places.every(validPlace)||!Array.isArray(value.targets)||value.targets.length>skyTargetLimit||!value.targets.every(name)||!record(value.notes)||Object.keys(value.notes).length>100||!Object.entries(value.notes).every(([key,text])=>name(key)&&typeof text==='string'&&text.length<=2000)||!Array.isArray(value.equipment)||value.equipment.length>equipmentProfilesLimit||!value.equipment.every(validEquipment))throw Error('This backup contains invalid saved plans. Nothing has been imported.');
  return {
   diary:normalizeDiary(value.diary===undefined?[]:value.diary),places:value.places.map(p=>({name:p.name,latitude:p.latitude,longitude:p.longitude,...(p.country!==undefined?{country:p.country}:{}),...(p.timezone!==undefined?{timezone:p.timezone}:{}),...(p.bortle!==undefined?{bortle:p.bortle}:{})})),
   deepTargets:[...new Set((value.deepTargets||[]) as string[])],targets:[...new Set(value.targets)],notes:Object.fromEntries(Object.entries(value.notes).map(([key,text])=>[key,text as string])),
@@ -24,14 +24,14 @@ function plan(value:unknown):SavedPlan{
 export function parsePlannerBackup(text:string):PlannerBackup{
  if(new TextEncoder().encode(text).length>plannerBackupMaxBytes)throw Error('Choose a Nightjar backup no larger than 5 MB.');
  let raw:unknown;try{raw=JSON.parse(text)}catch{throw Error('This file is not valid JSON. Choose a Nightjar backup file.')}
- if(!record(raw)||raw.format!=='nightjar-backup'||(raw.version!==1&&raw.version!==2&&raw.version!==3)||typeof raw.exportedAt!=='string'||!Number.isFinite(+new Date(raw.exportedAt)))throw Error('This is not a supported Nightjar backup. Nothing has been imported.');
- return {format:'nightjar-backup',version:3,exportedAt:raw.exportedAt,data:plan(raw.data)};
+ if(!record(raw)||raw.format!=='nightjar-backup'||(raw.version!==1&&raw.version!==2&&raw.version!==3&&raw.version!==4)||typeof raw.exportedAt!=='string'||!Number.isFinite(+new Date(raw.exportedAt)))throw Error('This is not a supported Nightjar backup. Nothing has been imported.');
+ return {format:'nightjar-backup',version:4,exportedAt:raw.exportedAt,data:plan(raw.data)};
 }
 export function readSavedPlan(storage:StorageAccess):SavedPlan{
  try{return plan({places:JSON.parse(storage.getItem(keys[0])||'[]'),targets:JSON.parse(storage.getItem(keys[1])||'[]'),notes:JSON.parse(storage.getItem(keys[2])||'{}'),equipment:JSON.parse(storage.getItem(keys[3])||'[]'),deepTargets:JSON.parse(storage.getItem(keys[4])||'[]'),diary:JSON.parse(storage.getItem(keys[5])||'[]')})}
  catch{throw Error('Saved plans could not be read. Your existing data has not been changed.')}
 }
-export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:3,exportedAt:now.toISOString(),data:readSavedPlan(storage)},null,2))}
+export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:now.toISOString(),data:readSavedPlan(storage)},null,2))}
 export function mergeSavedPlans(existing:SavedPlan,incoming:SavedPlan):SavedPlan{
  const places=[...existing.places];for(const p of incoming.places)if(!places.some(site=>Math.abs(site.latitude-p.latitude)<.0001&&Math.abs(site.longitude-p.longitude)<.0001))places.push(p);
  const equipment=[...existing.equipment];for(const e of incoming.equipment)if(!equipment.some(setup=>setup.name.trim()===e.name.trim()))equipment.push(e);

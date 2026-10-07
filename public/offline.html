@@ -85,7 +85,7 @@
       const targets = read('nightjar-targets-v1', []);
       const notes = read('nightjar-target-notes-v1', {});
       const noteEntries=notes&&typeof notes==='object'&&!Array.isArray(notes)?Object.entries(notes).filter(([name,text])=>name.length<=100&&typeof text==='string').slice(0,100):[];
-      const savedNames=Array.isArray(targets)?Array.from(new Set(targets.filter(name=>typeof name==='string'&&name.trim()&&name.length<=100))).slice(0,39):[];
+      const savedNames=Array.isArray(targets)?Array.from(new Set(targets.filter(name=>typeof name==='string'&&name.trim()&&name.length<=100))).slice(0,42):[];
       for (const name of savedNames) add('targets',safeText(name),'',safeNote(noteEntries.find(([key])=>key===name)?.[1]));
       for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(name),'',safeNote(note));
       document.getElementById('other-notes-card').hidden=!document.getElementById('other-notes').children.length;

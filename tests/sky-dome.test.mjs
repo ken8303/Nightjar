@@ -19,7 +19,7 @@ test('star photos use catalogue coordinates and planetary photos retain source a
  const {objectPhoto}=await vite.ssrLoadModule('/lib/object-photos.ts');
  const vega=objectPhoto('Vega'),url=new URL(vega.src);assert.equal(url.searchParams.get('r'),'18:36:56');assert.equal(url.searchParams.get('d'),'+38:47:01');assert.equal(url.searchParams.get('h'),'15');assert.equal(url.searchParams.get('w'),'15');assert.equal(vega.survey,true);
  assert(new URL(objectPhoto('Sirius').src).searchParams.get('d').startsWith('-16:'));
- for(const name of ['Moon','Venus','Mars','Jupiter','Saturn']){const photo=objectPhoto(name);assert(photo.credit.includes('NASA'));assert(photo.source.startsWith('https://science.nasa.gov/'));assert(!photo.survey)}
+ for(const name of ['Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune']){const photo=objectPhoto(name);assert(photo.credit.includes('NASA'));assert(photo.source.startsWith('https://science.nasa.gov/'));assert(!photo.survey)}
  assert.equal(objectPhoto('Unknown'),undefined);assert.equal(objectPhoto('constructor'),undefined);
 });
 

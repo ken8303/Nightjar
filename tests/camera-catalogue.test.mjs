@@ -10,7 +10,7 @@ const {skyTargets}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'London',latitude:51.5085,longitude:-.1257},date=new Date('2026-10-07T20:00Z');
 test('camera catalogue modes have stable unique identities and retain every original bright target',()=>{
  const bright=cameraCatalogueTargets(date,place,'bright'),deep=cameraCatalogueTargets(date,place,'deep-sky'),all=cameraCatalogueTargets(date,place,'all');
- assert.equal(bright.length,39);assert.equal(deep.length,109);assert.equal(all.length,148);assert.equal(new Set(all.map(t=>t.name)).size,148);
+ assert.equal(bright.length,42);assert.equal(deep.length,109);assert.equal(all.length,151);assert.equal(new Set(all.map(t=>t.name)).size,151);
  assert.deepEqual(bright.map(target=>Object.fromEntries(Object.entries(target).filter(([key])=>key!=='displayName'&&key!=='deepSky'))),skyTargets(date,place));
  assert(bright.every(t=>!t.deepSky&&t.displayName===t.name));assert(deep.every(t=>t.deepSky));assert(!deep.some(t=>t.name==='M102'));
 });
@@ -34,7 +34,7 @@ test('camera search discovers Messier/NGC identities and alternate names with Un
  assert.deepEqual(searchCameraTargets(all,'s i r i u s').map(target=>target.name),['Sirius']);
  assert.deepEqual(searchCameraTargets(all,'ＳＩＲＩＵＳ').map(target=>target.name),['Sirius']);
  assert.deepEqual(searchCameraTargets(all,'not-in-this-catalogue'),[]);
- assert.equal(searchCameraTargets(all,'').length,148);
+ assert.equal(searchCameraTargets(all,'').length,151);
  assert.equal(searchCameraTargets(cameraCatalogueTargets(date,place,'bright'),'M31').length,0);
 });
 test('camera search leaves catalogue positions, ordering and selected-record source intact',()=>{

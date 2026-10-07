@@ -26,8 +26,8 @@ test('the modern atlas corrects the fixed-equator shortcut without changing sour
 });
 test('precessed bright-star and solar-system selections stay finite and within horizontal coordinate bounds',()=>{
  for(const latitude of [-90,0,90]){
-  const targets=skyTargets(new Date('2026-10-07T20:00Z'),{...place,latitude});assert.equal(targets.length,39);
+  const targets=skyTargets(new Date('2026-10-07T20:00Z'),{...place,latitude});assert.equal(targets.length,42);
   for(const target of targets){assert(Number.isFinite(target.altitude)&&target.altitude>=-90&&target.altitude<=90);assert(Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<360)}
-  assert.equal(targets.filter(target=>target.planet).length,5);
+  assert.equal(targets.filter(target=>target.planet).length,8);
  }
 });

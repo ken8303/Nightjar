@@ -1,4 +1,4 @@
-import {A,bodyPosition,type Place} from '@/lib/sky';
+import {A,bodyPosition,skyBodies,type Place} from '@/lib/sky';
 export const minimumTargetAltitude=30;
 export type VisibilitySample={time:Date;sun:number;altitude:number;azimuth:number};
 export type VisibilitySamples={body:A.Body;positions:VisibilitySample[]};
@@ -19,7 +19,7 @@ export function planetVisibilityWindow(start:number,place:Place){
   const time=new Date(start+i*3600000);
   return {time,sun:bodyPosition(A.Body.Sun,time,place).altitude};
  });
- const samples=[A.Body.Moon,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn].map(body=>({
+ const samples=skyBodies.map(body=>({
   body,positions:hours.map(hour=>({...hour,...bodyPosition(body,hour.time,place)}))
  }));
  return {hours,rows:rankVisibilitySamples(samples)};

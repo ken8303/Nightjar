@@ -24,10 +24,12 @@ test('daylight peaks determine ranking while shortcuts require altitude above 30
 });
 test('London astronomical fixture includes daytime peaks and excludes low Venus',()=>{
  const data=planetVisibilityWindow(Date.parse('2026-10-03T20:00:00Z'),london);
- assert.deepEqual(data.rows.map(row=>row.body),['Moon','Mars','Jupiter','Saturn']);
- const expected=[62.8,58.2,48.7,40.5];
- data.rows.forEach((row,i)=>assert(Math.abs(row.peak-expected[i])<.2,`${row.body} peak differs from the reference window`));
- assert(data.rows[0].peakSample.sun>-6);assert(data.rows[3].best.sun<=-6);
+ assert.deepEqual(data.rows.map(row=>row.body),['Moon','Uranus','Mars','Jupiter','Saturn','Neptune']);
+ const expected={Moon:62.8,Mars:58.2,Jupiter:48.7,Saturn:40.5};
+ for(const [name,peak] of Object.entries(expected))assert(Math.abs(data.rows.find(row=>row.body===name).peak-peak)<.2,`${name} peak differs from the reference window`);
+ assert(data.rows[0].peakSample.sun>-6);assert(data.rows.find(row=>row.body==='Saturn').best.sun<=-6);
+ assert(!data.rows.some(row=>row.body==='Mercury'||row.body==='Venus'));
+ for(const row of data.rows)assert(row.peak>30);
 });
 test('a polar site can have no eligible object without creating placeholder rows',()=>{
  const data=planetVisibilityWindow(Date.parse('2026-10-03T20:00:00Z'),{name:'North Pole',latitude:90,longitude:0});

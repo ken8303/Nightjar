@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 263 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 267 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -67,6 +67,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Observing-plan UTC metadata retains seconds and milliseconds; local time includes seconds and offset. Regression tests cover repeated-clock occurrences and local year rollover. A generated 320-pixel report showed the full UTC instant and Kathmandu next-day time without overflow, and its checklist worked. Native print/download receipt remains pending.
 
 - Meteor planning preserves early calendar years, validates export dates and folds calendar lines within UTF-8 bounds. Upcoming cards advance at site-local noon and recommend only remaining complete hours, bounded at both ends. Browser checks confirmed year 99, London rollover, a future Explore action and compact 320/390-pixel layouts without errors; the disposable origin was cleaned.
+
+- Mercury, Uranus and Neptune now share the sky/camera/visibility catalogue, increasing it to 42 targets (151 combined with Messier). Planet magnitudes are calculated at the selected date. A mobile check loaded Neptune’s attributed image/details, centred Mercury in manual camera preview, prepared a version 4 backup and displayed all 42 targets plus notes offline. Older backup versions remain importable; native file receipt and live-phone alignment remain pending. The test origin was cleaned.
 
 ## After the next GitHub Desktop push
 

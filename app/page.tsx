@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { Moon, Compass, MapPin, Telescope, ArrowUpRight, Star, Search, LocateFixed, Bookmark, Cloud, Wind, Droplets, ChevronRight, Aperture, X, Trash2, RefreshCw } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { A, Place, bodyPosition, moonInfo, timeLabel, observingMilestones } from '@/lib/sky';
+import { A, Place, skyBodies, bodyPosition, moonInfo, timeLabel, observingMilestones } from '@/lib/sky';
 import ViewingMode from '@/components/viewing-mode';
 import SkyChart from '@/components/sky-chart';
 import SiteNameEditor from '@/components/site-name-editor';
@@ -151,7 +151,7 @@ function Planner(){
  function cancelLocation(){locationSession.current?.cancel();setSearchError('Location request cancelled. Your selected observing site is unchanged.')}
  const when=date,moon=moonInfo(when,place),tz=place.timezone||'UTC';
  const hours=useMemo(()=>weatherHours(forecast?.hourly,date,place),[forecast,date,place]);
- const current=hours[0],best=hours.reduce<(typeof hours)[number]|null>((a,b)=>b.score!==null&&(!a||a.score===null||b.score>a.score)?b:a,null);const dark=bodyPosition(A.Body.Sun,when,place).altitude<-18;const score=current?.score;const skyObjects=[A.Body.Moon,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn].map(body=>({body,...bodyPosition(body,when,place)})).filter(p=>p.altitude>0).sort((a,b)=>b.altitude-a.altitude);
+ const current=hours[0],best=hours.reduce<(typeof hours)[number]|null>((a,b)=>b.score!==null&&(!a||a.score===null||b.score>a.score)?b:a,null);const dark=bodyPosition(A.Body.Sun,when,place).altitude<-18;const score=current?.score;const skyObjects=skyBodies.map(body=>({body,...bodyPosition(body,when,place)})).filter(p=>p.altitude>0).sort((a,b)=>b.altitude-a.altitude);
 
  const milestones=useMemo(()=>observingMilestones(when,place),[when,place]);
  const title={tonight:'A night worth looking up.',sky:'Get to know your sky.',moon:'A world within reach.',places:'Find your place in the dark.',events:'Make a date with the cosmos.',tools:'Frame something extraordinary.',aurora:place.latitude<0?'Follow the southern lights.':'Follow the northern lights.'}[tab];

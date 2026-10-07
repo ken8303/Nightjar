@@ -56,3 +56,9 @@ test('offline diary renders snapshot notes as text and skips malformed observati
  const page=load({'nightjar-observing-diary-v1':[entry,{...entry,target:'M102'},{...entry,observedAt:'bad'},{...entry,place:{name:'bad',latitude:null,longitude:0}}]});
  assert.equal(page.elements.get('diary').children.length,1);assert(page.elements.get('diary').textContent.includes('2026-10-05 20:00 UTC'));assert(page.elements.get('diary').textContent.includes('Line one\n<img src=x>'));assert.equal(page.elements.get('diary-empty').hidden,true);
 });
+
+test('offline saved-target listing retains all 42 identities including the three added planets',()=>{
+ const targets=[...Array.from({length:39},(_,i)=>`Existing ${i}`),'Mercury','Uranus','Neptune'],page=load({'nightjar-targets-v1':targets});
+ assert.equal(page.elements.get('targets').children.length,42);
+ for(const name of ['Mercury','Uranus','Neptune'])assert(page.elements.get('targets').textContent.includes(name));
+});

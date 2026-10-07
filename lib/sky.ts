@@ -3,6 +3,8 @@ import {moonPhaseName} from './moon-phase';
 export type Place={name:string;latitude:number;longitude:number;country?:string;timezone?:string;bortle?:number};
 export const stars:[string,number,number,number][]=[['Sirius',6.7525,-16.7161,-1.46],['Canopus',6.3992,-52.6957,-.74],['Arcturus',14.261,19.1824,-.05],['Vega',18.6156,38.7837,.03],['Capella',5.2782,45.998,.08],['Rigel',5.2423,-8.2016,.13],['Procyon',7.655,5.225,.34],['Betelgeuse',5.9195,7.407,.5],['Altair',19.8464,8.8683,.77],['Aldebaran',4.5987,16.509,.85],['Spica',13.4199,-11.1613,.97],['Antares',16.4901,-26.432,1.06],['Pollux',7.7553,28.0262,1.14],['Fomalhaut',22.9608,-29.622,1.16],['Deneb',20.6905,45.2803,1.25],['Regulus',10.1395,11.9672,1.35],['Castor',7.5767,31.8883,1.58],['Bellatrix',5.4189,6.3497,1.64],['Alnilam',5.6036,-1.2019,1.69],['Alnitak',5.6793,-1.9426,1.74],['Dubhe',11.0621,61.751,1.79],['Merak',11.0307,56.3824,2.37],['Phecda',11.8972,53.6948,2.44],['Megrez',12.257,57.0326,3.31],['Alioth',12.9005,55.9598,1.77],['Mizar',13.3987,54.9254,2.23],['Alkaid',13.7923,49.3133,1.86],['Polaris',2.5303,89.2641,1.98],['Achernar',1.6286,-57.2367,.46],['Hadar',14.0637,-60.373,.61],['Acrux',12.4433,-63.0991,.76],['Mimosa',12.7953,-59.6888,1.25],['Gacrux',12.5194,-57.1132,1.63],['Alpha Centauri',14.6601,-60.8351,-.27]];
 export const lines=[['Dubhe','Merak','Phecda','Megrez','Alioth','Mizar','Alkaid'],['Megrez','Dubhe'],['Vega','Deneb','Altair','Vega'],['Betelgeuse','Bellatrix','Rigel','Alnitak','Betelgeuse'],['Acrux','Gacrux'],['Mimosa','Alpha Centauri']];
+export const skyBodies=[A.Body.Moon,A.Body.Mercury,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn,A.Body.Uranus,A.Body.Neptune] as const;
+export const skyTargetLimit=stars.length+skyBodies.length;
 export function observer(p:Place){return new A.Observer(p.latitude,p.longitude,0)}
 export function bodyPosition(body:A.Body,date:Date,p:Place){const eq=A.Equator(body,date,observer(p),true,true);return A.Horizon(date,observer(p),eq.ra,eq.dec,'normal')}
 function catalogueHorizon(ra:number,dec:number,date:Date,obs:A.Observer,rotation:A.RotationMatrix){
@@ -78,7 +80,7 @@ export function photographyLightWindows(date:Date,p:Place){
 export function skyTargets(date:Date,place:Place){
  const obs=observer(place),rotation=A.Rotation_EQJ_EQD(date);
  const fixed=stars.map(([name,ra,dec,mag])=>({name,...catalogueHorizon(ra,dec,date,obs,rotation),mag,planet:false}));
- const planets=[A.Body.Moon,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn].map(body=>({name:String(body),...bodyPosition(body,date,place),mag:-1,planet:true}));
+ const planets=skyBodies.map(body=>({name:String(body),...bodyPosition(body,date,place),mag:A.Illumination(body,date).mag,planet:true}));
  return [...fixed,...planets];
 }
 

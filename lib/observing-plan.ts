@@ -1,4 +1,4 @@
-import {A,bodyPosition,moonInfo,type Place} from './sky';
+import {A,bodyPosition,moonInfo,skyTargetLimit,type Place} from './sky';
 import {validPlace} from './planner-state';
 import {type Equipment,validEquipment} from './photography';
 
@@ -8,7 +8,7 @@ const escape=(value:string)=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 const direction=(azimuth:number)=>['N','NE','E','SE','S','SW','W','NW'][Math.round(azimuth/45)%8];
 export function printableObservingPlan(input:Plan):string{
  const {date,place,targets,notes,equipment}=input;
- if(!Number.isFinite(+date)||!validPlace(place)||targets.length>148||!targets.every(target=>typeof target.name==='string'&&target.name.length<=100&&Number.isFinite(target.altitude)&&Math.abs(target.altitude)<=90&&Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<=360)||equipment.length>100||!equipment.every(validEquipment))throw Error('The observing plan contains invalid data.');
+ if(!Number.isFinite(+date)||!validPlace(place)||targets.length>skyTargetLimit+109||!targets.every(target=>typeof target.name==='string'&&target.name.length<=100&&Number.isFinite(target.altitude)&&Math.abs(target.altitude)<=90&&Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<=360)||equipment.length>100||!equipment.every(validEquipment))throw Error('The observing plan contains invalid data.');
  const zone=place.timezone||'UTC';
  const local=new Intl.DateTimeFormat('en-GB',{timeZone:zone,weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'shortOffset'}).format(date);
  const moon=moonInfo(date,place),sun=bodyPosition(A.Body.Sun,date,place).altitude;
