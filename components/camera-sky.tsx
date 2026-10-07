@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import Image from 'next/image';
-import {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,type CameraCatalogue} from '@/lib/camera-catalogue';
+import {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,initialCameraView,type CameraCatalogue} from '@/lib/camera-catalogue';
 import {readCameraSettings,saveCameraSettings} from '@/lib/camera-settings';
 import {Camera,Compass,MapPin,Square,Star,Maximize2,Minimize2} from 'lucide-react';
 import ViewingMode from '@/components/viewing-mode';
@@ -24,9 +24,10 @@ function CameraThumbnail({name}:{name:string}){
  return <span className="camera-sky-thumbnail" aria-hidden="true">{(!photo||status!=='loaded')&&<Star size={20}/>} {photo&&status!=='failed'&&<Image unoptimized src={photo.src} alt="" width={36} height={36} referrerPolicy="no-referrer" className={status==='loaded'?'camera-sky-thumbnail-loaded':'camera-sky-thumbnail-loading'} onLoad={()=>setStatus('loaded')} onError={()=>setStatus('failed')}/>}</span>;
 }
 
-type Props={fullScreen:boolean;onFullScreenChange:(full:boolean)=>void;place:Place;selected:string;onSelect:(name:string)=>void;onDetails:(date:Date,place:Place,deepSkyId?:string)=>void};
+type Props={initialDeepTarget?:string;fullScreen:boolean;onFullScreenChange:(full:boolean)=>void;place:Place;selected:string;onSelect:(name:string)=>void;onDetails:(date:Date,place:Place,deepSkyId?:string)=>void};
 export default function CameraSky(props:Props){
- const [place,setPlace]=useState(props.place),[now,setNow]=useState(()=>new Date());
+ const [initialView]=useState(()=>initialCameraView(new Date(),props.place,props.initialDeepTarget));
+ const [place,setPlace]=useState(props.place),[now,setNow]=useState(initialView.date);
  const [camera,setCamera]=useState<'off'|'starting'|'on'>('off'),[cameraError,setCameraError]=useState(''),[trackPaused,setTrackPaused]=useState(false);
  const [playbackPaused,setPlaybackPaused]=useState(false);
  const cameraPaused=camera!=='off'&&(trackPaused||playbackPaused);
@@ -35,7 +36,7 @@ export default function CameraSky(props:Props){
  const [motionPending,setMotionPending]=useState(false),[alignmentError,setAlignmentError]=useState<{target:string;message:string}|null>(null);
  const [initialSettings]=useState(readCameraSettings);
  const [settingsStorageError,setSettingsStorageError]=useState(false);
- const [bearing,setBearing]=useState(0),[altitude,setAltitude]=useState(30),[fov,setFov]=useState(initialSettings.fov),[ratio,setRatio]=useState(.75),[size,setSize]=useState({width:360,height:480});
+ const [bearing,setBearing]=useState(initialView.bearing),[altitude,setAltitude]=useState(initialView.altitude),[fov,setFov]=useState(initialSettings.fov),[ratio,setRatio]=useState(.75),[size,setSize]=useState({width:360,height:480});
  const [sessionNotice,setSessionNotice]=useState('');
  const [wake,setWake]=useState<'off'|'requesting'|'on'>('off'),[wakeNotice,setWakeNotice]=useState('');
  const wakeSessionRef=useRef<ReturnType<typeof createCameraWakeLock>|null>(null);
@@ -47,7 +48,7 @@ export default function CameraSky(props:Props){
  const [badgeBounds,setBadgeBounds]=useState<CameraLabelObstacle|null>(null);
  const returnFocusRef=useRef<'stage'|'settings'|'alignment'|null>(null),wasFullScreenRef=useRef(false);
  const [labelMode,setLabelMode]=useState<'all'|'selected'|'hidden'>('all');
- const [catalogueMode,setCatalogueMode]=useState<CameraCatalogue>('bright'),[deepSelection,setDeepSelection]=useState(''),[targetQuery,setTargetQuery]=useState('');
+ const [catalogueMode,setCatalogueMode]=useState<CameraCatalogue>(initialView.mode),[deepSelection,setDeepSelection]=useState(initialView.selected),[targetQuery,setTargetQuery]=useState('');
  const selectedName=deepSelection||props.selected;
  function chooseTarget(name:string){if(/^M\d+$/.test(name)){setDeepSelection(name);props.onSelect('')}else{setDeepSelection('');props.onSelect(name)}}
  function chooseCatalogue(mode:CameraCatalogue){setCatalogueMode(mode);setDeepSelection('');props.onSelect('');setPreviousLabels([]);setAlignmentError(null)}

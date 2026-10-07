@@ -13,6 +13,13 @@ export function cameraCatalogueTargets(date:Date,place:Place,mode:CameraCatalogu
 export function cameraCataloguePhoto(name:string){
  const target=messierById.get(name);return target?deepSkyPhoto(target):objectPhoto(name);
 }
+export function initialCameraView(date:Date,place:Place,id?:string){
+ const now=new Date(+date),target=id?messierById.get(id):undefined;
+ const view={date:now,mode:'bright' as CameraCatalogue,selected:'',bearing:0,altitude:30};
+ if(!target)return view;
+ const position=deepSkyPosition(target,now,place);
+ return {...view,mode:'deep-sky' as CameraCatalogue,selected:target.id,...(position.altitude>0?{bearing:Math.round(position.azimuth)%360,altitude:Math.round(position.altitude)}:{})};
+}
 export function searchCameraTargets<T extends {name:string;altitude:number;deepSky:boolean}>(targets:T[],query:string):T[]{
  const deepIds=new Set(findDeepSky(query,'').map(target=>target.id));
  const brightNames=new Set(findSkyTargets(targets.filter(target=>!target.deepSky),query).map(target=>target.name));

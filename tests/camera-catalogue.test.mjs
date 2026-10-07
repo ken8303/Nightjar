@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets}=await vite.ssrLoadModule('/lib/camera-catalogue.ts');
+const {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,initialCameraView}=await vite.ssrLoadModule('/lib/camera-catalogue.ts');
 const {messierCatalogue,deepSkyPosition}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {skyTargets}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'London',latitude:51.5085,longitude:-.1257},date=new Date('2026-10-07T20:00Z');
@@ -41,4 +41,16 @@ test('camera search leaves catalogue positions, ordering and selected-record sou
  const all=cameraCatalogueTargets(date,place,'all'),before=structuredClone(all),selected=all.find(target=>target.name==='M13');
  const results=searchCameraTargets(all,'M31');assert(!results.some(target=>target.name===selected.name));assert(all.includes(selected));assert.deepEqual(all,before);
  assert.equal(results[0],all.find(target=>target.name===results[0].name));
+});
+
+test('a direct Messier camera preview selects its catalogue and centres an above-horizon direction without changing the source instant',async()=>{
+ const {manualCameraBasis,targetDirectionGuide}=await vite.ssrLoadModule('/lib/camera-sky.ts'),time=new Date('2026-10-07T14:00Z'),view=initialCameraView(time,place,'M13'),position=deepSkyPosition(messierCatalogue.find(target=>target.id==='M13'),time,place);
+ assert.equal(view.mode,'deep-sky');assert.equal(view.selected,'M13');assert.equal(+view.date,+time);assert.notEqual(view.date,time);assert(position.altitude>0);
+ assert(targetDirectionGuide(manualCameraBasis(view.bearing,view.altitude),position.altitude,position.azimuth).separation<1);
+ assert.equal(time.toISOString(),'2026-10-07T14:00:00.000Z');
+});
+test('a below-horizon preset retains the target with safe manual defaults, while an unknown ID opens the ordinary catalogue',()=>{
+ const time=new Date('2026-10-07T14:00Z'),view=initialCameraView(time,place,'M42');
+ assert(deepSkyPosition(messierCatalogue.find(target=>target.id==='M42'),time,place).altitude<0);assert.equal(view.mode,'deep-sky');assert.equal(view.selected,'M42');assert.equal(view.bearing,0);assert.equal(view.altitude,30);
+ for(const id of [undefined,'M102','Not a catalogue object']){const ordinary=initialCameraView(time,place,id);assert.equal(ordinary.mode,'bright');assert.equal(ordinary.selected,'');assert.equal(ordinary.bearing,0)}
 });
