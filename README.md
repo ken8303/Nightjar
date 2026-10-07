@@ -27,6 +27,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Saved deep-sky shortlists, six-object observing-window comparisons and Moon-down filtering.
 - An observing diary with recoverable unfinished forms, search/result/UTC date filters, in-app report previews, printable reports and CSV downloads. Saved observations can be removed to free space, with Undo for the latest removal while Sky atlas remains open.
 - Version 4 saved-plan backups up to 5 MiB (versions 1–3 remain importable), including full-capacity Unicode notes, legacy-file import and a PWA fallback that displays local saved records after network/server failures. Browser storage capacity can still prevent saving.
+- A separate raw recovery download preserves selected Nightjar storage values, including malformed text and unfinished forms, with unreadable entries listed. It is for manual recovery and is not an importable plan backup.
 - Local release verification and GitHub checks; deployment preparation is documented in [CLOUDFLARE.md](./CLOUDFLARE.md).
 
 For current release gates and phone checks, see [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
@@ -96,7 +97,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 283 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 286 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
