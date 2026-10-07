@@ -58,7 +58,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Site renaming was checked at 320/390-pixel mobile and 1280-pixel desktop widths, including Unicode, 199-character unbroken names, empty validation, Escape/focus restoration and actual quota rollback/retry. The name and observing time survived reload; saved metadata and unrelated sites were retained. Test-origin data/resources were cleaned.
 
-- Optional Messier/combined camera discovery was checked in manual preview. M13 centred within a degree and opened matching explorer details at the viewer time/site with correct focus; combined selection included all 148 identities, below-horizon preview was disabled and the original Polaris handoff still worked at 320 pixels. Hardware permissions were not requested; survey thumbnail receipt was not established and the fallback icon remained usable. The disposable origin was cleaned.
+- Optional Messier/combined camera discovery was checked in manual preview. M13 centred within a degree and opened matching explorer details at the viewer time/site with correct focus; combined selection included all 148 identities available at that stage (now 151 after planetary expansion), below-horizon preview was disabled and the original Polaris handoff still worked at 320 pixels. Hardware permissions were not requested; survey thumbnail receipt was not established and the fallback icon remained usable. The disposable origin was cleaned.
 
 - The Milky Way marker now uses an explicit galactic-coordinate origin and precesses it to the observing date. Independent vector-pipeline tests cover 2000/2026/2100 and polar latitudes. A 390-pixel browser check confirmed agreement between the 2D marker and card before/after using the peak time, without overflow or console errors; the disposable origin was cleaned.
 
@@ -71,6 +71,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Mercury, Uranus and Neptune now share the sky/camera/visibility catalogue, increasing it to 42 targets (151 combined with Messier). Planet magnitudes are calculated at the selected date. A mobile check loaded Neptune’s attributed image/details, centred Mercury in manual camera preview, prepared a version 4 backup and displayed all 42 targets plus notes offline. Older backup versions remain importable; native file receipt and live-phone alignment remain pending. The test origin was cleaned.
 
 - Both saved-target lists preserve the explicit Save/Remove action against latest storage, retain Undo after quota failure and preserve other-tab additions. Imported names without current catalogue positions have explicit removal controls. A 320/390-pixel disposable test checked capacity, both actual quota failures/retries, deep-sky additions, reload and unchanged notes; the origin was cleaned.
+
+- Messier details directly open the selected object in current-time manual camera preview. A disposable 390-pixel browser check verified above-horizon centring, full-screen entry/exit, return focus, ordinary-camera reset and below-horizon guidance without requesting hardware permissions. The planner time stayed unchanged when closing. All 273 tests, type checking, lint, production build and Cloudflare packaging passed; the disposable origin was cleaned.
 
 ## After the next GitHub Desktop push
 
@@ -89,6 +91,7 @@ Use an actual phone on the final HTTPS origin. Record browser, OS, installed/bro
 | Compass setup | On iPhone, begin upright, enable motion, then tilt slightly away from upright when prompted. | The initial compass setup cue clears after north is anchored; names track when returning upright. Physical verification remains pending. |
 | Camera alignment | Use a clearly identifiable bright target and the alignment controls. Repeat after rotation. | The label remains near the target after alignment, with understandable recalibration guidance if needed. Accuracy is not yet established by desktop tests. |
 | Camera fallback | Decline motion or use manual mode. | The manual controls work and the UI identifies manual operation. Labels remaining fixed while moving the phone in manual mode are expected. |
+| Messier shortcut | Select a Messier object in the explorer and choose Find in camera view. Compare with a known bright-star alignment before following a faint target. | The chosen object uses current viewer time/site; below-horizon guidance is clear. Camera/motion stay off until enabled. Returning to ordinary camera restores its default catalogue. |
 | Full screen | Enter full screen, rotate portrait/landscape, return and close. | Labels and essential controls remain usable around notches/safe areas; video and orientation recover. |
 | Permissions | Deny or revoke camera/motion permission, then retry through supported browser controls. | A useful message and recovery path appear. Permission should never be requested silently on page load. |
 | Lifecycle | Background/resume or interrupt the camera. | Video/labels pause or recover coherently; stale sensor/video data is not presented as current. |
