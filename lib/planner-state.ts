@@ -1,4 +1,5 @@
 import {Place,nextObservingTime} from './sky';
+import {parseObservingInstant} from './observing-time';
 
 export const initialPlace:Place={name:'London',latitude:51.5085,longitude:-.1257,country:'United Kingdom',timezone:'Europe/London'};
 export function validPlace(value:unknown):value is Place{
@@ -15,7 +16,7 @@ export function readPlannerSetup(now=new Date()){
  try{const value:unknown=JSON.parse(localStorage.getItem('nightjar-place')||'null');if(validPlace(value))place=value}catch{}
  try{const value:unknown=JSON.parse(localStorage.getItem('nightjar-places')||'[]');if(Array.isArray(value))saved=value.filter(validPlace)}catch{}
  // Reading is repeatable for React Strict Mode; remove the token after mounting.
- try{const value:unknown=JSON.parse(sessionStorage.getItem('nightjar-recovery-time-v1')||'null');if(typeof value==='string'){const date=new Date(value);if(Number.isFinite(+date))recovery=date}}catch{}
+ try{const value:unknown=JSON.parse(sessionStorage.getItem('nightjar-recovery-time-v1')||'null');recovery=parseObservingInstant(value)}catch{}
  return {place,saved,date:recovery||nextObservingTime(now,place)};
 }
 
