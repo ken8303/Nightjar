@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 225 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 229 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -37,6 +37,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Bright-star atlas positions now use the same J2000-to-date horizontal transformation as deep-sky objects, with one shared rotation per star catalogue pass. Tests cover equal-coordinate agreement at 2000/2026/2100, source/photo preservation and polar bounds. Built-app 3D selection and compact manual camera centring/fullscreen were checked without hardware permissions; real phone accuracy remains pending.
 
 - Full-capacity Unicode/escaped-text backups now fit within a shared 5 MB file bound; export validates the actual formatted JSON, and diary reads allow their validated serialized capacity. Country metadata is bounded to 199 characters. A generated 1.27 MB backup was reviewed/imported through the normal chooser on a disposable mobile origin; all 200 records and 2,000-character Chinese notes survived reload and could be prepared for re-export. Test-origin storage, workers and caches were removed.
+
+- Target-note management was checked with 100 imported archived notes on an isolated origin. A new note remained visible at capacity, survived another-tab updates, saved after freeing a slot and survived reload alongside unrelated newer text. Removal/Undo worked, including restoring editor focus, at 390/320-pixel widths without overflow or console errors. The disposable origin was cleaned.
 
 ## After the next GitHub Desktop push
 
