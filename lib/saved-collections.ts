@@ -22,6 +22,25 @@ export function restoreSavedPlace(current:Place[],removed:Place,index:number):Pl
  if(!validPlace(removed))throw Error('This observing place cannot be restored.');
  const next=[...current];next.splice(Math.max(0,Math.min(index,next.length)),0,removed);return next;
 }
+export function readEquipmentProfiles(storage:Pick<Storage,'getItem'>):Equipment[]{
+ const raw=storage.getItem('nightjar-equipment');
+ if(raw&&raw.length>5*1024*1024)throw Error('The saved equipment could not be read.');
+ const value:unknown=JSON.parse(raw||'[]');
+ if(!Array.isArray(value)||!value.every(validEquipment))throw Error('The saved equipment contains invalid data.');
+ return value;
+}
+export function removeEquipmentProfile(current:Equipment[],expected:Equipment):Equipment[]{
+ const index=current.findIndex(item=>item.name===expected.name);
+ if(index<0)throw Error('This setup was already removed elsewhere. The latest saved list is shown.');
+ if((['width','height','focal','pixel'] as const).some(key=>current[index][key]!==expected[key]))throw Error('This setup changed elsewhere. Review its latest dimensions before removing it.');
+ return current.filter((_,i)=>i!==index);
+}
+export function restoreEquipmentProfile(current:Equipment[],removed:Equipment,index:number):Equipment[]{
+ if(current.some(item=>item.name===removed.name))return [...current];
+ if(current.length>=equipmentProfilesLimit)throw Error(`Your ${equipmentProfilesLimit}-setup list is full. This removal cannot be undone until there is space.`);
+ if(!validEquipment(removed))throw Error('This equipment setup cannot be restored.');
+ const next=[...current];next.splice(Math.max(0,Math.min(index,next.length)),0,removed);return next;
+}
 export function upsertSavedPlace(current:Place[],place:Place):Place[]{
  if(!validPlace(place))throw Error('Enter a valid observing place before saving.');
  const matches=(item:Place)=>Math.abs(item.latitude-place.latitude)<.0001&&Math.abs(item.longitude-place.longitude)<.0001;

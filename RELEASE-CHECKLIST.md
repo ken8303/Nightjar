@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 241 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 244 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -53,6 +53,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Site comparisons retain each last successful forecast during refresh or failure, show update times and suppress highest-score claims until all selected feeds are fresh. Partial failure, retry, initial failure, delayed refresh and deselection were checked on a disposable origin at 320/390-pixel mobile and 1280-pixel desktop widths without overflow or console errors.
 
 - Saved places reread the latest stored collection before mutations and synchronize other-tab changes. Stale removal is refused, Undo preserves newer settings and quota failure retains Undo with adjacent mobile guidance. A disposable origin checked cross-tab additions/re-saving, actual storage failure and recovery surviving reload; test data and resources were cleaned.
+
+- Equipment profiles preserve cross-tab additions/newer dimensions without changing the current imaging draft. Actual quota failure retained Undo with adjacent 320-pixel guidance; freeing space restored the original profile, and reload retained restored/newer/unrelated profiles and the draft. The disposable origin was cleaned.
 
 ## After the next GitHub Desktop push
 

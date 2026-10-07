@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {upsertSavedPlace,upsertEquipmentProfile,readSavedPlaces,removeSavedPlace,restoreSavedPlace}=await vite.ssrLoadModule('/lib/saved-collections.ts');
+const {upsertSavedPlace,upsertEquipmentProfile,readSavedPlaces,removeSavedPlace,restoreSavedPlace,readEquipmentProfiles,removeEquipmentProfile,restoreEquipmentProfile}=await vite.ssrLoadModule('/lib/saved-collections.ts');
 const {makePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 const places=Array.from({length:100},(_,i)=>({name:`Site ${i}`,latitude:0,longitude:i,bortle:4}));
 const equipment=Array.from({length:100},(_,i)=>({name:`Setup ${i}`,width:36,height:24,focal:400,pixel:3.76}));
@@ -42,4 +42,26 @@ test('saved-place reads preserve valid oversized legacy data and reject unreadab
  for(const value of ['{}','bad',JSON.stringify([{...places[0],latitude:91}]),'x'.repeat(5*1024*1024+1)])assert.throws(()=>readSavedPlaces({getItem:()=>value}));
  assert.throws(()=>readSavedPlaces({getItem:()=>{throw Error('Storage blocked')}}),/Storage blocked/);
  assert.deepEqual(readSavedPlaces({getItem:()=>null}),[]);
+});
+
+test('equipment removal preserves unrelated additions and refuses changed dimensions',()=>{
+ const expected=equipment[0],newer={...expected,focal:800},current=[newer,equipment[1]],before=structuredClone(current);
+ assert.throws(()=>removeEquipmentProfile(current,expected),/changed elsewhere/);assert.deepEqual(current,before);
+ assert.deepEqual(removeEquipmentProfile(current,newer),[equipment[1]]);assert.deepEqual(current,before);
+ assert.throws(()=>removeEquipmentProfile([equipment[1]],expected),/already removed/);
+});
+test('equipment Undo preserves a re-saved name and respects current capacity',()=>{
+ const newer={...equipment[0],pixel:2.4},current=[newer,equipment[1]];
+ assert.deepEqual(restoreEquipmentProfile(current,equipment[0],0),current);
+ assert.deepEqual(restoreEquipmentProfile([equipment[1]],equipment[0],0),[equipment[0],equipment[1]]);
+ assert.throws(()=>restoreEquipmentProfile(equipment,{...equipment[0],name:'Extra'},0),/full/);
+ assert.equal(restoreEquipmentProfile(equipment,equipment[0],0).length,100);
+ assert.equal(current[0].pixel,2.4);
+});
+test('equipment reads retain valid legacy collections and reject corrupt or blocked storage',()=>{
+ const legacy=[...equipment,{...equipment[0],name:'Legacy extra'}];
+ assert.deepEqual(readEquipmentProfiles({getItem:()=>JSON.stringify(legacy)}),legacy);
+ for(const value of ['{}','bad',JSON.stringify([{...equipment[0],pixel:0}]),'x'.repeat(5*1024*1024+1)])assert.throws(()=>readEquipmentProfiles({getItem:()=>value}));
+ assert.throws(()=>readEquipmentProfiles({getItem:()=>{throw Error('Storage blocked')}}),/Storage blocked/);
+ assert.deepEqual(readEquipmentProfiles({getItem:()=>null}),[]);
 });
