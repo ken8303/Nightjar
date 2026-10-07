@@ -1,0 +1,29 @@
+import assert from 'node:assert/strict';
+import {test,after} from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {createServer} from './vite-test-server.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
+const {cameraCatalogueTargets,cameraCataloguePhoto}=await vite.ssrLoadModule('/lib/camera-catalogue.ts');
+const {messierCatalogue,deepSkyPosition}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+const {skyTargets}=await vite.ssrLoadModule('/lib/sky.ts');
+const place={name:'London',latitude:51.5085,longitude:-.1257},date=new Date('2026-10-07T20:00Z');
+test('camera catalogue modes have stable unique identities and retain every original bright target',()=>{
+ const bright=cameraCatalogueTargets(date,place,'bright'),deep=cameraCatalogueTargets(date,place,'deep-sky'),all=cameraCatalogueTargets(date,place,'all');
+ assert.equal(bright.length,39);assert.equal(deep.length,109);assert.equal(all.length,148);assert.equal(new Set(all.map(t=>t.name)).size,148);
+ assert.deepEqual(bright.map(target=>Object.fromEntries(Object.entries(target).filter(([key])=>key!=='displayName'&&key!=='deepSky'))),skyTargets(date,place));
+ assert(bright.every(t=>!t.deepSky&&t.displayName===t.name));assert(deep.every(t=>t.deepSky));assert(!deep.some(t=>t.name==='M102'));
+});
+test('deep camera directions agree with explorer date-frame positions while retaining catalogue identifiers',()=>{
+ const targets=cameraCatalogueTargets(date,place,'deep-sky');
+ targets.forEach((target,index)=>{
+  const source=messierCatalogue[index],position=deepSkyPosition(source,date,place);
+  assert.equal(target.name,source.id);assert.equal(target.altitude,position.altitude);assert.equal(target.azimuth,position.azimuth);assert(Number.isFinite(target.mag));
+  assert(target.displayName.startsWith(source.id+' · '));
+ });
+});
+test('camera reference photos retain survey coordinates and source attribution for Messier selections',()=>{
+ const photo=cameraCataloguePhoto('M31'),params=new URL(photo.src).searchParams;
+ assert.equal(params.get('e'),'J2000');assert.equal(params.get('r'),'0:42:44');assert(photo.caption.includes('M31'));assert(photo.source.includes('stsci.edu'));assert(photo.survey);
+ assert.equal(cameraCataloguePhoto('Unknown object'),undefined);assert(cameraCataloguePhoto('Polaris').survey);assert(cameraCataloguePhoto('Moon').credit.includes('NASA'));
+});

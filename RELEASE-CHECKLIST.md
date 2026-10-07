@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 248 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 251 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -58,6 +58,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Site renaming was checked at 320/390-pixel mobile and 1280-pixel desktop widths, including Unicode, 199-character unbroken names, empty validation, Escape/focus restoration and actual quota rollback/retry. The name and observing time survived reload; saved metadata and unrelated sites were retained. Test-origin data/resources were cleaned.
 
+- Optional Messier/combined camera discovery was checked in manual preview. M13 centred within a degree and opened matching explorer details at the viewer time/site with correct focus; combined selection included all 148 identities, below-horizon preview was disabled and the original Polaris handoff still worked at 320 pixels. Hardware permissions were not requested; survey thumbnail receipt was not established and the fallback icon remained usable. The disposable origin was cleaned.
+
 ## After the next GitHub Desktop push
 
 1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.
@@ -88,6 +90,6 @@ Use an actual phone on the final HTTPS origin. Record browser, OS, installed/bro
 
 ## Scope limits
 
-The camera overlays predicted positions from the bright-star/solar-system selection; it does not recognize sky objects from camera pixels. Deep-sky Messier objects are a separate explorer and are not part of camera discovery. Light-pollution maps, cloud accounts, push alerts, an AI assistant, a photo gallery and full reference-site feature parity remain outside this first-release implementation.
+The camera overlays predicted catalogue positions; it does not recognize sky objects from camera pixels. The optional Messier/combined camera catalogues provide predicted directions for 109 deep-sky objects; their photos/details open in the separate explorer. Most need binoculars or a telescope, and camera pixels are not analyzed. Light-pollution maps, cloud accounts, push alerts, an AI assistant, a photo gallery and full reference-site feature parity remain outside this first-release implementation.
 
 Completion percentages previously reported were estimates. Release acceptance is based on these checks, especially the remaining physical-phone and production-origin tests.
