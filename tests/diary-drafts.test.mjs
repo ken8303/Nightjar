@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
+const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts,diaryDraftConflicts,resolveDiaryDraftConflicts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
 const entry={id:'draft-M31',target:'M31',observedAt:'2026-10-06T20:00:00.000Z',place:{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},outcome:'seen',equipment:'',notes:'Unfinished\n星空'};
 test('new and edit drafts retain original metadata and unfinished text without touching saved observations',()=>{
  const values=new Map([['nightjar-observing-diary-v1','existing saved records']]),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
@@ -45,4 +45,22 @@ test('strict draft reads refuse corruption and storage failures so pending text 
  for(const raw of ['{','x'.repeat(1024*1024+1),JSON.stringify({version:2,drafts:[],edit:null})])assert.throws(()=>readStoredDiaryDrafts({getItem:()=>raw}));
  assert.throws(()=>readStoredDiaryDrafts({getItem:()=>{throw Error('Blocked')}}),/Blocked/);
  assert.deepEqual(readStoredDiaryDrafts({getItem:()=>null}),{drafts:[],edit:null});
+});
+
+
+test('reviewed draft resolution replaces only the chosen conflicts while preserving later unrelated forms',()=>{
+ const base={drafts:[entry],edit:null},local={drafts:[{...entry,notes:'Local text'}],edit:null},reviewed={drafts:[{...entry,notes:'Peer text'}],edit:null},other={...entry,id:'peer-M45',target:'M45'},current={drafts:[...reviewed.drafts,other],edit:null};
+ assert.equal(diaryDraftConflicts(base,local,reviewed).length,1);
+ const before=structuredClone([base,local,reviewed,current]);
+ for(const choice of ['local','stored']){const resolved=resolveDiaryDraftConflicts(base,local,reviewed,current,choice),saved=mergeDiaryDraftChanges(resolved.base,resolved.desired,current);assert.equal(saved.drafts.find(e=>e.target==='M31').notes,choice==='local'?'Local text':'Peer text');assert.deepEqual(saved.drafts.find(e=>e.target==='M45'),other)}
+ assert.deepEqual([base,local,reviewed,current],before);
+ assert.throws(()=>resolveDiaryDraftConflicts(base,local,reviewed,{drafts:[{...entry,notes:'Changed again'}],edit:null},'local'),/changed again/);
+});
+test('review resolution supports a removed form and edit conflict without altering an unrelated pending edit',()=>{
+ const original={...entry,id:'record-1'},first={original,draft:{...original,notes:'First'}},local={original,draft:{...original,notes:'Local edit'}},peer={original,draft:{...original,notes:'Peer edit'}};
+ const base={drafts:[entry],edit:first},desired={drafts:[],edit:local},reviewed={drafts:[{...entry,notes:'Peer draft'}],edit:peer};
+ assert.equal(diaryDraftConflicts(base,desired,reviewed).length,2);
+ const mine=resolveDiaryDraftConflicts(base,desired,reviewed,reviewed,'local');assert.deepEqual(mergeDiaryDraftChanges(mine.base,mine.desired,reviewed),desired);
+ const theirs=resolveDiaryDraftConflicts(base,desired,reviewed,reviewed,'stored');assert.deepEqual(mergeDiaryDraftChanges(theirs.base,theirs.desired,reviewed),reviewed);
+ assert.throws(()=>resolveDiaryDraftConflicts(base,desired,reviewed,{...reviewed,edit:null},'stored'),/edit changed again/);
 });

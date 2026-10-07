@@ -127,3 +127,5 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .page-heading>div:first-child{flex:1}.page-heading>.heading-utilities{flex:0 1 45%;max-width:45%}.page-heading .location-button{min-width:0}.location-button svg{flex-shrink:0}@media(max-width:900px){.page-heading>div:first-child{width:100%}.page-heading>.heading-utilities{flex:0 1 auto;max-width:100%;width:100%}}
 
 .other-saved-targets .saved-row{align-items:center;gap:12px}.other-saved-targets .saved-row>span{min-width:0;overflow-wrap:anywhere}.other-saved-targets .saved-row>.button{flex-shrink:0}
+
+.diary-draft-review{margin:18px 0;padding:16px;border:1px solid #49616a;border-radius:8px;min-width:0}.diary-draft-review h4{margin-top:0}.diary-draft-review details{margin-top:12px}.diary-draft-review details>div{margin:12px 0}.diary-draft-review summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.diary-draft-review p,.diary-draft-review summary{overflow-wrap:anywhere}.diary-draft-review textarea{width:100%;min-width:0;box-sizing:border-box}.diary-draft-review .button{white-space:normal;max-width:100%;min-height:44px}

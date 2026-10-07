@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 278 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 280 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -75,6 +75,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Messier details directly open the selected object in current-time manual camera preview. Disposable 320/390-pixel portrait and 800 × 400 landscape browser checks verified above-horizon centring, full-screen entry/exit, return focus, ordinary-camera reset and below-horizon guidance without requesting hardware permissions. The planner time stayed unchanged when closing. All 273 tests, type checking, lint, production build and Cloudflare packaging passed; the disposable origin was cleaned.
 
 - Unfinished diary forms preserve newer unrelated object drafts and refuse conflicting edits. Two-tab and actual-quota retry checks retained 1800 characters and unrelated equipment/notes through reload at 320 pixels; no console errors or overflow. Test resources were cleaned.
+
+- Conflicting unfinished diary forms can be reviewed side by side in selectable note fields. Both version choices retain unrelated peer forms, and stale local/saved reviews refuse overwriting. Two-tab 320-pixel mobile/1280-pixel desktop checks passed without overflow or console errors; reviewed local copies remained available after choosing stored text.
 
 ## After the next GitHub Desktop push
 
