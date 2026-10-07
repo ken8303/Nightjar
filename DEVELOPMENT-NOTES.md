@@ -342,3 +342,9 @@ Two calculation tests now check the overnight Sydney fixture, window bounds and 
 ## 7 October 2026 — batch handoff documentation
 
 README now states the shared 5 MiB backup file capacity and distinguishes it from available browser storage. The phone checklist includes upright iPhone compass initialization, the tilt cue and returning upright after anchoring. Final code checks passed with 235 tests; the working tree was clean before this documentation-only update. Production-origin, native-file and physical-phone acceptance remain pending; no push or deployment was performed.
+
+## 7 October 2026 — site comparison forecast recovery
+
+Comparison cards now retain a site’s last successful feed and timestamp during a refresh and after malformed/failed requests. Loading, failure and 30-minute age guidance distinguish retained data from fresh results. Highest-score labels require every selected site to have a fresh, successful result; old values remain inspectable without implying a current comparison winner. A shared state helper keeps coordinate identities separate and retains only active site records after settlement. Existing request cancellation and parallel requests remain intact.
+
+238 tests, TypeScript, lint without warnings, production build and Cloudflare packaging passed. Three tests cover preservation/retry, site isolation and age/pending state. A disposable proxy origin checked partial malformed refresh, successful retry, loading with retained values, deselection before delayed completion, first-load failure without invented scores and recovery. Layouts fit 320/390-pixel mobile and 1280-pixel desktop widths; browser page identity, meaningful content, no framework overlay, console health, screenshot and interaction checks passed through CUA (Browser plugin unavailable). Test-origin storage, workers, caches, tabs and servers were cleaned up. Native phone/PWA acceptance remains pending.

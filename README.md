@@ -19,7 +19,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Named equipment setups saved on this device.
 - Small-field mosaic planner with overlap, rotated panel centres and CSV export.
 - Interactive 3D Moon with NASA surface imagery, labelled landmarks, phase lighting and a lunar phase timeline.
-- Compare up to four saved/current locations at the same UTC forecast hour, with weather, Moon visibility and an explained planning score. Each site also shows its best remaining dark forecast window and can open the Tonight planner at that site and time.
+- Compare up to four saved/current locations at the same UTC forecast hour, with weather, Moon visibility and an explained planning score. Previous successful forecasts remain visible during refresh/failure with explicit update status; highest-score labels require fresh results for every selected site. Each site also shows its best remaining dark forecast window and can open the Tonight planner at that site and time.
 - Upcoming lunar eclipses with global contact times and local Moon altitude at each contact, plus UTC-safe calendar downloads containing the full event and contact notes.
 - A feature-detected WebMCP location tool. Coordinate-only selections preserve known time zone, country and Bortle metadata for matching sites; explicitly supplied values win.
 - Interactive 3D bright-sky atlas and optional camera overlay with predicted labels, thumbnails, manual alignment and full-screen controls. Camera alignment still requires real-phone verification.
@@ -96,7 +96,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 195 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 238 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
