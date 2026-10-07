@@ -18,3 +18,11 @@ test('full notes, empty notes and unavailable equipment remain explicit',()=>{
 test('invalid dates, coordinates, target positions and equipment are rejected',()=>{
  for(const change of [{date:new Date(NaN)},{place:{...input().place,latitude:91}},{targets:[{name:'Bad',altitude:NaN,azimuth:0}]},{targets:[{name:'Bad',altitude:91,azimuth:0}]},{equipment:[{...input().equipment[0],focal:0}]}])assert.throws(()=>printableObservingPlan({...input(),...change}));
 });
+
+test('catalogue reference exports identify supplied metadata without changing personal-note plans',()=>{
+ const plan=input();
+ const catalogue=printableObservingPlan({...plan,notesHeading:'Catalogue reference'});
+ assert(catalogue.includes('<h3>Catalogue reference</h3>'));assert(!catalogue.includes('<h3>Personal notes</h3>'));
+ assert(catalogue.includes('First line\nSecond line'));
+ assert(printableObservingPlan(plan).includes('<h3>Personal notes</h3>'));
+});
