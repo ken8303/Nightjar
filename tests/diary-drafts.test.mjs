@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
+const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
 const entry={id:'draft-M31',target:'M31',observedAt:'2026-10-06T20:00:00.000Z',place:{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},outcome:'seen',equipment:'',notes:'Unfinished\n星空'};
 test('new and edit drafts retain original metadata and unfinished text without touching saved observations',()=>{
  const values=new Map([['nightjar-observing-diary-v1','existing saved records']]),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
@@ -20,3 +20,29 @@ test('draft schema rejects duplicates, changed edit metadata and unbounded text'
 });
 
 test('completed drafts cannot become duplicate observations after a failed cleanup write',()=>{const state={drafts:[entry],edit:null};assert.equal(discardCompletedDrafts(state,[entry]).drafts.length,0);assert.equal(discardCompletedDrafts(state,[{...entry,notes:'Changed elsewhere'}]).drafts.length,1);assert.equal(state.drafts.length,1)});
+
+
+test('draft edits preserve newer unrelated forms and apply explicit deletion without mutating source snapshots',()=>{
+ const other={...entry,id:'draft-M45',target:'M45',notes:'Other tab'},base={drafts:[entry],edit:null},desired={drafts:[{...entry,notes:'My new text'}],edit:null},latest={drafts:[entry,other],edit:null};
+ const before=structuredClone([base,desired,latest]),merged=mergeDiaryDraftChanges(base,desired,latest);
+ assert.deepEqual(merged.drafts,[other,desired.drafts[0]]);assert.deepEqual([base,desired,latest],before);
+ assert.deepEqual(mergeDiaryDraftChanges(base,{drafts:[],edit:null},latest).drafts,[other]);
+ assert.deepEqual(mergeDiaryDraftChanges(base,desired,merged),merged);
+});
+test('changed, removed and independently created same-object drafts refuse overwriting newer text',()=>{
+ const base={drafts:[entry],edit:null},desired={drafts:[{...entry,notes:'My new text'}],edit:null};
+ for(const latest of [{drafts:[{...entry,notes:'Peer text'}],edit:null},{drafts:[],edit:null}])assert.throws(()=>mergeDiaryDraftChanges(base,desired,latest),/changed in another tab/);
+ assert.throws(()=>mergeDiaryDraftChanges({drafts:[],edit:null},base,{drafts:[{...entry,id:'peer-draft'}],edit:null}),/changed in another tab/);
+ assert.throws(()=>mergeDiaryDraftChanges(base,{drafts:[],edit:null},{drafts:[{...entry,notes:'Peer text'}],edit:null}),/changed in another tab/);
+});
+test('edit-draft conflicts are refused while unrelated new forms and latest edits are preserved',()=>{
+ const original={...entry,id:'saved-record'},edit={original,draft:{...original,notes:'Pending edit'}},other={...entry,id:'draft-M45',target:'M45'};
+ const latest={drafts:[other],edit},desired={drafts:[entry],edit:null};
+ assert.deepEqual(mergeDiaryDraftChanges({drafts:[],edit:null},desired,latest),{drafts:[other,entry],edit});
+ assert.throws(()=>mergeDiaryDraftChanges({drafts:[],edit}, {drafts:[],edit:null},{drafts:[],edit:{...edit,draft:{...original,notes:'Peer edit'}}}),/edit form changed/);
+});
+test('strict draft reads refuse corruption and storage failures so pending text cannot replace unreadable data',()=>{
+ for(const raw of ['{','x'.repeat(1024*1024+1),JSON.stringify({version:2,drafts:[],edit:null})])assert.throws(()=>readStoredDiaryDrafts({getItem:()=>raw}));
+ assert.throws(()=>readStoredDiaryDrafts({getItem:()=>{throw Error('Blocked')}}),/Blocked/);
+ assert.deepEqual(readStoredDiaryDrafts({getItem:()=>null}),{drafts:[],edit:null});
+});

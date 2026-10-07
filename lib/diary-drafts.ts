@@ -18,9 +18,38 @@ export function normalizeDiaryDrafts(value:unknown):DiaryDraftState{
  }
  return {drafts,edit};
 }
+export function readStoredDiaryDrafts(storage:Pick<Storage,'getItem'>):DiaryDraftState{
+ const raw=storage.getItem(diaryDraftKey);
+ if(raw===null)return emptyDiaryDrafts();
+ if(raw.length>1024*1024)throw Error('The unfinished diary forms are too large.');
+ return normalizeDiaryDrafts(JSON.parse(raw));
+}
 export function readDiaryDrafts(storage?:Pick<Storage,'getItem'>):{state:DiaryDraftState;status:string}{
- try{const raw=(storage??localStorage).getItem(diaryDraftKey);if(raw===null)return {state:emptyDiaryDrafts(),status:''};if(raw.length>1024*1024)throw Error();const state=normalizeDiaryDrafts(JSON.parse(raw));return {state,status:state.drafts.length||state.edit?'Unfinished diary forms restored from this browser.':''}}
- catch{return {state:emptyDiaryDrafts(),status:'Unfinished forms could not be restored. Existing stored drafts stay untouched until you edit a form.'}}
+ try{const state=readStoredDiaryDrafts(storage??localStorage);return {state,status:state.drafts.length||state.edit?'Unfinished diary forms restored from this browser.':''}}
+ catch{return {state:emptyDiaryDrafts(),status:'Unfinished forms could not be restored. Existing stored drafts are preserved; saving forms is unavailable until storage can be read.'}}
+}
+// Apply only changes made against the last successfully read/saved snapshot.
+// Unrelated forms keep their latest values; conflicting text is never overwritten.
+export function mergeDiaryDraftChanges(base:DiaryDraftState,desired:DiaryDraftState,latest:DiaryDraftState):DiaryDraftState{
+ const normalize=(state:DiaryDraftState)=>normalizeDiaryDrafts({version:1,...state});
+ const previous=normalize(base),next=normalize(desired),current=normalize(latest);
+ const equal=(a:Observation|undefined,b:Observation|undefined)=>a===undefined||b===undefined?a===b:sameObservation(a,b);
+ const targets=new Set([...previous.drafts,...next.drafts].map(entry=>entry.target));
+ let drafts=[...current.drafts];
+ for(const target of targets){
+  const before=previous.drafts.find(entry=>entry.target===target),after=next.drafts.find(entry=>entry.target===target);
+  if(equal(before,after))continue;
+  const stored=current.drafts.find(entry=>entry.target===target);
+  if(!equal(stored,before)&&!equal(stored,after))throw Error(`The unfinished ${target} form changed in another tab. Your text is retained here; review the latest form before replacing it.`);
+  drafts=drafts.filter(entry=>entry.target!==target);if(after)drafts.push(after);
+ }
+ const equalEdit=(a:DiaryDraftState['edit'],b:DiaryDraftState['edit'])=>a===null||b===null?a===b:sameObservation(a.original,b.original)&&sameObservation(a.draft,b.draft);
+ let edit=current.edit;
+ if(!equalEdit(previous.edit,next.edit)){
+  if(!equalEdit(current.edit,previous.edit)&&!equalEdit(current.edit,next.edit))throw Error('The diary edit form changed in another tab. Your text is retained here; review the latest edit before replacing it.');
+  edit=next.edit;
+ }
+ return normalize({drafts,edit});
 }
 export function saveDiaryDrafts(state:DiaryDraftState,storage?:Pick<Storage,'setItem'>){try{(storage??localStorage).setItem(diaryDraftKey,JSON.stringify({version:1,...normalizeDiaryDrafts({version:1,...state})}));return true}catch{return false}}
 
