@@ -43,7 +43,7 @@ test('edit-draft conflicts are refused while unrelated new forms and latest edit
 });
 test('strict draft reads refuse corruption and storage failures so pending text cannot replace unreadable data',()=>{
  for(const raw of ['{','x'.repeat(1024*1024+1),JSON.stringify({version:2,drafts:[],edit:null})])assert.throws(()=>readStoredDiaryDrafts({getItem:()=>raw}));
- assert.throws(()=>readStoredDiaryDrafts({getItem:()=>{throw Error('Blocked')}}),/Blocked/);
+ assert.throws(()=>readStoredDiaryDrafts({getItem:()=>{throw Error('Blocked')}}),/storage is unavailable/);
  assert.deepEqual(readStoredDiaryDrafts({getItem:()=>null}),{drafts:[],edit:null});
 });
 

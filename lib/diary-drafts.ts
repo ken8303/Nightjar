@@ -19,10 +19,11 @@ export function normalizeDiaryDrafts(value:unknown):DiaryDraftState{
  return {drafts,edit};
 }
 export function readStoredDiaryDrafts(storage:Pick<Storage,'getItem'>):DiaryDraftState{
- const raw=storage.getItem(diaryDraftKey);
+ let raw:string|null;
+ try{raw=storage.getItem(diaryDraftKey)}catch{throw Error('Browser storage is unavailable. Keep this view open or download a form recovery copy before leaving, then restore storage access and retry.');}
  if(raw===null)return emptyDiaryDrafts();
- if(raw.length>1024*1024)throw Error('The unfinished diary forms are too large.');
- return normalizeDiaryDrafts(JSON.parse(raw));
+ if(raw.length>1024*1024)throw Error('Stored unfinished forms are too large to read safely. Existing data is unchanged; keep this view open or download a form recovery copy before leaving.');
+ try{return normalizeDiaryDrafts(JSON.parse(raw))}catch{throw Error('Stored unfinished forms contain invalid data. They were not changed. Keep this view open or download a form recovery copy before leaving.');}
 }
 export function readDiaryDrafts(storage?:Pick<Storage,'getItem'>):{state:DiaryDraftState;status:string}{
  try{const state=readStoredDiaryDrafts(storage??localStorage);return {state,status:state.drafts.length||state.edit?'Unfinished diary forms restored from this browser.':''}}
