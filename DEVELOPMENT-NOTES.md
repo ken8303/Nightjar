@@ -334,3 +334,7 @@ The Milky Way planning card previously showed only the starting day beside an ov
 A valid 98-character unbroken target name expanded a generated observing plan to 1,000 pixels in a 320-pixel browser viewport. Checklist labels now wrap within their available width. The same generated report measured 305-pixel content and document width after the change; the full label remained visible and its checkbox worked. A screenshot was reviewed and the disposable browser tab/server closed. No user data was changed.
 
 233 tests, TypeScript, lint without warnings, production build and Cloudflare packaging dry-run passed. The CSS correction was verified in the browser rather than by a test mirroring its implementation. Native downloaded-file receipt and print/PDF remain pending.
+
+## 7 October 2026 — Milky Way window regression coverage
+
+Two calculation tests now check the overnight Sydney fixture, window bounds and contiguous qualifying samples, peak dominance across the full rolling 24 hours, and a polar-day fixture with no invented darkness. Both keep a valid current direction. The full 235-test suite, TypeScript and lint without warnings pass. Runtime source is unchanged from the preceding verified production build and Cloudflare dry-run; no repeat packaging was necessary for tests/documentation alone. All development commits remain local for a batch GitHub Desktop push.

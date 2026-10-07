@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 233 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 235 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -47,6 +47,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Milky Way windows show dates and UTC offsets at both endpoints and at the peak. A built-app overnight window crossed 21–22 April correctly at 320/390-pixel mobile widths without horizontal overflow or console errors; original location/time were restored.
 
 - Exported checklist labels wrap long unbroken names. A valid 98-character label was checked at 320 pixels: the document no longer overflowed, all text remained present and the checkbox worked.
+
+- Milky Way calculation tests cover a real overnight Sydney window, eligible adjacent samples, peak ranking across the full 24-hour search and no invented window during polar daylight.
 
 ## After the next GitHub Desktop push
 
