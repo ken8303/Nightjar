@@ -196,3 +196,17 @@ test('relative-source reset fires once per compass loss and does not erase ordin
  h.setTime(900);h.read({alpha:50,beta:120,webkitCompassHeading:230,webkitCompassAccuracy:5});
  h.setTime(1401);h.read({alpha:60,beta:120});assert.equal(h.result.relative,2);h.dispose();
 });
+
+test('an initially upright Safari phone requests north setup until a tilted compass anchor is established',()=>{
+ const h=harness();h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,false);assert.equal(h.result.reading.needsNorthAnchor,true);
+ h.setTime(100);h.read({beta:60,webkitCompassHeading:0,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,true);assert.equal(h.result.reading.needsNorthAnchor,undefined);
+ h.setTime(200);h.read({beta:90,webkitCompassHeading:0,webkitCompassAccuracy:5});
+ assert.equal(h.result.reading.absolute,true);assert.equal(h.result.reading.needsNorthAnchor,undefined);h.dispose();
+});
+test('north setup guidance is not invented for relative-only or unusable-compass streams',()=>{
+ for(const values of [{beta:90},{beta:90,webkitCompassHeading:0,webkitCompassAccuracy:-1},{beta:90,absolute:true}]){
+  const h=harness();h.read(values);assert.equal(h.result.reading.needsNorthAnchor,undefined);h.dispose();
+ }
+});
