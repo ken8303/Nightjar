@@ -322,3 +322,9 @@ An initially upright Safari-style pose can have usable gyro/compass fields while
 Mosaic panel right ascension is normalized before export, but seven-decimal rounding could produce 24.0000000 hours. The CSV now wraps the rounded value to zero, retaining the same sky direction and seven-decimal precision without mutating the source panels. Two regression tests cover the rounding boundary and a rotated two-row grid crossing RA zero, including panel identities, declination precision and CRLF rows.
 
 233 tests, TypeScript, lint without warnings, production build and Cloudflare packaging dry-run passed. This is a serialization correction; native file receipt remains pending.
+
+## 7 October 2026 — dated Milky Way windows
+
+The Milky Way planning card previously showed only the starting day beside an overnight time range. Both endpoints and the peak now show their dates, years and UTC offsets, resolving midnight and repeated-clock ambiguity. The label and explanation identify altitude as the ranking criterion and state the actual inclusive sampled Sun/core thresholds. The underlying calculations remain unchanged. NASA confirms the existing image coordinates but does not state their epoch on the linked page, so no coordinate-frame assumption was introduced for this regional marker: https://science.nasa.gov/asset/hubble/compass-and-scale-image-for-milky-way-center/
+
+233 tests, TypeScript, lint without warnings, production build and Cloudflare packaging dry-run passed. The built planner displayed a public Sydney test window from 21 April to 22 April with GMT+10 at each endpoint; its peak carried the next-day date. The 320-pixel document had no horizontal overflow, and a 390-pixel screenshot was reviewed. Browser console warnings/errors were absent. Original London metadata and observing time were restored; the owned tab and preview server were closed.

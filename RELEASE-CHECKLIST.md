@@ -44,6 +44,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Mosaic CSV rounds coordinates to seven decimals while wrapping RA at 24 hours back to zero. Boundary and rotated-grid tests preserve panel order, precision and original coordinate values.
 
+- Milky Way windows show dates and UTC offsets at both endpoints and at the peak. A built-app overnight window crossed 21–22 April correctly at 320/390-pixel mobile widths without horizontal overflow or console errors; original location/time were restored.
+
 ## After the next GitHub Desktop push
 
 1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.
