@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 296 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 300 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -87,6 +87,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Camera thumbnail retry recovered controlled failed images manually and after a simulated connection-return event, preserving the followed ID. Photo-off disabled retry/rendering; 320/390-pixel guidance fit without overflow or console errors. Actual phone network transitions remain pending.
 
 - Forecast/eclipse event identities now distinguish same-named observing sites and include coordinates. UTC/DST, fractional boundaries, contact validation and Unicode tests pass. Browser checks prepared real penumbral/partial/total events and reset messages after site/date changes at 320/390 pixels without overflow/errors. Native import remains pending.
+
+- Imaging bounds reject extreme/non-finite calculations while preserving legacy profiles and typed input. Fractional engineering values are natively valid, unsupported rotation/RA disable export, and rounded RA display wraps canonically. Full-width mobile centre fields passed 320/390-pixel and desktop checks without overflow/errors.
 
 ## After the next GitHub Desktop push
 

@@ -131,3 +131,7 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .diary-draft-review{margin:18px 0;padding:16px;border:1px solid #49616a;border-radius:8px;min-width:0}.diary-draft-review h4{margin-top:0}.diary-draft-review details{margin-top:12px}.diary-draft-review details>div{margin:12px 0}.diary-draft-review summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.diary-draft-review p,.diary-draft-review summary{overflow-wrap:anywhere}.diary-draft-review textarea{width:100%;min-width:0;box-sizing:border-box}.diary-draft-review .button{white-space:normal;max-width:100%;min-height:44px}
 
 .deep-compare-window{margin:12px 0;padding:10px 0;border-top:1px solid #49616a}.deep-compare-window p{overflow-wrap:anywhere}.deep-compare-window .button{white-space:normal;width:100%;min-height:44px}
+
+.photo-input-grid input[aria-invalid="true"],.equipment-save input[aria-invalid="true"]{border-color:#ee9c91}.photo-input-grid input[aria-invalid="true"]:focus,.equipment-save input[aria-invalid="true"]:focus{outline:2px solid #ee9c91;outline-offset:2px}
+
+@media(max-width:600px){.mosaic-panel .mosaic-centre-field{grid-column:1/-1}}
