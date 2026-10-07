@@ -338,3 +338,7 @@ A valid 98-character unbroken target name expanded a generated observing plan to
 ## 7 October 2026 — Milky Way window regression coverage
 
 Two calculation tests now check the overnight Sydney fixture, window bounds and contiguous qualifying samples, peak dominance across the full rolling 24 hours, and a polar-day fixture with no invented darkness. Both keep a valid current direction. The full 235-test suite, TypeScript and lint without warnings pass. Runtime source is unchanged from the preceding verified production build and Cloudflare dry-run; no repeat packaging was necessary for tests/documentation alone. All development commits remain local for a batch GitHub Desktop push.
+
+## 7 October 2026 — batch handoff documentation
+
+README now states the shared 5 MiB backup file capacity and distinguishes it from available browser storage. The phone checklist includes upright iPhone compass initialization, the tilt cue and returning upright after anchoring. Final code checks passed with 235 tests; the working tree was clean before this documentation-only update. Production-origin, native-file and physical-phone acceptance remain pending; no push or deployment was performed.

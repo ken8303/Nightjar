@@ -64,6 +64,7 @@ Use an actual phone on the final HTTPS origin. Record browser, OS, installed/bro
 | Area | Test | Pass condition |
 | --- | --- | --- |
 | Camera discovery | Start camera and enable motion yourself. Slowly turn through cardinal directions and tilt. | Predicted labels move with the view; they do not remain fixed to the screen. No repeated unexplained disappearance or frozen video. |
+| Compass setup | On iPhone, begin upright, enable motion, then tilt slightly away from upright when prompted. | The initial compass setup cue clears after north is anchored; names track when returning upright. Physical verification remains pending. |
 | Camera alignment | Use a clearly identifiable bright target and the alignment controls. Repeat after rotation. | The label remains near the target after alignment, with understandable recalibration guidance if needed. Accuracy is not yet established by desktop tests. |
 | Camera fallback | Decline motion or use manual mode. | The manual controls work and the UI identifies manual operation. Labels remaining fixed while moving the phone in manual mode are expected. |
 | Full screen | Enter full screen, rotate portrait/landscape, return and close. | Labels and essential controls remain usable around notches/safe areas; video and orientation recover. |
