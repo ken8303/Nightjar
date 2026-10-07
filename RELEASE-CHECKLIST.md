@@ -72,7 +72,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Both saved-target lists preserve the explicit Save/Remove action against latest storage, retain Undo after quota failure and preserve other-tab additions. Imported names without current catalogue positions have explicit removal controls. A 320/390-pixel disposable test checked capacity, both actual quota failures/retries, deep-sky additions, reload and unchanged notes; the origin was cleaned.
 
-- Messier details directly open the selected object in current-time manual camera preview. A disposable 390-pixel browser check verified above-horizon centring, full-screen entry/exit, return focus, ordinary-camera reset and below-horizon guidance without requesting hardware permissions. The planner time stayed unchanged when closing. All 273 tests, type checking, lint, production build and Cloudflare packaging passed; the disposable origin was cleaned.
+- Messier details directly open the selected object in current-time manual camera preview. Disposable 320/390-pixel portrait and 800 × 400 landscape browser checks verified above-horizon centring, full-screen entry/exit, return focus, ordinary-camera reset and below-horizon guidance without requesting hardware permissions. The planner time stayed unchanged when closing. All 273 tests, type checking, lint, production build and Cloudflare packaging passed; the disposable origin was cleaned.
 
 ## After the next GitHub Desktop push
 
