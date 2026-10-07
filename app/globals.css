@@ -125,3 +125,5 @@ html[data-red-light=on]::after{content:"";position:fixed;inset:0;z-index:2147483
 .site-name-trigger{margin:0 0 12px}.site-name-editor{margin:16px 0 20px;max-width:100%}.site-name-editor [data-slot="field"]{min-width:0}.site-name-editor [data-slot="field-description"]{overflow-wrap:anywhere}
 main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .location-button{white-space:normal;max-width:100%}.saved-row>button:first-child{min-width:0;flex:1}.saved-row>button:first-child>span,.comparison-picker label>span{min-width:0}.saved-row>button>svg,.comparison-picker [data-slot="checkbox"]{flex-shrink:0}.comparison-picker label{max-width:100%;min-width:0}
 .page-heading>div:first-child{flex:1}.page-heading>.heading-utilities{flex:0 1 45%;max-width:45%}.page-heading .location-button{min-width:0}.location-button svg{flex-shrink:0}@media(max-width:900px){.page-heading>div:first-child{width:100%}.page-heading>.heading-utilities{flex:0 1 auto;max-width:100%;width:100%}}
+
+.other-saved-targets .saved-row{align-items:center;gap:12px}.other-saved-targets .saved-row>span{min-width:0;overflow-wrap:anywhere}.other-saved-targets .saved-row>.button{flex-shrink:0}
