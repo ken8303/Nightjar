@@ -25,3 +25,8 @@ test('backup diary merge keeps local conflicts and supports legacy files without
  assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...empty,diary:null}})));
  assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...empty,diary:[{...entry,target:'bad'}]}})));
 });
+
+test('a diary at its allowed escaped-text capacity can be read back after saving',()=>{
+ const source=storage(),records=Array.from({length:200},(_,index)=>({...entry,id:`escaped-${index}`,notes:'\u0000'.repeat(2000)}));
+ saveDiary(records,source);assert(source.getItem('nightjar-observing-diary-v1').length>1024*1024);assert.deepEqual(readDiary(source),records);
+});

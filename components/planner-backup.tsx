@@ -2,7 +2,7 @@
 import {downloadFile} from '@/lib/download';
 import {useEffect,useRef,useState} from 'react';
 import {Download,Upload} from 'lucide-react';
-import {makePlannerBackup,parsePlannerBackup,readSavedPlan,previewPlannerMerge,restorePlannerBackup,type PlannerBackup,type SavedPlan} from '@/lib/planner-backup';
+import {plannerBackupMaxBytes,makePlannerBackup,parsePlannerBackup,readSavedPlan,previewPlannerMerge,restorePlannerBackup,type PlannerBackup,type SavedPlan} from '@/lib/planner-backup';
 
 const count=(value:number,label:string)=>`${value} ${label}${value===1?'':'s'}`;
 const counts=(data:SavedPlan)=>[count(data.places.length,'site'),count(data.targets.length,'target'),count((data.deepTargets||[]).length,'deep-sky target'),count((data.diary||[]).length,'observation'),count(Object.keys(data.notes).length,'note'),count(data.equipment.length,'setup')].join(' · ');
@@ -22,7 +22,7 @@ export default function PlannerBackupPanel({onRestore}:{onRestore:(data:SavedPla
   const request=++generation.current;setPreview(null);setStatus('');setError('');if(!file){setBusy(false);return}
   setBusy(true);
   try{
-   if(file.size>1024*1024)throw Error('Choose a Nightjar backup smaller than 1 MB.');
+   if(file.size>plannerBackupMaxBytes)throw Error('Choose a Nightjar backup no larger than 5 MB.');
    const backup=parsePlannerBackup(await file.text()),review=previewPlannerMerge(readSavedPlan(localStorage),backup.data);
    if(request===generation.current)setPreview({backup,review});
   }catch(error){if(request===generation.current)setError(error instanceof Error?error.message:'This backup could not be read.')}

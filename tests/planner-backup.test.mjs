@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
-const {parsePlannerBackup,makePlannerBackup,readSavedPlan,mergeSavedPlans,restorePlannerBackup,previewPlannerMerge}=await vite.ssrLoadModule('/lib/planner-backup.ts');
+const {plannerBackupMaxBytes,parsePlannerBackup,makePlannerBackup,readSavedPlan,mergeSavedPlans,restorePlannerBackup,previewPlannerMerge}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 after(()=>vite.close());
 const empty=()=>({places:[],targets:[],notes:{},equipment:[],diary:[]});
 const site={name:'Dark field',latitude:51,longitude:-1,timezone:'Europe/London',bortle:3};
@@ -33,7 +33,7 @@ test('invalid versions, dates, values, collection limits and oversized files are
  assert.throws(()=>parsePlannerBackup('{'));
  for(const change of [{version:4},{format:'another-app'},{exportedAt:'bad'}])assert.throws(()=>parsePlannerBackup(JSON.stringify({...JSON.parse(file(empty())),...change})));
  for(const data of [{...empty(),places:[{...site,latitude:91}]},{...empty(),notes:{Vega:'x'.repeat(2001)}},{...empty(),equipment:[{...camera,pixel:0}]},{...empty(),targets:Array.from({length:40},(_,i)=>String(i))},{...empty(),notes:JSON.parse('{"__proto__":"bad"}')}])assert.throws(()=>parsePlannerBackup(file(data)));
- assert.throws(()=>parsePlannerBackup('x'.repeat(1024*1024+1)));
+ assert.throws(()=>parsePlannerBackup('x'.repeat(plannerBackupMaxBytes+1)),/5 MB/);
  const current=storage();current.setItem(keys[0],'broken');const before=[...current.values];assert.throws(()=>restorePlannerBackup(current,parsePlannerBackup(file(empty()))));assert.deepEqual([...current.values],before);
 });
 test('quota failure rolls back all successful writes and preserves originally absent keys',()=>{
@@ -67,4 +67,17 @@ test('version 2 backups round-trip deep-sky lists while legacy version 1 remains
  assert.deepEqual(restorePlannerBackup(existing,incoming).deepTargets,['M31','M45']);
  const backup=makePlannerBackup(existing);assert.equal(backup.version,3);assert.deepEqual(parsePlannerBackup(JSON.stringify(backup)).data.deepTargets,['M31','M45']);
  for(const value of [['M102'],['bad'],Array(110).fill('M31')])assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...backup.data,deepTargets:value}})));
+});
+
+test('full-capacity Unicode backups export and restore without the former one-megabyte rejection',()=>{
+ const note='星'.repeat(2000),data={places:Array.from({length:100},(_,index)=>({...site,name:`Field ${index}`,longitude:-1+index/100})),targets:Array.from({length:39},(_,index)=>`Target ${index}`),notes:Object.fromEntries(Array.from({length:100},(_,index)=>[`Target ${index}`,note])),equipment:Array.from({length:100},(_,index)=>({...camera,name:`Setup ${index}`})),deepTargets:['M31','M45'],diary:Array.from({length:200},(_,index)=>({id:`unicode-${index}`,target:'M31',observedAt:'2026-10-07T20:00:00.000Z',place:site,outcome:'seen',equipment:'望遠鏡',notes:note}))};
+ const source=storage(data),backup=makePlannerBackup(source),text=JSON.stringify(backup,null,2),bytes=new TextEncoder().encode(text).length;
+ assert(bytes>1024*1024);assert(bytes<plannerBackupMaxBytes);
+ const parsed=parsePlannerBackup(text),destination=storage();restorePlannerBackup(destination,parsed);
+ assert.equal(readSavedPlan(destination).diary.length,200);assert.equal(readSavedPlan(destination).notes['Target 99'],note);assert.deepEqual(readSavedPlan(destination),backup.data);
+});
+test('maximum escaped note and metadata lengths stay within the formatted backup size bound',()=>{
+ const fill='\u0000',longName=prefix=>prefix+fill.repeat(199-prefix.length),data={places:Array.from({length:100},(_,index)=>({...site,name:longName(`Field ${index}`),country:fill.repeat(199),longitude:-1+index/100})),targets:Array.from({length:39},(_,index)=>`Target ${index}`),notes:Object.fromEntries(Array.from({length:100},(_,index)=>[`Target ${index}`+fill.repeat(90),fill.repeat(2000)])),equipment:Array.from({length:100},(_,index)=>({...camera,name:`Setup ${index}`+fill.repeat(70)})),diary:Array.from({length:200},(_,index)=>({id:`escaped-${index}`,target:'M31',observedAt:'2026-10-07T20:00:00.000Z',place:{...site,name:longName('Field')},outcome:'imaged',equipment:fill.repeat(100),notes:fill.repeat(2000)}))};
+ const backup=makePlannerBackup(storage(data)),text=JSON.stringify(backup,null,2);assert(new TextEncoder().encode(text).length<plannerBackupMaxBytes);assert.equal(parsePlannerBackup(text).data.diary[199].notes,fill.repeat(2000));
+ assert.throws(()=>parsePlannerBackup(file({...empty(),places:[{...site,country:'x'.repeat(200)}]})));
 });

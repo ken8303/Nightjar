@@ -5,7 +5,7 @@ export function validPlace(value:unknown):value is Place{
  if(!value||typeof value!=='object')return false;
  const p=value as Record<string,unknown>;
  if(typeof p.name!=='string'||!p.name.trim()||p.name.length>=200||typeof p.latitude!=='number'||!Number.isFinite(p.latitude)||Math.abs(p.latitude)>90||typeof p.longitude!=='number'||!Number.isFinite(p.longitude)||Math.abs(p.longitude)>180)return false;
- if(p.country!==undefined&&typeof p.country!=='string')return false;
+ if(p.country!==undefined&&(typeof p.country!=='string'||p.country.length>=200))return false;
  if(p.bortle!==undefined&&(typeof p.bortle!=='number'||!Number.isInteger(p.bortle)||p.bortle<1||p.bortle>9))return false;
  if(p.timezone!==undefined){if(typeof p.timezone!=='string')return false;try{new Intl.DateTimeFormat('en',{timeZone:p.timezone})}catch{return false}}
  return true;
