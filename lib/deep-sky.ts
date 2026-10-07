@@ -9,7 +9,10 @@ export {deepSkyName,deepSkyNames};
 export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
  const vector=A.VectorFromSphere(new A.Spherical(target.dec,target.ra*15,1),date);
  const equator=A.EquatorFromVector(A.RotateVector(A.Rotation_EQJ_EQD(date),vector));
- return A.Horizon(date,observer(place),equator.ra,equator.dec,'normal');
+ const {altitude,azimuth}=A.Horizon(date,observer(place),equator.ra,equator.dec,'normal');
+ // Horizon also exposes apparent equatorial coordinates. Return only the
+ // horizontal position so callers cannot overwrite catalogue J2000 RA/Dec.
+ return {altitude,azimuth};
 }
 export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude}:{constellation?:string;maximumMagnitude?:number}={}){
  const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');

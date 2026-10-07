@@ -80,3 +80,16 @@ test('offline plan notes preserve catalogue identity and aliases alongside angul
  const {printableObservingPlan}=await vite.ssrLoadModule('/lib/observing-plan.ts');const html=printableObservingPlan({date:new Date('2026-10-06T20:00Z'),place,targets:[{name:'M76 · Barbell Nebula',altitude:45,azimuth:60}],notes:{'M76 · Barbell Nebula':notes},equipment:[]});assert(html.includes('Cork Nebula, Little Dumbbell Nebula'));assert(html.includes('Perseus (Per)'));assert(html.includes('NGC0650'));
  const missing=deepSkyPlanNotes({...target,name:'',major:null,magnitude:null});assert(missing.includes('Visual magnitude: not listed'));assert(missing.includes('Angular major axis: not listed'));assert(!missing.includes('Also known as:'));
 });
+
+test('adding current horizontal positions preserves catalogue J2000 coordinates in saved plans and survey images',async()=>{
+ const {deepSkyPlanNotes,deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const target=messierCatalogue.find(target=>target.id==='M31'),before=structuredClone(target);
+ for(const date of [new Date('2026-10-07T20:00Z'),new Date('2100-01-01T00:00Z')]){
+  const position=deepSkyPosition(target,date,place),saved={...target,...position};
+  assert.deepEqual(Object.keys(position).sort(),['altitude','azimuth']);
+  assert.equal(saved.ra,target.ra);assert.equal(saved.dec,target.dec);
+  assert(deepSkyPlanNotes(saved).includes(`J2000: RA ${target.ra.toFixed(5)} h · Dec ${target.dec.toFixed(5)}°`));
+  assert.equal(deepSkyPhoto(saved).src,deepSkyPhoto(target).src);
+  assert.deepEqual(target,before);
+ }
+});
