@@ -82,11 +82,12 @@ export function skyTargets(date:Date,place:Place){
  return [...fixed,...planets];
 }
 
-// NASA's Hubble position for the Galactic Centre. This is a direction on the sky,
-// not a point source that is visible to the naked eye.
-export const galacticCentre={ra:17+45/60+36/3600,dec:-(28+55/60+58.8/3600)};
+// IAU galactic longitude/latitude zero, converted to a defined J2000 frame.
+// This is a regional sightline, not a point-source position for Sagittarius A*.
+const galacticOrigin=A.EquatorFromVector(A.RotateVector(A.Rotation_GAL_EQJ(),A.VectorFromSphere(new A.Spherical(0,0,1),new Date('2000-01-01T12:00:00Z'))));
+export const galacticCentre=Object.freeze({ra:galacticOrigin.ra,dec:galacticOrigin.dec});
 export function galacticCentrePosition(date:Date,place:Place){
- return A.Horizon(date,observer(place),galacticCentre.ra,galacticCentre.dec,'normal');
+ return j2000Position(galacticCentre.ra,galacticCentre.dec,date,place);
 }
 export function milkyWayPlanning(date:Date,place:Place){
  const current=galacticCentrePosition(date,place);

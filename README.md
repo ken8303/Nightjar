@@ -14,7 +14,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
 - Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events.
-- Golden-hour and blue-hour windows for morning/evening, based on Sun altitude and the shared observing time.
+- Golden-hour and blue-hour windows for morning/evening, based on Sun altitude and the shared observing time. The Milky Way direction marker uses galactic longitude/latitude zero in a defined J2000 frame, transformed to the observing date; it marks a regional sightline.
 - Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
 - Named equipment setups saved on this device.
 - Small-field mosaic planner with overlap, rotated panel centres and CSV export.
@@ -96,7 +96,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 251 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 253 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 

@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 251 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 253 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -59,6 +59,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Site renaming was checked at 320/390-pixel mobile and 1280-pixel desktop widths, including Unicode, 199-character unbroken names, empty validation, Escape/focus restoration and actual quota rollback/retry. The name and observing time survived reload; saved metadata and unrelated sites were retained. Test-origin data/resources were cleaned.
 
 - Optional Messier/combined camera discovery was checked in manual preview. M13 centred within a degree and opened matching explorer details at the viewer time/site with correct focus; combined selection included all 148 identities, below-horizon preview was disabled and the original Polaris handoff still worked at 320 pixels. Hardware permissions were not requested; survey thumbnail receipt was not established and the fallback icon remained usable. The disposable origin was cleaned.
+
+- The Milky Way marker now uses an explicit galactic-coordinate origin and precesses it to the observing date. Independent vector-pipeline tests cover 2000/2026/2100 and polar latitudes. A 390-pixel browser check confirmed agreement between the 2D marker and card before/after using the peak time, without overflow or console errors; the disposable origin was cleaned.
 
 ## After the next GitHub Desktop push
 
