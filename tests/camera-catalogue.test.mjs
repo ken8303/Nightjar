@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {cameraCatalogueTargets,cameraCataloguePhoto}=await vite.ssrLoadModule('/lib/camera-catalogue.ts');
+const {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets}=await vite.ssrLoadModule('/lib/camera-catalogue.ts');
 const {messierCatalogue,deepSkyPosition}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {skyTargets}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'London',latitude:51.5085,longitude:-.1257},date=new Date('2026-10-07T20:00Z');
@@ -26,4 +26,19 @@ test('camera reference photos retain survey coordinates and source attribution f
  const photo=cameraCataloguePhoto('M31'),params=new URL(photo.src).searchParams;
  assert.equal(params.get('e'),'J2000');assert.equal(params.get('r'),'0:42:44');assert(photo.caption.includes('M31'));assert(photo.source.includes('stsci.edu'));assert(photo.survey);
  assert.equal(cameraCataloguePhoto('Unknown object'),undefined);assert(cameraCataloguePhoto('Polaris').survey);assert(cameraCataloguePhoto('Moon').credit.includes('NASA'));
+});
+
+test('camera search discovers Messier/NGC identities and alternate names with Unicode normalization',()=>{
+ const all=cameraCatalogueTargets(date,place,'all');
+ for(const query of ['M31','Ｍ３１','m 0 0 3 1','NGC 0224','Andromeda'])assert(searchCameraTargets(all,query).some(target=>target.name==='M31'),query);
+ assert.deepEqual(searchCameraTargets(all,'s i r i u s').map(target=>target.name),['Sirius']);
+ assert.deepEqual(searchCameraTargets(all,'ＳＩＲＩＵＳ').map(target=>target.name),['Sirius']);
+ assert.deepEqual(searchCameraTargets(all,'not-in-this-catalogue'),[]);
+ assert.equal(searchCameraTargets(all,'').length,148);
+ assert.equal(searchCameraTargets(cameraCatalogueTargets(date,place,'bright'),'M31').length,0);
+});
+test('camera search leaves catalogue positions, ordering and selected-record source intact',()=>{
+ const all=cameraCatalogueTargets(date,place,'all'),before=structuredClone(all),selected=all.find(target=>target.name==='M13');
+ const results=searchCameraTargets(all,'M31');assert(!results.some(target=>target.name===selected.name));assert(all.includes(selected));assert.deepEqual(all,before);
+ assert.equal(results[0],all.find(target=>target.name===results[0].name));
 });

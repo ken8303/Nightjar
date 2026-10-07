@@ -1,6 +1,7 @@
 import {skyTargets,type Place} from './sky';
-import {messierCatalogue,deepSkyPosition,deepSkyPhoto,deepSkyName} from './deep-sky';
+import {messierCatalogue,deepSkyPosition,deepSkyPhoto,deepSkyName,findDeepSky} from './deep-sky';
 import {objectPhoto} from './object-photos';
+import {findSkyTargets} from './sky-target-search';
 
 export type CameraCatalogue='bright'|'deep-sky'|'all';
 const messierById=new Map(messierCatalogue.map(target=>[target.id,target]));
@@ -11,4 +12,9 @@ export function cameraCatalogueTargets(date:Date,place:Place,mode:CameraCatalogu
 }
 export function cameraCataloguePhoto(name:string){
  const target=messierById.get(name);return target?deepSkyPhoto(target):objectPhoto(name);
+}
+export function searchCameraTargets<T extends {name:string;altitude:number;deepSky:boolean}>(targets:T[],query:string):T[]{
+ const deepIds=new Set(findDeepSky(query,'').map(target=>target.id));
+ const brightNames=new Set(findSkyTargets(targets.filter(target=>!target.deepSky),query).map(target=>target.name));
+ return targets.filter(target=>target.deepSky?deepIds.has(target.name):brightNames.has(target.name));
 }

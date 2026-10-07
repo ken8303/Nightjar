@@ -142,3 +142,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 
 .object-photo-image.photo-recovery-active{aspect-ratio:auto;min-height:180px}.photo-enlarged-image.photo-recovery-active{height:auto;min-height:180px}.photo-viewer-dialog{overflow-y:auto;overscroll-behavior:contain}.photo-viewer-header,.photo-viewer-controls{flex-shrink:0}
 .photo-viewer-canvas:has(.photo-recovery-active){width:100%;aspect-ratio:auto}.photo-viewer-viewport:has(.photo-recovery-active){container-type:normal;flex:0 0 auto;max-height:none;overflow:visible}
+
+.camera-sky-quick-controls>.camera-sky-search{flex:1;min-width:220px;width:auto}.camera-sky-search [data-slot="field"]{gap:8px;min-width:0}.camera-sky-search [data-slot="field-description"]{overflow-wrap:anywhere}@media(max-width:700px){.camera-sky-quick-controls>.camera-sky-search{flex-basis:100%;min-width:0}}
