@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 286 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 291 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -81,6 +81,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - M13/M31 featured mission references and smaller camera thumbnails decoded in a disposable browser. Survey switching retained the J2000 request; enlarged zoom and processed/core captions were verified at 320/390-pixel portrait and 800 × 400 landscape without overflow or console errors. Hardware alignment remains pending.
 
 - Raw recovery downloads preserve whitelisted stored text and list unreadable entries without modifying storage. A disposable malformed-notes flow verified normal backup refusal and raw preparation at 320/390 pixels with no overflow/errors. The raw format cannot be imported directly; native file receipt remains pending.
+
+- Deep-sky comparison windows prepare tentative UTC calendar events after validating all adjacent eligible samples. Mobile/desktop checks verified target/interval selection, Moon-filtered bounds and scoped confirmations. Calendar text/DST/Unicode bounds pass automated checks; native receipt and phone calendar import remain pending.
 
 ## After the next GitHub Desktop push
 

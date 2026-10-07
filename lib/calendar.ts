@@ -1,4 +1,9 @@
 import {utcDate} from './utc-date';
+import {validPlace} from './planner-state';
+import {validMessierId} from './deep-sky-list';
+import {deepSkyName} from './deep-sky-names';
+import type {DeepSkyObject,DeepSkySample} from './deep-sky';
+import type {Place} from './sky';
 export function meteorCalendar(name:string,year:number,month:number,day:number){
  const peak=utcDate(year,month,day);
  if(year<1||year>9999||month<0||month>11||peak.getUTCFullYear()!==year||peak.getUTCMonth()!==month||peak.getUTCDate()!==day||!name.trim())throw Error('Invalid meteor calendar date.');
@@ -35,4 +40,21 @@ export function observingWindowCalendar(input:{start:Date;hours:number;place:str
  for(const char of `${place}|${timezone}`)siteHash=Math.imul(siteHash^char.charCodeAt(0),16777619)>>>0;
  const description=[`Planning score: ${score}/100; forecast cloud cover: ${cloud}%.`,moonAbove?`Moon above the horizon at the start, ${Math.round(moonIllumination*100)}% illuminated.`:'Moon below the horizon at the start.',`Observing site: ${place} (${timezone}).`,'Forecast and Moon conditions are estimates. Check weather and local conditions before leaving.'].join('\n');
  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Observing Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:observing-${calendarTime(start)}-${siteHash.toString(16)}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(start)}`,`DTEND:${calendarTime(end)}`,`SUMMARY:${calendarText('Stargazing window at '+place)}`,`LOCATION:${calendarText(place)}`,`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+}
+
+
+export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;start:Date;end:Date;samples:(DeepSkySample&{moonAltitude?:number})[];moonBelowOnly:boolean},created=new Date()){
+ const {target,place,start,end,samples,moonBelowOnly}=input;
+ const validTime=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
+ const duration=+end-+start;
+ if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validMessierId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||samples.length>97)throw Error('Invalid deep-sky calendar window.');
+ const included=samples.filter(sample=>+sample.time>=+start&&+sample.time<=+end);
+ if(included.length!==duration/900000+1||included.some((sample,index)=>+sample.time!==+start+index*900000||!Number.isFinite(sample.altitude)||sample.altitude<=30||sample.altitude>90||!Number.isFinite(sample.sun)||sample.sun> -18||(moonBelowOnly&&(!Number.isFinite(sample.moonAltitude)||sample.moonAltitude!>0))))throw Error('This interval has no complete qualifying deep-sky window.');
+ const peak=included.reduce((best,sample)=>sample.altitude>best.altitude?sample:best,included[0]);
+ // Calendar DATE-TIME has whole seconds. Round inward so serialization never
+ // extends the event outside its sampled interval.
+ const eventStart=new Date(Math.ceil(+start/1000)*1000),eventEnd=new Date(Math.floor(+end/1000)*1000);
+ let hash=2166136261;for(const char of `${target.id}|${place.name}|${place.latitude}|${place.longitude}|${start.toISOString()}|${end.toISOString()}|${moonBelowOnly}`)hash=Math.imul(hash^char.codePointAt(0)!,16777619)>>>0;
+ const description=[`${target.id}: ${deepSkyName(target)}.`,`Highest qualifying sample in this interval: ${peak.time.toISOString()}, altitude ${peak.altitude.toFixed(1)} degrees.`,`Catalogue J2000 coordinates: RA ${target.ra.toFixed(5)} h, Dec ${target.dec.toFixed(5)} degrees.`,`Site: ${place.name}; latitude ${place.latitude}, longitude ${place.longitude}; timezone ${place.timezone||'UTC'}.`,`Original sampled interval: ${start.toISOString()} to ${end.toISOString()}.`,moonBelowOnly?'Moon centre at or below the horizon at every qualifying sample.':'Moon-down filtering was not required.','Above 30 degrees with the Sun at or below -18 degrees at 15-minute samples. Intervals are not exact rise/set/transit times; weather, light pollution, equipment and terrain are not included. Recheck conditions before observing.'].join('\n');
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Deep Sky Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:deep-sky-${target.id}-${hash.toString(16)}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(`Observe ${target.id} - ${deepSkyName(target)}`)}`,`LOCATION:${calendarText(place.name)}`,`GEO:${place.latitude};${place.longitude}`,`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
