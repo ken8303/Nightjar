@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 206 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 208 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -24,6 +24,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Generated reports were checked at 320 × 568: a diary retained a 2,000-character note and long equipment/site text without overflow. A long unbroken plan site name caused horizontal overflow; its heading now wraps. Catalogue plans label their metadata correctly, and the checklist remains usable. Native download and print/PDF handling remain unverified.
 
 - Weather feed validation rejects empty/oversized/duplicate/reversed/overlapping timestamps and misaligned arrays before they reach scoring. Invalid percentages and negative wind/visibility become unavailable. An isolated 390-pixel browser test retained a previous forecast after malformed refresh and recovered through Retry without console errors; its disposable origin storage and caches were removed.
+
+- Long-lived PWA update checks now poll every 15 minutes while visible and online, sharing the event cooldown and pending-request guard. Unit tests cover polling, hidden/offline suppression and cleanup; an actual installed-PWA deployment update remains pending. The final built app also loaded real provider weather successfully without console errors.
 
 ## After the next GitHub Desktop push
 
