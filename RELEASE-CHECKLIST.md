@@ -84,6 +84,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Deep-sky comparison windows prepare tentative UTC calendar events after validating all adjacent eligible samples. Mobile/desktop checks verified target/interval selection, Moon-filtered bounds and scoped confirmations. Calendar text/DST/Unicode bounds pass automated checks; native receipt and phone calendar import remain pending.
 
+- Camera thumbnail retry recovered controlled failed images manually and after a simulated connection-return event, preserving the followed ID. Photo-off disabled retry/rendering; 320/390-pixel guidance fit without overflow or console errors. Actual phone network transitions remain pending.
+
 ## After the next GitHub Desktop push
 
 1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.
