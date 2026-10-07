@@ -1,4 +1,5 @@
 'use client';
+import {downloadFile} from '@/lib/download';
 import {useEffect,useRef,useState} from 'react';
 import {diaryKey,diaryLimit,readDiary,saveDiary,type Observation} from '@/lib/observing-diary';
 import {emptyDiaryDrafts,discardCompletedDrafts,readDiaryDrafts,saveDiaryDrafts,sameObservation,type DiaryDraftState} from '@/lib/diary-drafts';
@@ -48,8 +49,8 @@ export default function ObservingDiary({target,date,place}:{target:string;date:D
  const activeFilters=Boolean(filters.query||filters.outcome||filters.from||filters.through);
  function download(format:'html'|'csv'){
   try{
-   const content=format==='html'?diaryReport(shown):diaryCSV(shown),url=URL.createObjectURL(new Blob([content],{type:format==='html'?'text/html;charset=utf-8':'text/csv;charset=utf-8'}));
-   const link=document.createElement('a');link.href=url;link.download=`nightjar-diary-${showAll?'all':target}.${format}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   const content=format==='html'?diaryReport(shown):diaryCSV(shown);
+   downloadFile(new Blob([content],{type:format==='html'?'text/html;charset=utf-8':'text/csv;charset=utf-8'}),`nightjar-diary-${showAll?'all':target}.${format}`);
    setStatus(`${shown.length} saved observation${shown.length===1?'':'s'} prepared as ${format==='html'?'an offline report. Open the file to print or save as PDF':'CSV. Open the file in a spreadsheet'}. Unsaved form edits are excluded.`);
   }catch{setStatus('The diary download could not be prepared. Your saved observations have not changed.')}
  }

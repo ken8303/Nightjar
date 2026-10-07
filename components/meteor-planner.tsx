@@ -1,5 +1,6 @@
 "use client";
 
+import {downloadFile} from '@/lib/download';
 import {useMemo} from 'react';
 import {ArrowUpRight, Download, Moon, Star} from 'lucide-react';
 import {meteorCalendar} from '@/lib/calendar';
@@ -15,11 +16,10 @@ export default function MeteorPlanner({date,place,hourly,onExplore,onNotice}:{da
  const timezone=place.timezone||'UTC';
  const format=(value:Date)=>new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:timezone}).format(value);
  function download(name:string,year:number,month:number,day:number){
-  const blob=new Blob([meteorCalendar(name,year,month,day)],{type:'text/calendar;charset=utf-8'});
-  const url=URL.createObjectURL(blob),link=document.createElement('a');
-  link.href=url;link.download=`${name.toLowerCase().replaceAll(' ','-')}-${year}.ics`;link.click();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-  onNotice('Calendar file downloaded. Import it into your calendar app.');
+  try{
+   downloadFile(new Blob([meteorCalendar(name,year,month,day)],{type:'text/calendar;charset=utf-8'}),`${name.toLowerCase().replaceAll(' ','-')}-${year}.ics`);
+   onNotice('Calendar file prepared for download. Import it into your calendar app.');
+  }catch{onNotice('The calendar file could not be created. Please try again.')}
  }
  return <><div className="section-intro"><h3>The next meteor showers</h3><p className="muted">Annual typical peak dates after your selected observing time. Dark and Moon-free hours are sampled for {place.name} in {timezone}; they are not predictions of meteor counts.</p></div><div className="event-grid">{plans.map(({event,year,conditions,peak})=>{
   const {darkHours,moonFreeHours,window,moonIllumination,cloudCover}=conditions;

@@ -1,5 +1,6 @@
 "use client";
 
+import {downloadFile} from '@/lib/download';
 import {useMemo, useState, type CSSProperties} from 'react';
 import {ArrowUpRight, CalendarDays, Download, Moon} from 'lucide-react';
 import {observingWindowCalendar} from '@/lib/calendar';
@@ -21,9 +22,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
   try{
    const best=night.best;
    const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination});
-   const url=URL.createObjectURL(new Blob([data],{type:'text/calendar;charset=utf-8'}));
-   const link=document.createElement('a');link.href=url;link.download=`nightjar-${night.key}.ics`;link.click();
-   setTimeout(()=>URL.revokeObjectURL(url),1000);
+   downloadFile(new Blob([data],{type:'text/calendar;charset=utf-8'}),`nightjar-${night.key}.ics`);
    setDownloadStatus(`${dateLabel(night.key)} calendar file ready. Open it in your calendar app to add the window.`);
   }catch{setDownloadStatus('The calendar file could not be created. Please try again.')}
  }

@@ -1,4 +1,5 @@
 'use client';
+import {downloadFile} from '@/lib/download';
 import {useEffect,useRef,useState} from 'react';
 import {Download,Upload} from 'lucide-react';
 import {makePlannerBackup,parsePlannerBackup,readSavedPlan,previewPlannerMerge,restorePlannerBackup,type PlannerBackup,type SavedPlan} from '@/lib/planner-backup';
@@ -12,8 +13,8 @@ export default function PlannerBackupPanel({onRestore}:{onRestore:(data:SavedPla
  function cancelImport(){setPreview(null);setError('');fileInput.current?.focus({preventScroll:true});fileInput.current?.scrollIntoView({block:'center',behavior:'instant'})}
  function download(){
   try{
-   const backup=makePlannerBackup(localStorage),url=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-   const link=document.createElement('a');link.href=url;link.download=`nightjar-backup-${backup.exportedAt.slice(0,10)}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   const backup=makePlannerBackup(localStorage);
+   downloadFile(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),`nightjar-backup-${backup.exportedAt.slice(0,10)}.json`);
    setStatus('Backup prepared for download. Keep the file to restore on another device.');setError('');
   }catch(error){setError(error instanceof Error?error.message:'Backup could not be created.')}
  }

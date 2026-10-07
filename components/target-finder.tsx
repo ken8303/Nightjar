@@ -1,4 +1,5 @@
 'use client';
+import {downloadFile} from '@/lib/download';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {Download, Search, X} from 'lucide-react';
 import ObjectPhoto from '@/components/object-photo';
@@ -52,8 +53,7 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
   try{
    const localTime=new Intl.DateTimeFormat('en-GB',{dateStyle:'full',timeStyle:'short',timeZone:place.timezone||'UTC'}).format(date);
    const text=['NIGHTJAR — OBSERVING LIST',`Place: ${place.name.replace(/[\r\n]/g,' ')}`,`Coordinates: ${place.latitude.toFixed(4)}, ${place.longitude.toFixed(4)}`,`Time (UTC): ${date.toISOString()}`,`Local time: ${localTime} (${place.timezone||'UTC'})`,'','Saved targets — highest altitude first','',...savedTargets.flatMap(t=>[`[ ] ${t.name}`,`    Altitude: ${t.altitude.toFixed(1)}° | Azimuth: ${t.azimuth.toFixed(1)}° (${direction(t.azimuth)}) | ${t.altitude>0?'Above horizon':'Below horizon'}`,'    Notes:',...(notes[t.name]||'').split('\n').map(line=>`    ${line}`),'']),'Positions are a snapshot at the time and place above. Star positions are approximate.','Above the horizon does not guarantee visibility: daylight, weather and obstructions matter.',''].join('\n');
-   const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
-   const link=document.createElement('a');link.href=url;link.download=`nightjar-targets-${date.toISOString().slice(0,10)}.txt`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   downloadFile(new Blob([text],{type:'text/plain;charset=utf-8'}),`nightjar-targets-${date.toISOString().slice(0,10)}.txt`);
    setDownloadStatus('Observing list prepared for download. Open the text file to read or print it.');
   }catch{setDownloadStatus('The observing list could not be created. Please try again.')}
  }
@@ -62,7 +62,7 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
    let equipment:Equipment[]=[],equipmentUnavailable=false;
    try{const raw:unknown=JSON.parse(localStorage.getItem('nightjar-equipment')||'[]');if(!Array.isArray(raw))throw Error();equipment=raw.filter(validEquipment).slice(0,100)}catch{equipmentUnavailable=true}
    const html=printableObservingPlan({date,place,targets:savedTargets,notes,equipment,equipmentUnavailable});
-   const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=`nightjar-plan-${date.toISOString().slice(0,10)}.html`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   downloadFile(new Blob([html],{type:'text/html;charset=utf-8'}),`nightjar-plan-${date.toISOString().slice(0,10)}.html`);
    setDownloadStatus('Print-ready plan prepared. Open the HTML file offline, then use Print or save as PDF.');
   }catch{setDownloadStatus('The print-ready plan could not be created. Please try again.')}
  }

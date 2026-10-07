@@ -1,4 +1,5 @@
 'use client';
+import {downloadFile} from '@/lib/download';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {Bookmark,Download,Search,Telescope,X} from 'lucide-react';
 import ObjectPhoto from '@/components/object-photo';
@@ -37,7 +38,7 @@ export default function DeepSkyFinder({date,place,onDate,onFrame}:{date:Date;pla
    const targets=savedTargets.map(target=>({name:`${target.id} · ${deepSkyName(target)}`.slice(0,100),altitude:target.altitude,azimuth:target.azimuth}));
    const notes=Object.fromEntries(savedTargets.map((target,index)=>[targets[index].name,deepSkyPlanNotes(target)]));
    const html=printableObservingPlan({date,place,targets,notes,equipment,equipmentUnavailable,catalogueNotice:'Deep-sky data: OpenNGC by Mattia Verga and contributors, adapted under CC BY-SA 4.0. Positions are precessed from J2000 to the selected date.'});
-   const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=`nightjar-deep-sky-plan-${date.toISOString().slice(0,10)}.html`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setListStatus('Deep-sky plan prepared. Open the HTML file offline, then print or save as PDF. This is a snapshot, not a backup.');
+   downloadFile(new Blob([html],{type:'text/html;charset=utf-8'}),`nightjar-deep-sky-plan-${date.toISOString().slice(0,10)}.html`);setListStatus('Deep-sky plan prepared. Open the HTML file offline, then print or save as PDF. This is a snapshot, not a backup.');
   }catch{setListStatus('The deep-sky plan could not be created. Please try again.')}
  }
  const target=messierCatalogue.find(target=>target.id===selected);
