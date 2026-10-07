@@ -18,5 +18,5 @@ test('offline print plans can include the complete deep-sky list with source att
  const date=new Date('2026-10-05T20:00:00Z'),place={name:'London',latitude:51.508,longitude:-.126,timezone:'Europe/London'};
  const targets=messierCatalogue.map(target=>({name:target.id,...deepSkyPosition(target,date,place)}));
  const html=printableObservingPlan({date,place,targets,notes:{},equipment:[],catalogueNotice:'OpenNGC · CC BY-SA 4.0 <source>'});
- assert.equal([...html.matchAll(/type="checkbox"/g)].length,109);assert(html.includes('CC BY-SA 4.0 &lt;source&gt;'));assert(!/<[^>]+\b(?:src|href)\s*=/i.test(html));assert(html.includes('2026-10-05 20:00 UTC'));
+ assert.equal([...html.matchAll(/type="checkbox"/g)].length,109);assert(html.includes('CC BY-SA 4.0 &lt;source&gt;'));assert(!/<[^>]+\b(?:src|href)\s*=/i.test(html));assert(html.includes('2026-10-05 20:00:00.000 UTC'));
 });
