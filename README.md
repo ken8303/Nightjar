@@ -86,7 +86,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 - If saving bright-target notes fails, the text remains while Sky atlas is open and a Retry saving notes button is available. Leaving the tab or reloading may lose unsaved edits; retry can save them after storage becomes available. Camera preference failures likewise apply only while that viewer remains open.
 - Saved places and equipment setups are limited to 100 each, matching backup validation. Existing entries can be updated at capacity. An addition or Undo that would exceed capacity shows a message without silently dropping records. Oversized legacy lists remain available for manual cleanup.
 - Target notes include a manager for imported/older catalogue names, removal with Undo, and retained unsaved edits during storage failures or cross-tab updates. Saving enforces the same 100-note bound as backups; oversized legacy collections stay readable until you explicitly free space.
-- Saved places offer Undo for the latest removal until another place is removed or the page reloads. Equipment Undo lasts while Photo tools is open. Both target lists offer Undo while Sky atlas is open. Recovery preserves a record already re-saved and keeps current settings, notes and diary records.
+- Saved-place mutations reread the latest stored collection and reflect other-tab updates. Removing a changed record is refused. Failed saves leave the saved list unchanged; the selected observing site remains usable. Saved places offer Undo for the latest removal until another place is removed or the page reloads. Equipment Undo lasts while Photo tools is open. Both target lists offer Undo while Sky atlas is open. Recovery preserves a record already re-saved and keeps current settings, notes and diary records.
 - Diary records and unfinished forms are separate. Drafts retain their original site/time until explicitly changed and are excluded from backups, offline listings and downloads. The app stores no cloud account data.
 - Sky atlas shortcuts open camera discovery or jump to the chart, deep-sky explorer and diary. A deferred section can load for up to 15 seconds before retry guidance appears. Closing camera returns focus to its launch button; camera and motion access remain explicit actions inside the viewer.
 
@@ -96,7 +96,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 238 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 241 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
