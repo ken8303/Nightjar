@@ -18,4 +18,10 @@ export function mosaic(ra:number,dec:number,width:number,height:number,cols:numb
  }
  return panels;
 }
-export function mosaicCsv(panels:ReturnType<typeof mosaic>){return 'panel,row,column,ra_hours,dec_degrees\r\n'+panels.map(p=>[p.panel,p.row,p.column,p.raHours.toFixed(7),p.decDegrees.toFixed(7)].join(',')).join('\r\n')+'\r\n'}
+export function mosaicCsv(panels:ReturnType<typeof mosaic>){
+ return 'panel,row,column,ra_hours,dec_degrees\r\n'+panels.map(p=>{
+  // Rounding can turn a valid RA just below 24 h into 24.0000000 h.
+  const ra=Number(p.raHours.toFixed(7))%24;
+  return [p.panel,p.row,p.column,ra.toFixed(7),p.decDegrees.toFixed(7)].join(',');
+ }).join('\r\n')+'\r\n';
+}

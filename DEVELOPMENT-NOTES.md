@@ -316,3 +316,9 @@ Pending note edits are held separately and overlaid on storage refreshes. Saving
 An initially upright Safari-style pose can have usable gyro/compass fields while the device-top horizontal projection has no stable north anchor. The existing tracker safely treated it as relative, but the UI only suggested aligning a known object. Readings now expose a `needsNorthAnchor` hint for this specific state. Regular and fullscreen camera views explain that names are paused and suggest tilting slightly away from upright to initialize the compass, with manual known-object alignment retained as an option. The tracker/projection math, north-anchor grace periods and hardware permission flow are unchanged.
 
 231 tests, TypeScript, lint without warnings, production build and Cloudflare packaging passed. New synthetic-stream tests cover upright start, tilted anchoring, return upright, and absence of the cue for relative-only, unusable-compass and absolute streams. No physical phone behavior or rendered sensor state is claimed; those need device testing. An unused type import was removed after lint identified it.
+
+## 7 October 2026 — valid mosaic coordinates after export rounding
+
+Mosaic panel right ascension is normalized before export, but seven-decimal rounding could produce 24.0000000 hours. The CSV now wraps the rounded value to zero, retaining the same sky direction and seven-decimal precision without mutating the source panels. Two regression tests cover the rounding boundary and a rotated two-row grid crossing RA zero, including panel identities, declination precision and CRLF rows.
+
+233 tests, TypeScript, lint without warnings, production build and Cloudflare packaging dry-run passed. This is a serialization correction; native file receipt remains pending.

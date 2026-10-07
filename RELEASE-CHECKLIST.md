@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 231 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 233 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -41,6 +41,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Target-note management was checked with 100 imported archived notes on an isolated origin. A new note remained visible at capacity, survived another-tab updates, saved after freeing a slot and survived reload alongside unrelated newer text. Removal/Undo worked, including restoring editor focus, at 390/320-pixel widths without overflow or console errors. The disposable origin was cleaned.
 
 - Simulated orientation streams now identify an initially upright Safari pose that needs a north anchor, clear the cue after tilting establishes one, and keep it cleared on return upright. Regular/fullscreen camera guidance exposes this setup state. Physical iPhone initialization and alignment remain pending.
+
+- Mosaic CSV rounds coordinates to seven decimals while wrapping RA at 24 hours back to zero. Boundary and rotated-grid tests preserve panel order, precision and original coordinate values.
 
 ## After the next GitHub Desktop push
 
