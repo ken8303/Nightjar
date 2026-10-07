@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 216 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 219 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -31,6 +31,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Deep-sky exports now retain original J2000 RA/declination when adding current altitude/azimuth. Previously downloaded deep-sky plans should be regenerated to correct coordinate metadata.
 
 - Diary observation removal and Undo preserve original metadata, refuse stale deletions/newer overwrites and respect the 200-record cap. A mobile quota test retained unfinished edit text, kept Undo after a failed restore, recovered after freeing test storage and retained original records after reload. Recovery feedback appears beside Undo; test-origin storage, workers and caches were removed.
+
+- Moon phase labels now wrap correctly through 360°/0°, and the Moon dashboard, forecasts and deep-sky context share the same calculated illuminated fraction. Tests cover an actual new-moon crossing and a full lunation; the mobile Moon screen was checked before the crossing and the original time restored.
 
 ## After the next GitHub Desktop push
 

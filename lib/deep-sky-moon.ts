@@ -7,6 +7,6 @@ export function skySeparation(first:{altitude:number;azimuth:number},second:{alt
 }
 export function deepSkyMoon(target:DeepSkyObject,date:Date,place:Place){
  const moon=bodyPosition(A.Body.Moon,date,place),info=moonInfo(date,place);
- return {date,name:info.name,illumination:A.Illumination(A.Body.Moon,date).phase_fraction,altitude:moon.altitude,separation:skySeparation(deepSkyPosition(target,date,place),moon),belowHorizon:moon.altitude<=0};
+ return {date,name:info.name,illumination:info.illumination,altitude:moon.altitude,separation:skySeparation(deepSkyPosition(target,date,place),moon),belowHorizon:moon.altitude<=0};
 }
 export type DeepSkyMoon=ReturnType<typeof deepSkyMoon>;
