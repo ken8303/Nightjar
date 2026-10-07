@@ -1,5 +1,7 @@
 import {A, Place, hourBelowAltitude, moonInfo} from './sky';
 import {forecastHourIndex} from './weather-hours';
+import {utcDate} from './utc-date';
+import {observingTimeCandidates} from './observing-time';
 
 export const meteorEvents=[
  {name:'Quadrantids',date:'January 3–4',month:0,day:4,rate:'Up to 120',note:'A short, sharp peak. Best suited to northern latitudes.'},
@@ -12,27 +14,33 @@ export const meteorEvents=[
 ] as const;
 
 export type MeteorEvent=(typeof meteorEvents)[number];
-export function nextMeteorYear(event:MeteorEvent,from:Date){
+export function nextMeteorYear(event:MeteorEvent,from:Date,timezone='UTC'){
  const year=from.getUTCFullYear();
- return +from>Date.UTC(year,event.month,event.day+1)?year+1:year;
+ const noon=utcDate(year,event.month,event.day,12);
+ const candidates=observingTimeCandidates(noon.toISOString().slice(0,16),timezone);
+ const end=candidates.at(-1)??noon;
+ return +from>=+end?year+1:year;
 }
 function localDateHour(date:Date,formatter:Intl.DateTimeFormat){
  const parts=formatter.formatToParts(date);
  const number=(type:string)=>Number(parts.find(part=>part.type===type)?.value);
- return {day:number('year')*10000+number('month')*100+number('day'),hour:number('hour')};
+ return {day:number('year')*10000+number('month')*100+number('day'),hour:number('hour'),minute:number('minute')};
 }
-export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourly?:{time:number[];cloud_cover:(number|null)[]}){
+export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourly?:{time:number[];cloud_cover:(number|null)[]},from?:Date){
  const timezone=place.timezone||'UTC';
- const dayFormatter=new Intl.DateTimeFormat('en-US',{timeZone:timezone,year:'numeric',month:'numeric',day:'numeric',hour:'numeric',hourCycle:'h23'});
- const firstLocal=new Date(Date.UTC(year,event.month,event.day-1));
- const lastLocal=new Date(Date.UTC(year,event.month,event.day));
+ const dayFormatter=new Intl.DateTimeFormat('en-US',{timeZone:timezone,year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'});
+ const firstLocal=utcDate(year,event.month,event.day-1);
+ const lastLocal=utcDate(year,event.month,event.day);
  const firstDay=firstLocal.getUTCFullYear()*10000+(firstLocal.getUTCMonth()+1)*100+firstLocal.getUTCDate();
  const lastDay=lastLocal.getUTCFullYear()*10000+(lastLocal.getUTCMonth()+1)*100+lastLocal.getUTCDate();
  const dark:{date:Date;moonBelow:boolean}[]=[];
  for(let hour=-48;hour<=72;hour++){
-  const date=new Date(Date.UTC(year,event.month,event.day)+hour*3600000);
+  const date=new Date(+utcDate(year,event.month,event.day)+hour*3600000);
+  if(from&&+date<+from)continue;
   const local=localDateHour(date,dayFormatter);
   if(!((local.day===firstDay&&local.hour>=12)||(local.day===lastDay&&local.hour<12)))continue;
+  const end=localDateHour(new Date(+date+3600000),dayFormatter);
+  if(!((end.day===firstDay&&end.hour>=12)||(end.day===lastDay&&(end.hour<12||end.hour===12&&end.minute===0))))continue;
   if(!hourBelowAltitude(A.Body.Sun,date,place,-18))continue;
   dark.push({date,moonBelow:hourBelowAltitude(A.Body.Moon,date,place,0)});
  }
@@ -50,6 +58,6 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
   const cloud=index>=0?hourly?.cloud_cover?.[index]:null;
   return typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?[cloud]:[];
  });
- const moon=moonInfo(new Date(Date.UTC(year,event.month,event.day,12)),place);
+ const moon=moonInfo(utcDate(year,event.month,event.day,12),place);
  return {darkHours:dark.length,moonFreeHours:moonFree.length,window:longest,moonIllumination:moon.illumination,cloudCover:cloudValues.length?Math.round(cloudValues.reduce((sum,n)=>sum+n,0)/cloudValues.length):null};
 }

@@ -13,7 +13,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Twelve-hour Moon/bright-planet altitude table: only objects with a sample above 30° are shown, ordered by peak altitude. Peak-hour jumps, daylight context and above-30° shortcuts after civil twilight share target selection with the atlas. Mobile controls browse the same order; chart/details links preserve the selected object and time.
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
 - Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
-- Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events.
+- Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events. Recommendations include only complete hours remaining after the selected time, and move to the next annual occurrence when the site-local window has ended.
 - Golden-hour and blue-hour windows for morning/evening, based on Sun altitude and the shared observing time. The Milky Way direction marker uses galactic longitude/latitude zero in a defined J2000 frame, transformed to the observing date; it marks a regional sightline.
 - Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
 - Named equipment setups saved on this device.
@@ -96,7 +96,7 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 257 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 263 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 

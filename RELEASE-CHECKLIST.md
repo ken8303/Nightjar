@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 257 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 263 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -65,6 +65,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Camera picker search matched NGC aliases and Unicode names while retaining a followed object outside the filter, including fullscreen. Empty results kept guidance available; Clear restored all options and focus to search. Final 320/390-pixel portrait and 800 × 400 landscape checks had no overflow or console errors; the disposable origin was cleaned.
 
 - Observing-plan UTC metadata retains seconds and milliseconds; local time includes seconds and offset. Regression tests cover repeated-clock occurrences and local year rollover. A generated 320-pixel report showed the full UTC instant and Kathmandu next-day time without overflow, and its checklist worked. Native print/download receipt remains pending.
+
+- Meteor planning preserves early calendar years, validates export dates and folds calendar lines within UTF-8 bounds. Upcoming cards advance at site-local noon and recommend only remaining complete hours, bounded at both ends. Browser checks confirmed year 99, London rollover, a future Explore action and compact 320/390-pixel layouts without errors; the disposable origin was cleaned.
 
 ## After the next GitHub Desktop push
 
