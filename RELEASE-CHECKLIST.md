@@ -46,6 +46,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Milky Way windows show dates and UTC offsets at both endpoints and at the peak. A built-app overnight window crossed 21–22 April correctly at 320/390-pixel mobile widths without horizontal overflow or console errors; original location/time were restored.
 
+- Exported checklist labels wrap long unbroken names. A valid 98-character label was checked at 320 pixels: the document no longer overflowed, all text remained present and the checkbox worked.
+
 ## After the next GitHub Desktop push
 
 1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.
