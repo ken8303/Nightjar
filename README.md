@@ -25,7 +25,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Interactive 3D bright-sky atlas and optional camera overlay with predicted labels, thumbnails, manual alignment and full-screen controls. Camera alignment still requires real-phone verification.
 - A 109-object Messier explorer with archival reference fields, precessed coordinates, 24-hour altitude planning and imaging handoff. An optional dark-sky filter keeps only objects with a sampled altitude above 30° during full darkness in the next 24 hours, ranked by their highest qualifying altitude.
 - Saved deep-sky shortlists, six-object observing-window comparisons and Moon-down filtering.
-- An observing diary with recoverable unfinished forms, search/result/UTC date filters, printable reports and CSV downloads.
+- An observing diary with recoverable unfinished forms, search/result/UTC date filters, in-app report previews, printable reports and CSV downloads. Saved observations can be removed to free space, with Undo for the latest removal while Sky atlas remains open.
 - Versioned saved-plan backups, legacy-file import and a PWA fallback that displays local saved records after network/server failures.
 - Local release verification and GitHub checks; deployment preparation is documented in [CLOUDFLARE.md](./CLOUDFLARE.md).
 
