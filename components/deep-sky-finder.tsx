@@ -13,7 +13,7 @@ import {deepSkyMoon} from '@/lib/deep-sky-moon';
 import DeepSkyComparison from '@/components/deep-sky-comparison';
 import ObservingDiary from '@/components/observing-diary';
 import DeepSkyTimeline from '@/components/deep-sky-timeline';
-import {messierCatalogue,deepSkyName,deepSkyNames,deepSkyPlanNotes,findDeepSky,deepSkyRecommendations,deepSkyPosition,deepSkyWindow,bestDeepSkySample,deepSkyPhoto,type DeepSkyObject} from '@/lib/deep-sky';
+import {messierCatalogue,deepSkyName,deepSkyNames,deepSkyPlanNotes,findDeepSky,deepSkyRecommendations,deepSkyPositions,deepSkyWindow,bestDeepSkySample,deepSkyPhoto,type DeepSkyObject} from '@/lib/deep-sky';
 import {deepSkyListKey,readDeepSkyList,saveDeepSkyList,validMessierId} from '@/lib/deep-sky-list';
 import {printableObservingPlan} from '@/lib/observing-plan';
 import {validEquipment,type Equipment} from '@/lib/photography';
@@ -26,7 +26,7 @@ export default function DeepSkyFinder({date,place,onDate,onFrame,onCamera,reques
  const [handledRequest,setHandledRequest]=useState<number|null>(null);
  if(request&&request.revision!==handledRequest&&messierCatalogue.some(target=>target.id===request.id)){setHandledRequest(request.revision);setSelected(request.id)}
  useEffect(()=>{if(request?.revision===handledRequest)onRequestHandled?.()},[request,handledRequest,onRequestHandled]);
- const positions=useMemo(()=>new Map(messierCatalogue.map(target=>[target.id,{...target,...deepSkyPosition(target,date,place)}])),[date,place]);
+ const positions=useMemo(()=>new Map(deepSkyPositions(messierCatalogue,date,place).map(target=>[target.id,target])),[date,place]);
  const windowFormatter=useMemo(()=>new Intl.DateTimeFormat('en-GB',{timeZone:place.timezone||'UTC',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'shortOffset'}),[place.timezone]);
  const recommendations=useMemo(()=>darkOnly?deepSkyRecommendations(messierCatalogue,date,place):null,[darkOnly,date,place]);
  const results=useMemo(()=>findDeepSky(query,type,{constellation,maximumMagnitude:magnitude?Number(magnitude):undefined}).map(target=>positions.get(target.id)!).filter(target=>(!above||target.altitude>30)&&(!recommendations||recommendations.has(target.id))).sort((a,b)=>(recommendations?recommendations.get(b.id)!.altitude-recommendations.get(a.id)!.altitude:b.altitude-a.altitude)||a.id.localeCompare(b.id)),[query,type,constellation,magnitude,positions,above,recommendations]);

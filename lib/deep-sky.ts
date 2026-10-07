@@ -2,7 +2,7 @@ import catalogue from '@/data/messier.json';
 import {constellationName} from './constellations';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
-import {A,j2000Position,bodyPosition,type Place} from '@/lib/sky';
+import {A,j2000Position,j2000Projector,bodyPosition,type Place} from '@/lib/sky';
 export const messierCatalogue=catalogue;
 export type DeepSkyObject=(typeof catalogue)[number];
 import {deepSkyName,deepSkyNames} from './deep-sky-names';
@@ -10,6 +10,11 @@ export {deepSkyName,deepSkyNames};
 export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
  // Horizontal positions never overwrite the source catalogue's J2000 RA/Dec.
  return j2000Position(target.ra,target.dec,date,place);
+}
+
+export function deepSkyPositions(targets:DeepSkyObject[],date:Date,place:Place){
+ const project=j2000Projector(date,place);
+ return targets.map(target=>({...target,...project(target.ra,target.dec)}));
 }
 
 export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude}:{constellation?:string;maximumMagnitude?:number}={}){
@@ -42,11 +47,12 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
 // recalculate the same 24-hour opportunity window for each keystroke.
 export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
  if(targets.length>109)throw Error('Plan up to 109 deep-sky targets at once.');
- const darkTimes=Array.from({length:97},(_,index)=>new Date(+date+index*900000)).filter(time=>bodyPosition(A.Body.Sun,time,place).altitude<=-18);
+ if(!targets.length)return new Map<string,{date:Date;altitude:number;azimuth:number}>();
+ const darkTimes=Array.from({length:97},(_,index)=>new Date(+date+index*900000)).filter(time=>bodyPosition(A.Body.Sun,time,place).altitude<=-18).map(time=>({time,project:j2000Projector(time,place)}));
  const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();
  for(const target of targets){
   let best:{date:Date;altitude:number;azimuth:number}|null=null;
-  for(const time of darkTimes){const position=deepSkyPosition(target,time,place);if(position.altitude>30&&(!best||position.altitude>best.altitude))best={date:time,altitude:position.altitude,azimuth:position.azimuth}}
+  for(const {time,project} of darkTimes){const position=project(target.ra,target.dec);if(position.altitude>30&&(!best||position.altitude>best.altitude))best={date:time,altitude:position.altitude,azimuth:position.azimuth}}
   if(best)recommendations.set(target.id,best);
  }
  return recommendations;

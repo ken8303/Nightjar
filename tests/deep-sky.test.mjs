@@ -101,3 +101,16 @@ test('featured deep-sky photos distinguish processed/core views and retain an ex
  assert.match(deepSkyPhoto(findDeepSky('M13','')[0]).caption,/core of M13/);assert.match(deepSkyPhoto(findDeepSky('M31','')[0]).caption,/infrared mosaic/);
  const other=findDeepSky('M57','')[0];assert.deepEqual(deepSkyPhoto(other),deepSkyPhoto(other,'survey'));
 });
+
+
+test('shared catalogue positions and dark-window transforms preserve all individual calculations and source coordinates',async()=>{
+ const {deepSkyPositions,deepSkyRecommendations}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const original=structuredClone(messierCatalogue);
+ for(const [iso,site] of [['2026-10-07T20:00Z',place],['2026-04-21T08:00Z',{name:'Sydney fixture',latitude:-33.86,longitude:151.21}],['2026-06-21T12:00Z',{name:'Polar fixture',latitude:89,longitude:0}]]){
+  const date=new Date(iso),positions=deepSkyPositions(messierCatalogue,date,site);
+  positions.forEach((position,index)=>{const target=messierCatalogue[index];assert.deepEqual(position,{...target,...deepSkyPosition(target,date,site)});assert.equal(position.ra,target.ra);assert.equal(position.dec,target.dec)});
+  const targets=['M31','M13','M42','M45','M57','M104'].map(id=>messierCatalogue.find(t=>t.id===id)),recommendations=deepSkyRecommendations(targets,date,site);
+  for(const target of targets){const reference=bestDeepSkyTime(target,date,site);assert.deepEqual(recommendations.get(target.id)??null,reference)}
+ }
+ assert.deepEqual(messierCatalogue,original);assert.equal(deepSkyRecommendations([],new Date(NaN),place).size,0);
+});
