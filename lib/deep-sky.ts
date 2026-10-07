@@ -1,19 +1,16 @@
 import catalogue from '@/data/messier.json';
 import {constellationName} from './constellations';
 import {skySurveyPhoto} from '@/lib/object-photos';
-import {A,observer,bodyPosition,type Place} from '@/lib/sky';
+import {A,j2000Position,bodyPosition,type Place} from '@/lib/sky';
 export const messierCatalogue=catalogue;
 export type DeepSkyObject=(typeof catalogue)[number];
 import {deepSkyName,deepSkyNames} from './deep-sky-names';
 export {deepSkyName,deepSkyNames};
 export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
- const vector=A.VectorFromSphere(new A.Spherical(target.dec,target.ra*15,1),date);
- const equator=A.EquatorFromVector(A.RotateVector(A.Rotation_EQJ_EQD(date),vector));
- const {altitude,azimuth}=A.Horizon(date,observer(place),equator.ra,equator.dec,'normal');
- // Horizon also exposes apparent equatorial coordinates. Return only the
- // horizontal position so callers cannot overwrite catalogue J2000 RA/Dec.
- return {altitude,azimuth};
+ // Horizontal positions never overwrite the source catalogue's J2000 RA/Dec.
+ return j2000Position(target.ra,target.dec,date,place);
 }
+
 export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude}:{constellation?:string;maximumMagnitude?:number}={}){
  const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
  const normalized=normalize(query.trim());

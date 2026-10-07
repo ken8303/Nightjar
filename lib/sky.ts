@@ -5,6 +5,15 @@ export const stars:[string,number,number,number][]=[['Sirius',6.7525,-16.7161,-1
 export const lines=[['Dubhe','Merak','Phecda','Megrez','Alioth','Mizar','Alkaid'],['Megrez','Dubhe'],['Vega','Deneb','Altair','Vega'],['Betelgeuse','Bellatrix','Rigel','Alnitak','Betelgeuse'],['Acrux','Gacrux'],['Mimosa','Alpha Centauri']];
 export function observer(p:Place){return new A.Observer(p.latitude,p.longitude,0)}
 export function bodyPosition(body:A.Body,date:Date,p:Place){const eq=A.Equator(body,date,observer(p),true,true);return A.Horizon(date,observer(p),eq.ra,eq.dec,'normal')}
+function catalogueHorizon(ra:number,dec:number,date:Date,obs:A.Observer,rotation:A.RotationMatrix){
+ const vector=A.VectorFromSphere(new A.Spherical(dec,ra*15,1),date);
+ const equator=A.EquatorFromVector(A.RotateVector(rotation,vector));
+ const {altitude,azimuth}=A.Horizon(date,obs,equator.ra,equator.dec,'normal');
+ return {altitude,azimuth};
+}
+export function j2000Position(ra:number,dec:number,date:Date,place:Place){
+ return catalogueHorizon(ra,dec,date,observer(place),A.Rotation_EQJ_EQD(date));
+}
 export function moonInfo(date:Date,p:Place){const phase=A.MoonPhase(date),illumination=A.Illumination(A.Body.Moon,date).phase_fraction;return {phase,illumination,name:moonPhaseName(phase),altitude:bodyPosition(A.Body.Moon,date,p).altitude}}
 export function scoreAt(cloud:number,date:Date,p:Place){const sun=bodyPosition(A.Body.Sun,date,p).altitude,moon=moonInfo(date,p);if(sun>-6)return 0;return Math.round(Math.max(0,Math.min(100,(100-cloud)*.8+Math.min(1,(-sun-6)/12)*20-(moon.altitude>0?moon.illumination*20:0))))}
 export function hourBelowAltitude(body:A.Body,date:Date,place:Place,altitude:number){
@@ -67,8 +76,8 @@ export function photographyLightWindows(date:Date,p:Place){
 }
 
 export function skyTargets(date:Date,place:Place){
- const obs=observer(place);
- const fixed=stars.map(([name,ra,dec,mag])=>({name,...A.Horizon(date,obs,ra,dec,'normal'),mag,planet:false}));
+ const obs=observer(place),rotation=A.Rotation_EQJ_EQD(date);
+ const fixed=stars.map(([name,ra,dec,mag])=>({name,...catalogueHorizon(ra,dec,date,obs,rotation),mag,planet:false}));
  const planets=[A.Body.Moon,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn].map(body=>({name:String(body),...bodyPosition(body,date,place),mag:-1,planet:true}));
  return [...fixed,...planets];
 }
