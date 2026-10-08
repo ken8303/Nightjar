@@ -24,11 +24,12 @@ function plan(value:unknown):SavedPlan{
   equipment:value.equipment.map(e=>({name:e.name,width:e.width,height:e.height,focal:e.focal,pixel:e.pixel}))
  };
 }
-// Exports use ISO UTC instants. Legacy files may omit milliseconds; require
+// Exports use ISO UTC instants. Legacy files may omit seconds or milliseconds; require
 // an exact calendar round trip so Date parsing cannot silently repair a day.
 function validBackupExportTime(value:unknown):value is string{
- if(typeof value!=='string'||value.length>27||!/^(?:\d{4}|[+-]\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value))return false;
- const date=new Date(value);return Number.isFinite(+date)&&date.toISOString()===(value.includes('.')?value:value.slice(0,-1)+'.000Z');
+ if(typeof value!=='string'||value.length>27||!/^(?:\d{4}|[+-]\d{6})-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?Z$/.test(value))return false;
+ const expected=value.includes('.')?value:value.slice(0,-1)+(/T\d{2}:\d{2}Z$/.test(value)?':00.000Z':'.000Z');
+ const date=new Date(value);return Number.isFinite(+date)&&date.toISOString()===expected;
 }
 export function parsePlannerBackup(text:string):PlannerBackup{
  if(new TextEncoder().encode(text).length>plannerBackupMaxBytes)throw Error('Choose a Nightjar backup no larger than 5 MB.');

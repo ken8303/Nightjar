@@ -130,7 +130,7 @@ test('valid backups that would exceed a merged collection limit give specific re
 
 
 test('backup export times retain valid legacy and generated ISO UTC instants across supported versions',()=>{
- for(const version of [1,2,3,4])for(const exportedAt of ['2026-10-02T00:00:00Z','2026-10-02T00:00:59.987Z','2024-02-29T00:00:00.000Z','0000-01-01T00:00:00.000Z','+010000-01-01T00:00:00.000Z','-000001-01-01T00:00:00.000Z']){const text=JSON.stringify({...JSON.parse(file(empty())),version,exportedAt});assert.equal(parsePlannerBackup(text).exportedAt,exportedAt)}
+ for(const version of [1,2,3,4])for(const exportedAt of ['2026-10-02T00:00Z','2026-10-02T00:00:00Z','2026-10-02T00:00:59.987Z','2024-02-29T00:00:00.000Z','0000-01-01T00:00:00.000Z','+010000-01-01T00:00:00.000Z','-000001-01-01T00:00:00.000Z']){const text=JSON.stringify({...JSON.parse(file(empty())),version,exportedAt});assert.equal(parsePlannerBackup(text).exportedAt,exportedAt)}
 });
 test('backup metadata rejects repaired dates, ambiguous local dates and non-export formats',()=>{
  for(const exportedAt of ['2026-02-30T00:00:00.000Z','2026-10-02T24:00:00.000Z','2026-10-02T00:00:00','2026-10-02','October 2, 2026','2026-10-02T00:00:00+01:00','2026-10-02T00:00:00.1Z','+002026-10-02T00:00:00.000Z','-000000-01-01T00:00:00.000Z','x'.repeat(1000)])assert.throws(()=>parsePlannerBackup(JSON.stringify({...JSON.parse(file(empty())),exportedAt})),/export time is invalid/);
