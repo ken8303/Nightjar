@@ -184,3 +184,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Header red-light guidance and save-failure feedback occupy separate rows above observing controls. Synthetic failure/recovery passed at 320/390-pixel phone and 1280-pixel desktop widths without overflow or overlapping messages.
 
 - Saved-equipment read failures now show persistent Retry guidance and retain cached setups/draft fields. Mixed-invalid input, failed Retry, repaired input and damaged/repaired cross-context updates passed, with Save/remove paused during unreadable states and the Retry control fitting 320-pixel layouts.
+
+- Equipment Save/Remove/Undo also enter the persistent Retry state if storage becomes unreadable after loading. Synthetic failed reads preserved data and drafts and recovered all three actions; physical storage acceptance is pending.
