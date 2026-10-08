@@ -165,3 +165,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Sky calendar provides weather refresh/retry, dated fetch timestamps and stale guidance alongside meteor cloud averages; failed updates retain earlier forecasts with explicit status, and retry clears warnings.
 
 - [x] Moon graphics-context loss switches to a surface map with retry; texture/fallback failures have readable recovery states and retry recreates working controls. Actual local WebGL event and mobile layouts checked; physical-phone memory pressure remains pending.
+
+- [x] Visible lunar texture stalls offer retry after 15 seconds; fresh retries work while old responses are held and remain healthy after release. Continued waiting completes normally; loading placeholders hide untextured graphics and fit compact phones.

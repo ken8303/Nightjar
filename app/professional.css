@@ -151,3 +151,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 @media(max-width:600px){.aurora-outlook .score-row{grid-template-columns:minmax(0,1fr);gap:16px}.aurora-outlook .score-row h2,.aurora-outlook .score-row p{max-width:none}.aurora-outlook .aurora-value{min-width:0;justify-self:start;text-align:left}}
 
 .moon-globe.moon-globe-unavailable{height:auto;min-height:160px;display:flex;align-items:center;justify-content:center;padding:24px 16px}.moon-globe-unavailable .globe-status{position:static;margin:0;max-width:420px;line-height:1.6}
+
+.lunar-retry{margin:12px 0 16px}
+
+.moon-globe-loading canvas,.moon-globe-loading .lunar-marker{visibility:hidden}
