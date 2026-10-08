@@ -6,10 +6,11 @@ export function readSavedPlaces(storage:Pick<Storage,'getItem'>):Place[]{
  return parseSavedPlaces(storage.getItem('nightjar-places'));
 }
 export function removeSavedPlace(current:Place[],expected:Place):Place[]{
- const index=current.findIndex(item=>samePlaceCoordinates(item,expected));
- if(index<0)throw Error('This place was already removed elsewhere. The latest saved list is shown.');
- const actual=current[index];
- if((['name','latitude','longitude','country','timezone','bortle'] as const).some(key=>actual[key]!==expected[key]))throw Error('This place changed elsewhere. Review the latest settings before removing it.');
+ const index=current.findIndex(item=>samePlaceCoordinates(item,expected)&&(['name','latitude','longitude','country','timezone','bortle'] as const).every(key=>item[key]===expected[key]));
+ if(index<0){
+  if(current.some(item=>samePlaceCoordinates(item,expected)))throw Error('This place changed elsewhere. Review the latest settings before removing it.');
+  throw Error('This place was already removed elsewhere. The latest saved list is shown.');
+ }
  return current.filter((_,i)=>i!==index);
 }
 export function restoreSavedPlace(current:Place[],removed:Place,index:number):Place[]{
@@ -26,9 +27,11 @@ export function readEquipmentProfiles(storage:Pick<Storage,'getItem'>):Equipment
  return value;
 }
 export function removeEquipmentProfile(current:Equipment[],expected:Equipment):Equipment[]{
- const index=current.findIndex(item=>item.name===expected.name);
- if(index<0)throw Error('This setup was already removed elsewhere. The latest saved list is shown.');
- if((['width','height','focal','pixel'] as const).some(key=>current[index][key]!==expected[key]))throw Error('This setup changed elsewhere. Review its latest dimensions before removing it.');
+ const index=current.findIndex(item=>item.name===expected.name&&(['width','height','focal','pixel'] as const).every(key=>item[key]===expected[key]));
+ if(index<0){
+  if(current.some(item=>item.name===expected.name))throw Error('This setup changed elsewhere. Review its latest dimensions before removing it.');
+  throw Error('This setup was already removed elsewhere. The latest saved list is shown.');
+ }
  return current.filter((_,i)=>i!==index);
 }
 export function restoreEquipmentProfile(current:Equipment[],removed:Equipment,index:number):Equipment[]{

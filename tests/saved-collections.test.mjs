@@ -65,3 +65,18 @@ test('equipment reads retain valid legacy collections and reject corrupt or bloc
  assert.throws(()=>readEquipmentProfiles({getItem:()=>{throw Error('Storage blocked')}}),/Storage blocked/);
  assert.deepEqual(readEquipmentProfiles({getItem:()=>null}),[]);
 });
+
+
+test('legacy coordinate aliases remove the requested metadata match without removing a sibling',()=>{
+ const first={name:'First alias',latitude:51.5,longitude:0,bortle:2,extra:'first'},second={...first,name:'Second alias',bortle:4,extra:'second'},other={name:'Elsewhere',latitude:48,longitude:2},current=[first,second,other],before=structuredClone(current);
+ assert.deepEqual(removeSavedPlace(current,second),[first,other]);assert.deepEqual(removeSavedPlace(current,first),[second,other]);assert.deepEqual(current,before);
+ assert.throws(()=>removeSavedPlace([first,other],second),/changed elsewhere/);
+ assert.equal(removeSavedPlace([first,{...first}],first).length,1);
+ assert.deepEqual(restoreSavedPlace([first,other],second,1),[first,other]);
+});
+test('legacy same-name equipment removes the requested dimensions and retains sibling settings',()=>{
+ const first={name:'Shared setup',width:36,height:24,focal:400,pixel:3.76,extra:'first'},second={...first,focal:800,extra:'second'},other={...first,name:'Other'},current=[first,second,other],before=structuredClone(current);
+ assert.deepEqual(removeEquipmentProfile(current,second),[first,other]);assert.deepEqual(removeEquipmentProfile(current,first),[second,other]);assert.deepEqual(current,before);
+ assert.throws(()=>removeEquipmentProfile([first,other],second),/changed elsewhere/);assert.equal(removeEquipmentProfile([first,{...first}],first).length,1);
+ assert.deepEqual(restoreEquipmentProfile([first,other],second,1),[first,other]);
+});
