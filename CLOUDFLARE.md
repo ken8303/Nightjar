@@ -29,6 +29,8 @@ npm run verify
 
 `deploy:check` packages without publishing. `npm run deploy` publishes an already built version and requires Cloudflare credentials; Workers Builds provides deployment authentication. Do not commit API tokens or local `.dev.vars` files.
 
+Both commands copy the generated build to a temporary isolated snapshot, keeping the entry and assets together with their generated relative paths. Packaging omits only byte-identical, unreferenced numbered copies of hashed generated JavaScript/CSS files. Distinct or referenced files and public photos remain included. The original `dist` is untouched, and the snapshot is removed after Wrangler exits. Configuration overrides are rejected; the packaging check accepts only an optional `--outdir` path and always uses `--dry-run`. The non-production upload command above directly uses `dist`; run it from a clean build environment.
+
 ## Runtime requirements
 
 No D1, R2, or API keys are needed for the current features. Weather/location search use Open-Meteo; aurora uses NOAA. Saved places and equipment stay in browser local storage and do not transfer between site origins.
