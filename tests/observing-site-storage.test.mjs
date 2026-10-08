@@ -27,3 +27,17 @@ test('forecast time zones update only the unchanged owning site and never overwr
  assert.equal(saveForecastTimezone({getItem:()=>{throw Error('Blocked')},setItem:()=>assert.fail('must not write')},site,'Europe/London'),false);
  const failed=store(JSON.stringify(site));failed.setItem=()=>{throw Error('Quota')};assert.equal(saveForecastTimezone(failed,site,'Europe/London'),false);assert.equal(failed.getItem('nightjar-place'),JSON.stringify(site));
 });
+
+test('startup treats a damaged saved-place collection as unreadable instead of silently dropping rows',()=>{
+ const previousLocal=globalThis.localStorage,previousSession=globalThis.sessionStorage;
+ globalThis.sessionStorage={getItem:()=>JSON.stringify('2026-10-08T20:00:00.000Z')};
+ try{
+  for(const raw of ['bad','{}',JSON.stringify([site,{...site,latitude:91}]),'x'.repeat(5*1024*1024+1)]){const storage=store(JSON.stringify(site));storage.values.set('nightjar-places',raw);globalThis.localStorage=storage;const setup=readPlannerSetup();assert.equal(setup.savedReadError,true);assert.deepEqual(setup.saved,[]);assert.deepEqual(setup.place,site);assert.equal(setup.placeReadError,false);assert.equal(storage.getItem('nightjar-places'),raw);assert.deepEqual(storage.writes,[])}
+  globalThis.localStorage={getItem:key=>{if(key==='nightjar-places')throw Error('Blocked');return JSON.stringify(site)}};assert.equal(readPlannerSetup().savedReadError,true);
+ }finally{if(previousLocal===undefined)delete globalThis.localStorage;else globalThis.localStorage=previousLocal;if(previousSession===undefined)delete globalThis.sessionStorage;else globalThis.sessionStorage=previousSession}
+});
+test('shared saved-place parsing accepts empty and legacy oversized valid lists without truncation',async()=>{
+ const {parseSavedPlaces}=await vite.ssrLoadModule('/lib/planner-state.ts');
+ for(const raw of [null,'','[]'])assert.deepEqual(parseSavedPlaces(raw),[]);
+ const legacy=Array.from({length:101},(_,index)=>({...site,name:`Legacy ${index}`})),raw=JSON.stringify(legacy);assert.deepEqual(parseSavedPlaces(raw),legacy);assert.equal(raw,JSON.stringify(legacy));assert.throws(()=>parseSavedPlaces(JSON.stringify([site,{...site,timezone:'Invalid/QA'}])),/invalid data/);
+});

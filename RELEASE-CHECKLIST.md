@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 362 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 364 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -188,3 +188,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Equipment Save/Remove/Undo also enter the persistent Retry state if storage becomes unreadable after loading. Synthetic failed reads preserved data and drafts and recovered all three actions; physical storage acceptance is pending.
 
 - Startup preserves malformed/unreadable selected-site values, clearly identifies the fallback and offers Retry/My places recovery. Synthetic forecast/reload checks made zero writes; repaired-site Retry kept the observing time, explicit choice replaced the value once, and older forecasts preserved newer stored selections. Valid time-zone updates retain additional stored fields.
+
+- Saved-place failures show persistent Retry guidance, retain cached sites and pause collection-dependent changes. Invalid startup, late Save/Remove/Undo/rename/rating failures and cross-context repair passed; site, rating, time and form fields remained intact in the tested flows. Valid 101-site legacy collections remain readable for explicit removal.

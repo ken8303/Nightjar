@@ -2,10 +2,10 @@
 
 import type {Place} from '@/lib/sky';
 
-export default function SiteDarkness({place,onChange}:{place:Place;onChange:(bortle:number|undefined)=>void}){
+export default function SiteDarkness({place,onChange,disabled=false}:{place:Place;onChange:(bortle:number|undefined)=>void;disabled?:boolean}){
  return <div className="site-darkness">
   <label htmlFor="site-bortle">Your sky darkness rating</label>
-  <select id="site-bortle" value={place.bortle??''} onChange={event=>onChange(event.target.value?Number(event.target.value):undefined)}>
+  <select id="site-bortle" disabled={disabled} value={place.bortle??''} onChange={event=>onChange(event.target.value?Number(event.target.value):undefined)}>
    <option value="">Not rated</option>
    {Array.from({length:9},(_,index)=><option key={index+1} value={index+1}>Bortle class {index+1}{index===0?' · darkest':index===8?' · brightest':''}</option>)}
   </select>

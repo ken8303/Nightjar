@@ -1,13 +1,9 @@
 import {type Place} from './sky';
-import {validPlace,samePlaceCoordinates} from './planner-state';
+import {validPlace,samePlaceCoordinates,parseSavedPlaces} from './planner-state';
 import {validEquipment,type Equipment} from './photography';
 export const savedPlacesLimit=100,equipmentProfilesLimit=100;
 export function readSavedPlaces(storage:Pick<Storage,'getItem'>):Place[]{
- const raw=storage.getItem('nightjar-places');
- if(raw&&raw.length>5*1024*1024)throw Error('The saved places could not be read.');
- const value:unknown=JSON.parse(raw||'[]');
- if(!Array.isArray(value)||!value.every(validPlace))throw Error('The saved places contain invalid data.');
- return value;
+ return parseSavedPlaces(storage.getItem('nightjar-places'));
 }
 export function removeSavedPlace(current:Place[],expected:Place):Place[]{
  const index=current.findIndex(item=>samePlaceCoordinates(item,expected));

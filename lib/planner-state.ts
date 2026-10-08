@@ -20,12 +20,18 @@ export function readObservingSite(storage?:Pick<Storage,'getItem'>):{place:Place
   return {place:value,error:false};
  }catch{return {place:initialPlace,error:true}}
 }
+export function parseSavedPlaces(raw:string|null):Place[]{
+ if(raw&&raw.length>5*1024*1024)throw Error('The saved places could not be read.');
+ const value:unknown=JSON.parse(raw||'[]');
+ if(!Array.isArray(value)||!value.every(validPlace))throw Error('The saved places contain invalid data.');
+ return value;
+}
 export function readPlannerSetup(now=new Date()){
- const site=readObservingSite(),place=site.place;let saved:Place[]=[],recovery:Date|null=null;
- try{const value:unknown=JSON.parse(localStorage.getItem('nightjar-places')||'[]');if(Array.isArray(value))saved=value.filter(validPlace)}catch{}
+ const site=readObservingSite(),place=site.place;let saved:Place[]=[],savedReadError=false,recovery:Date|null=null;
+ try{saved=parseSavedPlaces(localStorage.getItem('nightjar-places'))}catch{savedReadError=true}
  // Reading is repeatable for React Strict Mode; remove the token after mounting.
  try{const value:unknown=JSON.parse(sessionStorage.getItem('nightjar-recovery-time-v1')||'null');recovery=parseObservingInstant(value)}catch{}
- return {place,saved,placeReadError:site.error,date:recovery||nextObservingTime(now,place)};
+ return {place,saved,savedReadError,placeReadError:site.error,date:recovery||nextObservingTime(now,place)};
 }
 
 export function samePlaceCoordinates(a:Place,b:Place){return Math.abs(a.latitude-b.latitude)<.0001&&Math.abs(a.longitude-b.longitude)<.0001}
