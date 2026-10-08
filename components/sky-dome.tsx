@@ -4,7 +4,7 @@ import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ArrowLeft,ArrowRight,ArrowUp,ArrowDown,Minus,Plus,RotateCcw,Crosshair} from 'lucide-react';
 import {skyTargets,lines,galacticCentrePosition} from '@/lib/sky';
-import {horizonVector,nearestProjectedTarget,zoomCameraPosition} from '@/lib/sky-dome';
+import {horizonVector,nearestProjectedTarget,zoomCameraPosition,createSkyTapSelection} from '@/lib/sky-dome';
 import SkyChart from '@/components/sky-chart';
 import type {SkyAtlasProps} from '@/components/sky-atlas-viewer';
 type Actions={sync:()=>void;rotate:(angle:number)=>void;tilt:(angle:number)=>void;zoom:(factor:number)=>void;reset:()=>void;focus:()=>void};
@@ -25,7 +25,7 @@ export default function SkyDome(props:SkyAtlasProps){
    const node=host.current;if(!node)return;const el=node;
    const scene=new T.Scene(),camera=new T.PerspectiveCamera(44,1,.1,20);
    const renderer=new T.WebGLRenderer({alpha:true,antialias:true});
-   disposers.push(()=>{renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove()});
+   disposers.push(()=>{renderer.dispose();if(!renderer.getContext().isContextLost())renderer.forceContextLoss();renderer.domElement.remove()});
    renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.setClearColor(0x08121a,1);
    const canvas=renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Interactive 3D sky dome. Arrow keys rotate and tilt; plus and minus zoom; Home resets. Objects can also be selected using their labels or the target finder.');el.appendChild(canvas);
    const controls=new OrbitControls(camera,canvas);disposers.push(()=>controls.dispose());controls.enablePan=false;controls.enableDamping=false;controls.minDistance=1.8;controls.maxDistance=5;controls.minPolarAngle=.12;controls.maxPolarAngle=Math.PI/2;controls.target.set(0,.3,0);
@@ -69,14 +69,13 @@ export default function SkyDome(props:SkyAtlasProps){
    actions.current={sync,reset,focus:()=>{const chosen=coordinates.find(point=>point.name===latest.current.props.selected);if(!chosen)return;controls.target.copy(chosen.vector);const direction=new T.Spherical().setFromVector3(chosen.vector);direction.radius=2.4;direction.phi=T.MathUtils.clamp(direction.phi,.12,Math.PI/2);camera.position.setFromSpherical(direction).add(controls.target);controls.update();render()},rotate:angle=>{camera.position.sub(controls.target).applyAxisAngle(new T.Vector3(0,1,0),angle).add(controls.target);controls.update();render()},tilt:angle=>{const spherical=new T.Spherical().setFromVector3(camera.position.clone().sub(controls.target));spherical.phi=T.MathUtils.clamp(spherical.phi+angle,.12,Math.PI/2);camera.position.setFromSpherical(spherical).add(controls.target);controls.update();render()},zoom:factor=>{camera.position.set(...zoomCameraPosition(camera.position.toArray(),controls.target.toArray(),factor));controls.update();render()}};
    const resize=()=>{if(!el.clientWidth||!el.clientHeight)return;camera.aspect=el.clientWidth/el.clientHeight;camera.fov=camera.aspect<1?2*Math.atan(Math.tan(44*Math.PI/360)/camera.aspect)*180/Math.PI:44;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight);render()};
    const observer=new ResizeObserver(resize);observer.observe(el);disposers.push(()=>observer.disconnect());controls.addEventListener('change',render);disposers.push(()=>controls.removeEventListener('change',render));
-   let down:{x:number;y:number}|null=null;
-   const pointerDown=(event:PointerEvent)=>{down={x:event.clientX,y:event.clientY}};
-   const pointerUp=(event:PointerEvent)=>{if(!down||Math.hypot(event.clientX-down.x,event.clientY-down.y)>6){down=null;return}down=null;const rect=canvas.getBoundingClientRect(),name=nearestProjectedTarget(projected,event.clientX-rect.left,event.clientY-rect.top);if(name)latest.current.props.onSelect(name)};
-   const cancel=()=>{down=null};
+   const tap=createSkyTapSelection((x,y)=>{const rect=canvas.getBoundingClientRect(),name=nearestProjectedTarget(projected,x-rect.left,y-rect.top);if(name)latest.current.props.onSelect(name)});
+   const pointerDown=(event:PointerEvent)=>tap.down(event),pointerMove=(event:PointerEvent)=>tap.move(event),pointerUp=(event:PointerEvent)=>tap.up(event),cancel=(event:PointerEvent)=>tap.cancel(event);
    const key=(event:KeyboardEvent)=>{const a=actions.current;if(!a)return;switch(event.key){case'ArrowLeft':a.rotate(-.18);break;case'ArrowRight':a.rotate(.18);break;case'ArrowUp':a.tilt(-.15);break;case'ArrowDown':a.tilt(.15);break;case'+':case'=':a.zoom(.85);break;case'-':a.zoom(1.18);break;case'Home':a.reset();break;default:return}event.preventDefault()};
    const lost=(event:Event)=>{event.preventDefault();cleanup();setFailed(true);setStatus('3D rendering stopped. The 2D chart is available below.')};
-   canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointerup',pointerUp);canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('keydown',key);canvas.addEventListener('webglcontextlost',lost);
-   disposers.push(()=>{canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('pointercancel',cancel);canvas.removeEventListener('keydown',key);canvas.removeEventListener('webglcontextlost',lost)});
+   // Handle release before OrbitControls releases pointer capture.
+   canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointermove',pointerMove);canvas.addEventListener('pointerup',pointerUp,true);canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);canvas.addEventListener('keydown',key);canvas.addEventListener('webglcontextlost',lost);
+   disposers.push(()=>{canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointermove',pointerMove);canvas.removeEventListener('pointerup',pointerUp,true);canvas.removeEventListener('pointercancel',cancel);canvas.removeEventListener('lostpointercapture',cancel);canvas.removeEventListener('keydown',key);canvas.removeEventListener('webglcontextlost',lost)});
    reset();resize();sync();setStatus('');
   }catch{cleanup();setFailed(true);setStatus('3D is unavailable in this browser. The 2D chart is shown instead.')}});
   disposers.push(()=>cancelAnimationFrame(frame));

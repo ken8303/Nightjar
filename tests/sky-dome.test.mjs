@@ -5,7 +5,7 @@ import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
-const {horizonVector,nearestProjectedTarget,zoomCameraPosition}=await vite.ssrLoadModule('/lib/sky-dome.ts');
+const {horizonVector,nearestProjectedTarget,zoomCameraPosition,createSkyTapSelection}=await vite.ssrLoadModule('/lib/sky-dome.ts');
 const close=(actual,expected)=>actual.forEach((value,i)=>assert(Math.abs(value-expected[i])<1e-10));
 test('3D horizon frame preserves cardinal directions, altitude and unit radius',()=>{
  close(horizonVector(0,0),[0,0,-1]);close(horizonVector(0,90),[1,0,0]);close(horizonVector(0,180),[0,0,1]);close(horizonVector(0,270),[-1,0,0]);close(horizonVector(90,42),[0,1,0]);
@@ -39,4 +39,29 @@ test('camera zoom clamps orbit distance and stays stable at both limits',()=>{
  close(zoomCameraPosition(near,target,.8),near);close(zoomCameraPosition(far,target,1.25),far);
  close(zoomCameraPosition([3.2,.6,0],target,.1),near);close(zoomCameraPosition([3.2,.6,0],target,10),far);
  close(zoomCameraPosition(target,target,.8),target);
+});
+
+
+test('sky taps select only a primary pointer that never became a drag, pinch or cancelled gesture',()=>{
+ const taps=[],gesture=createSkyTapSelection((x,y)=>taps.push([x,y]));
+ const point=(id,x=100,y=100,button=0)=>({pointerId:id,clientX:x,clientY:y,button});
+ gesture.down(point(1));gesture.move(point(1,103));gesture.up(point(1,103));assert.deepEqual(taps,[[103,100]]);
+ // Returning to the starting pixel cannot turn an orbit drag into selection.
+ gesture.down(point(2));gesture.move(point(2,120));gesture.move(point(2));gesture.up(point(2));assert.equal(taps.length,1);
+ gesture.down(point(3));gesture.up(point(3,110));assert.equal(taps.length,1);
+ gesture.down(point(4));gesture.down(point(5,150));gesture.up(point(4));gesture.up(point(5,150));assert.equal(taps.length,1);
+ gesture.down(point(6));gesture.cancel({pointerId:6});gesture.up(point(6));assert.equal(taps.length,1);
+ gesture.down(point(7,100,100,2));gesture.up(point(7,100,100,2));assert.equal(taps.length,1);
+ // Cleanup after release may deliver capture loss; it must not undo a tap.
+ gesture.down(point(8));gesture.up(point(8,106));gesture.cancel({pointerId:8});assert.deepEqual(taps.at(-1),[106,100]);
+ gesture.down(point(9));gesture.up(point(9));assert.equal(taps.length,3);
+});
+test('pinch cancellation and duplicate or unknown pointer events cannot leak selection into a later gesture',()=>{
+ const taps=[],gesture=createSkyTapSelection((x,y)=>taps.push([x,y]));
+ const point=(id,x=0)=>({pointerId:id,clientX:x,clientY:0,button:0});
+ gesture.down(point(1));gesture.down(point(1));gesture.down(point(2,20));gesture.cancel({pointerId:1});gesture.up(point(2,20));assert.equal(taps.length,0);
+ gesture.up(point(99));gesture.move(point(99,100));gesture.cancel({pointerId:99});
+ gesture.down(point(3));gesture.move(point(99,100));gesture.up(point(3));assert.deepEqual(taps,[[0,0]]);
+ gesture.down(point(4));gesture.down(point(5,20));gesture.up(point(5,20));gesture.up(point(4));assert.equal(taps.length,1);
+ gesture.down(point(6));gesture.up(point(6));assert.equal(taps.length,2);
 });

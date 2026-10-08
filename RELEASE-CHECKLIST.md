@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 355 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 357 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -167,3 +167,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Moon graphics-context loss switches to a surface map with retry; texture/fallback failures have readable recovery states and retry recreates working controls. Actual local WebGL event and mobile layouts checked; physical-phone memory pressure remains pending.
 
 - [x] Visible lunar texture stalls offer retry after 15 seconds; fresh retries work while old responses are held and remain healthy after release. Continued waiting completes normally; loading placeholders hide untextured graphics and fit compact phones.
+
+- [x] 3D sky selection distinguishes taps from orbit drags, pinches and cancellations; native canvas clicks, right-click rejection, orbiting and mobile remount/fallback passed. Verify two-finger pinch selection on a physical phone.

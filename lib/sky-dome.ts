@@ -16,3 +16,32 @@ export function nearestProjectedTarget(points:{name:string;x:number;y:number;vis
  for(const point of points){if(!point.visible)continue;const squared=(point.x-x)**2+(point.y-y)**2;if(squared<distance){nearest=point.name;distance=squared}}
  return nearest;
 }
+
+type SkyPointer=Pick<PointerEvent,'pointerId'|'clientX'|'clientY'|'button'>;
+// A tap is one primary pointer that never becomes a drag or pinch. Movement
+// history matters even when a drag finishes close to where it started.
+export function createSkyTapSelection(onTap:(x:number,y:number)=>void){
+ const active=new Set<number>();
+ let start:{id:number;x:number;y:number}|null=null,blocked=false;
+ const reset=()=>{start=null;blocked=false};
+ const moved=(event:SkyPointer)=>Boolean(start&&Math.hypot(event.clientX-start.x,event.clientY-start.y)>6);
+ return {
+  down(event:SkyPointer){
+   if(event.button!==0||active.has(event.pointerId))return;
+   active.add(event.pointerId);
+   if(active.size===1){start={id:event.pointerId,x:event.clientX,y:event.clientY};blocked=false}
+   else blocked=true;
+  },
+  move(event:SkyPointer){if(active.has(event.pointerId)&&start?.id===event.pointerId&&moved(event))blocked=true},
+  up(event:SkyPointer){
+   if(!active.delete(event.pointerId))return;
+   const tap=active.size===0&&!blocked&&start?.id===event.pointerId&&!moved(event)&&event.button===0;
+   if(active.size===0)reset();
+   if(tap)onTap(event.clientX,event.clientY);
+  },
+  cancel(event:Pick<PointerEvent,'pointerId'>){
+   if(!active.delete(event.pointerId))return;
+   blocked=true;if(active.size===0)reset();
+  },
+ };
+}

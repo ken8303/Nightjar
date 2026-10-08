@@ -103,7 +103,7 @@ Backup import reviews retain a snapshot of the saved plan. If that data changes 
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 355 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 357 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
