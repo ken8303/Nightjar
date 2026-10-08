@@ -36,8 +36,8 @@ export function weatherHours(hourly:HourlyForecast|undefined,date:Date|null,plac
  if(!Array.isArray(hourly?.time)||!date)return [];
  const index=forecastHourIndex(hourly.time,date);
  if(index<0)return [];
- const start=hourly.time[index];
- return hourly.time.map((time,index)=>({time,index})).filter(({time})=>finite(time)&&Number.isFinite(+new Date(time*1000))&&time>=start).sort((a,b)=>a.time-b.time).slice(0,12).map(({time,index})=>{
+ const start=hourly.time[index],instant=+date/1000;
+ return hourly.time.map((time,index)=>({time,index})).filter(({time})=>finite(time)&&Number.isFinite(+new Date(time*1000))&&time>=start&&time<instant+12*3600).sort((a,b)=>a.time-b.time).slice(0,13).map(({time,index})=>{
   const at=new Date(time*1000);
   const value=(field:string)=>{const raw=hourly[field]?.[index];return finite(raw)?raw:null};
   const rawCloud=value('cloud_cover'),cloud=rawCloud!==null&&rawCloud>=0&&rawCloud<=100?rawCloud:null;

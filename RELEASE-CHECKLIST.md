@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 368 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 372 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -194,3 +194,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Unfinished site-name edits now guard navigation and PWA reload. Site/comparison/camera plans queue their full context until an explicit continuation; Keep editing and newer requests cancel/replace the prior intent. Phone-width checks preserved drafts/site/time and applied a comparison's future site/time together. Native phone exit/keyboard behavior remains pending.
 
 - Stored-site Retry respects unfinished edits and adopts reviewed data without rewriting it. Same-coordinate recovery cleared the name editor/guard only after explicit continuation; completed site choices cleared older location-search feedback.
+
+- Tonight distinguishes unavailable cloud scores from known poor conditions, reports partial coverage and evaluates the current outlook at the exact selected minute. Hour rows stay within twelve elapsed hours and include date/UTC-offset labels. Missing/partial/full/dawn cases and narrow phone layouts were checked on a disposable origin.

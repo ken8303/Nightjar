@@ -166,3 +166,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .startup-site-warning{margin-bottom:18px}.startup-site-warning h2{margin-top:0;font-size:22px}.startup-site-warning p{font-size:14px;line-height:1.65;color:var(--text-secondary)}.startup-site-warning .button{max-width:100%;white-space:normal}
 
 .saved-places-read-error .button{max-width:100%;white-space:normal;text-align:left}
+
+.forecast-coverage{margin:12px 0 0}.hour .forecast-hour-stamp{font-size:9px;white-space:normal;line-height:1.5;min-height:27px}
