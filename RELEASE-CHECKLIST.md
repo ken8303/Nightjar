@@ -177,3 +177,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Returning to My places after leaving a pending device-location request clears busy state. Synthetic desktop/mobile checks ignored obsolete success and accepted a fresh request; physical GPS acceptance remains pending.
 
 - Collection/preference synchronization accepts localStorage events only. Two disposable tabs verified red light, stars, notes, deep-sky targets and diary synchronization; an unrelated frame session clear preserved red light at mobile width.
+
+- Header red-light guidance and save-failure feedback occupy separate rows above observing controls. Synthetic failure/recovery passed at 320/390-pixel phone and 1280-pixel desktop widths without overflow or overlapping messages.

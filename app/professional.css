@@ -155,3 +155,8 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .lunar-retry{margin:12px 0 16px}
 
 .moon-globe-loading canvas,.moon-globe-loading .lunar-marker{visibility:hidden}
+
+/* Keep preference feedback readable without covering the observing controls. */
+.heading-utilities{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}
+.heading-utilities .viewing-mode{display:contents}
+.heading-utilities .viewing-mode p{grid-column:1/-1;position:static;width:auto;max-width:none;margin:0;padding:0;border:0;background:none;box-shadow:none;font-size:12px;line-height:1.6;color:var(--text-secondary)}
