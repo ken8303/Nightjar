@@ -24,10 +24,17 @@ function plan(value:unknown):SavedPlan{
   equipment:value.equipment.map(e=>({name:e.name,width:e.width,height:e.height,focal:e.focal,pixel:e.pixel}))
  };
 }
+// Exports use ISO UTC instants. Legacy files may omit milliseconds; require
+// an exact calendar round trip so Date parsing cannot silently repair a day.
+function validBackupExportTime(value:unknown):value is string{
+ if(typeof value!=='string'||value.length>27||!/^(?:\d{4}|[+-]\d{6})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value))return false;
+ const date=new Date(value);return Number.isFinite(+date)&&date.toISOString()===(value.includes('.')?value:value.slice(0,-1)+'.000Z');
+}
 export function parsePlannerBackup(text:string):PlannerBackup{
  if(new TextEncoder().encode(text).length>plannerBackupMaxBytes)throw Error('Choose a Nightjar backup no larger than 5 MB.');
  let raw:unknown;try{raw=JSON.parse(text)}catch{throw Error('This file is not valid JSON. Choose a Nightjar backup file.')}
- if(!record(raw)||raw.format!=='nightjar-backup'||(raw.version!==1&&raw.version!==2&&raw.version!==3&&raw.version!==4)||typeof raw.exportedAt!=='string'||!Number.isFinite(+new Date(raw.exportedAt)))throw Error('This is not a supported Nightjar backup. Nothing has been imported.');
+ if(!record(raw)||raw.format!=='nightjar-backup'||(raw.version!==1&&raw.version!==2&&raw.version!==3&&raw.version!==4))throw Error('This is not a supported Nightjar backup. Nothing has been imported.');
+ if(!validBackupExportTime(raw.exportedAt))throw Error('The backup export time is invalid. Choose an original Nightjar backup file. Nothing has been imported.');
  return {format:'nightjar-backup',version:4,exportedAt:raw.exportedAt,data:plan(raw.data)};
 }
 export function readSavedPlan(storage:StorageAccess):SavedPlan{

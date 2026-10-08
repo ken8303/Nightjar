@@ -150,3 +150,4 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Diary search includes stored country, with legacy records and Unicode matching preserved.
 - [x] Camera and inline/expanded 3D module failures stay inside recovery panels; surrounding planner and unsaved notes remain available, 2D switching works, and restored modules load normally.
 - [x] Failed site renames restore only their own unchanged writes, preserve newer active/saved site values and keep the typed name available for retry.
+- [x] Backup export dates must be exact generated UTC formats; legacy files remain readable, malformed calendar dates produce focused errors, and reviews retain seconds/milliseconds.
