@@ -62,3 +62,10 @@ test('offline saved-target listing retains all 42 identities including the three
  assert.equal(page.elements.get('targets').children.length,42);
  for(const name of ['Mercury','Uranus','Neptune'])assert(page.elements.get('targets').textContent.includes(name));
 });
+test('offline timestamps retain sub-minute precision and reject normalized or unsupported recovery dates without rewriting storage',()=>{
+ const precise='2026-10-25T01:30:59.987Z',entry={target:'M31',observedAt:precise,place:{name:'London',latitude:51.5,longitude:0},outcome:'seen',equipment:'',notes:'Exact timestamp'};
+ const page=load({'nightjar-observing-time':precise,'nightjar-place':{...entry.place,timezone:'Europe/London'},'nightjar-observing-diary-v1':[entry,{...entry,observedAt:'2026-02-30T01:00:00.000Z'}]});
+ assert(page.elements.get('session').textContent.includes('2026-10-25 01:30:59.987 UTC'));assert(page.elements.get('session').textContent.includes('01:30:59.987 GMT'));assert(page.elements.get('diary').textContent.includes('2026-10-25 01:30:59.987 UTC'));assert.equal(page.elements.get('diary').children.length,1);
+ page.elements.get('retry').listeners.get('click')();assert.equal(page.session.get('nightjar-recovery-time-v1'),JSON.stringify(precise));
+ for(const time of ['2026-02-30T01:00:00.000Z','0000-01-01T00:00:00.000Z','2026-10-25T24:00:00.000Z','2026-10-25T01:30:00Z']){const invalid=load({'nightjar-observing-time':time});assert.equal(invalid.elements.get('session').children.length,0);assert.equal(invalid.elements.get('storage-warning').hidden,false);invalid.elements.get('retry').listeners.get('click')();assert.equal(invalid.session.size,0)}
+});

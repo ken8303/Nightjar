@@ -58,6 +58,11 @@
       const validDimension=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&value>0&&value<=limit;
       const safeNote=value=>typeof value==='string'?value.slice(0,2000):'';
       const safeText = value => typeof value === 'string' ? value.trim().slice(0, 300) : '';
+      const canonicalInstant=value=>{
+        if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value))return null;
+        const instant=new Date(value);return Number.isFinite(+instant)&&instant.toISOString()===value?instant:null;
+      };
+      const utcTime=value=>value.replace('T',' ').replace(/:00\.000Z$/,' UTC').replace(/\.000Z$/,' UTC').replace(/Z$/,' UTC');
       const add = (id, title, detail, note) => {
         const item = document.createElement('li');
         const heading = document.createElement('strong');
@@ -71,15 +76,16 @@
 
       const currentPlace = read('nightjar-place', null);
       const selectedTime = read('nightjar-observing-time', null);
-      const instant = typeof selectedTime === 'string' ? new Date(selectedTime) : null;
-      if (instant && Number.isFinite(+instant)) {
+      const instant = canonicalInstant(selectedTime);
+      if (instant && instant.getUTCFullYear()>=1) {
         const siteName = currentPlace && typeof currentPlace === 'object' ? safeText(currentPlace.name) : '';
         let zone = currentPlace && typeof currentPlace === 'object' ? safeText(currentPlace.timezone) || 'UTC' : 'UTC';
         let localTime;
-        try { localTime = new Intl.DateTimeFormat('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:zone, timeZoneName:'short' }).format(instant); }
-        catch { zone = 'UTC'; localTime = new Intl.DateTimeFormat('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'UTC' }).format(instant); }
-        add('session', siteName ? 'At ' + siteName : 'Selected time', localTime, 'UTC: ' + instant.toISOString().slice(0,16).replace('T',' ') + ' · Times are a saved snapshot, not a live forecast.');
-      }
+        const options={calendar:'gregory',numberingSystem:'latn',weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',timeZoneName:'shortOffset',...(instant.getUTCMilliseconds()?{fractionalSecondDigits:3}:{}),...(instant.getUTCFullYear()<=1?{era:'short'}:{})};
+        try { localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
+        catch { zone = 'UTC'; localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
+        add('session', siteName ? 'At ' + siteName : 'Selected time', localTime, utcTime(selectedTime) + ' · Times are a saved snapshot, not a live forecast.');
+      }else if(selectedTime!==null)document.getElementById('storage-warning').hidden=false;
       showEmpty('session');
 
       const targets = read('nightjar-targets-v1', []);
@@ -96,9 +102,9 @@
       showEmpty('deep-targets');
 
       const diary=read('nightjar-observing-diary-v1',[]);
-      if(Array.isArray(diary))for(const entry of diary.slice(0,200).filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&typeof entry.observedAt==='string'&&Number.isFinite(+new Date(entry.observedAt))&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180)).sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
+      if(Array.isArray(diary))for(const entry of diary.slice(0,200).filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180)).sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
         const outcome={'seen':'Seen','not-seen':'Not seen','imaged':'Imaged'}[entry.outcome];
-        add('diary',entry.target+' · '+outcome,new Date(entry.observedAt).toISOString().slice(0,16).replace('T',' ')+' UTC · '+safeText(entry.place.name)+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
+        add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
       }
       showEmpty('diary');
 
@@ -124,7 +130,7 @@
       const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
       document.getElementById('retry').addEventListener('click',()=>{
-        try{const value=localStorage.getItem('nightjar-observing-time');const time=JSON.parse(value||'null');if(typeof time==='string'&&Number.isFinite(+new Date(time)))sessionStorage.setItem('nightjar-recovery-time-v1',value)}catch{/* Reopening still works when session storage is unavailable. */}
+        try{const value=localStorage.getItem('nightjar-observing-time');const time=canonicalInstant(JSON.parse(value||'null'));if(time&&time.getUTCFullYear()>=1)sessionStorage.setItem('nightjar-recovery-time-v1',value)}catch{/* Reopening still works when session storage is unavailable. */}
       });
     })();
   </script>
