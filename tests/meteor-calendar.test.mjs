@@ -6,7 +6,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {utcDate}=await vite.ssrLoadModule('/lib/utc-date.ts');
 const {meteorCalendar}=await vite.ssrLoadModule('/lib/calendar.ts');
-const {nextMeteorYear,meteorEvents,meteorConditions}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
+const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
 test('meteor dates and next-year selection preserve early years rather than adding 1900',()=>{
  for(const year of [1,99,100,2026]){
   const padded=String(year).padStart(4,'0');
@@ -51,4 +51,27 @@ test('a complete sampled meteor hour cannot extend beyond local noon in a fracti
  if(conditions.window)assert(+conditions.window.end<=+new Date('2026-12-14T06:15:00Z'));
  const lastHour=meteorConditions(event,2026,place,undefined,new Date('2026-12-14T06:00:00Z'));
  assert.equal(lastHour.darkHours,0);assert.equal(lastHour.window,null);
+});
+
+
+test('meteor cloud estimates report complete, partial and missing coverage without treating gaps as clear skies',()=>{
+ const event=meteorEvents.find(event=>event.name==='Geminids'),place={name:'Polar QA',latitude:90,longitude:0,timezone:'UTC'};
+ const start=Date.parse('2026-12-13T12:00:00Z')/1000;
+ const time=Array.from({length:24},(_,index)=>start+index*3600);
+ const hourly={time,cloud_cover:time.map(()=>40)};
+ const original=structuredClone(hourly);
+ const full=meteorConditions(event,2026,place,hourly);
+ assert(full.cloudSampleHours>1);assert.equal(full.cloudForecastHours,full.cloudSampleHours);assert.equal(full.cloudCover,40);
+ assert(!meteorCloudSummary(full).includes('Partial coverage'));
+ const baseline=meteorConditions(event,2026,place);
+ const selectedStart=baseline.window?.start??new Date(start*1000);
+ const partial=meteorConditions(event,2026,place,{time:[+selectedStart/1000],cloud_cover:[70]});
+ assert.equal(partial.cloudForecastHours,1);assert.equal(partial.cloudCover,70);assert.equal(partial.cloudSampleHours,full.cloudSampleHours);
+ assert(meteorCloudSummary(partial).includes('1 of '+full.cloudSampleHours));assert(meteorCloudSummary(partial).includes('Partial coverage'));
+ const missing=meteorConditions(event,2026,place,{time,cloud_cover:time.map(()=>null)});
+ assert.equal(missing.cloudForecastHours,0);assert.equal(missing.cloudCover,null);assert(meteorCloudSummary(missing).includes('unavailable'));
+ for(const invalid of [NaN,-1,101,Infinity]){const result=meteorConditions(event,2026,place,{time,cloud_cover:time.map(()=>invalid)});assert.equal(result.cloudForecastHours,0);assert.equal(result.cloudCover,null)}
+ const elapsed=meteorConditions(event,2026,place,hourly,new Date('2026-12-14T12:00:00Z'));
+ assert.equal(elapsed.cloudSampleHours,0);assert.equal(elapsed.cloudForecastHours,0);assert.equal(meteorCloudSummary(elapsed),'No remaining dark hours to check against the cloud forecast.');
+ assert.deepEqual(hourly,original);
 });

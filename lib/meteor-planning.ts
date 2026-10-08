@@ -59,5 +59,13 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
   return typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?[cloud]:[];
  });
  const moon=moonInfo(utcDate(year,event.month,event.day,12),place);
- return {darkHours:dark.length,moonFreeHours:moonFree.length,window:longest,moonIllumination:moon.illumination,cloudCover:cloudValues.length?Math.round(cloudValues.reduce((sum,n)=>sum+n,0)/cloudValues.length):null};
+ return {darkHours:dark.length,moonFreeHours:moonFree.length,window:longest,moonIllumination:moon.illumination,cloudCover:cloudValues.length?Math.round(cloudValues.reduce((sum,n)=>sum+n,0)/cloudValues.length):null,cloudForecastHours:cloudValues.length,cloudSampleHours:sampleForWeather.length,cloudUsesMoonFreeHours:moonFree.length>0};
+}
+
+export function meteorCloudSummary(conditions:ReturnType<typeof meteorConditions>){
+ const {cloudCover,cloudForecastHours,cloudSampleHours,cloudUsesMoonFreeHours}=conditions;
+ if(cloudSampleHours===0)return 'No remaining dark hours to check against the cloud forecast.';
+ if(cloudCover===null)return `Cloud forecast unavailable for the ${cloudSampleHours} sampled ${cloudUsesMoonFreeHours?'Moon-free dark':'dark'} ${cloudSampleHours===1?'hour':'hours'}.`;
+ const coverage=`${cloudForecastHours} of ${cloudSampleHours} sampled ${cloudUsesMoonFreeHours?'Moon-free dark':'dark'} ${cloudSampleHours===1?'hour':'hours'}`;
+ return `Forecast cloud cover: about ${cloudCover}% average across ${coverage}.${cloudForecastHours<cloudSampleHours?' Partial coverage; the other hours have no cloud forecast.':''}`;
 }

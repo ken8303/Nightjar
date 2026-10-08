@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 354 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 355 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -159,3 +159,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 
 - [x] Aurora rejects repaired/non-UTC/reversed forecast dates, retains the previous outlook after an invalid refresh and distinguishes stale from far-future clock guidance. High-latitude nearest cells use angular distance; the card fits compact mobile and desktop layouts. Current public NOAA feed validation passed.
 - [x] Deployment and packaging checks use an isolated build snapshot. Only identical, unreferenced numbered copies of hashed generated code are omitted; source output, distinct files, referenced copies and photos remain intact. The isolated artifact passed a local mobile browser smoke test.
+
+- [x] Meteor cloud averages identify their sampled hours and partial/missing coverage, including Moon-free filtering and nights without dark hours; compact mobile navigation and refresh were checked.
