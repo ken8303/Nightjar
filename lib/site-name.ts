@@ -9,13 +9,13 @@ export function renameObservingSite(storage:SiteStorage,current:Place,value:stri
  const originalPlaces=storage.getItem('nightjar-places'),originalPlace=storage.getItem('nightjar-place');
  const latest=readSavedPlaces({getItem:()=>originalPlaces});
  const places=latest.map(item=>samePlaceCoordinates(item,current)?{...item,name:place.name}:item);
- const writes:[string,string|null][]=[];
+ const writes:[string,string|null,string][]=[];
  try{
-  if(JSON.stringify(places)!==JSON.stringify(latest)){writes.push(['nightjar-places',originalPlaces]);storage.setItem('nightjar-places',JSON.stringify(places))}
-  writes.push(['nightjar-place',originalPlace]);storage.setItem('nightjar-place',JSON.stringify(place));
+  if(JSON.stringify(places)!==JSON.stringify(latest)){const value=JSON.stringify(places);writes.push(['nightjar-places',originalPlaces,value]);storage.setItem('nightjar-places',value)}
+  const value=JSON.stringify(place);writes.push(['nightjar-place',originalPlace,value]);storage.setItem('nightjar-place',value);
  }catch{
   let restored=true;
-  for(const [key,raw] of writes.reverse())try{if(raw===null)storage.removeItem(key);else storage.setItem(key,raw)}catch{restored=false}
+  for(const [key,raw,written] of writes.reverse())try{const stored=storage.getItem(key);if(stored===raw)continue;if(stored!==written){restored=false;continue}if(raw===null)storage.removeItem(key);else storage.setItem(key,raw)}catch{restored=false}
   throw Error(restored?'This name could not be saved. Your original site was kept; free browser storage and retry.':'This name could not be saved completely. Review your saved sites before retrying.');
  }
  return {place,places};

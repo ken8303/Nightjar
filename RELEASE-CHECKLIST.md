@@ -149,3 +149,4 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Failed-view reload buttons pause while another Sky atlas view holds unsaved text; retrying enables recovery and saved notes survive reload.
 - [x] Diary search includes stored country, with legacy records and Unicode matching preserved.
 - [x] Camera and inline/expanded 3D module failures stay inside recovery panels; surrounding planner and unsaved notes remain available, 2D switching works, and restored modules load normally.
+- [x] Failed site renames restore only their own unchanged writes, preserve newer active/saved site values and keep the typed name available for retry.
