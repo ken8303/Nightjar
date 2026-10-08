@@ -163,3 +163,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Meteor cloud averages identify their sampled hours and partial/missing coverage, including Moon-free filtering and nights without dark hours; compact mobile navigation and refresh were checked.
 
 - [x] Sky calendar provides weather refresh/retry, dated fetch timestamps and stale guidance alongside meteor cloud averages; failed updates retain earlier forecasts with explicit status, and retry clears warnings.
+
+- [x] Moon graphics-context loss switches to a surface map with retry; texture/fallback failures have readable recovery states and retry recreates working controls. Actual local WebGL event and mobile layouts checked; physical-phone memory pressure remains pending.
