@@ -10,11 +10,24 @@ export async function searchLocations(query:string,{signal,fetcher=fetch,timeout
  try{
   const response=await fetcher(`/api/locations?q=${encodeURIComponent(text)}`,{signal:controller.signal});
   const raw:unknown=await response.json();
-  const data=raw&&typeof raw==='object'?raw as Record<string,unknown>:{};
-  if(!response.ok)throw Error(typeof data.error==='string'?data.error.slice(0,300):'Location search is unavailable. Try again or enter coordinates.');
+  const isRecord=Boolean(raw&&typeof raw==='object'&&!Array.isArray(raw));
+  const data=isRecord?raw as Record<string,unknown>:{};
+  const detail=[data.error,data.reason].find(value=>typeof value==='string'&&value.trim());
+  const providerFailure=typeof detail==='string'?detail.trim().slice(0,300):'Location search is unavailable. Try again or enter coordinates.';
+  if(!response.ok)throw Error(providerFailure);
   if(signal.aborted)throw new DOMException('Location search cancelled.','AbortError');
   if(timedOut)throw Error('Location search timed out. Try again or enter coordinates.');
-  return Array.isArray(data.results)?data.results.filter((value):value is LocationResult=>validPlace(value)&&'id' in value&&typeof value.id==='number'&&Number.isFinite(value.id)&&(!('admin1' in value)||value.admin1===undefined||typeof value.admin1==='string')).slice(0,6):[];
+  const unreadable='Location search returned an unreadable response. Try again or enter coordinates.';
+  if(!isRecord||Object.hasOwn(data,'results')&&!Array.isArray(data.results))throw Error(unreadable);
+  if(data.error===true||typeof data.error==='string')throw Error(providerFailure);
+  if(!Array.isArray(data.results))return [];
+  const seen=new Set<number>();
+  const results=data.results.filter((value):value is LocationResult=>{
+   if(!validPlace(value)||!('id' in value)||typeof value.id!=='number'||!Number.isSafeInteger(value.id)||value.id<0||seen.has(value.id)||'admin1' in value&&value.admin1!==undefined&&(typeof value.admin1!=='string'||value.admin1.length>=200))return false;
+   seen.add(value.id);return true;
+  }).slice(0,6);
+  if(data.results.length&&!results.length)throw Error(unreadable);
+  return results;
  }catch(error){
   if(signal.aborted)throw new DOMException('Location search cancelled.','AbortError');
   if(timedOut)throw Error('Location search timed out. Try again or enter coordinates.');
