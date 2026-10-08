@@ -172,3 +172,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .saved-list-controls{padding-top:12px;border-top:1px solid var(--border);margin-top:12px}.saved-list-controls p{font-size:12px;color:var(--text-secondary)}.saved-list-controls .button{max-width:100%;white-space:normal;text-align:left}
 
 .mobile-altitude-grid .visibility-hour-stamp,.visibility-table .visibility-hour-stamp{white-space:normal;line-height:1.5}
+
+#visibility-planner{scroll-margin-top:24px}#visibility-planner:focus-visible{outline:2px solid var(--accent-soft);outline-offset:4px}@media(max-width:420px){.sky-shortcuts>:last-child:nth-child(odd){grid-column:1/-1}}

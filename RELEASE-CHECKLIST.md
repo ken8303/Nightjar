@@ -204,3 +204,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Missing selected-hour forecast timestamps retain later samples/recommendations without borrowing their current metrics. Selecting an actual period or refreshing a repaired feed restores ordinary scores; timestamp gaps stay explicit.
 
 - When to look distinguishes repeated local hours with dates/UTC offsets on mobile and desktop. A UK fallback fixture selected the second 01:00 occurrence as 01:00 UTC; highest-first/above-30° calculations are unchanged.
+
+- Sky atlas has a direct When to look shortcut. Delayed loading and loaded-section jumps focus the named section below the mobile bar; the narrow layout gives the shortcut its own row.
