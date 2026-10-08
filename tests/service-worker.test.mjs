@@ -6,7 +6,7 @@ const source=readFileSync(new URL('../public/sw.js',import.meta.url),'utf8');
 function runtime(fetcher,stored=new Map()){
  const handlers=new Map(),timers=new Map(),deleted=[],writes=[];let claimed=0,skipped=0,timerId=0;
  const cache={match:async request=>stored.get(typeof request==='string'?request:request.url),put:async(request,response)=>{const key=typeof request==='string'?request:request.url;stored.set(key,response);writes.push(key)},keys:async()=>[...stored.keys()],delete:async key=>stored.delete(key)};
- const caches={open:async()=>cache,match:async key=>stored.get(key),keys:async()=>['nightjar-offline-v4','nightjar-offline-v5','nightjar-offline-v6','nightjar-static-v0','nightjar-static-v1','other-app'],delete:async key=>deleted.push(key)};
+ const caches={open:async()=>cache,match:async key=>stored.get(key),keys:async()=>['nightjar-offline-v4','nightjar-offline-v5','nightjar-offline-v6','nightjar-offline-v7','nightjar-static-v0','nightjar-static-v1','other-app'],delete:async key=>deleted.push(key)};
  vm.runInNewContext(source,{self:{location:{origin:'https://nightjar.test'},addEventListener:(name,handler)=>handlers.set(name,handler),clients:{claim:async()=>claimed++},skipWaiting:async()=>skipped++},caches,fetch:fetcher,URL,Response,AbortController,setTimeout:(callback,delay)=>{timers.set(++timerId,{callback,delay});return timerId},clearTimeout:id=>timers.delete(id)});
  const dispatch=(name,input={})=>{let promise;handlers.get(name)({...input,respondWith:value=>{promise=value},waitUntil:value=>{promise=value}});return promise};
  return {dispatch,timers,cache,caches,stored,deleted,writes,claimed:()=>claimed,skipped:()=>skipped};
@@ -19,7 +19,7 @@ test('navigation serves cached plans on network errors or server failures while 
   const response=await app.dispatch('fetch',{request:request()});assert.equal(await response.text(),status>=500?'Saved plans offline':'Server response');assert.equal(app.timers.size,0);assert.equal(app.writes.length,0);
  }
  const broken=runtime(async()=>{throw Error('offline')},new Map([['/offline',offline()]]));assert.equal(await(await broken.dispatch('fetch',{request:request()})).text(),'Saved plans offline');
- const unavailable=runtime(async()=>{throw Error('offline')});unavailable.caches.match=async()=>{throw Error('denied')};const fallback=await unavailable.dispatch('fetch',{request:request()});assert.equal(fallback.status,503);assert.match(await fallback.text(),/temporarily unavailable/);
+ const unavailable=runtime(async()=>{throw Error('offline')});unavailable.caches.open=async()=>{throw Error('denied')};const fallback=await unavailable.dispatch('fetch',{request:request()});assert.equal(fallback.status,503);assert.match(await fallback.text(),/temporarily unavailable/);
 });
 test('stalled navigation aborts after eight seconds and returns saved plans without leaving a timer',async()=>{
  let signal;
@@ -27,14 +27,14 @@ test('stalled navigation aborts after eight seconds and returns saved plans with
  const response=app.dispatch('fetch',{request:request()});assert.equal(app.timers.size,1);const timer=[...app.timers.values()][0];assert.equal(timer.delay,8000);timer.callback();assert(signal.aborted);assert.equal(await(await response).text(),'Saved plans offline');assert.equal(app.timers.size,0);
 });
 test('installation validates offline HTML and activation removes only outdated Nightjar caches',async()=>{
- const app=runtime(async path=>path==='/offline'?offline():new Response('export const recovery=true',{headers:{'content-type':'text/javascript'}}));await app.dispatch('install');assert.deepEqual(app.writes,['/offline','/planner-recovery.mjs']);await app.dispatch('activate');assert.deepEqual(app.deleted,['nightjar-offline-v4','nightjar-offline-v5','nightjar-static-v0']);assert.equal(app.claimed(),1);await app.dispatch('message',{data:{type:'SKIP_WAITING'}});assert.equal(app.skipped(),1);
+ const app=runtime(async path=>path==='/offline'?offline():new Response('export const recovery=true',{headers:{'content-type':'text/javascript'}}));await app.dispatch('install');assert.deepEqual(app.writes,['/offline','/planner-recovery.mjs']);await app.dispatch('activate');assert.deepEqual(app.deleted,['nightjar-offline-v4','nightjar-offline-v5','nightjar-offline-v6','nightjar-static-v0']);assert.equal(app.claimed(),1);await app.dispatch('message',{data:{type:'SKIP_WAITING'}});assert.equal(app.skipped(),1);
  for(const response of [new Response('bad',{status:503}),new Response('{}',{headers:{'content-type':'application/json'}})]){const invalid=runtime(async()=>response);await assert.rejects(invalid.dispatch('install'),/Offline page unavailable/);assert.equal(invalid.writes.length,0)}
 });
 test('offline recovery module is served from its validated cache while denied caches fall back to the network',async()=>{
  const source='export const recovery=true',asset=request('/planner-recovery.mjs',{mode:'cors'}),app=runtime(async()=>{throw Error('offline')},new Map([['/planner-recovery.mjs',new Response(source,{headers:{'content-type':'text/javascript'}})]]));
  assert.equal(await(await app.dispatch('fetch',{request:asset})).text(),source);
  for(const response of [new Response('bad',{status:503}),new Response('<html>',{headers:{'content-type':'text/html'}})]){const invalid=runtime(async path=>path==='/offline'?offline():response);await assert.rejects(invalid.dispatch('install'),/Recovery tools unavailable/);assert.equal(invalid.writes.length,0)}
- const denied=runtime(async()=>new Response(source));denied.caches.match=async()=>{throw Error('denied')};assert.equal(await(await denied.dispatch('fetch',{request:asset})).text(),source);
+ const denied=runtime(async()=>new Response(source));denied.caches.open=async()=>{throw Error('denied')};assert.equal(await(await denied.dispatch('fetch',{request:asset})).text(),source);
  for(const ignored of [request('/planner-recovery.mjs?v=1',{mode:'cors'}),request('/planner-recovery.mjs',{mode:'cors',headers:new Headers({authorization:'test'})})])assert.equal(app.dispatch('fetch',{request:ignored}),undefined);
 });
 test('static caching remains bounded and skips APIs, foreign requests, auth, queries and non-GET requests',async()=>{
@@ -44,4 +44,33 @@ test('static caching remains bounded and skips APIs, foreign requests, auth, que
  for(const ignored of [request('/api/weather',{mode:'cors'}),request('/_next/static/app.js?v=1',{mode:'cors'}),request('/_next/static/app.js',{mode:'cors',headers:new Headers({authorization:'test'})}),request('/',{method:'POST'}),request('/',{url:'https://other.test/'})])assert.equal(app.dispatch('fetch',{request:ignored}),undefined);
  const denied=runtime(async()=>response());denied.caches.open=async()=>{throw Error('storage denied')};assert.equal((await denied.dispatch('fetch',{request:asset})).status,200);
  const privateApp=runtime(async()=>{const value=response();value.headers.set('cache-control','private, no-store');return value});await privateApp.dispatch('fetch',{request:asset});assert.equal(privateApp.writes.length,0);
+});
+
+function releaseRuntime(workerSource,collections,fetcher,{failPut=()=>false}={}){
+ const handlers=new Map();let claimed=0;
+ const caches={
+  open:async name=>{if(!collections.has(name))collections.set(name,new Map());const values=collections.get(name);return {match:async key=>values.get(typeof key==='string'?key:key.url)?.clone(),put:async(key,response)=>{if(failPut(name,key))throw Error('Quota unavailable');values.set(key,response.clone())},keys:async()=>[...values.keys()],delete:async key=>values.delete(key)}},
+  keys:async()=>[...collections.keys()],delete:async name=>collections.delete(name),match:async()=>{throw Error('Cross-release lookup is forbidden')}
+ };
+ vm.runInNewContext(workerSource,{self:{location:{origin:'https://nightjar.test'},addEventListener:(name,handler)=>handlers.set(name,handler),clients:{claim:async()=>claimed++},skipWaiting:async()=>{}},caches,fetch:fetcher,URL,Response,AbortController,setTimeout,clearTimeout});
+ const dispatch=(name,input={})=>{let promise;handlers.get(name)({...input,respondWith:value=>{promise=value},waitUntil:value=>{promise=value}});return promise};
+ return {dispatch,claimed:()=>claimed};
+}
+const namedSource=name=>source.replace("const CACHE = 'nightjar-offline-v7';",`const CACHE = '${name}';`);
+const moduleResponse=text=>new Response(text,{headers:{'content-type':'text/javascript'}});
+test('failed and waiting release installs cannot replace the active offline page or recovery module',async()=>{
+ const oldName='nightjar-offline-v7-old',newName='nightjar-offline-v7-new';
+ const collections=new Map([[oldName,new Map([['/offline',new Response('Old page',{headers:{'content-type':'text/html'}})],['/planner-recovery.mjs',moduleResponse('old module')]])],['nightjar-static-v1',new Map()],['other-app',new Map()]]);
+ const old=releaseRuntime(namedSource(oldName),collections,async()=>{throw Error('offline')});let blocked=true;
+ const newer=releaseRuntime(namedSource(newName),collections,async path=>path==='/offline'?new Response('New page',{headers:{'content-type':'text/html'}}):moduleResponse('new module'),{failPut:(name,key)=>blocked&&name===newName&&key==='/planner-recovery.mjs'});
+ await assert.rejects(newer.dispatch('install'),/Quota unavailable/);assert.equal(collections.get(newName).has('/offline'),true);assert.equal(collections.get(newName).has('/planner-recovery.mjs'),false);
+ const readOld=async()=>{assert.equal(await(await old.dispatch('fetch',{request:request()})).text(),'Old page');assert.equal(await(await old.dispatch('fetch',{request:request('/planner-recovery.mjs',{mode:'cors'})})).text(),'old module')};
+ await readOld();blocked=false;await newer.dispatch('install');await readOld();assert.equal(newer.claimed(),0);
+ await newer.dispatch('activate');assert.equal(newer.claimed(),1);assert.equal(collections.has(oldName),false);assert.equal(collections.has(newName),true);assert.equal(collections.has('nightjar-static-v1'),true);assert.equal(collections.has('other-app'),true);
+});
+test('an unavailable release cache never borrows another release recovery page or module',async()=>{
+ const collections=new Map([['nightjar-offline-v7-other',new Map([['/offline',offline()],['/planner-recovery.mjs',moduleResponse('wrong module')]])]]);
+ const app=releaseRuntime(namedSource('nightjar-offline-v7-current'),collections,async()=>new Response('Network unavailable',{status:503}));
+ const page=await app.dispatch('fetch',{request:request()});assert.equal(page.status,503);assert.match(await page.text(),/Nightjar is offline/);
+ const recoveryResponse=await app.dispatch('fetch',{request:request('/planner-recovery.mjs',{mode:'cors'})});assert.equal(recoveryResponse.status,503);assert.equal(await recoveryResponse.text(),'Network unavailable');
 });

@@ -1,12 +1,12 @@
 // Cache the public offline page and immutable app files, never HTML or live forecasts.
-const CACHE = 'nightjar-offline-v6';
+const CACHE = 'nightjar-offline-v7';
 const STATIC_CACHE = 'nightjar-static-v1';
 const MAX_STATIC_FILES = 80;
 const OFFLINE = '/offline';
 const RECOVERY = '/planner-recovery.mjs';
 const NAVIGATION_TIMEOUT_MS = 8000;
 async function offlineResponse() {
-  try { const cached = await caches.match(OFFLINE); if (cached) return cached; } catch { /* Storage can be unavailable. */ }
+  try { const cache = await caches.open(CACHE); const cached = await cache.match(OFFLINE); if (cached) return cached; } catch { /* Storage can be unavailable. */ }
   return new Response('Nightjar is offline or temporarily unavailable. Reconnect and reload.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
 }
 async function navigate(request) {
@@ -48,7 +48,7 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (url.pathname === RECOVERY && !url.search && !request.headers.has('authorization')) {
-    event.respondWith((async () => {try {const cached=await caches.match(RECOVERY);if(cached)return cached}catch{}return fetch(request)})());
+    event.respondWith((async () => {try {const cache=await caches.open(CACHE);const cached=await cache.match(RECOVERY);if(cached)return cached}catch{}return fetch(request)})());
     return;
   }
   if (!url.pathname.startsWith('/_next/static/') || url.search || request.headers.has('authorization')) return;
