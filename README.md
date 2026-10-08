@@ -95,6 +95,8 @@ Mobile observing navigation includes a fixed Explore button that opens all seven
 - Diary records and unfinished forms are separate. Drafts retain their original site/time until explicitly changed and are excluded from normal plan backups, offline listings and saved-observation reports/CSV. Failed saves retain text in the current view, with retry, conflict review and a separate manual form recovery download. Reviewed copies last until another review or leaving Sky atlas; unsaved text can be lost on leaving/reloading. Raw storage recovery copies include stored forms but cannot recover unsaved view-only text. Neither recovery format is directly importable as a plan backup. The app stores no cloud account data.
 - Sky atlas shortcuts open camera discovery or jump to the chart, deep-sky explorer and diary. A deferred section can load for up to 15 seconds before retry guidance appears. Closing camera returns focus to its launch button; camera and motion access remain explicit actions inside the viewer.
 
+Backup import reviews retain a snapshot of the saved plan. If that data changes before Import, the app updates its counts/conflicts and requires another explicit import action; an over-capacity merge clears the old review and identifies the collection limit. Error messages receive focus, and cancellation returns to file selection. Failed-import rollback restores only values still matching that import's writes, preserving newer peer values and reporting possible partial changes. Browser storage transactions remain non-atomic across keys/tabs.
+
 ## Verification and deployment
 
 ```sh

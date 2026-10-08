@@ -1,4 +1,4 @@
-import {diaryKey,normalizeDiary,mergeDiary,type Observation} from './observing-diary';
+import {diaryKey,diaryLimit,normalizeDiary,mergeDiary,type Observation} from './observing-diary';
 import {deepSkyListKey,validDeepSkyList} from './deep-sky-list';
 import {type Place,skyTargetLimit} from './sky';
 import {validPlace} from './planner-state';
@@ -10,6 +10,9 @@ export type SavedPlan={places:Place[];targets:string[];notes:Record<string,strin
 export type PlannerBackup={format:'nightjar-backup';version:4;exportedAt:string;data:SavedPlan};
 const keys=['nightjar-places','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-equipment',deepSkyListKey,diaryKey] as const;
 type StorageAccess=Pick<Storage,'getItem'|'setItem'|'removeItem'>;
+export class PlannerReviewChangedError extends Error{
+ constructor(public current:SavedPlan){super('Saved plans changed since this review. Review the updated counts and conflicts before importing again.');this.name='PlannerReviewChangedError'}
+}
 const record=(value:unknown):value is Record<string,unknown>=>Boolean(value&&typeof value==='object'&&!Array.isArray(value));
 const name=(value:unknown):value is string=>typeof value==='string'&&value.trim().length>0&&value.length<=100&&!['__proto__','constructor','prototype'].includes(value);
 function plan(value:unknown):SavedPlan{
@@ -28,14 +31,19 @@ export function parsePlannerBackup(text:string):PlannerBackup{
  return {format:'nightjar-backup',version:4,exportedAt:raw.exportedAt,data:plan(raw.data)};
 }
 export function readSavedPlan(storage:StorageAccess):SavedPlan{
- try{return plan({places:JSON.parse(storage.getItem(keys[0])||'[]'),targets:JSON.parse(storage.getItem(keys[1])||'[]'),notes:JSON.parse(storage.getItem(keys[2])||'{}'),equipment:JSON.parse(storage.getItem(keys[3])||'[]'),deepTargets:JSON.parse(storage.getItem(keys[4])||'[]'),diary:JSON.parse(storage.getItem(keys[5])||'[]')})}
+ const read=(key:string,fallback:string)=>{const raw=storage.getItem(key);if(raw!==null&&raw.length>plannerBackupMaxBytes)throw Error('Oversized saved plans');return JSON.parse(raw||fallback)};
+ try{return plan({places:read(keys[0],'[]'),targets:read(keys[1],'[]'),notes:read(keys[2],'{}'),equipment:read(keys[3],'[]'),deepTargets:read(keys[4],'[]'),diary:read(keys[5],'[]')})}
  catch{throw Error('Saved plans could not be read. Your existing data has not been changed.')}
 }
 export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:now.toISOString(),data:readSavedPlan(storage)},null,2))}
 export function mergeSavedPlans(existing:SavedPlan,incoming:SavedPlan):SavedPlan{
+ existing=plan(existing);incoming=plan(incoming);
  const places=[...existing.places];for(const p of incoming.places)if(!places.some(site=>Math.abs(site.latitude-p.latitude)<.0001&&Math.abs(site.longitude-p.longitude)<.0001))places.push(p);
  const equipment=[...existing.equipment];for(const e of incoming.equipment)if(!equipment.some(setup=>setup.name.trim()===e.name.trim()))equipment.push(e);
- return plan({places,equipment,diary:mergeDiary(existing.diary||[],incoming.diary||[]),deepTargets:[...new Set([...(existing.deepTargets||[]),...(incoming.deepTargets||[])])],targets:[...new Set([...existing.targets,...incoming.targets])],notes:{...incoming.notes,...existing.notes}});
+ const targets=[...new Set([...existing.targets,...incoming.targets])],notes={...incoming.notes,...existing.notes},knownDiary=new Set((existing.diary||[]).map(entry=>entry.id));
+ const capacity=(size:number,limit:number,label:string)=>{if(size>limit)throw Error(`The combined plan would exceed ${limit} saved ${label}. Free space or choose a smaller backup. Nothing has been imported.`)};
+ capacity(places.length,savedPlacesLimit,'sites');capacity(equipment.length,equipmentProfilesLimit,'equipment setups');capacity(targets.length,skyTargetLimit,'bright-sky targets');capacity(Object.keys(notes).length,100,'target notes');capacity(knownDiary.size+(incoming.diary||[]).filter(entry=>!knownDiary.has(entry.id)).length,diaryLimit,'observations');
+ return plan({places,equipment,diary:mergeDiary(existing.diary||[],incoming.diary||[]),deepTargets:[...new Set([...(existing.deepTargets||[]),...(incoming.deepTargets||[])])],targets,notes});
 }
 export function previewPlannerMerge(existing:SavedPlan,incoming:SavedPlan){
  const merged=mergeSavedPlans(existing,incoming);
@@ -51,17 +59,19 @@ export function previewPlannerMerge(existing:SavedPlan,incoming:SavedPlan){
   }
  };
 }
-export function restorePlannerBackup(storage:StorageAccess,backup:PlannerBackup):SavedPlan{
+export function restorePlannerBackup(storage:StorageAccess,backup:PlannerBackup,reviewed?:SavedPlan):SavedPlan{
  // Revalidate even when called outside the file picker, and read the latest
  // local data so imports preserve edits made after the preview was opened.
- const incoming=plan(backup.data),merged=mergeSavedPlans(readSavedPlan(storage),incoming);
+ const incoming=plan(backup.data),current=readSavedPlan(storage);
+ if(reviewed&&JSON.stringify(current)!==JSON.stringify(plan(reviewed)))throw new PlannerReviewChangedError(current);
+ const merged=mergeSavedPlans(current,incoming);
  const previous=keys.map(key=>storage.getItem(key));
  const values=[merged.places,merged.targets,merged.notes,merged.equipment,merged.deepTargets||[],merged.diary||[]].map(value=>JSON.stringify(value));
  let written=0;
  try{for(let i=0;i<keys.length;i++){storage.setItem(keys[i],values[i]);written++}}
  catch{
   let rollbackFailed=false;
-  for(let i=0;i<written;i++){try{const value=previous[i];if(value===null)storage.removeItem(keys[i]);else storage.setItem(keys[i],value)}catch{rollbackFailed=true}}
+  for(let i=0;i<written;i++){try{if(storage.getItem(keys[i])!==values[i]){rollbackFailed=true;continue}const value=previous[i];if(value===null)storage.removeItem(keys[i]);else storage.setItem(keys[i],value)}catch{rollbackFailed=true}}
   throw Error(rollbackFailed?'Storage failed and some changes could not be undone. Keep your backup file and check your saved plans.':'This browser could not save the imported plans. Your existing data has not been changed.');
  }
  return merged;

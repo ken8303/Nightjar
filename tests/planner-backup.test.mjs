@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
-const {plannerBackupMaxBytes,parsePlannerBackup,makePlannerBackup,readSavedPlan,mergeSavedPlans,restorePlannerBackup,previewPlannerMerge}=await vite.ssrLoadModule('/lib/planner-backup.ts');
+const {plannerBackupMaxBytes,parsePlannerBackup,makePlannerBackup,readSavedPlan,mergeSavedPlans,restorePlannerBackup,previewPlannerMerge,PlannerReviewChangedError}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 after(()=>vite.close());
 const empty=()=>({places:[],targets:[],notes:{},equipment:[],diary:[]});
 const site={name:'Dark field',latitude:51,longitude:-1,timezone:'Europe/London',bortle:3};
@@ -88,4 +88,42 @@ test('version 4 backups retain all expanded sky identities and still normalize l
  for(const name of ['Mercury','Uranus','Neptune'])assert(backup.data.targets.includes(name));
  const destination=storage();restorePlannerBackup(destination,parsePlannerBackup(JSON.stringify(backup)));assert.deepEqual(readSavedPlan(destination).targets,targets);
  for(const version of [1,2,3]){const parsed=parsePlannerBackup(JSON.stringify({...backup,version,data:{...empty(),targets:['Moon','Vega']}}));assert.equal(parsed.version,4);assert.deepEqual(parsed.data.targets,['Moon','Vega'])}
+});
+test('reviewed imports refuse any changed saved collection before writes and expose a fresh review snapshot',()=>{
+ const incoming=parsePlannerBackup(file({...empty(),targets:['Saturn']}));
+ for(const [key,value] of [[keys[0],[site]],[keys[1],['Vega']],[keys[2],{Vega:'Changed after review'}],[keys[3],[camera]],[keys[4],['M31']],[keys[5],[{id:'new-record',target:'M31',observedAt:'2026-10-08T20:00:00.000Z',place:site,outcome:'seen',equipment:'',notes:'Peer observation'}]]]){
+  const current=storage(),reviewed=readSavedPlan(current);current.setItem(key,JSON.stringify(value));const before=structuredClone([...current.values]);let writes=0;const set=current.setItem;current.setItem=(name,text)=>{writes++;set(name,text)};
+  let changed;try{restorePlannerBackup(current,incoming,reviewed)}catch(error){changed=error}
+  assert(changed instanceof PlannerReviewChangedError);assert.deepEqual(changed.current,readSavedPlan(current));assert.equal(writes,0);assert.deepEqual([...current.values],before);
+  const result=restorePlannerBackup(current,incoming,changed.current);assert(result.targets.includes('Saturn'));assert.equal(writes,6);
+ }
+});
+test('failed-import rollback preserves a newer value written elsewhere rather than restoring an older snapshot over it',()=>{
+ const current=storage(),peerPlaces=JSON.stringify([{...site,name:'Peer changed site'}]),set=current.setItem;let writes=0;
+ current.setItem=(key,value)=>{if(++writes===2){set(keys[0],peerPlaces);throw Error('Quota')}set(key,value)};
+ assert.throws(()=>restorePlannerBackup(current,parsePlannerBackup(file({...empty(),places:[site],targets:['Vega']}))),/some changes could not be undone/);
+ assert.equal(current.getItem(keys[0]),peerPlaces);assert.equal(current.getItem(keys[1]),'[]');
+});
+test('oversized stored backup values are refused before JSON parsing and are left available for raw recovery',()=>{
+ const current=storage(),raw='x'.repeat(plannerBackupMaxBytes+1);current.setItem(keys[2],raw);const before=structuredClone([...current.values]),parse=JSON.parse;let parsedOversized=false;
+ JSON.parse=function(value,...options){if(typeof value==='string'&&value.length>plannerBackupMaxBytes)parsedOversized=true;return parse(value,...options)};
+ try{assert.throws(()=>readSavedPlan(current),/could not be read/)}finally{JSON.parse=parse}
+ assert.equal(parsedOversized,false);assert.deepEqual([...current.values],before);
+});
+test('a refreshed review that now exceeds collection capacity still performs no import writes',()=>{
+ const places=Array.from({length:99},(_,index)=>({...site,name:`Site ${index}`,latitude:0,longitude:-170+index/2})),current=storage({...empty(),places}),incoming=parsePlannerBackup(file({...empty(),places:[{...site,name:'Incoming site',latitude:40,longitude:20}]})),reviewed=readSavedPlan(current);
+ assert.equal(previewPlannerMerge(reviewed,incoming.data).merged.places.length,100);current.setItem(keys[0],JSON.stringify([...places,{...site,name:'Peer site',latitude:45,longitude:30}]));const before=structuredClone([...current.values]);let changed;
+ try{restorePlannerBackup(current,incoming,reviewed)}catch(error){changed=error}
+ assert(changed instanceof PlannerReviewChangedError);assert.throws(()=>previewPlannerMerge(changed.current,incoming.data),/exceed 100 saved sites/);assert.deepEqual([...current.values],before);
+});
+test('valid backups that would exceed a merged collection limit give specific recovery guidance without writes',()=>{
+ const observation={id:'new-record',target:'M31',observedAt:'2026-10-08T20:00:00.000Z',place:site,outcome:'seen',equipment:'',notes:''};
+ const cases=[
+  [{...empty(),places:Array.from({length:100},(_,index)=>({...site,name:`Site ${index}`,latitude:0,longitude:-170+index/2}))},{...empty(),places:[site]},'100 saved sites'],
+  [{...empty(),equipment:Array.from({length:100},(_,index)=>({...camera,name:`Camera ${index}`}))},{...empty(),equipment:[camera]},'100 saved equipment setups'],
+  [{...empty(),targets:Array.from({length:42},(_,index)=>`Legacy ${index}`)},{...empty(),targets:['Vega']},'42 saved bright-sky targets'],
+  [{...empty(),notes:Object.fromEntries(Array.from({length:100},(_,index)=>[`Legacy ${index}`,'Note']))},{...empty(),notes:{Vega:'New note'}},'100 saved target notes'],
+  [{...empty(),diary:Array.from({length:200},(_,index)=>({...observation,id:`record-${index}`}))},{...empty(),diary:[observation]},'200 saved observations']
+ ];
+ for(const [existing,incoming,expected] of cases){const current=storage(existing),before=structuredClone([...current.values]),backup=parsePlannerBackup(file(incoming));assert.throws(()=>restorePlannerBackup(current,backup,readSavedPlan(current)),error=>error.message.includes(expected)&&error.message.includes('Free space'));assert.deepEqual([...current.values],before)}
 });
