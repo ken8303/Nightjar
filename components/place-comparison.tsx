@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, RefreshCw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import SavedListControls,{savedListPageSize} from '@/components/saved-list-controls';
 import {bestNightWindow, sevenNightOutlook} from '@/lib/night-outlook';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
@@ -13,7 +14,8 @@ const key = (p: Place) => `${p.latitude},${p.longitude}`;
 const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
 
 export default function PlaceComparison({ places, current, date, onChoose, onPlan }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date)=>void }) {
- const options = useMemo(()=>[current, ...places].filter((p,i,a)=>a.findIndex(v=>key(v)===key(p))===i),[current,places]);
+ const options = useMemo(()=>{const seen=new Set<string>();return [current,...places].filter(place=>{const id=key(place);if(seen.has(id))return false;seen.add(id);return true})},[current,places]);
+ const [optionsShown,setOptionsShown]=useState(savedListPageSize);
  const [selection,setSelection] = useState<string[]|null>(null);
  const selected = useMemo(()=>(selection ?? options.slice(0,4).map(key)).filter(id=>options.some(p=>key(p)===id)),[selection,options]);
  const selectedKey = selected.join('|');
@@ -50,11 +52,11 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
  const best=complete?Math.max(...rows.map(r=>r.score!)):null;
  return <section className="panel place-comparison" aria-labelledby="comparison-heading">
   <div className="comparison-heading"><div><h2 id="comparison-heading">Compare your observing sites</h2><p className="muted">Choose up to four places. Every site is evaluated at {new Date(instant*1000).toISOString().slice(0,16).replace('T',' ')} UTC, using the hourly forecast covering that time.</p></div><button className="text-button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}><RefreshCw size={16}/>{rows.some(row=>row.loading)?'Refreshing forecasts…':rows.some(row=>row.error)?'Retry forecasts':'Refresh forecasts'}</button></div>
-  <div className="comparison-picker">{options.map((p,i)=><label key={key(p)} htmlFor={`compare-${i}`}><Checkbox id={`compare-${i}`} checked={selected.includes(key(p))} disabled={!selected.includes(key(p))&&selected.length>=4} onCheckedChange={checked=>setSelection(checked?[...selected,key(p)]:selected.filter(id=>id!==key(p)))}/><span>{p.name}<small>{p.latitude.toFixed(2)}°, {p.longitude.toFixed(2)}°{p.bortle?` · Bortle ${p.bortle}`:''}</small></span></label>)}</div>
+  <div id="comparison-site-list" className="comparison-picker">{options.slice(0,optionsShown).map((p,i)=><label key={key(p)} htmlFor={`compare-${i}`}><Checkbox id={`compare-${i}`} checked={selected.includes(key(p))} disabled={!selected.includes(key(p))&&selected.length>=4} onCheckedChange={checked=>setSelection(checked?[...selected,key(p)]:selected.filter(id=>id!==key(p)))}/><span>{p.name}<small>{p.latitude.toFixed(2)}°, {p.longitude.toFixed(2)}°{p.bortle?` · Bortle ${p.bortle}`:''}</small></span></label>)}</div><SavedListControls count={options.length} shown={optionsShown} onChange={setOptionsShown} label="comparison sites" listId="comparison-site-list"/>
   {options.length<2&&<p className="muted">Save another place above to compare conditions before choosing where to go.</p>}
   {!selected.length&&<p className="muted">Select a place to see its forecast.</p>}
   <div className="comparison-grid">{rows.map(r=><article className="comparison-card" key={r.id}>
-   <h3>{r.place.name}</h3><p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}</p>
+   <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={`Stop comparing ${r.place.name}`}>Stop comparing this site</button><p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}</p>
    <p className="comparison-darkness">{r.place.bortle?`Your sky rating: Bortle ${r.place.bortle} / 9`:'Sky darkness: not rated'}</p>
    {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?'Refreshing; previous forecast shown.':'Loading forecast…':r.error?r.result?.data?'Refresh failed; previous forecast shown. Retry forecasts to update it.':r.error:'This forecast was fetched over 30 minutes ago. Refresh before relying on it.'}</p>}
    {r.result?.data&&r.result.fetchedAt!==undefined&&<p className="comparison-local">Last successful update: {new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:r.timezone,timeZoneName:'shortOffset'}).format(new Date(r.result.fetchedAt))}</p>}

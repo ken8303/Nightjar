@@ -196,3 +196,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Stored-site Retry respects unfinished edits and adopts reviewed data without rewriting it. Same-coordinate recovery cleared the name editor/guard only after explicit continuation; completed site choices cleared older location-search feedback.
 
 - Tonight distinguishes unavailable cloud scores from known poor conditions, reports partial coverage and evaluates the current outlook at the exact selected minute. Hour rows stay within twelve elapsed hours and include date/UTC-offset labels. Missing/partial/full/dawn cases and narrow phone layouts were checked on a disposable origin.
+
+- Long saved-place/equipment/comparison lists display twenty entries initially, with progressive expansion and keyboard focus. Synthetic 101-record collections retained last-entry access; selected comparison cards remain manageable after picker collapse.
