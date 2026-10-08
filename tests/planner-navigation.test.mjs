@@ -25,3 +25,16 @@ test('applying one queued request cannot clear a new request queued during its a
  const apply=intent=>{applied.push(intent);if(intent.kind==='section')navigation.request({kind:'context',section:'tonight',place:site},true,apply)};
  navigation.request({kind:'section',section:'sky'},true,apply);navigation.continue(apply);assert.equal(pending.at(-1).kind,'context');assert.equal(applied.length,1);navigation.continue(apply);assert.equal(applied.length,2);assert.equal(applied[1].place.name,site.name);assert.equal(pending.at(-1),null);
 });
+
+
+test('imaging navigation snapshots the target and cannot replace a draft before approval',()=>{
+ const h=harness(),target={id:'M13',ra:16.695,dec:36.46},intent={kind:'imaging',section:'tools',target};
+ assert.equal(h.navigation.request(intent,true,h.apply),false);assert.deepEqual(h.applied,[]);target.id='M31';target.ra=0;target.dec=0;
+ h.navigation.continue(h.apply);assert.deepEqual(h.applied,[{kind:'imaging',section:'tools',target:{id:'M13',ra:16.695,dec:36.46}}]);assert.equal(h.navigation.continue(h.apply),false);
+ h.navigation.request(intent,true,h.apply);h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,1);
+});
+test('a later imaging request supersedes an earlier target and section navigation cancels it',()=>{
+ const h=harness(),first={kind:'imaging',section:'tools',target:{id:'M31',ra:.7,dec:41}},second={kind:'imaging',section:'tools',target:{id:'M13',ra:16.7,dec:36}};
+ h.navigation.request(first,true,h.apply);h.navigation.request(second,true,h.apply);h.navigation.continue(h.apply);assert.deepEqual(h.applied,[second]);
+ h.navigation.request(first,true,h.apply);h.navigation.request({kind:'section',section:'moon'},false,h.apply);assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.at(-1).section,'moon');
+});
