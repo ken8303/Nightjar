@@ -35,7 +35,7 @@ export default function DeepSkyFinder({date,place,onDate,onFrame,onCamera,reques
  const savedHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{
   const read=()=>{try{setSaved(readDeepSkyList(localStorage));setListStatus('')}catch{setListStatus('Saved list could not be loaded. Changes may remain only while Sky atlas is open.')}setListReady(true)};
-  read();const sync=(event:StorageEvent)=>{if(event.key===deepSkyListKey||event.key===null)read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  read();const sync=(event:StorageEvent)=>{if(event.storageArea===localStorage&&(event.key===deepSkyListKey||event.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
  },[]);
  const savedTargets=useMemo(()=>messierCatalogue.filter(target=>saved.includes(target.id)).map(target=>positions.get(target.id)!).sort((a,b)=>b.altitude-a.altitude),[saved,positions]);
  function toggleSaved(id:string){

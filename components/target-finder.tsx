@@ -30,7 +30,7 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
  const savedHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{
   const read=()=>{try{setSaved(readSavedTargets(localStorage));setSaveError('')}catch{setSaveError('Saved targets could not be loaded. You can still browse the catalogue.')}setReady(true)};
-  read();const sync=(e:StorageEvent)=>{if(e.key==='nightjar-targets-v1'||e.key===null)read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  read();const sync=(e:StorageEvent)=>{if(e.storageArea===localStorage&&(e.key==='nightjar-targets-v1'||e.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
  },[]);
  useEffect(()=>{
   const read=()=>{
@@ -41,7 +41,7 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
    }catch{setNotesStatus('Notes could not be loaded. New edits will try to save again.')}
    setNotesReady(true);
   };
-  read();const sync=(e:StorageEvent)=>{if(e.key===targetNotesKey||e.key===null)read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  read();const sync=(e:StorageEvent)=>{if(e.storageArea===localStorage&&(e.key===targetNotesKey||e.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
  },[]);
  function persistNoteEdits(){
   try{

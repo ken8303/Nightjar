@@ -20,7 +20,7 @@ export default function ObservingDiary({target,date,place}:{target:string;date:D
  const undoRemovalButton=useRef<HTMLButtonElement>(null),savedDiaryHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{if(removedEntry){undoRemovalButton.current?.focus({preventScroll:true});undoRemovalButton.current?.scrollIntoView({block:'center',behavior:'instant'})}},[removedEntry]);
  const [entries,setEntries]=useState<Observation[]>([]),[ready,setReady]=useState(false),[status,setStatus]=useState(''),[showAll,setShowAll]=useState(false),[visible,setVisible]=useState(10);
- useEffect(()=>{const read=()=>{try{setEntries(readDiary(localStorage));setStatus('')}catch{setStatus('Your diary could not be read. Existing data is preserved; saving is unavailable.');setReady(false);return}setReady(true)};read();const sync=(event:StorageEvent)=>{if(event.key===diaryKey||event.key===null)read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync)},[]);
+ useEffect(()=>{const read=()=>{try{setEntries(readDiary(localStorage));setStatus('')}catch{setStatus('Your diary could not be read. Existing data is preserved; saving is unavailable.');setReady(false);return}setReady(true)};read();const sync=(event:StorageEvent)=>{if(event.storageArea===localStorage&&(event.key===diaryKey||event.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync)},[]);
  const [draftState,setDraftState]=useState<DiaryDraftState>(emptyDiaryDrafts),[draftStatus,setDraftStatus]=useState('');
  const draftRef=useRef(draftState),savedDraftSnapshot=useRef<DiaryDraftState>(emptyDiaryDrafts());
  const [draftSaveFailed,setDraftSaveFailed]=useState(false);

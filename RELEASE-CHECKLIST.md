@@ -175,3 +175,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Mobile Explore uses a sticky section bar instead of covering bottom-screen feedback. 320/390-pixel checks verified section/anchor clearance and menu focus return; verify real phone keyboard and installed-PWA safe areas before release.
 
 - Returning to My places after leaving a pending device-location request clears busy state. Synthetic desktop/mobile checks ignored obsolete success and accepted a fresh request; physical GPS acceptance remains pending.
+
+- Collection/preference synchronization accepts localStorage events only. Two disposable tabs verified red light, stars, notes, deep-sky targets and diary synchronization; an unrelated frame session clear preserved red light at mobile width.

@@ -10,7 +10,7 @@ export default function ViewingMode({inline=false}:{inline?:boolean}){
  const [storageError,setStorageError]=useState(false);
  useEffect(()=>{
   const initial=currentMode();document.documentElement.dataset.redLight=initial?'on':'off';
-  const sync=(event:StorageEvent)=>{if(event.key===key||event.key===null){const value=event.newValue==='on';setEnabled(value);document.documentElement.dataset.redLight=value?'on':'off'}};
+  const sync=(event:StorageEvent)=>{if(event.storageArea===localStorage&&(event.key===key||event.key===null)){const value=event.newValue==='on';setEnabled(value);document.documentElement.dataset.redLight=value?'on':'off'}};
   const syncCurrent=()=>setEnabled(document.documentElement.dataset.redLight==='on');
   window.addEventListener('storage',sync);window.addEventListener(changeEvent,syncCurrent);
   return()=>{window.removeEventListener('storage',sync);window.removeEventListener(changeEvent,syncCurrent)};
