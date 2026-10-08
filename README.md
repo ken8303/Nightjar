@@ -116,3 +116,5 @@ The 109-object Messier catalogue is adapted from [OpenNGC by Mattia Verga and co
 ## Technical reference
 
 [Development notes](./DEVELOPMENT-NOTES.md) retain detailed feature behaviour, calculations, attribution and earlier local QA evidence. Historical test counts there describe individual development batches; use the release checklist for current status and remaining acceptance tests.
+
+Failed note and diary-form saves keep text in the current view. Section navigation warns before discarding it; PWA and failed-view reload controls pause until it is saved or copied. Native reload/close prompts remain browser dependent. Retried target notes that conflict with a newer saved version require an explicit version review, preserving unrelated notes and unfinished edits. Long reviewed versions support keyboard scrolling. Diary snapshots retain optional site country; search includes it, reports/offline cards show it and CSV appends a Country column.

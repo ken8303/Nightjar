@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 308 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 340 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -151,3 +151,4 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Camera and inline/expanded 3D module failures stay inside recovery panels; surrounding planner and unsaved notes remain available, 2D switching works, and restored modules load normally.
 - [x] Failed site renames restore only their own unchanged writes, preserve newer active/saved site values and keep the typed name available for retry.
 - [x] Backup export dates must be exact generated UTC formats; legacy files remain readable, malformed calendar dates produce focused errors, and reviews retain seconds/milliseconds.
+- [x] Retried target notes preserve newer same-target values until version review. Both choices preserve unrelated data; later edits invalidate stale review, Cancel retains text, and long versions are keyboard-scrollable.

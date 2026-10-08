@@ -27,3 +27,19 @@ test('note persistence retains full Unicode/multiline text and refuses malformed
  for(const value of [[],null,{Vega:23},{Vega:'x'.repeat(2001)},JSON.parse('{"__proto__":"bad"}')])assert.throws(()=>readTargetNotes({getItem:()=>JSON.stringify(value)}));
  assert.throws(()=>saveTargetNotes(notes,{setItem(){throw Error('quota')}}),/quota/);
 });
+
+test('retry merge refuses conflicting replacement, deletion and creation while retaining exact pending text',async()=>{
+ const {mergeTargetNoteChanges,targetNoteConflicts}=await vite.ssrLoadModule('/lib/target-notes.ts');
+ for(const [base,edits,latest] of [[{Vega:'Original'},{Vega:'Local 星空'},{Vega:'Peer'}],[{Vega:'Original'},{Vega:''},{Vega:'Peer'}],[{Vega:null},{Vega:'Local'},{Vega:'Peer'}],[{Vega:'Original'},{Vega:'Local'},{}]]){const before=structuredClone([base,edits,latest]);assert.deepEqual(targetNoteConflicts(base,edits,latest),['Vega']);assert.throws(()=>mergeTargetNoteChanges(base,edits,latest),/changed elsewhere/);assert.deepEqual([base,edits,latest],before)}
+ assert.deepEqual(mergeTargetNoteChanges({Vega:'Original'},{Vega:'Local'},{Vega:'Local',Polaris:'Peer unrelated'}),{Vega:'Local',Polaris:'Peer unrelated'});assert.deepEqual(mergeTargetNoteChanges({Vega:''},{Vega:''},{}),{});assert.throws(()=>mergeTargetNoteChanges({},{Vega:'Local'},{}),/original note version/);
+});
+test('review choices affect only reviewed conflicts and preserve unrelated pending and newer saved notes',async()=>{
+ const {resolveTargetNoteConflicts,mergeTargetNoteChanges}=await vite.ssrLoadModule('/lib/target-notes.ts');const base={Vega:'Original',Sirius:null},edits={Vega:'Local 星空',Sirius:'Pending unrelated'},reviewed={Vega:'Peer'},current={...reviewed,Polaris:'Later unrelated'},before=structuredClone([base,edits,reviewed,current]);
+ for(const choice of ['local','stored']){const next=resolveTargetNoteConflicts(base,edits,reviewed,current,choice);assert.deepEqual(mergeTargetNoteChanges(next.base,next.edits,current),{Vega:choice==='local'?'Local 星空':'Peer',Sirius:'Pending unrelated',Polaris:'Later unrelated'})}assert.deepEqual([base,edits,reviewed,current],before);
+ assert.throws(()=>resolveTargetNoteConflicts(base,edits,reviewed,{Vega:'Changed again'},'local'),/changed again/);assert.throws(()=>resolveTargetNoteConflicts(base,edits,reviewed,{Vega:'Changed again'},'stored'),/changed again/);
+});
+test('reviewing removal conflicts preserves explicit choices and respects saved capacity',async()=>{
+ const {resolveTargetNoteConflicts,mergeTargetNoteChanges}=await vite.ssrLoadModule('/lib/target-notes.ts');const base={Vega:'Old'},edits={Vega:''},current={Vega:'Peer',Polaris:'Unrelated'};
+ const mine=resolveTargetNoteConflicts(base,edits,current,current,'local');assert.deepEqual(mergeTargetNoteChanges(mine.base,mine.edits,current),{Polaris:'Unrelated'});const peer=resolveTargetNoteConflicts(base,edits,current,current,'stored');assert.deepEqual(mergeTargetNoteChanges(peer.base,peer.edits,current),current);
+ assert.throws(()=>mergeTargetNoteChanges({Vega:null},{Vega:'New'},full()),/100 target notes/);
+});
