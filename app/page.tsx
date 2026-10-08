@@ -1,7 +1,7 @@
 "use client";
 import { lazy, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
-import {preventPendingEditUnload} from '@/lib/pending-edits';
+import {watchPendingEditUnload} from '@/lib/pending-edits';
 import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { Moon, Compass, MapPin, Telescope, ArrowUpRight, Star, Search, LocateFixed, Bookmark, Cloud, Wind, Droplets, ChevronRight, Aperture, X, Trash2, RefreshCw } from 'lucide-react';
@@ -78,7 +78,7 @@ function Planner(){
   setPendingDestination('');updateTab(next);
  },[setCameraOpen,tab]);
  useEffect(()=>{if(pendingDestination){pendingHeading.current?.focus({preventScroll:true});pendingHeading.current?.scrollIntoView({block:'center',behavior:'instant'})}},[pendingDestination]);
- useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>preventPendingEditUnload(event,pendingEdits.snapshot());window.addEventListener('beforeunload',guard);return()=>window.removeEventListener('beforeunload',guard)},[]);
+ useEffect(()=>watchPendingEditUnload(window,pendingEdits),[]);
  function keepEditing(){setPendingDestination('');document.getElementById('planner-heading')?.focus()}
  function leaveView(){const next=pendingDestination;setPendingDestination('');if(next){updateTab(next);requestAnimationFrame(()=>{const heading=document.getElementById('planner-heading');heading?.focus({preventScroll:true});heading?.scrollIntoView({block:'start',behavior:'instant'})})}}
 

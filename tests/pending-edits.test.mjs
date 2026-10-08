@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {createPendingEdits,preventPendingEditUnload}=await vite.ssrLoadModule('/lib/pending-edits.ts');
+const {createPendingEdits,preventPendingEditUnload,watchPendingEditUnload}=await vite.ssrLoadModule('/lib/pending-edits.ts');
 test('independent pending-edit owners retain a stable section summary until each saves or unmounts',()=>{
  const store=createPendingEdits(),diary=Symbol(),notes=Symbol(),otherNotes=Symbol(),other=Symbol();let updates=0;const unsubscribe=store.subscribe(()=>updates++);
  store.change(diary,{section:'sky',label:'diary'});store.change(notes,{section:'sky',label:'notes'});store.change(otherNotes,{section:'sky',label:'notes'});store.change(other,{section:'tools',label:'equipment'});
@@ -12,5 +12,23 @@ test('independent pending-edit owners retain a stable section summary until each
  unsubscribe();store.change(other,null);assert.equal(updates,7);assert.equal(store.snapshot(),'');
 });
 test('unload prompts are requested only while a pending view edit exists',()=>{
- const event={returnValue:'unchanged',preventDefault(){this.prevented=true}};preventPendingEditUnload(event,'');assert.equal(event.prevented,undefined);assert.equal(event.returnValue,'unchanged');preventPendingEditUnload(event,'notes');assert.equal(event.prevented,true);assert.equal(event.returnValue,'');
+ const event={returnValue:'unchanged',preventDefault(){this.prevented=true}};preventPendingEditUnload(event,'');assert.equal(event.prevented,undefined);assert.equal(event.returnValue,'unchanged');preventPendingEditUnload(event,'notes');assert.equal(event.prevented,true);assert.equal(event.returnValue,'true');
+});
+test('unload listeners attach synchronously for pending edits and detach only after every owner clears',()=>{
+ const store=createPendingEdits(),target=new EventTarget(),first=Symbol(),second=Symbol();let adds=0,removes=0;
+ const events={addEventListener(...args){adds++;target.addEventListener(...args)},removeEventListener(...args){removes++;target.removeEventListener(...args)}};
+ const unload=()=>{const event=new Event('beforeunload',{cancelable:true});target.dispatchEvent(event);return event.defaultPrevented};
+ const stop=watchPendingEditUnload(events,store);assert.equal(adds,0);assert.equal(unload(),false);
+ store.change(first,{section:'sky',label:'notes'});assert.equal(adds,1);assert.equal(unload(),true);
+ store.change(first,{section:'sky',label:'notes'});store.change(second,{section:'sky',label:'diary'});store.change(first,null);assert.equal(adds,1);assert.equal(removes,0);assert.equal(unload(),true);
+ store.change(second,null);assert.equal(removes,1);assert.equal(unload(),false);
+ stop();store.change(first,{section:'sky',label:'notes'});assert.equal(adds,1);assert.equal(unload(),false);
+});
+test('unload watching protects existing edits on mount and cleans up across remounts',()=>{
+ const store=createPendingEdits(),owner=Symbol(),target=new EventTarget();let adds=0,removes=0;
+ const events={addEventListener(...args){adds++;target.addEventListener(...args)},removeEventListener(...args){removes++;target.removeEventListener(...args)}};
+ store.change(owner,{section:'sky',label:'notes'});const stop=watchPendingEditUnload(events,store);assert.equal(adds,1);
+ stop();stop();assert.equal(removes,1);const stopAgain=watchPendingEditUnload(events,store);assert.equal(adds,2);
+ const event=new Event('beforeunload',{cancelable:true});target.dispatchEvent(event);assert.equal(event.defaultPrevented,true);
+ store.change(owner,null);assert.equal(removes,2);stopAgain();assert.equal(removes,2);
 });

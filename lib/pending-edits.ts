@@ -9,4 +9,11 @@ export function createPendingEdits(){
  }
  return {snapshot,change,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener)}}};
 }
-export function preventPendingEditUnload(event:Pick<BeforeUnloadEvent,'preventDefault'|'returnValue'>,pending:string){if(!pending)return;event.preventDefault();event.returnValue=''}
+export function preventPendingEditUnload(event:Pick<BeforeUnloadEvent,'preventDefault'|'returnValue'>,pending:string){if(!pending)return;event.preventDefault();event.returnValue='true'}
+export function watchPendingEditUnload(events:Pick<EventTarget,'addEventListener'|'removeEventListener'>,store:ReturnType<typeof createPendingEdits>){
+ let attached=false;
+ const guard=(event:Event)=>preventPendingEditUnload(event as BeforeUnloadEvent,store.snapshot());
+ const sync=()=>{const needed=Boolean(store.snapshot());if(needed===attached)return;attached=needed;if(needed)events.addEventListener('beforeunload',guard);else events.removeEventListener('beforeunload',guard)};
+ const unsubscribe=store.subscribe(sync);sync();
+ return()=>{unsubscribe();if(attached){events.removeEventListener('beforeunload',guard);attached=false}};
+}
