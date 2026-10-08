@@ -7,10 +7,10 @@ const {createPlannerNavigation}=await vite.ssrLoadModule('/lib/planner-navigatio
 const site={name:'Queued site QA',latitude:51.5,longitude:0,timezone:'UTC'};
 function harness(){const applied=[],pending=[];return {applied,pending,apply:intent=>applied.push(intent),navigation:createPlannerNavigation({onPending:intent=>pending.push(intent)})}}
 test('blocked context requests preserve site, time and catalogue together until explicit continuation',()=>{
- const h=harness(),date=new Date('2026-10-08T20:00:00.123Z'),intent={kind:'context',section:'sky',place:{...site},date,deepTarget:'M31'};
+ const h=harness(),date=new Date('2026-10-08T20:00:00.123Z'),intent={kind:'context',section:'sky',place:{...site},date,deepTarget:'M31',persist:false};
  assert.equal(h.navigation.request(intent,true,h.apply),false);assert.deepEqual(h.applied,[]);assert.equal(h.pending.at(-1).deepTarget,'M31');
  intent.place.name='Mutated later';intent.place.latitude=0;date.setUTCHours(1);intent.deepTarget='M13';
- assert.equal(h.navigation.continue(h.apply),true);assert.equal(h.applied.length,1);assert.deepEqual(h.applied[0].place,site);assert.equal(h.applied[0].date.toISOString(),'2026-10-08T20:00:00.123Z');assert.equal(h.applied[0].deepTarget,'M31');assert.equal(h.pending.at(-1),null);assert.equal(h.navigation.continue(h.apply),false);
+ assert.equal(h.navigation.continue(h.apply),true);assert.equal(h.applied.length,1);assert.deepEqual(h.applied[0].place,site);assert.equal(h.applied[0].date.toISOString(),'2026-10-08T20:00:00.123Z');assert.equal(h.applied[0].deepTarget,'M31');assert.equal(h.applied[0].persist,false);assert.equal(h.pending.at(-1),null);assert.equal(h.navigation.continue(h.apply),false);
 });
 test('keeping edits cancels the queued context without partially applying it',()=>{
  const h=harness();h.navigation.request({kind:'context',section:'tonight',place:site,date:new Date('2026-10-09T01:00Z')},true,h.apply);h.navigation.cancel();assert.deepEqual(h.applied,[]);assert.equal(h.pending.at(-1),null);assert.equal(h.navigation.continue(h.apply),false);

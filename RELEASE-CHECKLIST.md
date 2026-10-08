@@ -192,3 +192,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Saved-place failures show persistent Retry guidance, retain cached sites and pause collection-dependent changes. Invalid startup, late Save/Remove/Undo/rename/rating failures and cross-context repair passed; site, rating, time and form fields remained intact in the tested flows. Valid 101-site legacy collections remain readable for explicit removal.
 
 - Unfinished site-name edits now guard navigation and PWA reload. Site/comparison/camera plans queue their full context until an explicit continuation; Keep editing and newer requests cancel/replace the prior intent. Phone-width checks preserved drafts/site/time and applied a comparison's future site/time together. Native phone exit/keyboard behavior remains pending.
+
+- Stored-site Retry respects unfinished edits and adopts reviewed data without rewriting it. Same-coordinate recovery cleared the name editor/guard only after explicit continuation; completed site choices cleared older location-search feedback.
