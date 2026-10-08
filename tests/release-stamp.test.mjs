@@ -17,4 +17,5 @@ test('app-only changes produce a different worker while unchanged builds remain 
 test('offline-page changes and worker changes both produce a release update',()=>{
  assert.notEqual(stampServiceWorker('worker',[['offline.html','old']]),stampServiceWorker('worker',[['offline.html','new']]));
  assert.notEqual(stampServiceWorker('worker',[]),stampServiceWorker('new worker',[]));
+ assert.notEqual(stampServiceWorker('worker',[['planner-recovery.mjs','old']]),stampServiceWorker('worker',[['planner-recovery.mjs','new']]));
 });

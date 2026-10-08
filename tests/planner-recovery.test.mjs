@@ -19,3 +19,11 @@ test('fully blocked storage refuses an empty recovery claim and oversized keys a
  const blocked={getItem:()=>{throw Error('Blocked')}};assert.throws(()=>makePlannerRecovery(blocked,blocked,now),/could not be read/);
  const result=makePlannerRecovery({getItem:key=>key==='nightjar-places'?'x'.repeat(8*1024*1024+1):null},{getItem:()=>null},now);assert.deepEqual(result.unreadable,[{area:'local',key:'nightjar-places'}]);assert(!Object.hasOwn(JSON.parse(result.text).stores.local,'nightjar-places'));
 });
+test('escaped recovery size is bounded before large JSON serialization while Unicode and surrogate text round-trips exactly',()=>{
+ const key='nightjar-target-notes-v1',large='\u0000'.repeat(8*1024*1024),stringify=JSON.stringify;let fullSerialization=false;
+ JSON.stringify=function(value,...options){if(value?.format==='nightjar-raw-recovery'&&value.stores.local[key]===large)fullSerialization=true;return stringify(value,...options)};
+ try{assert.throws(()=>makePlannerRecovery({getItem:name=>name===key?large:null},{getItem:()=>null},now),/too large/)}finally{JSON.stringify=stringify}
+ assert.equal(fullSerialization,false,'oversized escaped values must be refused before constructing the full output');
+ const raw='\u0000\b\t\n\f\r"\\é字😀\ud800X\udfff\u2028\u2029'.repeat(1000)+'\ud800',copy=makePlannerRecovery({getItem:name=>name===key?raw:null},{getItem:()=>null},now);
+ assert.equal(JSON.parse(copy.text).stores.local[key],raw);assert(new TextEncoder().encode(copy.text).length<32*1024*1024);
+});

@@ -124,6 +124,7 @@ Use an actual phone on the final HTTPS origin. Record browser, OS, installed/bro
 | Lifecycle | Background/resume or interrupt the camera. | Video/labels pause or recover coherently; stale sensor/video data is not presented as current. |
 | Install | Install from the final origin and reopen it. | Correct icon/name and standalone layout; required live data still indicates network dependence. |
 | Offline fallback | Open online once, save targets/notes/diary records, then enable flight mode and reopen. | Saved records appear on the offline page. Full planner startup offline is not a supported release promise. |
+| Offline recovery copy | On the cached offline page, open Copy saved plans for recovery, download and inspect the JSON. | Stored values/forms and malformed text remain exact; unreadable keys are listed. No source storage changes. The format is manual recovery, not a normal importable backup; native phone receipt remains unverified. |
 | Reconnect | Turn flight mode off and use the retry control. | The planner returns, saved records remain and live requests can refresh. |
 | Drafts | Type a diary draft, switch tabs, reload and return. | Text and original site/time recover; changing the snapshot requires the explicit action. |
 | Draft conflicts | Open the same unfinished form in two browser tabs, edit both and review a refused save. | Both versions are readable before choosing. A newer change after review prevents an outdated choice; unrelated forms remain saved. |

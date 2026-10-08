@@ -17,6 +17,7 @@
     p{color:#a9bdc7;margin:12px 0}
     .intro{max-width:560px}
     .retry{display:inline-flex;align-items:center;justify-content:center;min-height:48px;background:#c1df93;color:#152218;border-radius:8px;padding:10px 22px;text-decoration:none;font-weight:600;margin:14px 0 20px}
+    .recovery{margin-top:22px;border-top:1px solid #334851;padding-top:18px}.recovery summary{cursor:pointer;min-height:44px;color:#c1df93}.recovery button{font:inherit;cursor:pointer;min-height:48px;max-width:100%;white-space:normal;overflow-wrap:anywhere;border:1px solid #526b75;border-radius:8px;background:#172a32;color:#e9eeef;padding:10px 16px}.recovery button:disabled{opacity:.6;cursor:wait}.recovery p{font-size:14px}.recovery button:focus-visible,.recovery summary:focus-visible{outline:2px solid #c1df93;outline-offset:4px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
     section{min-width:0;background:#142129;border:1px solid #334851;border-radius:10px;padding:18px}
     .session-card,.targets-card{grid-column:1/-1}
@@ -49,11 +50,12 @@
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
     </div>
+    <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <footer>Offline details are stored only in this browser. Positions, visibility and forecasts are not updated here; weather, location search and aurora forecasts require internet.</footer>
   </main>
   <script>
     (() => {
-      const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; } catch { document.getElementById('storage-warning').hidden=false; return fallback; } };
+      const read = (key, fallback) => { try { const raw=localStorage.getItem(key);if(raw!==null&&raw.length>5*1024*1024)throw Error('Oversized saved value');return JSON.parse(raw || 'null') ?? fallback; } catch { document.getElementById('storage-warning').hidden=false; return fallback; } };
       const validCoordinate=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)<=limit;
       const validDimension=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&value>0&&value<=limit;
       const safeNote=value=>typeof value==='string'?value.slice(0,2000):'';
@@ -90,15 +92,15 @@
 
       const targets = read('nightjar-targets-v1', []);
       const notes = read('nightjar-target-notes-v1', {});
-      const noteEntries=notes&&typeof notes==='object'&&!Array.isArray(notes)?Object.entries(notes).filter(([name,text])=>name.length<=100&&typeof text==='string').slice(0,100):[];
-      const savedNames=Array.isArray(targets)?Array.from(new Set(targets.filter(name=>typeof name==='string'&&name.trim()&&name.length<=100))).slice(0,42):[];
+      const noteEntries=notes&&typeof notes==='object'&&!Array.isArray(notes)?Object.entries(notes).slice(0,100).filter(([name,text])=>name.length<=100&&typeof text==='string'):[];
+      const savedNames=Array.isArray(targets)?Array.from(new Set(targets.slice(0,200).filter(name=>typeof name==='string'&&name.trim()&&name.length<=100))).slice(0,42):[];
       for (const name of savedNames) add('targets',safeText(name),'',safeNote(noteEntries.find(([key])=>key===name)?.[1]));
       for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(name),'',safeNote(note));
       document.getElementById('other-notes-card').hidden=!document.getElementById('other-notes').children.length;
       showEmpty('targets');
 
       const deepTargets=read('nightjar-deep-targets-v1',[]);
-      if(Array.isArray(deepTargets))for(const id of Array.from(new Set(deepTargets.filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id)))).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
+      if(Array.isArray(deepTargets))for(const id of Array.from(new Set(deepTargets.slice(0,200).filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id)))).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
       showEmpty('deep-targets');
 
       const diary=read('nightjar-observing-diary-v1',[]);
@@ -131,6 +133,20 @@
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
       document.getElementById('retry').addEventListener('click',()=>{
         try{const value=localStorage.getItem('nightjar-observing-time');const time=canonicalInstant(JSON.parse(value||'null'));if(time&&time.getUTCFullYear()>=1)sessionStorage.setItem('nightjar-recovery-time-v1',value)}catch{/* Reopening still works when session storage is unavailable. */}
+      });
+      const recoveryButton=document.getElementById('download-recovery'),recoveryStatus=document.getElementById('recovery-status');
+      recoveryButton.addEventListener('click',async()=>{
+        if(recoveryButton.disabled)return;
+        recoveryButton.disabled=true;recoveryStatus.textContent='Preparing a recovery copy…';
+        try{
+          const {makePlannerRecovery}=await import('/planner-recovery.mjs');
+          const copy=makePlannerRecovery({getItem:key=>localStorage.getItem(key)},{getItem:key=>sessionStorage.getItem(key)});
+          const url=URL.createObjectURL(new Blob([copy.text],{type:'application/json'}));
+          try{const link=document.createElement('a');link.href=url;link.download='nightjar-raw-recovery-'+copy.exportedAt.slice(0,10)+'.json';document.body.append(link);try{link.click()}finally{link.remove()}}
+          finally{setTimeout(()=>URL.revokeObjectURL(url),60000)}
+          recoveryStatus.textContent='Recovery copy prepared'+(copy.unreadable.length?' with '+copy.unreadable.length+' unreadable or oversized entries excluded and listed.':'.')+' Verify the file is saved before leaving; it cannot be imported as a plan backup.';
+        }catch(error){recoveryStatus.textContent=error instanceof Error&&error.message.includes('storage')?error.message:'The recovery copy could not be prepared. Keep this page open and restore storage or connection access before retrying.'}
+        finally{recoveryButton.disabled=false}
       });
     })();
   </script>

@@ -6,7 +6,7 @@ const source=readFileSync(new URL('../public/sw.js',import.meta.url),'utf8');
 function runtime(fetcher,stored=new Map()){
  const handlers=new Map(),timers=new Map(),deleted=[],writes=[];let claimed=0,skipped=0,timerId=0;
  const cache={match:async request=>stored.get(typeof request==='string'?request:request.url),put:async(request,response)=>{const key=typeof request==='string'?request:request.url;stored.set(key,response);writes.push(key)},keys:async()=>[...stored.keys()],delete:async key=>stored.delete(key)};
- const caches={open:async()=>cache,match:async key=>stored.get(key),keys:async()=>['nightjar-offline-v4','nightjar-offline-v5','nightjar-static-v0','nightjar-static-v1','other-app'],delete:async key=>deleted.push(key)};
+ const caches={open:async()=>cache,match:async key=>stored.get(key),keys:async()=>['nightjar-offline-v4','nightjar-offline-v5','nightjar-offline-v6','nightjar-static-v0','nightjar-static-v1','other-app'],delete:async key=>deleted.push(key)};
  vm.runInNewContext(source,{self:{location:{origin:'https://nightjar.test'},addEventListener:(name,handler)=>handlers.set(name,handler),clients:{claim:async()=>claimed++},skipWaiting:async()=>skipped++},caches,fetch:fetcher,URL,Response,AbortController,setTimeout:(callback,delay)=>{timers.set(++timerId,{callback,delay});return timerId},clearTimeout:id=>timers.delete(id)});
  const dispatch=(name,input={})=>{let promise;handlers.get(name)({...input,respondWith:value=>{promise=value},waitUntil:value=>{promise=value}});return promise};
  return {dispatch,timers,cache,caches,stored,deleted,writes,claimed:()=>claimed,skipped:()=>skipped};
@@ -27,8 +27,15 @@ test('stalled navigation aborts after eight seconds and returns saved plans with
  const response=app.dispatch('fetch',{request:request()});assert.equal(app.timers.size,1);const timer=[...app.timers.values()][0];assert.equal(timer.delay,8000);timer.callback();assert(signal.aborted);assert.equal(await(await response).text(),'Saved plans offline');assert.equal(app.timers.size,0);
 });
 test('installation validates offline HTML and activation removes only outdated Nightjar caches',async()=>{
- const app=runtime(async()=>offline());await app.dispatch('install');assert.deepEqual(app.writes,['/offline']);await app.dispatch('activate');assert.deepEqual(app.deleted,['nightjar-offline-v4','nightjar-static-v0']);assert.equal(app.claimed(),1);await app.dispatch('message',{data:{type:'SKIP_WAITING'}});assert.equal(app.skipped(),1);
+ const app=runtime(async path=>path==='/offline'?offline():new Response('export const recovery=true',{headers:{'content-type':'text/javascript'}}));await app.dispatch('install');assert.deepEqual(app.writes,['/offline','/planner-recovery.mjs']);await app.dispatch('activate');assert.deepEqual(app.deleted,['nightjar-offline-v4','nightjar-offline-v5','nightjar-static-v0']);assert.equal(app.claimed(),1);await app.dispatch('message',{data:{type:'SKIP_WAITING'}});assert.equal(app.skipped(),1);
  for(const response of [new Response('bad',{status:503}),new Response('{}',{headers:{'content-type':'application/json'}})]){const invalid=runtime(async()=>response);await assert.rejects(invalid.dispatch('install'),/Offline page unavailable/);assert.equal(invalid.writes.length,0)}
+});
+test('offline recovery module is served from its validated cache while denied caches fall back to the network',async()=>{
+ const source='export const recovery=true',asset=request('/planner-recovery.mjs',{mode:'cors'}),app=runtime(async()=>{throw Error('offline')},new Map([['/planner-recovery.mjs',new Response(source,{headers:{'content-type':'text/javascript'}})]]));
+ assert.equal(await(await app.dispatch('fetch',{request:asset})).text(),source);
+ for(const response of [new Response('bad',{status:503}),new Response('<html>',{headers:{'content-type':'text/html'}})]){const invalid=runtime(async path=>path==='/offline'?offline():response);await assert.rejects(invalid.dispatch('install'),/Recovery tools unavailable/);assert.equal(invalid.writes.length,0)}
+ const denied=runtime(async()=>new Response(source));denied.caches.match=async()=>{throw Error('denied')};assert.equal(await(await denied.dispatch('fetch',{request:asset})).text(),source);
+ for(const ignored of [request('/planner-recovery.mjs?v=1',{mode:'cors'}),request('/planner-recovery.mjs',{mode:'cors',headers:new Headers({authorization:'test'})})])assert.equal(app.dispatch('fetch',{request:ignored}),undefined);
 });
 test('static caching remains bounded and skips APIs, foreign requests, auth, queries and non-GET requests',async()=>{
  let fetches=0;const response=()=>{const value=new Response('app code',{headers:{'content-type':'text/javascript'}});Object.defineProperty(value,'type',{value:'basic'});return value};
