@@ -161,3 +161,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Deployment and packaging checks use an isolated build snapshot. Only identical, unreferenced numbered copies of hashed generated code are omitted; source output, distinct files, referenced copies and photos remain intact. The isolated artifact passed a local mobile browser smoke test.
 
 - [x] Meteor cloud averages identify their sampled hours and partial/missing coverage, including Moon-free filtering and nights without dark hours; compact mobile navigation and refresh were checked.
+
+- [x] Sky calendar provides weather refresh/retry, dated fetch timestamps and stale guidance alongside meteor cloud averages; failed updates retain earlier forecasts with explicit status, and retry clears warnings.
