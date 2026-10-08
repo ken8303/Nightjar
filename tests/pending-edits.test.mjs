@@ -32,3 +32,12 @@ test('unload watching protects existing edits on mount and cleans up across remo
  const event=new Event('beforeunload',{cancelable:true});target.dispatchEvent(event);assert.equal(event.defaultPrevented,true);
  store.change(owner,null);assert.equal(removes,2);stopAgain();assert.equal(removes,2);
 });
+
+test('root-retained edits protect reload without blocking section changes and policy changes notify subscribers',()=>{
+ const store=createPendingEdits(),imaging=Symbol(),notes=Symbol();let updates=0;store.subscribe(()=>updates++);
+ store.change(imaging,{section:'tools',label:'imaging draft',retainedAcrossSections:true});assert.equal(store.snapshot(),'imaging draft');assert.equal(store.snapshot('tools'),'');
+ store.change(notes,{section:'sky',label:'notes'});assert.equal(store.snapshot(),'imaging draft, notes');assert.equal(store.snapshot('sky'),'notes');
+ store.change(imaging,{section:'tools',label:'imaging draft'});assert.equal(store.snapshot('tools'),'imaging draft');assert.equal(updates,3);
+ store.change(imaging,{section:'tools',label:'imaging draft',retainedAcrossSections:true});assert.equal(store.snapshot('tools'),'');assert.equal(updates,4);
+ store.change(notes,null);assert.equal(store.snapshot(),'imaging draft');store.change(imaging,null);assert.equal(store.snapshot(),'');
+});

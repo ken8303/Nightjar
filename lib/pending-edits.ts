@@ -1,9 +1,9 @@
-type EditOwner={section:string;label:string};
+type EditOwner={section:string;label:string;retainedAcrossSections?:boolean};
 export function createPendingEdits(){
  const owners=new Map<symbol,EditOwner>(),listeners=new Set<()=>void>();
- function snapshot(section?:string){return [...new Set([...owners.values()].filter(owner=>section===undefined||owner.section===section).map(owner=>owner.label))].sort().join(', ')}
+ function snapshot(section?:string){return [...new Set([...owners.values()].filter(owner=>section===undefined||owner.section===section&&!owner.retainedAcrossSections).map(owner=>owner.label))].sort().join(', ')}
  function change(owner:symbol,value:EditOwner|null){
-  const prior=owners.get(owner);if(value?prior?.section===value.section&&prior.label===value.label:!prior)return;
+  const prior=owners.get(owner);if(value?prior?.section===value.section&&prior.label===value.label&&Boolean(prior.retainedAcrossSections)===Boolean(value.retainedAcrossSections):!prior)return;
   if(value)owners.set(owner,value);else owners.delete(owner);
   for(const listener of listeners)listener();
  }

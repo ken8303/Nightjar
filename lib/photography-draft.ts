@@ -28,3 +28,10 @@ export function savePhotographyDraft(draft:PhotographyDraft,storage?:Pick<Storag
  const parsed=parsePhotographyDraft({version:1,draft});if(!parsed)return false;
  try{(storage??localStorage).setItem(key,JSON.stringify({version:1,draft:parsed}));return true}catch{return false}
 }
+export function makePhotographyDraftRecovery(draft:PhotographyDraft,created=new Date()){
+ const parsed=parsePhotographyDraft({version:1,draft});
+ if(!parsed)throw Error('The imaging draft could not be prepared. Keep this view open and copy its fields.');
+ if(!Number.isFinite(+created))throw Error('A valid recovery-copy time is required.');
+ const exportedAt=created.toISOString();
+ return {exportedAt,text:JSON.stringify({format:'nightjar-imaging-recovery',version:1,exportedAt,notice:'Manual recovery copy of the imaging draft held in this visit. It excludes saved equipment profiles and cannot be imported as a Nightjar plan backup.',draft:parsed},null,2)};
+}

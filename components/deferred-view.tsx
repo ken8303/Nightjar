@@ -8,7 +8,7 @@ type Props={name:string;children:ReactNode};
 
 function ViewRecovery(){
  const pendingText=usePendingEdits();
- return <>{pendingText&&<p>Reload is paused while {pendingText} remain unsaved. Keep Sky atlas open to retry saving or copy your text first.</p>}<button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot())reloadPlanner()}}>Reload Nightjar</button></>;
+ return <>{pendingText&&<p>Reload is paused while {pendingText} remain unsaved. Keep Nightjar open and return to the editor for these changes to retry saving or copy them first.</p>}<button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot())reloadPlanner()}}>Reload Nightjar</button></>;
 }
 class ViewBoundary extends Component<Props,{failed:boolean}>{
  state={failed:false};

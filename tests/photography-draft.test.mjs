@@ -5,7 +5,8 @@ import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
-const {defaultPhotographyDraft,parsePhotographyDraft,readPhotographyDraft,savePhotographyDraft}=await vite.ssrLoadModule('/lib/photography-draft.ts');
+const {defaultPhotographyDraft,parsePhotographyDraft,readPhotographyDraft,savePhotographyDraft,makePhotographyDraftRecovery}=await vite.ssrLoadModule('/lib/photography-draft.ts');
+const {parsePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 test('imaging drafts retain unfinished edits separately from valid saved equipment',()=>{
  const map=new Map(),storage={getItem:key=>map.get(key)??null,setItem:(key,value)=>map.set(key,value)};
  assert.equal(readPhotographyDraft(storage).status,'new');
@@ -24,4 +25,13 @@ test('blocked storage retains an explicit visit-only status and never reports a 
  assert.equal(readPhotographyDraft(storage).status,'visit');assert.equal(savePhotographyDraft(defaultPhotographyDraft(),storage),false);
  assert.equal(savePhotographyDraft({...defaultPhotographyDraft(),width:'bad'},storage),false);
  const copy=defaultPhotographyDraft();copy.width='12';assert.equal(defaultPhotographyDraft().width,'36');
+});
+
+test('manual imaging recovery retains incomplete Unicode fields without changing the source or accepting invalid drafts',()=>{
+ const draft={...defaultPhotographyDraft(),name:'香港 \u0022觀星\u0022',focal:'',ra:'-',dec:'+',rms:'.',catalogueId:''},before=structuredClone(draft);
+ const copy=makePhotographyDraftRecovery(draft,new Date('2026-10-08T21:30:59.987Z')),value=JSON.parse(copy.text);
+ assert.equal(value.format,'nightjar-imaging-recovery');assert.equal(copy.exportedAt,'2026-10-08T21:30:59.987Z');assert.deepEqual(value.draft,draft);assert.deepEqual(draft,before);assert.match(value.notice,/cannot be imported/);assert.throws(()=>parsePlannerBackup(copy.text),/not a supported Nightjar backup/);
+ assert.throws(()=>makePhotographyDraftRecovery({...draft,name:'x'.repeat(81)}),/could not be prepared/);assert.throws(()=>makePhotographyDraftRecovery(draft,new Date(NaN)),/valid recovery-copy time/);
+ const max={...defaultPhotographyDraft(),name:'\u0000'.repeat(80)};for(const key of Object.keys(max)){if(!['name','catalogueId'].includes(key))max[key]='1'.repeat(40)}
+ assert(new TextEncoder().encode(makePhotographyDraftRecovery(max).text).length<8192);
 });
