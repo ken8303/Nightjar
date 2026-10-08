@@ -4,7 +4,7 @@ import {makeDiaryFormRecovery} from '@/lib/diary-form-recovery';
 import {downloadFile} from '@/lib/download';
 import {useEffect,useRef,useState} from 'react';
 import {diaryKey,diaryLimit,readDiary,saveDiary,type Observation} from '@/lib/observing-diary';
-import {emptyDiaryDrafts,discardCompletedDrafts,readDiaryDrafts,readStoredDiaryDrafts,mergeDiaryDraftChanges,diaryDraftConflicts,resolveDiaryDraftConflicts,saveDiaryDrafts,sameObservation,type DiaryDraftState} from '@/lib/diary-drafts';
+import {emptyDiaryDrafts,discardCompletedDrafts,readDiaryDrafts,readStoredDiaryDrafts,mergeDiaryDraftChanges,diaryDraftConflicts,resolveDiaryDraftConflicts,saveDiaryDrafts,sameObservation,startDiaryEdit,type DiaryDraftState} from '@/lib/diary-drafts';
 import {filterDiary,diaryDateInput,emptyDiaryFilters,type DiaryFilters} from '@/lib/diary-filters';
 import {removeDiaryEntry,restoreDiaryEntry} from '@/lib/diary-removal';
 import {diaryCSV,diaryReport} from '@/lib/diary-export';
@@ -63,7 +63,10 @@ export default function ObservingDiary({target,date,place}:{target:string;date:D
   const previous=current.drafts.find(entry=>entry.target===target),next:Observation={...(previous||{id:crypto.randomUUID(),target,observedAt:date.toISOString(),place:{...place},...empty}),...patch};
   persistDrafts({...current,drafts:[...current.drafts.filter(entry=>entry.target!==target),next]});
  }
- function startEdit(entry:Observation){persistDrafts({...draftRef.current,edit:{original:entry,draft:{...entry}}});setStatus('')}
+ function startEdit(entry:Observation){
+  try{const next=startDiaryEdit(draftRef.current,entry);if(next!==draftRef.current){persistDrafts(next);setStatus('')}else{setStatus('You are already editing this observation. Your unfinished changes are kept.');heading.current?.focus({preventScroll:true});heading.current?.scrollIntoView({block:'start',behavior:'instant'})}}
+  catch(error){setStatus(error instanceof Error?error.message:'The current diary edit could not be replaced. Your text is kept.');heading.current?.focus({preventScroll:true});heading.current?.scrollIntoView({block:'start',behavior:'instant'})}
+ }
  function cancelEdit(){persistDrafts({...draftRef.current,edit:null})}
  function useCurrentSnapshot(){if(pending)persistDrafts({...draftRef.current,drafts:draftRef.current.drafts.map(entry=>entry.target===target?{...entry,observedAt:date.toISOString(),place:{...place}}:entry)})}
  function save(){

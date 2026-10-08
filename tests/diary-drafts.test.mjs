@@ -3,8 +3,20 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts,diaryDraftConflicts,resolveDiaryDraftConflicts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
+const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts,diaryDraftConflicts,resolveDiaryDraftConflicts,startDiaryEdit}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
 const entry={id:'draft-M31',target:'M31',observedAt:'2026-10-06T20:00:00.000Z',place:{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},outcome:'seen',equipment:'',notes:'Unfinished\n星空'};
+test('opening the active diary edit retains its original snapshot and current text, even after the saved entry changes',()=>{
+ const state={drafts:[{...entry,id:'pending-M45',target:'M45'}],edit:{original:entry,draft:{...entry,notes:'Current unsaved changes 星空',equipment:'Binoculars',outcome:'imaged'}}},before=structuredClone(state);
+ assert.equal(startDiaryEdit(state,entry),state);
+ assert.equal(startDiaryEdit(state,{...entry,notes:'Peer saved version',place:{...entry.place,name:'Changed site'}}),state);
+ assert.deepEqual(state,before);
+});
+test('a different diary edit refuses replacing changed notes, equipment or outcome; unchanged edits can switch without losing other drafts',()=>{
+ const next={...entry,id:'record-2',target:'M45'},pending={...entry,id:'pending-M13',target:'M13'};
+ for(const patch of [{notes:'Unfinished edit'},{equipment:'Telescope'},{outcome:'not-seen'}]){const state={drafts:[pending],edit:{original:entry,draft:{...entry,...patch}}},before=structuredClone(state);assert.throws(()=>startDiaryEdit(state,next),/Save or cancel/);assert.deepEqual(state,before)}
+ for(const edit of [null,{original:entry,draft:{...entry}}]){const state={drafts:[pending],edit},before=structuredClone(state),opened=startDiaryEdit(state,next);assert.deepEqual(opened.edit,{original:next,draft:next});assert.notEqual(opened.edit.original,opened.edit.draft);assert.notEqual(opened.edit.original.place,opened.edit.draft.place);assert.deepEqual(opened.drafts,[pending]);assert.deepEqual(state,before)}
+ assert.throws(()=>startDiaryEdit({drafts:[],edit:null},{...next,notes:'x'.repeat(2001)}));
+});
 test('new and edit drafts retain original metadata and unfinished text without touching saved observations',()=>{
  const values=new Map([['nightjar-observing-diary-v1','existing saved records']]),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)};
  assert.deepEqual(readDiaryDrafts(storage).state,{drafts:[],edit:null});const state={drafts:[entry],edit:{original:{...entry,id:'record-1'},draft:{...entry,id:'record-1',notes:'Pending edit'}}};assert(saveDiaryDrafts(state,storage));assert.deepEqual(readDiaryDrafts(storage).state,state);assert.equal(values.get('nightjar-observing-diary-v1'),'existing saved records');assert(!sameObservation(state.edit.original,state.edit.draft));assert(sameObservation(entry,{...entry,ignored:'extra'}));

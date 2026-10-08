@@ -96,6 +96,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## After the next GitHub Desktop push
 
+Repeated Edit preserves the active diary form; a different-entry Edit refuses replacing unfinished changes until save/cancel. Local mobile/desktop checks confirmed focus, reload, save-then-switch and malformed-store recovery behavior. Include repeated/different-entry clicks in physical-phone diary acceptance.
+
 Local integrated PWA verification passed two waiting-worker updates, retaining millisecond observing time, favourite/note and unfinished diary site/time/Unicode text. A subsequent rebuilt CSS update verified wrapped diary actions at 320/390 pixels, including snapshot and clear/undo behavior. Panel-bound checks supplement document-overflow checks because a clipped internal control can leave document width unchanged. Installed-phone and production-origin update checks below remain required.
 
 1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.

@@ -3,6 +3,14 @@ export const diaryDraftKey='nightjar-diary-drafts-v1';
 export type DiaryDraftState={drafts:Observation[];edit:{original:Observation;draft:Observation}|null};
 export function emptyDiaryDrafts():DiaryDraftState{return {drafts:[],edit:null}}
 export function sameObservation(first:Observation,second:Observation){return JSON.stringify(normalizeDiary([first])[0])===JSON.stringify(normalizeDiary([second])[0])}
+// Reopening the active entry must not reset its text. Only an unchanged edit
+// can be replaced without an explicit save/cancel of the current edit.
+export function startDiaryEdit(state:DiaryDraftState,entry:Observation):DiaryDraftState{
+ const original=normalizeDiary([entry])[0];
+ if(state.edit?.original.id===original.id)return state;
+ if(state.edit&&!sameObservation(state.edit.original,state.edit.draft))throw Error('Save or cancel your current diary edit before editing another observation. Your unfinished changes are kept.');
+ return {...state,edit:{original,draft:{...original,place:{...original.place}}}};
+}
 export function normalizeDiaryDrafts(value:unknown):DiaryDraftState{
  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid diary draft.');
  const raw=value as Record<string,unknown>;
