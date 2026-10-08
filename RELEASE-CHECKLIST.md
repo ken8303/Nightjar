@@ -148,3 +148,4 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [ ] Verify native reload/close warnings on supported physical phones and installed PWAs; browsers may suppress these prompts. Verify recovery-copy receipt before deliberately leaving unsaved text.
 - [x] Failed-view reload buttons pause while another Sky atlas view holds unsaved text; retrying enables recovery and saved notes survive reload.
 - [x] Diary search includes stored country, with legacy records and Unicode matching preserved.
+- [x] Camera and inline/expanded 3D module failures stay inside recovery panels; surrounding planner and unsaved notes remain available, 2D switching works, and restored modules load normally.

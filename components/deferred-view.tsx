@@ -23,6 +23,6 @@ class ViewBoundary extends Component<Props,{failed:boolean}>{
  }
 }
 
-export default function DeferredView({name,children}:Props){
- return <ViewBoundary name={name}><Suspense fallback={<div className="panel tab-loading" role="status">Loading {name.toLowerCase()}…</div>}>{children}</Suspense></ViewBoundary>;
+export default function DeferredView({name,children,fallback}:Props&{fallback?:ReactNode}){
+ return <ViewBoundary name={name}><Suspense fallback={fallback??<div className="panel tab-loading" role="status">Loading {name.toLowerCase()}…</div>}>{children}</Suspense></ViewBoundary>;
 }
