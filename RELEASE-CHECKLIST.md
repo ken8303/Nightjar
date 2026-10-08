@@ -141,3 +141,8 @@ Use an actual phone on the final HTTPS origin. Record browser, OS, installed/bro
 The camera overlays predicted catalogue positions; it does not recognize sky objects from camera pixels. The optional Messier/combined camera catalogues provide predicted directions for 109 deep-sky objects, with optional reference thumbnails alongside labels; full photos/details open in the separate explorer. Most need binoculars or a telescope, and camera pixels are not analyzed. Light-pollution maps, cloud accounts, push alerts, an AI assistant, a photo gallery and full reference-site feature parity remain outside this first-release implementation.
 
 Completion percentages previously reported were estimates. Release acceptance is based on these checks, especially the remaining physical-phone and production-origin tests.
+
+- [x] Desktop and mobile section changes protect notes/unfinished diary forms after save failures; each retry releases only its own warning, and explicit leaving keeps saved records unchanged.
+- [x] A waiting PWA update pauses while view-only edits remain; activation-race tests prevent reload after a new failed save. Local update retained planner time.
+- [x] Diary country survives editing, backups, recovery and offline/report output; CSV adds Country as its final column.
+- [ ] Verify native reload/close warnings on supported physical phones and installed PWAs; browsers may suppress these prompts. Verify recovery-copy receipt before deliberately leaving unsaved text.

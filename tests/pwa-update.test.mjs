@@ -54,3 +54,9 @@ test('recovery preserves the current tab time when another tab changes shared st
  preservePlannerTime({getItem:()=>{throw Error('Blocked')}},first);
  assert.equal(one.get('nightjar-recovery-time-v1'),'"2026-10-08T22:30:00.000Z"');
 });
+
+test('unsaved view text blocks activation and a newly failed edit blocks reload after activation',()=>{
+ const first=fixture();first.options.canReload=()=>false;applyPwaUpdate(first.worker,first.controller,first.options);assert.equal(first.events.length,1);assert.match(first.events[0].failure,/unsaved text/);first.controller.dispatchEvent(new Event('controllerchange'));assert.equal(first.events.length,1);
+ let saved=true;const later=fixture();later.options.canReload=()=>saved;applyPwaUpdate(later.worker,later.controller,later.options);saved=false;later.controller.dispatchEvent(new Event('controllerchange'));assert.deepEqual(later.events.slice(0,2),['preserve',{type:'SKIP_WAITING'}]);assert.match(later.events[2].failure,/reload was paused/);saved=true;later.controller.dispatchEvent(new Event('controllerchange'));assert.equal(later.events.length,3);
+ const valid=fixture(controller=>controller.dispatchEvent(new Event('controllerchange')));valid.options.canReload=()=>true;applyPwaUpdate(valid.worker,valid.controller,valid.options);assert.equal(valid.events.at(-1),'reload');
+});

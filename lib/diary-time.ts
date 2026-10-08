@@ -1,5 +1,6 @@
 import type {Observation} from './observing-diary';
 const formatters=new Map<string,Intl.DateTimeFormat>();
+export function diarySiteLabel(place:Observation['place']){return place.country?`${place.name} · ${place.country}`:place.name}
 export function diaryLocalTime(entry:Pick<Observation,'observedAt'|'place'>){
  const instant=new Date(entry.observedAt),timezone=entry.place.timezone||'UTC',fraction=instant.getUTCMilliseconds()!==0,era=instant.getUTCFullYear()<=1;
  const key=JSON.stringify([timezone,fraction,era]);

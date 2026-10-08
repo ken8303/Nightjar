@@ -91,3 +91,9 @@ export function mergeDiaryDraftChanges(base:DiaryDraftState,desired:DiaryDraftSt
 export function saveDiaryDrafts(state:DiaryDraftState,storage?:Pick<Storage,'setItem'>){try{(storage??localStorage).setItem(diaryDraftKey,JSON.stringify({version:1,...normalizeDiaryDrafts({version:1,...state})}));return true}catch{return false}}
 
 export function discardCompletedDrafts(state:DiaryDraftState,saved:Observation[]):DiaryDraftState{return {...state,drafts:state.drafts.filter(draft=>!saved.some(entry=>entry.id===draft.id&&sameObservation(entry,draft)))}}
+
+// Removed forms contain no remaining view-only text. In particular a failed
+// cleanup after saving an observation must not prevent leaving the explorer.
+export function hasChangedDiaryForms(base:DiaryDraftState,desired:DiaryDraftState){
+ return desired.drafts.some(entry=>{const saved=base.drafts.find(item=>item.target===entry.target);return !saved||!sameObservation(saved,entry)})||Boolean(desired.edit&&(!base.edit||!sameObservation(base.edit.original,desired.edit.original)||!sameObservation(base.edit.draft,desired.edit.draft)));
+}

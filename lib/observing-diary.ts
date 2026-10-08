@@ -11,7 +11,7 @@ export function validObservation(value:unknown):value is Observation{
 }
 export function normalizeDiary(value:unknown):Observation[]{
  if(!Array.isArray(value)||value.length>diaryLimit||!value.every(validObservation)||new Set(value.map(entry=>entry.id)).size!==value.length)throw Error('The observing diary contains invalid entries.');
- return value.map(entry=>({id:entry.id,target:entry.target,observedAt:entry.observedAt,place:{name:entry.place.name,latitude:entry.place.latitude,longitude:entry.place.longitude,...(entry.place.timezone?{timezone:entry.place.timezone}:{}),...(entry.place.bortle?{bortle:entry.place.bortle}:{})},outcome:entry.outcome,equipment:entry.equipment,notes:entry.notes}));
+ return value.map(entry=>({id:entry.id,target:entry.target,observedAt:entry.observedAt,place:{name:entry.place.name,latitude:entry.place.latitude,longitude:entry.place.longitude,...(entry.place.country!==undefined?{country:entry.place.country}:{}),...(entry.place.timezone?{timezone:entry.place.timezone}:{}),...(entry.place.bortle?{bortle:entry.place.bortle}:{})},outcome:entry.outcome,equipment:entry.equipment,notes:entry.notes}));
 }
 export function readDiary(storage:Pick<Storage,'getItem'>){const raw=storage.getItem(diaryKey);if(raw&&raw.length>diaryMaxStoredChars)throw Error('The saved diary is too large.');return normalizeDiary(JSON.parse(raw||'[]'))}
 export function saveDiary(value:Observation[],storage:Pick<Storage,'setItem'>){storage.setItem(diaryKey,JSON.stringify(normalizeDiary(value)))}

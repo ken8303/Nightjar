@@ -106,7 +106,7 @@
       const diary=read('nightjar-observing-diary-v1',[]);
       if(Array.isArray(diary))for(const entry of diary.slice(0,200).filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180)).sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
         const outcome={'seen':'Seen','not-seen':'Not seen','imaged':'Imaged'}[entry.outcome];
-        add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
+        add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.place.country)?' · '+safeText(entry.place.country):'')+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
       }
       showEmpty('diary');
 

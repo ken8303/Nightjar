@@ -76,3 +76,9 @@ test('review resolution supports a removed form and edit conflict without alteri
  const theirs=resolveDiaryDraftConflicts(base,desired,reviewed,reviewed,'stored');assert.deepEqual(mergeDiaryDraftChanges(theirs.base,theirs.desired,reviewed),reviewed);
  assert.throws(()=>resolveDiaryDraftConflicts(base,desired,reviewed,{...reviewed,edit:null},'stored'),/edit changed again/);
 });
+
+test('only remaining new or changed forms require guarding after a failed save, excluding completed cleanup',async()=>{
+ const {hasChangedDiaryForms}=await vite.ssrLoadModule('/lib/diary-drafts.ts');const base={drafts:[entry],edit:null};
+ assert(!hasChangedDiaryForms(base,structuredClone(base)));assert(!hasChangedDiaryForms(base,{drafts:[],edit:null}));assert(hasChangedDiaryForms(base,{drafts:[{...entry,notes:'Unsaved text'}],edit:null}));assert(hasChangedDiaryForms(base,{drafts:[{...entry,place:{...entry.place,country:'France'}}],edit:null}));
+ const edit={original:entry,draft:{...entry,notes:'Stored edit'}};assert(!hasChangedDiaryForms({drafts:[],edit},{drafts:[],edit:structuredClone(edit)}));assert(!hasChangedDiaryForms({drafts:[],edit},{drafts:[],edit:null}));assert(hasChangedDiaryForms({drafts:[],edit},{drafts:[],edit:{...edit,draft:{...entry,notes:'Unsaved edit'}}}));assert(hasChangedDiaryForms({drafts:[],edit:null},{drafts:[],edit}));
+});

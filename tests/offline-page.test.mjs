@@ -89,3 +89,7 @@ test('offline recovery reports partial access and unavailable module/storage wit
  const partial=load({'nightjar-targets-v1':['Vega']},false,{sessionBlocked:true});await partial.elements.get('download-recovery').listeners.get('click')();assert(partial.elements.get('recovery-status').textContent.includes('2 unreadable'));assert.equal(JSON.parse(await partial.blobs[0].text()).unreadable.length,2);
  for(const page of [load({},true,{sessionBlocked:true}),load({},false,{importFailed:true})]){await page.elements.get('download-recovery').listeners.get('click')();assert.equal(page.blobs.length,0);assert(!page.elements.get('recovery-status').textContent.includes('copy prepared'));assert.equal(page.elements.get('download-recovery').disabled,false)}
 });
+test('offline diary country metadata is rendered as text alongside the original site without interpreting markup',()=>{
+ const entry={target:'M31',observedAt:'2026-10-08T20:00:00.000Z',place:{name:'Paris QA',country:'France <country> 星空',latitude:48.85,longitude:2.35},outcome:'seen',equipment:'',notes:''},page=load({'nightjar-observing-diary-v1':[entry]});
+ assert(page.elements.get('diary').textContent.includes('Paris QA · France <country> 星空'));assert.equal(page.elements.get('diary').children[0].children.length,2);
+});

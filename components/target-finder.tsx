@@ -1,4 +1,5 @@
 'use client';
+import {usePendingEditReporter} from '@/hooks/use-pending-edits';
 import {downloadFile} from '@/lib/download';
 import {useEffect,useMemo,useRef,useState,useId} from 'react';
 import {Download, Search, X} from 'lucide-react';
@@ -14,6 +15,7 @@ import {findSkyTargets} from '@/lib/sky-target-search';
 import {printableObservingPlan} from '@/lib/observing-plan';
 import {validEquipment,type Equipment} from '@/lib/photography';
 export default function TargetFinder({date,place,selected,onSelect}:{date:Date;place:Place;selected:string;onSelect:(name:string)=>void}){
+ const reportPending=usePendingEditReporter('sky','target note edits');
  const [notes,setNotes]=useState<Record<string,string>>({}),[notesReady,setNotesReady]=useState(false),[notesStatus,setNotesStatus]=useState(''),[notesStorageError,setNotesStorageError]=useState(false);
  const pendingNotes=useRef<TargetNotes>({});
  const [managedNote,setManagedNote]=useState(''),[removedNote,setRemovedNote]=useState<{name:string;text:string}|null>(null);
@@ -41,8 +43,8 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
  function persistNoteEdits(){
   try{
    const next=applyTargetNoteEdits(readTargetNotes(localStorage),pendingNotes.current);
-   saveTargetNotes(next,localStorage);pendingNotes.current={};setNotes(next);setNotesStatus('Notes saved on this browser.');setNotesStorageError(false);return true;
-  }catch(error){setNotesStorageError(true);const reason=error instanceof Error&&error.name==='Error'?`${error.message} `:'';setNotesStatus(`${reason}Your edits could not be saved. They remain while Sky atlas is open; leaving this tab or reloading may lose them.`);return false}
+   saveTargetNotes(next,localStorage);pendingNotes.current={};reportPending(false);setNotes(next);setNotesStatus('Notes saved on this browser.');setNotesStorageError(false);return true;
+  }catch(error){reportPending(Object.keys(pendingNotes.current).length>0);setNotesStorageError(true);const reason=error instanceof Error&&error.name==='Error'?`${error.message} `:'';setNotesStatus(`${reason}Your edits could not be saved. They remain while Sky atlas is open; leaving this tab or reloading may lose them.`);return false}
  }
  function updateNote(name:string,value:string){
   const edit={[name]:value.slice(0,2000)};pendingNotes.current={...pendingNotes.current,...edit};

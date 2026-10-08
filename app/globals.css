@@ -138,3 +138,5 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 @media(max-width:600px){.mosaic-panel .mosaic-centre-field{grid-column:1/-1}}
 
 .time-entry-precision{overflow-wrap:anywhere;max-width:100%;margin:0 0 12px}
+
+.unsaved-view-warning{margin:20px 0;border-color:var(--accent);overflow-wrap:anywhere}.unsaved-view-warning .button-row{display:flex;flex-wrap:wrap;gap:10px}.unsaved-view-warning h2:focus{outline:2px solid currentColor;outline-offset:5px}
