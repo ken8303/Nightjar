@@ -7,7 +7,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Live hourly Open-Meteo weather, an explained planning score, and a best-hour recommendation.
 - Mobile Explore navigation uses a sticky section bar, with anchor clearance and keyboard focus return. Red-light guidance and save errors appear above observing controls; preference changes synchronize across planner tabs.
 - Low/middle/high cloud cover, near-surface visibility, dew point and temperature margin for the selected forecast hour. Dew guidance is a heuristic; visibility is not astronomical seeing or transparency.
-- Location search with validated unique results and distinct unavailable/empty feedback, coordinates, optional browser geolocation, an OpenStreetMap view, and device-local saved places. Rename a selected site with a readable name; saved sites retain their coordinates, time zone and sky rating.
+- Location search with validated unique results and distinct unavailable/empty feedback, coordinates, optional browser geolocation, an OpenStreetMap view, and device-local saved places. Unreadable selected-site data is preserved with an explicit fallback and Retry guidance. Rename a selected site with a readable name; saved sites retain their coordinates, time zone and sky rating.
 - Optional, user-entered Bortle class (1–9) for observing sites, shown in saved places, comparisons and the offline plan. It is separate from the weather score and is not a light-pollution map measurement.
 - Shared observing time in UTC with local-time display; bright-star sky chart and calculated planetary positions. On first open, the time starts at the next astronomical-dark period for the restored site, or evening civil twilight when full darkness is unavailable in the next two days. If neither occurs, it starts at the next hour.
 - Search the 42 existing sky targets by name, including Unicode-compatible and spaced text. Filter by horizon visibility or a strict altitude above 30°, inspect altitude/azimuth, and highlight a target in the atlas.
@@ -104,7 +104,7 @@ Backup import reviews retain a snapshot of the saved plan. If that data changes 
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 359 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 362 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 

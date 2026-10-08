@@ -162,3 +162,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .heading-utilities .viewing-mode p{grid-column:1/-1;position:static;width:auto;max-width:none;margin:0;padding:0;border:0;background:none;box-shadow:none;font-size:12px;line-height:1.6;color:var(--text-secondary)}
 
 .equipment-read-error .button{max-width:100%;white-space:normal;text-align:left}
+
+.startup-site-warning{margin-bottom:18px}.startup-site-warning h2{margin-top:0;font-size:22px}.startup-site-warning p{font-size:14px;line-height:1.65;color:var(--text-secondary)}.startup-site-warning .button{max-width:100%;white-space:normal}
