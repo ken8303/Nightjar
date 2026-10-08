@@ -2,7 +2,7 @@
 import {useEffect,useRef,useState,type MouseEvent} from 'react';
 import {Camera} from 'lucide-react';
 
-const sections=[['sky-chart','Sky chart'],['deep-sky-finder','Deep-sky explorer'],['observing-diary','Observing diary'],['visibility-planner','When to look']] as const;
+import {skyShortcutSections as sections} from '@/lib/sky-shortcuts';
 export default function SkyShortcuts({onCamera}:{onCamera:(launcher:HTMLButtonElement)=>void}){
  const pending=useRef<(()=>void)|null>(null);
  const [status,setStatus]=useState('');

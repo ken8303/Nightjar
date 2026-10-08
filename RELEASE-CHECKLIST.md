@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 378 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 380 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -206,3 +206,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - When to look distinguishes repeated local hours with dates/UTC offsets on mobile and desktop. A UK fallback fixture selected the second 01:00 occurrence as 01:00 UTC; highest-first/above-30° calculations are unchanged.
 
 - Sky atlas has a direct When to look shortcut. Delayed loading and loaded-section jumps focus the named section below the mobile bar; the narrow layout gives the shortcut its own row.
+
+- Known Sky atlas section fragments reopen the named section after lazy loading. Pointer/keyboard activity cancels deferred focus; unknown fragments keep Tonight. Direct-link, delayed-load, search-cancellation and unknown-link browser checks passed.
