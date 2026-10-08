@@ -173,3 +173,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Location search differentiates malformed/unusable responses from genuine empty searches, deduplicates safe IDs and bounds administrative labels. Disposable 320/390-pixel checks preserved the selected site on errors and selected valid results; live provider/device acceptance remains separate.
 
 - Mobile Explore uses a sticky section bar instead of covering bottom-screen feedback. 320/390-pixel checks verified section/anchor clearance and menu focus return; verify real phone keyboard and installed-PWA safe areas before release.
+
+- Returning to My places after leaving a pending device-location request clears busy state. Synthetic desktop/mobile checks ignored obsolete success and accepted a fresh request; physical GPS acceptance remains pending.

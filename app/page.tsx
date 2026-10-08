@@ -112,7 +112,7 @@ function Planner(){
  useEffect(()=>{
   const session=createCameraLocation({onPending:setLocating,onSite:site=>choose({...site,name:'My location'}),onError:()=>setSearchError('Location could not be accessed. Search for a town or enter coordinates.')});
   locationSession.current=session;
-  return()=>{session.cancel(false);locationSession.current=null};
+  return()=>{session.cancel();locationSession.current=null};
  },[choose]);
  useEffect(()=>{try{sessionStorage.removeItem('nightjar-recovery-time-v1')}catch{};return()=>searchController.current?.abort()},[]);
  useEffect(()=>{try{localStorage.setItem('nightjar-place',JSON.stringify(place))}catch{}},[place]);
