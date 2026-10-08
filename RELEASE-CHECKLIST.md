@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 376 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 378 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -200,3 +200,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Long saved-place/equipment/comparison lists display twenty entries initially, with progressive expansion and keyboard focus. Synthetic 101-record collections retained last-entry access; selected comparison cards remain manageable after picker collapse.
 
 - Deep-sky imaging actions defer centre replacement when unsaved edits exist, including retained imaging drafts. Cancellation keeps exact fields; explicit approval changes only the centre/catalogue and focuses the mosaic. Synthetic autosave-failure/retry and narrow mobile review checks passed.
+
+- Missing selected-hour forecast timestamps retain later samples/recommendations without borrowing their current metrics. Selecting an actual period or refreshing a repaired feed restores ordinary scores; timestamp gaps stay explicit.

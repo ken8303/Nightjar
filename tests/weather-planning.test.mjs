@@ -28,3 +28,13 @@ test('forecast labels distinguish repeated clock-change hours and year boundarie
  const first=forecastHourLabel(new Date('2026-10-25T00:00Z'),'Europe/London'),second=forecastHourLabel(new Date('2026-10-25T01:00Z'),'Europe/London');assert.equal(first.time,'01:00');assert.equal(second.time,'01:00');assert.match(first.detail,/GMT\+1/);assert.match(second.detail,/GMT(?:\+0)?$/);assert.notEqual(first.full,second.full);
  assert.match(forecastHourLabel(new Date('2026-12-31T23:00Z'),'UTC').full,/2026/);assert.match(forecastHourLabel(new Date('2027-01-01T00:00Z'),'UTC').full,/2027/);
 });
+
+
+test('a missing current timestamp retains later rows without presenting their measurements as current',()=>{
+ const date=new Date((start+5400)*1000),data={...hourly([0,2,3,4],40),temperature_2m:[10,20,30,40]},before=structuredClone(data),hours=weatherHours(data,date,place),planned=forecastPlanning(hours,date,place);
+ assert.deepEqual(hours.map(hour=>+hour.date),[2,3,4].map(offset=>(start+offset*3600)*1000));assert.equal(planned.current,undefined);assert.equal(planned.score,null);assert.equal(+planned.best.date,(start+7200)*1000);assert.equal(hours[0].temp,20);assert.equal(planned.scored,3);assert.deepEqual(data,before);
+});
+test('forecast arrival and expiry boundaries keep only future periods within twelve elapsed hours',()=>{
+ const data=hourly([0,1,2],40),before=new Date((start-3600)*1000),planned=forecastPlanning(weatherHours(data,before,place),before,place);assert.equal(planned.current,undefined);assert.equal(planned.score,null);assert.equal(+planned.best.date,start*1000);
+ assert.deepEqual(weatherHours(data,new Date((start+3*3600)*1000),place),[]);assert.deepEqual(weatherHours(data,new Date((start-12*3600)*1000),place),[]);assert.deepEqual(weatherHours(data,new Date('invalid'),place),[]);
+});
