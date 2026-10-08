@@ -146,3 +146,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] A waiting PWA update pauses while view-only edits remain; activation-race tests prevent reload after a new failed save. Local update retained planner time.
 - [x] Diary country survives editing, backups, recovery and offline/report output; CSV adds Country as its final column.
 - [ ] Verify native reload/close warnings on supported physical phones and installed PWAs; browsers may suppress these prompts. Verify recovery-copy receipt before deliberately leaving unsaved text.
+- [x] Failed-view reload buttons pause while another Sky atlas view holds unsaved text; retrying enables recovery and saved notes survive reload.
+- [x] Diary search includes stored country, with legacy records and Unicode matching preserved.

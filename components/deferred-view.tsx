@@ -1,10 +1,15 @@
 "use client";
 
 import {Component, Suspense, type ReactNode} from 'react';
+import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
 import {reloadPlanner} from '@/lib/reload-planner';
 
 type Props={name:string;children:ReactNode};
 
+function ViewRecovery(){
+ const pendingText=usePendingEdits();
+ return <>{pendingText&&<p>Reload is paused while {pendingText} remain unsaved. Keep Sky atlas open to retry saving or copy your text first.</p>}<button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot())reloadPlanner()}}>Reload Nightjar</button></>;
+}
 class ViewBoundary extends Component<Props,{failed:boolean}>{
  state={failed:false};
  static getDerivedStateFromError(){return {failed:true}}
@@ -12,7 +17,7 @@ class ViewBoundary extends Component<Props,{failed:boolean}>{
   if(this.state.failed)return <section className="panel view-unavailable" role="alert">
    <h3>{this.props.name} is unavailable</h3>
    <p>If your connection dropped, reconnect and reload Nightjar. You can still use the other tabs.</p>
-   <button type="button" className="button" onClick={reloadPlanner}>Reload Nightjar</button>
+   <ViewRecovery/>
   </section>;
   return this.props.children;
  }

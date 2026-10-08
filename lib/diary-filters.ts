@@ -12,6 +12,6 @@ export function filterDiary(entries:Observation[],filters:DiaryFilters){
  const query=normalize(filters.query);
  return {error:'',entries:entries.filter(entry=>{
   const day=entry.observedAt.slice(0,10);
-  return (!filters.outcome||entry.outcome===filters.outcome)&&(!filters.from||day>=filters.from)&&(!filters.through||day<=filters.through)&&(!query||normalize([entry.target,names.get(entry.target)||'',entry.place.name,entry.equipment,entry.notes].join(' ')).includes(query));
+  return (!filters.outcome||entry.outcome===filters.outcome)&&(!filters.from||day>=filters.from)&&(!filters.through||day<=filters.through)&&(!query||normalize([entry.target,names.get(entry.target)||'',entry.place.name,entry.place.country||'',entry.equipment,entry.notes].join(' ')).includes(query));
  }).sort((a,b)=>b.observedAt.localeCompare(a.observedAt)||a.id.localeCompare(b.id))};
 }

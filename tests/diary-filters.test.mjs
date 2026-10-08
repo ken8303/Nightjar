@@ -21,3 +21,10 @@ test('invalid calendar dates and reversed ranges report errors and return no dow
 });
 
 test('mobile numeric date entry normalizes eight digits while keeping partial input editable',()=>{assert.equal(diaryDateInput('20261005'),'2026-10-05');assert.equal(diaryDateInput('2026-10-05'),'2026-10-05');assert.equal(diaryDateInput('202610'),'202610');assert.equal(diaryDateInput(''),'');assert(filterDiary(entries,{...emptyDiaryFilters,from:diaryDateInput('20260230')}).error)});
+
+
+test('country search matches stored observing sites with Unicode normalization and preserves legacy records',()=>{
+ const country={...first,place:{...first.place,country:'Ｕｎｉｔｅｄ Kingdom · 星空'}},before=structuredClone(country);
+ for(const query of ['united kingdom','星空','Dark field'])assert.deepEqual(filterDiary([country,second],{...emptyDiaryFilters,query}).entries,query==='Dark field'?[second,country]:[country]);
+ assert.deepEqual(country,before);assert.deepEqual(filterDiary([first,second],{...emptyDiaryFilters,query:'united kingdom'}).entries,[]);
+});
