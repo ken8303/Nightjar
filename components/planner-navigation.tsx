@@ -7,7 +7,7 @@ export const plannerSections=[['tonight','Tonight',Moon],['sky','Sky atlas',Comp
 export default function MobileNavigation({section,onSelect}:{section:string;onSelect:(section:string)=>void}){
  const [open,setOpen]=useState(false);
  const navigating=useRef(false);
- return <Dialog.Root open={open} onOpenChange={setOpen}><Dialog.Trigger className="mobile-navigation-trigger" aria-label="Open planner navigation"><Menu size={18}/><span>Explore</span></Dialog.Trigger><Dialog.Portal><Dialog.Overlay className="mobile-navigation-overlay"/><Dialog.Content className="mobile-navigation-menu" onCloseAutoFocus={event=>{
+ return <Dialog.Root open={open} onOpenChange={setOpen}><div className="mobile-navigation-bar"><span className="mobile-navigation-label">{plannerSections.find(([key])=>key===section)?.[1]||'Nightjar'}</span><Dialog.Trigger className="mobile-navigation-trigger" aria-label="Open planner navigation"><Menu size={18}/><span>Explore</span></Dialog.Trigger></div><Dialog.Portal><Dialog.Overlay className="mobile-navigation-overlay"/><Dialog.Content className="mobile-navigation-menu" onCloseAutoFocus={event=>{
   if(!navigating.current)return;
   event.preventDefault();navigating.current=false;
   requestAnimationFrame(()=>{const heading=document.getElementById('unsaved-view-heading')||document.getElementById('planner-heading');heading?.focus({preventScroll:true});heading?.scrollIntoView({block:'start',behavior:'instant'})});

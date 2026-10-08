@@ -171,3 +171,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] 3D sky selection distinguishes taps from orbit drags, pinches and cancellations; native canvas clicks, right-click rejection, orbiting and mobile remount/fallback passed. Verify two-finger pinch selection on a physical phone.
 
 - Location search differentiates malformed/unusable responses from genuine empty searches, deduplicates safe IDs and bounds administrative labels. Disposable 320/390-pixel checks preserved the selected site on errors and selected valid results; live provider/device acceptance remains separate.
+
+- Mobile Explore uses a sticky section bar instead of covering bottom-screen feedback. 320/390-pixel checks verified section/anchor clearance and menu focus return; verify real phone keyboard and installed-PWA safe areas before release.
