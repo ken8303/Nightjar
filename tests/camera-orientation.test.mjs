@@ -210,3 +210,10 @@ test('north setup guidance is not invented for relative-only or unusable-compass
   const h=harness();h.read(values);assert.equal(h.result.reading.needsNorthAnchor,undefined);h.dispose();
  }
 });
+test('Safari compass metadata follows fresh/coalesced readings and does not reuse old accuracy through dropouts or relative fallback',()=>{
+ const h=harness();h.read({beta:120,webkitCompassHeading:180,webkitCompassAccuracy:5.1});assert.equal(h.result.reading.northReference,'magnetic');assert.equal(h.result.reading.compassAccuracy,5.1);
+ h.setTime(20);h.read({beta:120,webkitCompassHeading:190,webkitCompassAccuracy:40});h.advance(60);assert.equal(h.result.reading.compassAccuracy,40);assert.equal(h.result.absolute,1);
+ h.setTime(100);h.read({beta:120,alpha:20});h.advance(60);assert.equal(h.result.reading.absolute,true);assert.equal(h.result.reading.northReference,'magnetic');assert.equal(h.result.reading.compassAccuracy,undefined);
+ h.setTime(701);h.read({beta:120,alpha:30});assert.equal(h.result.reading.absolute,false);assert.equal(h.result.reading.northReference,undefined);assert.equal(h.result.reading.compassAccuracy,undefined);h.dispose();
+ const standard=harness();standard.read({absolute:true});assert.equal(standard.result.reading.northReference,undefined);assert.equal(standard.result.reading.compassAccuracy,undefined);standard.dispose();
+});

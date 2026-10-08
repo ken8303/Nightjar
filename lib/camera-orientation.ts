@@ -1,6 +1,6 @@
 import {deviceCameraBasis,safariHeadingOffset,rotateCameraBearing,type CameraBasis} from './camera-sky';
 type Events=Pick<EventTarget,'addEventListener'|'removeEventListener'>;
-export type CameraOrientationReading={basis:CameraBasis;absolute:boolean;needsNorthAnchor?:boolean};
+export type CameraOrientationReading={basis:CameraBasis;absolute:boolean;needsNorthAnchor?:boolean;northReference?:'magnetic';compassAccuracy?:number};
 type Reading=CameraOrientationReading;
 type Callbacks={onReading:(reading:Reading)=>void;onQuiet:(quiet:boolean)=>void;onUnavailable:(reason:'waiting'|'invalid'|'rotated'|'compass')=>void;onAbsolute:()=>void;onRelative:()=>void};
 type Options={angle:()=>number;now?:()=>number;schedule?:(tick:()=>void)=>()=>void;defer?:(tick:()=>void,delay:number)=>()=>void};
@@ -55,7 +55,7 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   else if(sourceTransition)callbacks.onRelative();
   const refresh=quiet||!available||sourceTransition;
   lastReading=now();available=true;setQuiet(false);
-  const reading:Reading={basis,absolute,...(safari&&compass&&compassOffset===null&&verticalCompass?{needsNorthAnchor:true}:{})};
+  const reading:Reading={basis,absolute,...(safari&&anchored?{northReference:'magnetic' as const,...(compass?{compassAccuracy:event.webkitCompassAccuracy!}:{})}:{}),...(safari&&compass&&compassOffset===null&&verticalCompass?{needsNorthAnchor:true}:{})};
   // Coalesce busy sensor events, but deliver the final pose even if the phone
   // stops moving before another event arrives. Never replay it after invalidation.
   if(!refresh&&lastReading-lastRender<80){
