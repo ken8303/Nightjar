@@ -146,3 +146,6 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .camera-sky-quick-controls>.camera-sky-search{flex:1;min-width:220px;width:auto}.camera-sky-search [data-slot="field"]{gap:8px;min-width:0}.camera-sky-search [data-slot="field-description"]{overflow-wrap:anywhere}@media(max-width:700px){.camera-sky-quick-controls>.camera-sky-search{flex-basis:100%;min-width:0}}
 
 .camera-sky-fullscreen-controls:focus-visible{outline:2px solid var(--accent-soft);outline-offset:-3px}.camera-sky-fullscreen-controls .camera-sky-control-scroll-hint{display:none}@media(max-height:700px){.camera-sky-fullscreen-controls .camera-sky-control-scroll-hint{display:block;margin:0 0 8px}}
+
+.aurora-outlook .score-row{grid-template-columns:minmax(0,1fr) 108px}
+@media(max-width:600px){.aurora-outlook .score-row{grid-template-columns:minmax(0,1fr);gap:16px}.aurora-outlook .score-row h2,.aurora-outlook .score-row p{max-width:none}.aurora-outlook .aurora-value{min-width:0;justify-self:start;text-align:left}}

@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 347 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 350 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -156,3 +156,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Failed imaging-draft saves pause PWA/recovery reload while section changes retain the fields. Retry releases the guard; a local waiting-worker update retained the exact Unicode name, unfinished focal length and planner time. Manual recovery content is covered; native file receipt remains pending.
 
 - [x] Each production release has an isolated offline page/recovery-module cache. A real waiting worker preserved the active pair during server failure; activation removed the old cache and restored the planner with its original site/time. Failed second-cache-write isolation is covered automatically.
+
+- [x] Aurora rejects repaired/non-UTC/reversed forecast dates, retains the previous outlook after an invalid refresh and distinguishes stale from far-future clock guidance. High-latitude nearest cells use angular distance; the card fits compact mobile and desktop layouts. Current public NOAA feed validation passed.
