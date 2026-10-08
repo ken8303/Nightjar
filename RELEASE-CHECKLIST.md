@@ -182,3 +182,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Collection/preference synchronization accepts localStorage events only. Two disposable tabs verified red light, stars, notes, deep-sky targets and diary synchronization; an unrelated frame session clear preserved red light at mobile width.
 
 - Header red-light guidance and save-failure feedback occupy separate rows above observing controls. Synthetic failure/recovery passed at 320/390-pixel phone and 1280-pixel desktop widths without overflow or overlapping messages.
+
+- Saved-equipment read failures now show persistent Retry guidance and retain cached setups/draft fields. Mixed-invalid input, failed Retry, repaired input and damaged/repaired cross-context updates passed, with Save/remove paused during unreadable states and the Retry control fitting 320-pixel layouts.
