@@ -1,7 +1,7 @@
 const localKeys=[
  'nightjar-place','nightjar-places','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-equipment','nightjar-deep-targets-v1','nightjar-observing-diary-v1','nightjar-diary-drafts-v1','nightjar-imaging-draft-v1','nightjar-observing-time','nightjar-sky-view-v1','nightjar-sky-layers-v1','nightjar-camera-settings-v1','nightjar-camera-settings-v2'
 ];
-const sessionKeys=['nightjar-current-time-v1','nightjar-recovery-time-v1'];
+const sessionKeys=['nightjar-current-time-v1','nightjar-recovery-time-v1','nightjar-current-context-v1','nightjar-recovery-context-v1'];
 export const plannerRecoveryMaxBytes=32*1024*1024;
 // Count JSON's escaped UTF-8 representation without allocating an oversized
 // serialized copy. Lone surrogates are escaped by well-formed JSON.stringify.

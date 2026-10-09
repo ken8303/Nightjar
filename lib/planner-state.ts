@@ -1,5 +1,20 @@
 import {Place,nextObservingTime} from './sky';
-import {parseObservingInstant} from './observing-time';
+import {parseObservingInstant,validObservingDate} from './observing-time';
+
+export const currentPlannerContextKey='nightjar-current-context-v1',recoveryPlannerContextKey='nightjar-recovery-context-v1';
+const contextPlace=(place:Place):Place=>({name:place.name,latitude:place.latitude,longitude:place.longitude,...(place.country!==undefined?{country:place.country}:{}),...(place.timezone!==undefined?{timezone:place.timezone}:{}),...(place.bortle!==undefined?{bortle:place.bortle}:{})});
+export function serializePlannerContext(date:Date,place:Place){
+ if(!validObservingDate(date)||!validPlace(place))throw Error('Invalid observing context.');
+ return JSON.stringify({version:1,time:date.toISOString(),place:contextPlace(place)});
+}
+export function readPlannerContext(storage:Pick<Storage,'getItem'>,key:string):{date:Date;place:Place}|null{
+ try{
+  const raw=storage.getItem(key);if(raw===null||raw.length>4096)return null;
+  const value:unknown=JSON.parse(raw);if(!value||typeof value!=='object'||Array.isArray(value))return null;
+  const context=value as Record<string,unknown>,date=parseObservingInstant(context.time);
+  return context.version===1&&date&&validPlace(context.place)?{date,place:contextPlace(context.place)}:null;
+ }catch{return null}
+}
 
 export const initialPlace:Place={name:'London',latitude:51.5085,longitude:-.1257,country:'United Kingdom',timezone:'Europe/London'};
 export function validPlace(value:unknown):value is Place{
@@ -27,10 +42,12 @@ export function parseSavedPlaces(raw:string|null):Place[]{
  return value;
 }
 export function readPlannerSetup(now=new Date()){
- const site=readObservingSite(),place=site.place;let saved:Place[]=[],savedReadError=false,recovery:Date|null=null;
+ const site=readObservingSite();let context:{date:Date;place:Place}|null=null;
+ try{context=readPlannerContext(sessionStorage,recoveryPlannerContextKey)}catch{}
+ const place=context?.place??site.place;let saved:Place[]=[],savedReadError=false,recovery:Date|null=context?.date??null;
  try{saved=parseSavedPlaces(localStorage.getItem('nightjar-places'))}catch{savedReadError=true}
  // Reading is repeatable for React Strict Mode; remove the token after mounting.
- try{const value:unknown=JSON.parse(sessionStorage.getItem('nightjar-recovery-time-v1')||'null');recovery=parseObservingInstant(value)}catch{}
+ if(!recovery)try{const value:unknown=JSON.parse(sessionStorage.getItem('nightjar-recovery-time-v1')||'null');recovery=parseObservingInstant(value)}catch{}
  return {place,saved,savedReadError,placeReadError:site.error,date:recovery||nextObservingTime(now,place)};
 }
 

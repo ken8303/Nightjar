@@ -8,7 +8,7 @@ type Props={name:string;children:ReactNode};
 
 function ViewRecovery(){
  const pendingText=usePendingEdits(),[reloadError,setReloadError]=useState('');
- return <>{pendingText&&<p>Reload is paused while {pendingText} remain unsaved. Keep Nightjar open and return to the editor for these changes to retry saving or copy them first.</p>}<button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setReloadError('Your observing time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button>{reloadError&&<p role="status">{reloadError}</p>}</>;
+ return <>{pendingText&&<p>Reload is paused while {pendingText} remain unsaved. Keep Nightjar open and return to the editor for these changes to retry saving or copy them first.</p>}<button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setReloadError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button>{reloadError&&<p role="status">{reloadError}</p>}</>;
 }
 class ViewBoundary extends Component<Props,{failed:boolean}>{
  state={failed:false};

@@ -74,14 +74,14 @@ test('failed time preservation pauses both initial activation and later reload w
   let calls=0;const first=fixture();first.options.preserve=()=>{if(throwError)throw Error('denied');return false};applyPwaUpdate(first.worker,first.controller,first.options);
   assert.equal(first.events.length,1);assert.match(first.events[0].failure,/could not/);first.controller.dispatchEvent(new Event('controllerchange'));assert.equal(first.events.length,1);
   const later=fixture();later.options.preserve=()=>{calls++;if(calls===1)return true;if(throwError)throw Error('denied');return false};applyPwaUpdate(later.worker,later.controller,later.options);later.controller.dispatchEvent(new Event('controllerchange'));later.controller.dispatchEvent(new Event('controllerchange'));
-  assert.equal(calls,2);assert.equal(later.events.length,2);assert.match(later.events[1].failure,/observing time could not be preserved/);assert(!later.events.includes('reload'));
+  assert.equal(calls,2);assert.equal(later.events.length,2);assert.match(later.events[1].failure,/observing site and time could not be preserved/);assert(!later.events.includes('reload'));
  }
 });
 test('time tokens validate bounded canonical instants and report unavailable persistence without rewriting sources',async()=>{
  const {preservePlannerTime}=await vite.ssrLoadModule('/lib/reload-planner.ts');
  const expected='"2026-10-09T21:45:00.000Z"';
  for(const bad of [null,'','{','"2026-02-30T21:45:00.000Z"','"0000-01-01T00:00:00.000Z"','x'.repeat(129)]){
-  const writes=[],session={getItem:()=>bad,setItem:(key,value)=>writes.push([key,value])};
+  const writes=[],session={getItem:key=>key==='nightjar-current-time-v1'?bad:null,setItem:(key,value)=>writes.push([key,value])};
   assert.equal(preservePlannerTime({getItem:()=>expected},session),true);assert.deepEqual(writes,[['nightjar-recovery-time-v1',expected]]);
  }
  const writes=[];assert.equal(preservePlannerTime({getItem:()=>'{bad'},{getItem:()=>'{bad',setItem:()=>writes.push('write')}),false);assert.deepEqual(writes,[]);

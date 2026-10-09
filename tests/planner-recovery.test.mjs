@@ -27,3 +27,10 @@ test('escaped recovery size is bounded before large JSON serialization while Uni
  const raw='\u0000\b\t\n\f\r"\\é字😀\ud800X\udfff\u2028\u2029'.repeat(1000)+'\ud800',copy=makePlannerRecovery({getItem:name=>name===key?raw:null},{getItem:()=>null},now);
  assert.equal(JSON.parse(copy.text).stores.local[key],raw);assert(new TextEncoder().encode(copy.text).length<32*1024*1024);
 });
+
+
+test('raw recovery includes exact paired context values without interpreting or rewriting malformed snapshots',()=>{
+ const values=new Map([['nightjar-current-context-v1','{broken context\n星空'],['nightjar-recovery-context-v1','old paired snapshot'],['unrelated-session','excluded']]),calls=[];
+ const copy=makePlannerRecovery({getItem:()=>null},{getItem:key=>{calls.push(key);return values.get(key)??null}},now),raw=JSON.parse(copy.text);
+ assert.equal(raw.stores.session['nightjar-current-context-v1'],values.get('nightjar-current-context-v1'));assert.equal(raw.stores.session['nightjar-recovery-context-v1'],'old paired snapshot');assert(!calls.includes('unrelated-session'));
+});

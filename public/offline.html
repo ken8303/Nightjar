@@ -68,6 +68,24 @@
         if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value))return null;
         const instant=new Date(value);return Number.isFinite(+instant)&&instant.toISOString()===value?instant:null;
       };
+      const validContextPlace=place=>{
+        if(!place||typeof place!=='object'||Array.isArray(place)||typeof place.name!=='string'||!place.name.trim()||place.name.length>=200||!validCoordinate(place.latitude,90)||!validCoordinate(place.longitude,180))return false;
+        if(place.country!==undefined&&(typeof place.country!=='string'||place.country.length>=200))return false;
+        if(place.bortle!==undefined&&(!Number.isInteger(place.bortle)||place.bortle<1||place.bortle>9))return false;
+        if(place.timezone!==undefined){if(typeof place.timezone!=='string')return false;try{new Intl.DateTimeFormat('en',{timeZone:place.timezone})}catch{return false}}
+        return true;
+      };
+      const contextPlace=place=>({name:place.name,latitude:place.latitude,longitude:place.longitude,...(place.country!==undefined?{country:place.country}:{}),...(place.timezone!==undefined?{timezone:place.timezone}:{}),...(place.bortle!==undefined?{bortle:place.bortle}:{})});
+      let pairedContext=null;
+      try{
+        const raw=sessionStorage.getItem('nightjar-current-context-v1');
+        if(raw!==null){
+          if(raw.length>4096)throw Error('Oversized context');
+          const value=JSON.parse(raw),time=value&&canonicalInstant(value.time);
+          if(!value||value.version!==1||!time||time.getUTCFullYear()<1||!validContextPlace(value.place))throw Error('Invalid context');
+          pairedContext={time:value.time,place:contextPlace(value.place)};
+        }
+      }catch{document.getElementById('storage-warning').hidden=false}
       const utcTime=value=>value.replace('T',' ').replace(/:00\.000Z$/,' UTC').replace(/\.000Z$/,' UTC').replace(/Z$/,' UTC');
       const add = (id, title, detail, note) => {
         const item = document.createElement('li');
@@ -80,8 +98,9 @@
       };
       const showEmpty = (id,key) => { const empty=document.getElementById(id + '-empty');empty.hidden=Boolean(document.getElementById(id).children.length);if(!empty.hidden&&unavailable.has(key))empty.textContent='Saved data is unavailable in this offline view. Stored values are unchanged.';else if(!empty.hidden&&partial.has(key))empty.textContent='Some stored records are omitted from this offline view. Use a raw recovery copy to preserve them.'; };
 
-      const currentPlace = read('nightjar-place', null, value=>typeof value==='object'&&!Array.isArray(value));
-      const selectedTime = read('nightjar-observing-time', null, value=>Boolean(canonicalInstant(value)));
+      const storedPlace=read('nightjar-place',null,value=>typeof value==='object'&&!Array.isArray(value));
+      const currentPlace=pairedContext?.place??storedPlace;
+      const selectedTime=pairedContext?.time??read('nightjar-observing-time',null,value=>Boolean(canonicalInstant(value)));
       const instant = canonicalInstant(selectedTime);
       if (instant && instant.getUTCFullYear()>=1) {
         const siteName = currentPlace && typeof currentPlace === 'object' ? safeText(currentPlace.name) : '';
@@ -125,7 +144,7 @@
       const places = read('nightjar-places', [], Array.isArray);
       const placeList=places.slice(0,100);
       if(places.length>100)markPartial('nightjar-places','Your places');
-      if (currentPlace && typeof currentPlace === 'object' && !placeList.some(place => place && place.latitude === currentPlace.latitude && place.longitude === currentPlace.longitude)) placeList.unshift(currentPlace);
+      for(const snapshot of [storedPlace,currentPlace])if(snapshot&&typeof snapshot==='object'&&!placeList.some(place=>place&&place.latitude===snapshot.latitude&&place.longitude===snapshot.longitude))placeList.unshift(snapshot);
       for (const place of placeList) {
         if (!place || typeof place !== 'object') {markPartial('nightjar-places','Your places');continue}
         const name = safeText(place.name), lat = place.latitude, lon = place.longitude;
@@ -148,8 +167,19 @@
       const connection=document.getElementById('connection');
       const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
-      document.getElementById('retry').addEventListener('click',()=>{
-        try{const value=localStorage.getItem('nightjar-observing-time');const time=canonicalInstant(JSON.parse(value||'null'));if(time&&time.getUTCFullYear()>=1)sessionStorage.setItem('nightjar-recovery-time-v1',value)}catch{/* Reopening still works when session storage is unavailable. */}
+      document.getElementById('retry').addEventListener('click',event=>{
+        try{
+          if(!instant||instant.getUTCFullYear()<1){sessionStorage.removeItem('nightjar-recovery-context-v1');sessionStorage.removeItem('nightjar-recovery-time-v1');return}
+          if(instant&&instant.getUTCFullYear()>=1){
+            if(validContextPlace(currentPlace)){
+              sessionStorage.setItem('nightjar-recovery-context-v1',JSON.stringify({version:1,time:selectedTime,place:contextPlace(currentPlace)}));
+              try{sessionStorage.setItem('nightjar-recovery-time-v1',JSON.stringify(selectedTime))}catch{}
+            }else{
+              sessionStorage.removeItem('nightjar-recovery-context-v1');
+              sessionStorage.setItem('nightjar-recovery-time-v1',JSON.stringify(selectedTime));
+            }
+          }
+        }catch{event?.preventDefault();connection.textContent='Your observing site and time could not be preserved. Keep this page open, restore browser storage access and try again.'}
       });
       const recoveryButton=document.getElementById('download-recovery'),recoveryStatus=document.getElementById('recovery-status');
       recoveryButton.addEventListener('click',async()=>{

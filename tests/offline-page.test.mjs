@@ -15,12 +15,12 @@ class Element{
  click(){this.clicked=true}
  remove(){this.removed=true}
 }
-function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,importFailed=false}={}){
+function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessionWriteBlocked=false,sessionOverrides={},importFailed=false}={}){
  const elements=new Map([...html.matchAll(/id="([^"]+)"/g)].map(match=>[match[1],new Element()]));
  const raw=new Map(Object.entries(data).map(([key,value])=>[key,key==='nightjar-red-light'?value:JSON.stringify(value)]));
  for(const [key,value] of Object.entries(rawOverrides))raw.set(key,value);
- const session=new Map(),listeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
- const context={document:{documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>session.set(key,value)},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)}},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return {makePlannerRecovery}}};
+ const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
+ const context={document:{documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return {makePlannerRecovery}}};
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
  for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()'),context);
@@ -86,7 +86,7 @@ test('offline recovery click preserves exact stored text, excludes unrelated key
  assert(page.elements.get('recovery-status').textContent.includes('cannot be imported'));assert.equal(page.elements.get('download-recovery').disabled,false);assert(page.body.children[0].clicked);assert(page.body.children[0].removed);assert(page.body.children[0].download.startsWith('nightjar-raw-recovery-'));assert.equal(page.timers[0].delay,60000);page.timers[0].callback();assert.deepEqual(page.revoked,['blob:qa-recovery']);
 });
 test('offline recovery reports partial access and unavailable module/storage without empty-success claims',async()=>{
- const partial=load({'nightjar-targets-v1':['Vega']},false,{sessionBlocked:true});await partial.elements.get('download-recovery').listeners.get('click')();assert(partial.elements.get('recovery-status').textContent.includes('2 unreadable'));assert.equal(JSON.parse(await partial.blobs[0].text()).unreadable.length,2);
+ const partial=load({'nightjar-targets-v1':['Vega']},false,{sessionBlocked:true});await partial.elements.get('download-recovery').listeners.get('click')();assert(partial.elements.get('recovery-status').textContent.includes('4 unreadable'));assert.equal(JSON.parse(await partial.blobs[0].text()).unreadable.length,4);
  for(const page of [load({},true,{sessionBlocked:true}),load({},false,{importFailed:true})]){await page.elements.get('download-recovery').listeners.get('click')();assert.equal(page.blobs.length,0);assert(!page.elements.get('recovery-status').textContent.includes('copy prepared'));assert.equal(page.elements.get('download-recovery').disabled,false)}
 });
 test('offline diary country metadata is rendered as text alongside the original site without interpreting markup',()=>{
@@ -132,4 +132,16 @@ test('offline clipped note and legacy label text report partial content while re
  const coverage=page.elements.get('coverage-warning');assert.equal(coverage.hidden,false);for(const label of ['Target notes','Observing diary','Your places','Imaging setups'])assert(coverage.textContent.includes(label));
  assert.equal(page.elements.get('targets').children[0].children[1].textContent.length,2000);assert.equal(page.elements.get('diary').children[0].children[2].textContent.length,2000);
  assert.equal(JSON.parse(page.raw.get('nightjar-target-notes-v1')).Vega,note);assert.equal(JSON.parse(page.raw.get('nightjar-places'))[0].name,longName);assert.equal(page.session.size,0);
+});
+
+
+test('offline paired views and return tokens retain this tab while keeping a newer shared site visible and unchanged',()=>{
+ const own={name:'Own window QA',latitude:51.5,longitude:0,timezone:'UTC'},peer={name:'Shared peer QA',latitude:48.85,longitude:2.35,timezone:'Europe/Paris'},time='2026-10-09T21:45:17.123Z',raw=JSON.stringify({version:1,time,place:own});
+ const page=load({'nightjar-place':peer,'nightjar-observing-time':'2026-10-09T20:30:00.000Z'},false,{sessionOverrides:{'nightjar-current-context-v1':raw}}),before=structuredClone(page.raw);
+ assert(page.elements.get('session').textContent.includes('Own window QA'));assert(page.elements.get('session').textContent.includes('21:45:17.123 UTC'));assert(page.elements.get('places').textContent.includes('Shared peer QA'));assert(page.elements.get('places').textContent.includes('Own window QA'));
+ page.elements.get('retry').listeners.get('click')();const recovery=JSON.parse(page.session.get('nightjar-recovery-context-v1'));assert.deepEqual(recovery,{version:1,time,place:own});assert.deepEqual(page.raw,before);
+ const blocked=load({'nightjar-place':peer,'nightjar-observing-time':time},false,{sessionOverrides:{'nightjar-current-context-v1':raw},sessionWriteBlocked:true});let prevented=false;
+ blocked.elements.get('retry').listeners.get('click')({preventDefault:()=>{prevented=true}});assert(prevented);assert(blocked.elements.get('connection').textContent.includes('could not be preserved'));assert.equal(blocked.session.get('nightjar-recovery-context-v1'),undefined);
+ const invalid=load({'nightjar-place':peer,'nightjar-observing-time':time},false,{sessionOverrides:{'nightjar-current-context-v1':'{broken'}});assert.equal(invalid.elements.get('storage-warning').hidden,false);assert(invalid.elements.get('session').textContent.includes('Shared peer QA'));
+ const missing=load({'nightjar-place':peer},false,{sessionOverrides:{'nightjar-recovery-context-v1':raw,'nightjar-recovery-time-v1':JSON.stringify(time)}});missing.elements.get('retry').listeners.get('click')();assert(!missing.session.has('nightjar-recovery-context-v1'));assert(!missing.session.has('nightjar-recovery-time-v1'));
 });

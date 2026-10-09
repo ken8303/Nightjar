@@ -30,7 +30,7 @@ import SiteDarkness from '@/components/site-darkness';
 import {rateObservingSite,SiteRatingReadError} from '@/lib/site-rating';
 import {weatherHours,parseWeatherForecast,type WeatherForecast} from '@/lib/weather-hours';
 import {forecastPlanning,forecastHourLabel} from '@/lib/weather-planning';
-import {validPlace,readPlannerSetup,readObservingSite,resolveObservingPlace,samePlaceCoordinates as same} from '@/lib/planner-state';
+import {validPlace,readPlannerSetup,readObservingSite,recoveryPlannerContextKey,resolveObservingPlace,samePlaceCoordinates as same} from '@/lib/planner-state';
 import {upsertSavedPlace,readSavedPlaces,removeSavedPlace,restoreSavedPlace,savedPlacesLimit} from '@/lib/saved-collections';
 import {useClientReady} from '@/hooks/use-client-ready';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
@@ -162,8 +162,8 @@ function Planner(){
   locationSession.current=session;
   return()=>{session.cancel();locationSession.current=null};
  },[choose]);
- useEffect(()=>{try{sessionStorage.removeItem('nightjar-recovery-time-v1')}catch{};return()=>searchController.current?.abort()},[]);
- useEffect(()=>{savePlannerTime(date)},[date]);
+ useEffect(()=>{for(const key of ['nightjar-recovery-time-v1',recoveryPlannerContextKey])try{sessionStorage.removeItem(key)}catch{};return()=>searchController.current?.abort()},[]);
+ useEffect(()=>{savePlannerTime(date,undefined,undefined,place)},[date,place]);
  useEffect(()=>{
   let stopped=false;const controller=new AbortController(),requestedPlace=placeRef.current;
   const timeout=setTimeout(()=>controller.abort(),20000);
