@@ -222,3 +222,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Valid oversized legacy bright-target lists retain all names and allow incremental removal; additions/Undo respect the 42-target capacity. Older names reveal in twenty-row groups. Repeated deep-sky IDs are deduplicated only in memory; raw recovery retains the source. Synthetic desktop/mobile checks passed; physical-phone acceptance remains pending.
 
 - Bright/deep saved-list read failures retain cached names with earlier-read guidance and read-only Retry; edits, Undo and list exports pause until recovery. Synthetic startup/later failure, repair and retained Undo checks passed at desktop and compact widths.
+
+- Saved-diary read recovery retains cached observations and unfinished forms, pauses saved mutations/reports and offers read-only Retry. Synthetic startup, during-Save and later-event failure/recovery/Undo checks passed, including a compact recovery view.
