@@ -228,3 +228,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Bright-target HTML/text checklists explicitly count older names and associated notes omitted for unavailable catalogue positions. Singular/plural/complete HTML coverage and source preservation passed; native text/file receipt remains pending.
 
 - Unfinished diary forms offer read-only recovery and retain local edits/unrelated drafts. Repaired conflicts require explicit version review; synthetic read/merge/save/conflict and compact recovery checks passed.
+
+- Desktop CUA file-chooser import and browser-received JSON backup now pass on a disposable origin. Received version-4 JSON matches all six synthetic collections including Unicode notes; selected site/time remain unchanged. Physical mobile file selection/download/share-sheet and other export formats remain pending. The received Downloads file dated 9 October is a QA backup, not a backup of real observing plans.
