@@ -22,7 +22,7 @@ export function readObservingSite(storage?:Pick<Storage,'getItem'>):{place:Place
 }
 export function parseSavedPlaces(raw:string|null):Place[]{
  if(raw&&raw.length>5*1024*1024)throw Error('The saved places could not be read.');
- const value:unknown=JSON.parse(raw||'[]');
+ const value:unknown=JSON.parse(raw===null?'[]':raw);
  if(!Array.isArray(value)||!value.every(validPlace))throw Error('The saved places contain invalid data.');
  return value;
 }

@@ -12,7 +12,7 @@ export function readTargetNotes(storage:Pick<Storage,'getItem'>){
  const raw=storage.getItem(targetNotesKey);
  if(raw&&raw.length>5*1024*1024)throw Error('Saved target notes are too large to read.');
  // Preserve oversized legacy collections so the user can explicitly free space.
- return normalizeTargetNotes(JSON.parse(raw||'{}'),true);
+ return normalizeTargetNotes(JSON.parse(raw===null?'{}':raw),true);
 }
 export function overlayTargetNoteEdits(notes:TargetNotes,edits:TargetNotes){
  const next={...notes,...edits};for(const [name,value] of Object.entries(edits))if(value==='')delete next[name];return next;

@@ -4,7 +4,7 @@ export function validSavedTargetName(value:unknown):value is string{return typeo
 export function readSavedTargets(storage:Pick<Storage,'getItem'>){
  const raw=storage.getItem(savedTargetsKey);
  if(raw&&raw.length>5*1024*1024)throw Error('Saved targets could not be read.');
- const value:unknown=JSON.parse(raw||'[]');
+ const value:unknown=JSON.parse(raw===null?'[]':raw);
  if(!Array.isArray(value)||value.length>skyTargetLimit||!value.every(validSavedTargetName))throw Error('Saved targets contain invalid data. Your stored list was kept.');
  return [...new Set(value)];
 }

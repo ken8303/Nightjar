@@ -22,7 +22,7 @@ export function restoreSavedPlace(current:Place[],removed:Place,index:number):Pl
 export function readEquipmentProfiles(storage:Pick<Storage,'getItem'>):Equipment[]{
  const raw=storage.getItem('nightjar-equipment');
  if(raw&&raw.length>5*1024*1024)throw Error('The saved equipment could not be read.');
- const value:unknown=JSON.parse(raw||'[]');
+ const value:unknown=JSON.parse(raw===null?'[]':raw);
  if(!Array.isArray(value)||!value.every(validEquipment))throw Error('The saved equipment contains invalid data.');
  return value;
 }

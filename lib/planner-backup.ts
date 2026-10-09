@@ -39,7 +39,7 @@ export function parsePlannerBackup(text:string):PlannerBackup{
  return {format:'nightjar-backup',version:4,exportedAt:raw.exportedAt,data:plan(raw.data)};
 }
 export function readSavedPlan(storage:StorageAccess):SavedPlan{
- const read=(key:string,fallback:string)=>{const raw=storage.getItem(key);if(raw!==null&&raw.length>plannerBackupMaxBytes)throw Error('Oversized saved plans');return JSON.parse(raw||fallback)};
+ const read=(key:string,fallback:string)=>{const raw=storage.getItem(key);if(raw!==null&&raw.length>plannerBackupMaxBytes)throw Error('Oversized saved plans');return JSON.parse(raw===null?fallback:raw)};
  try{return plan({places:read(keys[0],'[]'),targets:read(keys[1],'[]'),notes:read(keys[2],'{}'),equipment:read(keys[3],'[]'),deepTargets:read(keys[4],'[]'),diary:read(keys[5],'[]')})}
  catch{throw Error('Saved plans could not be read. Your existing data has not been changed.')}
 }
