@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 429 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 433 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -249,6 +249,4 @@ Completion percentages previously reported were estimates. Release acceptance is
 
 - Unknown site time zones keep entry in UTC with an accessible explanation. Forecast recovery enables local entry without changing the selected instant; Hong Kong local 20:00 correctly becomes 12:00 UTC. Compact 320-pixel layout has no horizontal overflow. All 429 tests, types, lint, production build and Cloudflare dry-run pass.
 
-## Next confirmed fix
-
-- A non-JSON forecast HTTP error currently exposes a JSON parsing message in the forecast panels. Reproduced with a disposable text/plain HTTP 503 fixture; friendly error handling remains to be implemented and verified. No change to this request path was made in the final time-zone batch.
+- Forecast requests reject failed HTTP responses before parsing arbitrary bodies and give readable guidance for malformed success bodies/network failures. Desktop and 320-pixel checks verified failed initial loads, successful retry and retained prior forecasts in Tonight/site comparison. All 433 tests, types, lint, build and Cloudflare dry-run pass. Browser plugin not available; the supported CUA Playwright/native screenshot path was used. Screenshots were inspected in the tool output, with no saved image artifacts. Physical-phone acceptance remains pending.

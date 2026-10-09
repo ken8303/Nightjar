@@ -6,7 +6,8 @@ import SavedListControls,{savedListPageSize} from '@/components/saved-list-contr
 import {bestNightWindow, sevenNightOutlook} from '@/lib/night-outlook';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
-import {parseWeatherForecast,forecastHourIndex} from '@/lib/weather-hours';
+import {forecastHourIndex} from '@/lib/weather-hours';
+import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
 import {storeSiteForecast,siteForecastState,type SiteForecast} from '@/lib/site-forecasts';
 import { A, bodyPosition, moonInfo, Place, scoreAt, timeLabel } from '@/lib/sky';
 
@@ -29,11 +30,9 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   for(const id of active){
    const [lat,lon] = id.split(',');
    fetch(`/api/weather?lat=${lat}&lon=${lon}`,{signal:controller.signal,cache:'no-cache'}).then(async response=>{
-    const raw:unknown = await response.json();
-    if(!response.ok) throw new Error('Forecast unavailable. Try refreshing.');
-    const data=parseWeatherForecast(raw);
+    const data=await readForecastResponse(response);
     if(!stopped)setResults(old=>storeSiteForecast(old,id,{data,requestKey,fetchedAt:Date.now()},active));
-   }).catch(()=>{if(!stopped)setResults(old=>storeSiteForecast(old,id,{error:'Forecast unavailable. Try refreshing.',requestKey},active));});
+   }).catch(error=>{if(!stopped)setResults(old=>storeSiteForecast(old,id,{error:forecastFailureMessage(error),requestKey},active));});
   }
   return()=>{stopped=true;clearTimeout(timeout);controller.abort()};
  },[selectedKey,requestKey]);

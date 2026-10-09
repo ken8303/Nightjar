@@ -28,7 +28,8 @@ import SevenNightOutlook from '@/components/seven-night-outlook';
 import WeatherFreshness from '@/components/weather-freshness';
 import SiteDarkness from '@/components/site-darkness';
 import {rateObservingSite,SiteRatingReadError} from '@/lib/site-rating';
-import {weatherHours,parseWeatherForecast,type WeatherForecast} from '@/lib/weather-hours';
+import {weatherHours,type WeatherForecast} from '@/lib/weather-hours';
+import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
 import {forecastPlanning,forecastHourLabel} from '@/lib/weather-planning';
 import {validPlace,readPlannerSetup,readObservingSite,recoveryPlannerContextKey,resolveObservingPlace,samePlaceCoordinates as same} from '@/lib/planner-state';
 import {upsertSavedPlace,readSavedPlaces,removeSavedPlace,restoreSavedPlace,savedPlacesLimit} from '@/lib/saved-collections';
@@ -168,10 +169,9 @@ function Planner(){
   let stopped=false;const controller=new AbortController(),requestedPlace=placeRef.current;
   const timeout=setTimeout(()=>controller.abort(),20000);
   fetch(`/api/weather?lat=${place.latitude}&lon=${place.longitude}`,{signal:controller.signal,cache:'no-cache'}).then(async response=>{
-   const raw:unknown=await response.json();if(!response.ok)throw Error('Forecast unavailable. Please try again.');
-   const data=parseWeatherForecast(raw);
+   const data=await readForecastResponse(response);
    if(!stopped){setWeather({key:forecastKey,siteKey,data,fetchedAt:Date.now()});if(data.timezone){setPlace(p=>p.latitude===place.latitude&&p.longitude===place.longitude&&p.timezone!==data.timezone?{...p,timezone:data.timezone}:p);try{saveForecastTimezone(localStorage,requestedPlace,data.timezone)}catch{}}}
-  }).catch(error=>{if(!stopped)setWeather(old=>({key:forecastKey,siteKey,data:old?.siteKey===siteKey?old.data:undefined,fetchedAt:old?.siteKey===siteKey?old.fetchedAt:undefined,error:error.name==='AbortError'?'Weather request timed out. Please retry.':error instanceof Error?error.message:'Forecast unavailable'}))});
+  }).catch(error=>{if(!stopped)setWeather(old=>({key:forecastKey,siteKey,data:old?.siteKey===siteKey?old.data:undefined,fetchedAt:old?.siteKey===siteKey?old.fetchedAt:undefined,error:forecastFailureMessage(error)}))});
   return()=>{stopped=true;clearTimeout(timeout);controller.abort()};
  },[place.latitude,place.longitude,forecastKey,siteKey]);
 
