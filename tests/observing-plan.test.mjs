@@ -38,3 +38,11 @@ test('local date rollover keeps the export UTC instant exact and includes quarte
  const plan={...input(),date:new Date('2026-12-31T23:59:59.987Z'),place:{...input().place,timezone:'Asia/Kathmandu'}},html=printableObservingPlan(plan);
  assert(html.includes('2026-12-31 23:59:59.987 UTC'));assert(html.includes('1 Jan 2027'));assert(html.includes('05:44:59 GMT+5:45'));
 });
+
+
+test('unreadable notes are identified while retaining the shown snapshot',()=>{
+ const plan=input();plan.notesUnavailable=true;plan.notes.Vega='Earlier 星空 snapshot';const html=printableObservingPlan(plan);assert(html.includes('Personal notes could not be read from browser storage'));assert(html.includes('earlier successful read'));assert(html.includes('Earlier 星空 snapshot'));
+});
+test('unsaved note edits are labelled separately from unavailable stored notes',()=>{
+ const plan=input();plan.notesUnsaved=true;plan.notes.Vega='Unsaved text';let html=printableObservingPlan(plan);assert(html.includes('includes unsaved note edits'));assert(!html.includes('Personal notes could not be read'));assert(html.includes('Unsaved text'));plan.notesUnavailable=true;html=printableObservingPlan(plan);assert(html.includes('includes unsaved note edits'));assert(html.includes('Personal notes could not be read'));
+});
