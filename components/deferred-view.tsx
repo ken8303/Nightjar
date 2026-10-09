@@ -1,11 +1,20 @@
 "use client";
 
-import {Component, Suspense, type ReactNode,useState} from 'react';
+import {Component, Suspense, type ReactNode,useState,useEffect} from 'react';
 import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
 import TimeEditRecovery from '@/components/time-edit-recovery';
 import {reloadPlanner} from '@/lib/reload-planner';
 
 type Props={name:string;children:ReactNode};
+
+function ViewLoading({name}:{name:string}){
+ const [delayedName,setDelayedName]=useState<string|null>(null);
+ useEffect(()=>{const timeout=setTimeout(()=>setDelayedName(name),15000);return()=>clearTimeout(timeout)},[name]);
+ const delayed=delayedName===name;
+ return <section className={`panel tab-loading${delayed?' view-load-delayed':''}`} role="status" aria-label={`${name} loading`}>
+  {delayed?<><h3>{name} is taking longer to load</h3><p>Check your connection. You can still use the other tabs while this view loads, or reload Nightjar to try again.</p><ViewRecovery/></>:<>Loading {name.toLowerCase()}…</>}
+ </section>;
+}
 
 function ViewRecovery(){
  const pendingText=usePendingEdits(),[reloadError,setReloadError]=useState('');
@@ -25,5 +34,5 @@ class ViewBoundary extends Component<Props,{failed:boolean}>{
 }
 
 export default function DeferredView({name,children,fallback}:Props&{fallback?:ReactNode}){
- return <ViewBoundary name={name}><Suspense fallback={fallback??<div className="panel tab-loading" role="status">Loading {name.toLowerCase()}…</div>}>{children}</Suspense></ViewBoundary>;
+ return <ViewBoundary name={name}><Suspense fallback={fallback??<ViewLoading name={name}/>}>{children}</Suspense></ViewBoundary>;
 }

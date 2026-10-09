@@ -150,3 +150,5 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .time-entry{scroll-margin-top:24px}@media(max-width:700px){.time-entry{scroll-margin-top:96px}}
 
 .time-entry-warning .button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+.tab-loading.view-load-delayed{display:block;text-align:left;min-height:0;overflow-wrap:anywhere}.view-load-delayed .button{max-width:100%;white-space:normal;margin:0 8px 8px 0}
