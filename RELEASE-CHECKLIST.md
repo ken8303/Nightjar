@@ -234,3 +234,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - The offline viewer distinguishes missing/valid empty collections from unreadable empty/null/wrong-shape values, preserves exact source text and identifies unavailable cards. Actual fallback-document repair/reload and compact layout checks passed; physical installed-PWA acceptance remains separate.
 
 - Partial offline views name affected collections and distinguish omitted rows/clipped legacy text from genuinely empty data. Raw recovery appears before long lists. Exact-source/read-only, repair/reload and compact disclosure checks passed.
+
+- The current production service worker served the revised cached fallback after simulated HTTP failures, loaded the cached raw-recovery helper and returned online at exact saved time. Legacy source data stayed intact. Physical radio-off/installed-PWA/mobile file acceptance remains pending.
