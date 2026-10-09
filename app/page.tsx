@@ -219,9 +219,10 @@ function Planner(){
  function cancelSearch(){searchController.current?.abort();searchController.current=null;setSearching(false);setSearchError('Search cancelled. Enter another town or use coordinates.')}
  function locate(){setSearchError('');if(!navigator.geolocation){setSearchError('Device location is unavailable. Search for a town instead.');return}locationSession.current?.start((success,failure)=>navigator.geolocation.getCurrentPosition(success,failure,{timeout:10000}))}
  function cancelLocation(){locationSession.current?.cancel();setSearchError('Location request cancelled. Your selected observing site is unchanged.')}
- const when=date,moon=moonInfo(when,place),tz=place.timezone||'UTC';
+ const when=date,moon=useMemo(()=>moonInfo(date,place),[date,place]),tz=place.timezone||'UTC';
  const hours=useMemo(()=>weatherHours(forecast?.hourly,date,place),[forecast,date,place]);
- const planning=forecastPlanning(hours,date,place),current=planning.current,best=planning.best;const dark=bodyPosition(A.Body.Sun,when,place).altitude<-18;const score=planning.score;const skyObjects=skyBodies.map(body=>({body,...bodyPosition(body,when,place)})).filter(p=>p.altitude>0).sort((a,b)=>b.altitude-a.altitude);
+ const planning=useMemo(()=>forecastPlanning(hours,date,place),[hours,date,place]),current=planning.current,best=planning.best,score=planning.score;
+ const {dark,skyObjects}=useMemo(()=>({dark:bodyPosition(A.Body.Sun,when,place).altitude<-18,skyObjects:skyBodies.map(body=>({body,...bodyPosition(body,when,place)})).filter(p=>p.altitude>0).sort((a,b)=>b.altitude-a.altitude)}),[when,place]);
 
  const milestones=useMemo(()=>observingMilestones(when,place),[when,place]);
  const title={tonight:'A night worth looking up.',sky:'Get to know your sky.',moon:'A world within reach.',places:'Find your place in the dark.',events:'Make a date with the cosmos.',tools:'Frame something extraordinary.',aurora:place.latitude<0?'Follow the southern lights.':'Follow the northern lights.'}[tab];
