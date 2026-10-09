@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';import {test,after} from 'node:test';import {fileURLToPath} from 'node:url';import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {printableObservingPlan}=await vite.ssrLoadModule('/lib/observing-plan.ts');
+const {printableObservingPlan,targetCoverageNotice}=await vite.ssrLoadModule('/lib/observing-plan.ts');
 const input=()=>({date:new Date('2026-10-25T01:30:00Z'),place:{name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London',bortle:4},targets:[{name:'Below',altitude:-12,azimuth:90},{name:'Vega',altitude:35,azimuth:270}],notes:{Vega:'First line\nSecond line'},equipment:[{name:'Camera',width:36,height:24,focal:400,pixel:3.76}]});
 test('plan records exact UTC and DST offset, horizon status, notes, Moon and equipment',()=>{
  const plan=input(),html=printableObservingPlan(plan);
@@ -45,4 +45,23 @@ test('unreadable notes are identified while retaining the shown snapshot',()=>{
 });
 test('unsaved note edits are labelled separately from unavailable stored notes',()=>{
  const plan=input();plan.notesUnsaved=true;plan.notes.Vega='Unsaved text';let html=printableObservingPlan(plan);assert(html.includes('includes unsaved note edits'));assert(!html.includes('Personal notes could not be read'));assert(html.includes('Unsaved text'));plan.notesUnavailable=true;html=printableObservingPlan(plan);assert(html.includes('includes unsaved note edits'));assert(html.includes('Personal notes could not be read'));
+});
+
+
+test('checklists explicitly identify older names and notes omitted without catalogue positions',()=>{
+ assert.equal(targetCoverageNotice(0),'');
+ assert(!printableObservingPlan(input()).includes('targets-coverage'));
+ for(const count of [1,44]){
+  const plan={...input(),targetsOmitted:count},html=printableObservingPlan(plan),notice=targetCoverageNotice(count);
+  assert(notice.includes(`${count} older saved ${count===1?'name':'names'}`));
+  assert(notice.includes('associated notes'));assert(html.includes(`<p class="hint targets-coverage">${notice}</p>`));
+  assert(html.indexOf('targets-coverage')<html.indexOf('<article>'));
+  assert(html.includes('Target checklist · 2'));assert.equal(plan.targets.length,2);
+ }
+});
+test('invalid omission counts cannot make inaccurate checklist coverage claims',()=>{
+ for(const count of [-1,1.5,NaN,Infinity,'2',Number.MAX_SAFE_INTEGER+1]){
+  assert.throws(()=>targetCoverageNotice(count));assert.throws(()=>printableObservingPlan({...input(),targetsOmitted:count}));
+ }
+ assert.throws(()=>printableObservingPlan({...input(),targetsOmitted:Number.MAX_SAFE_INTEGER}));
 });
