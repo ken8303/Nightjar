@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 395 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 399 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -220,3 +220,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Backup import uses one bounded snapshot for merge/rollback, checks keys before replacing them and tracks attempted writes. Synthetic later-key changes updated review without overwriting peer equipment; an injected adapter failure after writing restored touched collections. These are not transactional or physical-device guarantees.
 
 - Valid oversized legacy bright-target lists retain all names and allow incremental removal; additions/Undo respect the 42-target capacity. Older names reveal in twenty-row groups. Repeated deep-sky IDs are deduplicated only in memory; raw recovery retains the source. Synthetic desktop/mobile checks passed; physical-phone acceptance remains pending.
+
+- Bright/deep saved-list read failures retain cached names with earlier-read guidance and read-only Retry; edits, Undo and list exports pause until recovery. Synthetic startup/later failure, repair and retained Undo checks passed at desktop and compact widths.
