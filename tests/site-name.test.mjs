@@ -42,7 +42,7 @@ test('failed rename rollback keeps newer site values and reports that review is 
 test('rollback can restore a rename value written before failure but does not touch unchanged failed keys',()=>{
  const store=storage([current]),before=new Map(store.values),set=store.setItem;let calls=0;store.setItem=(key,value)=>{set(key,value);if(++calls===2)throw Error('Failed after write')};
  assert.throws(()=>renameObservingSite(store,current,'Local name'),/original site was kept/);assert.deepEqual(store.values,before);
- const blocked=storage([current]);let reads=0;const get=blocked.getItem;blocked.getItem=key=>{if(++reads>2)throw Error('Read denied');return get(key)};blocked.setItem=()=>{throw Error('Quota')};assert.throws(()=>renameObservingSite(blocked,current,'Local name'),/Review your saved sites/);
+ const blocked=storage([current]);let reads=0;const get=blocked.getItem;blocked.getItem=key=>{if(++reads>2)throw Error('Read denied');return get(key)};let writes=0;blocked.setItem=()=>{writes++;throw Error('Quota')};assert.throws(()=>renameObservingSite(blocked,current,'Local name'),/could not be checked/);assert.equal(writes,0);
 });
 
 
@@ -59,4 +59,25 @@ test('a selected-site change after the first rename write prevents replacement a
  const store=storage([current]),originalList=store.getItem('nightjar-places'),newer=JSON.stringify({...current,name:'Peer during save',bortle:1}),write=store.setItem;
  store.setItem=(key,value)=>{write(key,value);if(key==='nightjar-places')store.values.set('nightjar-place',newer)};
  assert.throws(()=>renameObservingSite(store,current,'Local name'),/changed during saving/);assert.equal(store.getItem('nightjar-place'),newer);assert.equal(store.getItem('nightjar-places'),originalList);
+});
+
+
+test('saved-place changes after name snapshots refuse before writing and keep all peer records',()=>{
+ const store=storage([current]),get=store.getItem,peer=JSON.stringify([current,{...current,name:'Peer added',latitude:48,extra:'Keep peer'}]);let writes=0,readSelected=false;
+ store.getItem=key=>{const raw=get(key);if(key==='nightjar-place'&&!readSelected){readSelected=true;store.values.set('nightjar-places',peer)}return raw};store.setItem=()=>{writes++};
+ assert.throws(()=>renameObservingSite(store,current,'Local name'),/Saved places changed during saving/);assert.equal(writes,0);assert.equal(get('nightjar-places'),peer);assert.deepEqual(JSON.parse(get('nightjar-place')),current);
+});
+test('a peer edit after the list replacement is retained without applying a stale selected-site name',()=>{
+ const store=storage([current]),set=store.setItem,peer=JSON.stringify([{...current,name:'Peer alias',extra:'Latest alias'},{...current,name:'Other peer',latitude:48}]);let writes=0;
+ store.setItem=(key,value)=>{writes++;set(key,value);if(key==='nightjar-places')store.values.set(key,peer)};
+ assert.throws(()=>renameObservingSite(store,current,'Local name'),/Review your saved sites/);assert.equal(writes,1);assert.equal(store.getItem('nightjar-places'),peer);assert.deepEqual(JSON.parse(store.getItem('nightjar-place')),current);
+});
+test('selected-site changes after capture are detected before the first rename write',()=>{
+ const store=storage([current]),get=store.getItem,peer=JSON.stringify({...current,name:'Peer selected',latitude:48});let selectedReads=0,writes=0;
+ store.getItem=key=>{const raw=get(key);if(key==='nightjar-place'&&++selectedReads===1)store.values.set(key,peer);return raw};store.setItem=()=>{writes++};
+ assert.throws(()=>renameObservingSite(store,current,'Local name'),/changed during saving/);assert.equal(writes,0);assert.equal(get('nightjar-place'),peer);assert.deepEqual(JSON.parse(get('nightjar-places')),[current]);
+});
+test('guarded name edits preserve every valid legacy saved-place record above normal capacity',()=>{
+ const legacy=Array.from({length:101},(_,i)=>({...current,name:'Legacy '+i,longitude:i/10,extra:'Metadata '+i})),store=storage(legacy),result=renameObservingSite(store,current,'Updated name');
+ assert.equal(result.places.length,101);assert.equal(result.places[0].name,'Updated name');assert.deepEqual(result.places.slice(1),legacy.slice(1));assert.equal(JSON.parse(store.getItem('nightjar-places'))[100].extra,'Metadata 100');
 });
