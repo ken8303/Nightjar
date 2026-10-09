@@ -26,7 +26,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
    const best=night.best;
    const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination});
    downloadFile(new Blob([data],{type:'text/calendar;charset=utf-8'}),`nightjar-${night.key}.ics`);
-   setDownloadStatus(`${dateLabel(night.key)} calendar file ready. Open it in your calendar app to add the window.`);
+   setDownloadStatus(`${dateLabel(night.key)} calendar file prepared for download. Check that it arrived before opening it in your calendar app.`);
   }catch{setDownloadStatus('The calendar file could not be created. Please try again.')}
  }
  return <section className="panel seven-night-outlook" aria-labelledby="seven-night-title">
