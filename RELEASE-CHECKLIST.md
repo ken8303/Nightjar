@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 434 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 439 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -252,3 +252,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Forecast requests reject failed HTTP responses before parsing arbitrary bodies and give readable guidance for malformed success bodies/network failures. Desktop and 320-pixel checks verified failed initial loads, successful retry and retained prior forecasts in Tonight/site comparison. All 433 tests, types, lint, build and Cloudflare dry-run pass. Browser plugin not available; the supported CUA Playwright/native screenshot path was used. Screenshots were inspected in the tool output, with no saved image artifacts. Physical-phone acceptance remains pending.
 
 - Incomplete or repeated-hour observing-time entry is retained across tabs, including Aurora, and guards site changes/reloads. Controlled waiting-worker activation verified both initial and late-edit pauses, cancellation and exact-instant reload recovery. Explicit site review kept the old context until approval. Final 320-pixel review copy was inspected; console remained clear. All 434 tests passed before wording-only changes; ten targeted update tests, types, lint, final build and packaging passed afterward. Physical installed-PWA/time-picker acceptance remains pending.
+
+- Aurora and location search show actionable messages for non-JSON server errors, malformed success bodies and transport failures. Aurora keeps its prior model/timestamps after failed refresh; search retains the query and retries without selecting a result or changing site/time. Desktop and 320-pixel checks passed with equal document/scroll widths and no captured console warnings/errors. All 439 tests, types, lint, production build and Cloudflare dry-run pass. Real-provider outages and physical phone acceptance remain pending.

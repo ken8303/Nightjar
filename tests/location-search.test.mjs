@@ -44,3 +44,11 @@ test('location IDs are unique safe integers and displayed administrative names s
  const original=structuredClone(raw);const results=await searchLocations('London',{signal,fetcher:async()=>Response.json(raw)});
  assert.equal(results.length,6);assert.deepEqual(results.map(result=>result.id),[1,4,5,6,7,8]);assert.equal(results[0].name,'First QA');assert.equal(results[0].admin1,'地區');assert.deepEqual(raw,original);
 });
+
+test('non-JSON HTTP failures and interrupted bodies remain actionable without parser or network details',async()=>{
+ const signal=new AbortController().signal;
+ await assert.rejects(searchLocations('London',{signal,fetcher:async()=>new Response('<html>Proxy QA error</html>',{status:503})}),{message:'Location search is unavailable. Try again or enter coordinates.'});
+ await assert.rejects(searchLocations('London',{signal,fetcher:async()=>({ok:true,json:async()=>{throw new TypeError('Body stream disturbed QA')}})}),{message:'Location search returned an unreadable response. Try again or enter coordinates.'});
+ await assert.rejects(searchLocations('London',{signal,fetcher:async()=>{throw new TypeError('Failed to fetch QA')}}),{message:'Location search is unavailable. Try again or enter coordinates.'});
+ const retry=await searchLocations('London',{signal,fetcher:async()=>Response.json({results:[place]})});assert.equal(retry[0].name,'London');
+});

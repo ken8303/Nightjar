@@ -9,7 +9,11 @@ export async function searchLocations(query:string,{signal,fetcher=fetch,timeout
  const timeout=setTimeout(()=>{timedOut=true;controller.abort()},timeoutMs);
  try{
   const response=await fetcher(`/api/locations?q=${encodeURIComponent(text)}`,{signal:controller.signal});
-  const raw:unknown=await response.json();
+  let raw:unknown;
+  try{raw=await response.json()}catch(error){
+   if(error instanceof Error&&error.name==='AbortError')throw error;
+   throw Error(response.ok?'Location search returned an unreadable response. Try again or enter coordinates.':'Location search is unavailable. Try again or enter coordinates.');
+  }
   const isRecord=Boolean(raw&&typeof raw==='object'&&!Array.isArray(raw));
   const data=isRecord?raw as Record<string,unknown>:{};
   const detail=[data.error,data.reason].find(value=>typeof value==='string'&&value.trim());
@@ -32,6 +36,7 @@ export async function searchLocations(query:string,{signal,fetcher=fetch,timeout
   if(signal.aborted)throw new DOMException('Location search cancelled.','AbortError');
   if(timedOut)throw Error('Location search timed out. Try again or enter coordinates.');
   if(error instanceof SyntaxError)throw Error('Location search returned an unreadable response. Try again or enter coordinates.');
+  if(error instanceof TypeError)throw Error('Location search is unavailable. Try again or enter coordinates.');
   throw error;
  }finally{clearTimeout(timeout);signal.removeEventListener('abort',cancel)}
 }

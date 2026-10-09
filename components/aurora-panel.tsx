@@ -4,13 +4,14 @@ import {Activity,RefreshCw,ArrowUpRight,Sun,MapPin} from 'lucide-react';
 import {A,Place,bodyPosition,timeLabel} from '@/lib/sky';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
-import {AuroraFeed,auroraTimingIssue,nearestAurora,validateAuroraFeed} from '@/lib/aurora';
+import {AuroraFeed,auroraTimingIssue,nearestAurora} from '@/lib/aurora';
+import {readAuroraResponse,auroraFailureMessage} from '@/lib/aurora-response';
 export default function AuroraPanel({place,onLocation}:{place:Place;onLocation:()=>void}){
  const [result,setResult]=useState<{retry:number;feed?:AuroraFeed;error?:string}|null>(null);
  const {revision:retry,refresh}=useForecastRefresh(5*60*1000);
  const now=usePlanningClock();
  const feed=result?.feed||null,loading=result?.retry!==retry,error=result?.retry===retry?result.error||'':'';
- useEffect(()=>{const ctrl=new AbortController();let active=true;const timeout=setTimeout(()=>ctrl.abort(),20000);fetch('/api/aurora',{signal:ctrl.signal,cache:'no-cache'}).then(async r=>{const raw:unknown=await r.json();if(!r.ok)throw Error(raw&&typeof raw==='object'&&'error' in raw&&typeof raw.error==='string'?raw.error.slice(0,300):'Aurora data is unavailable. Please retry.');const feed=validateAuroraFeed(raw);if(active){setResult({retry,feed})}}).catch(e=>{if(active)setResult(old=>({retry,feed:old?.feed,error:e.name==='AbortError'?'Aurora request timed out. Please retry.':e instanceof Error?e.message:'Aurora data is unavailable.'}))});return()=>{active=false;clearTimeout(timeout);ctrl.abort()}},[retry]);
+ useEffect(()=>{const ctrl=new AbortController();let active=true;const timeout=setTimeout(()=>ctrl.abort(),20000);fetch('/api/aurora',{signal:ctrl.signal,cache:'no-cache'}).then(async r=>{const feed=await readAuroraResponse(r);if(active){setResult({retry,feed})}}).catch(e=>{if(active)setResult(old=>({retry,feed:old?.feed,error:auroraFailureMessage(e)}))});return()=>{active=false;clearTimeout(timeout);ctrl.abort()}},[retry]);
  const local=useMemo(()=>feed?nearestAurora(feed.cells,place.latitude,place.longitude):null,[feed,place.latitude,place.longitude]);
  const timingIssue=feed?auroraTimingIssue(feed,now):null,stale=timingIssue!==null;
  const timingWarning=timingIssue==='future'?'Forecast timestamps are unexpectedly ahead of this device’s clock. Check its date and time, then refresh before relying on the outlook.':timingIssue==='invalid'?'Forecast timing is unavailable. Refresh before relying on the outlook.':'This forecast is out of date. Refresh before using it to plan an outing.';
