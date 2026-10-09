@@ -135,3 +135,22 @@ test('backup export times retain valid legacy and generated ISO UTC instants acr
 test('backup metadata rejects repaired dates, ambiguous local dates and non-export formats',()=>{
  for(const exportedAt of ['2026-02-30T00:00:00.000Z','2026-10-02T24:00:00.000Z','2026-10-02T00:00:00','2026-10-02','October 2, 2026','2026-10-02T00:00:00+01:00','2026-10-02T00:00:00.1Z','+002026-10-02T00:00:00.000Z','-000000-01-01T00:00:00.000Z','x'.repeat(1000)])assert.throws(()=>parsePlannerBackup(JSON.stringify({...JSON.parse(file(empty())),exportedAt})),/export time is invalid/);
 });
+
+
+test('a failed storage adapter after writing any import key restores every original value',()=>{
+ const incoming=parsePlannerBackup(file({places:[site],targets:['Vega'],notes:{Vega:'Imported note'},equipment:[camera],deepTargets:['M31'],diary:[]}));
+ for(let failedAt=1;failedAt<=keys.length;failedAt++){const current=storage(),before=new Map(current.values),set=current.setItem;let writes=0;current.setItem=(key,value)=>{set(key,value);if(++writes===failedAt)throw Error('Failed after writing')};assert.throws(()=>restorePlannerBackup(current,incoming),/existing data has not been changed/);assert.deepEqual(current.values,before)}
+ const missing=storage();missing.values.clear();const set=missing.setItem;let writes=0;missing.setItem=(key,value)=>{set(key,value);if(++writes===2)throw Error('After write')};assert.throws(()=>restorePlannerBackup(missing,incoming),/existing data has not been changed/);assert.equal(missing.values.size,0);
+});
+test('a change after reading an import snapshot is reviewed before the first write',()=>{
+ const current=storage(),reviewed=readSavedPlan(current),get=current.getItem,peer=JSON.stringify([site]);let injected=false,writes=0;
+ current.getItem=key=>{const value=get(key);if(key===keys[5]&&!injected){injected=true;current.values.set(keys[0],peer)}return value};current.setItem=()=>{writes++};
+ let changed;try{restorePlannerBackup(current,parsePlannerBackup(file({...empty(),targets:['Vega']})),reviewed)}catch(error){changed=error}
+ assert(changed instanceof PlannerReviewChangedError);assert.deepEqual(changed.current.places,[site]);assert.equal(writes,0);assert.equal(current.getItem(keys[0]),peer);
+});
+test('a peer change before a later import key rolls back local writes without overwriting that peer',()=>{
+ const current=storage(),before=new Map(current.values),set=current.setItem,peer=JSON.stringify([{...camera,name:'Peer equipment'}]);let injected=false;
+ current.setItem=(key,value)=>{set(key,value);if(key===keys[0]&&!injected){injected=true;current.values.set(keys[3],peer)}};
+ let changed;try{restorePlannerBackup(current,parsePlannerBackup(file({places:[site],targets:['Vega'],notes:{Vega:'Incoming'},equipment:[camera]})))}catch(error){changed=error}
+ assert(changed instanceof PlannerReviewChangedError);assert.equal(current.getItem(keys[3]),peer);before.set(keys[3],peer);assert.deepEqual(current.values,before);assert.deepEqual(changed.current.equipment,[{...camera,name:'Peer equipment'}]);
+});

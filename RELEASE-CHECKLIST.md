@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 392 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 395 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -216,3 +216,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Observing reports use strict equipment reads and mark unreadable collections unavailable. Valid legacy equipment beyond the hundred-row checklist limit is explicitly counted as omitted, while storage remains intact. Both preview paths and the compact coverage note were checked.
 
 - Target-note read recovery is read-only. Reports label unreadable/shown snapshots and unsaved edits; selected-target Retry saves only actual pending fields and preserves unrelated newer notes. Synthetic repair, quota failure, peer-note update and compact preview checks passed.
+
+- Backup import uses one bounded snapshot for merge/rollback, checks keys before replacing them and tracks attempted writes. Synthetic later-key changes updated review without overwriting peer equipment; an injected adapter failure after writing restored touched collections. These are not transactional or physical-device guarantees.

@@ -38,11 +38,14 @@ export function parsePlannerBackup(text:string):PlannerBackup{
  if(!validBackupExportTime(raw.exportedAt))throw Error('The backup export time is invalid. Choose an original Nightjar backup file. Nothing has been imported.');
  return {format:'nightjar-backup',version:4,exportedAt:raw.exportedAt,data:plan(raw.data)};
 }
-export function readSavedPlan(storage:StorageAccess):SavedPlan{
- const read=(key:string,fallback:string)=>{const raw=storage.getItem(key);if(raw!==null&&raw.length>plannerBackupMaxBytes)throw Error('Oversized saved plans');return JSON.parse(raw===null?fallback:raw)};
- try{return plan({places:read(keys[0],'[]'),targets:read(keys[1],'[]'),notes:read(keys[2],'{}'),equipment:read(keys[3],'[]'),deepTargets:read(keys[4],'[]'),diary:read(keys[5],'[]')})}
- catch{throw Error('Saved plans could not be read. Your existing data has not been changed.')}
+function readSavedPlanSnapshot(storage:StorageAccess){
+ try{
+  const raw=keys.map(key=>{const value=storage.getItem(key);if(value!==null&&value.length>plannerBackupMaxBytes)throw Error('Oversized saved plans');return value});
+  const read=(index:number,fallback:string)=>{const value=raw[index];return JSON.parse(value===null?fallback:value)};
+  return {raw,data:plan({places:read(0,'[]'),targets:read(1,'[]'),notes:read(2,'{}'),equipment:read(3,'[]'),deepTargets:read(4,'[]'),diary:read(5,'[]')})};
+ }catch{throw Error('Saved plans could not be read. Your existing data has not been changed.')}
 }
+export function readSavedPlan(storage:StorageAccess):SavedPlan{return readSavedPlanSnapshot(storage).data}
 export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:now.toISOString(),data:readSavedPlan(storage)},null,2))}
 export function mergeSavedPlans(existing:SavedPlan,incoming:SavedPlan):SavedPlan{
  existing=plan(existing);incoming=plan(incoming);
@@ -70,16 +73,17 @@ export function previewPlannerMerge(existing:SavedPlan,incoming:SavedPlan){
 export function restorePlannerBackup(storage:StorageAccess,backup:PlannerBackup,reviewed?:SavedPlan):SavedPlan{
  // Revalidate even when called outside the file picker, and read the latest
  // local data so imports preserve edits made after the preview was opened.
- const incoming=plan(backup.data),current=readSavedPlan(storage);
+ const incoming=plan(backup.data),snapshot=readSavedPlanSnapshot(storage),current=snapshot.data;
  if(reviewed&&JSON.stringify(current)!==JSON.stringify(plan(reviewed)))throw new PlannerReviewChangedError(current);
  const merged=mergeSavedPlans(current,incoming);
- const previous=keys.map(key=>storage.getItem(key));
+ const previous=snapshot.raw;
  const values=[merged.places,merged.targets,merged.notes,merged.equipment,merged.deepTargets||[],merged.diary||[]].map(value=>JSON.stringify(value));
- let written=0;
- try{for(let i=0;i<keys.length;i++){storage.setItem(keys[i],values[i]);written++}}
+ let attempted=0,changed=false;
+ try{for(let i=0;i<keys.length;i++){if(storage.getItem(keys[i])!==previous[i]){changed=true;throw Error('Saved plans changed during import.')}attempted=i+1;storage.setItem(keys[i],values[i])}}
  catch{
   let rollbackFailed=false;
-  for(let i=0;i<written;i++){try{if(storage.getItem(keys[i])!==values[i]){rollbackFailed=true;continue}const value=previous[i];if(value===null)storage.removeItem(keys[i]);else storage.setItem(keys[i],value)}catch{rollbackFailed=true}}
+  for(let i=attempted-1;i>=0;i--){try{const stored=storage.getItem(keys[i]);if(stored===previous[i])continue;if(stored!==values[i]){rollbackFailed=true;continue}const value=previous[i];if(value===null)storage.removeItem(keys[i]);else storage.setItem(keys[i],value)}catch{rollbackFailed=true}}
+  if(changed&&!rollbackFailed)throw new PlannerReviewChangedError(readSavedPlan(storage));
   throw Error(rollbackFailed?'Storage failed and some changes could not be undone. Keep your backup file and check your saved plans.':'This browser could not save the imported plans. Your existing data has not been changed.');
  }
  return merged;
