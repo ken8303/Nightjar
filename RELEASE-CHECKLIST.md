@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 401 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 402 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -226,3 +226,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Saved-diary read recovery retains cached observations and unfinished forms, pauses saved mutations/reports and offers read-only Retry. Synthetic startup, during-Save and later-event failure/recovery/Undo checks passed, including a compact recovery view.
 
 - Bright-target HTML/text checklists explicitly count older names and associated notes omitted for unavailable catalogue positions. Singular/plural/complete HTML coverage and source preservation passed; native text/file receipt remains pending.
+
+- Unfinished diary forms offer read-only recovery and retain local edits/unrelated drafts. Repaired conflicts require explicit version review; synthetic read/merge/save/conflict and compact recovery checks passed.

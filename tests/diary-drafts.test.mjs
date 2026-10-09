@@ -82,3 +82,14 @@ test('only remaining new or changed forms require guarding after a failed save, 
  assert(!hasChangedDiaryForms(base,structuredClone(base)));assert(!hasChangedDiaryForms(base,{drafts:[],edit:null}));assert(hasChangedDiaryForms(base,{drafts:[{...entry,notes:'Unsaved text'}],edit:null}));assert(hasChangedDiaryForms(base,{drafts:[{...entry,place:{...entry.place,country:'France'}}],edit:null}));
  const edit={original:entry,draft:{...entry,notes:'Stored edit'}};assert(!hasChangedDiaryForms({drafts:[],edit},{drafts:[],edit:structuredClone(edit)}));assert(!hasChangedDiaryForms({drafts:[],edit},{drafts:[],edit:null}));assert(hasChangedDiaryForms({drafts:[],edit},{drafts:[],edit:{...edit,draft:{...entry,notes:'Unsaved edit'}}}));assert(hasChangedDiaryForms({drafts:[],edit:null},{drafts:[],edit}));
 });
+
+
+test('unfinished-form recovery exposes read failures separately from a valid empty collection',()=>{
+ for(const raw of [null,JSON.stringify({version:1,drafts:[],edit:null}),JSON.stringify({version:1,drafts:[entry],edit:null})]){
+  const result=readDiaryDrafts({getItem:()=>raw});assert.equal(result.unavailable,false);
+ }
+ for(const raw of ['', '{',JSON.stringify({version:2,drafts:[],edit:null})]){
+  const result=readDiaryDrafts({getItem:()=>raw});assert.equal(result.unavailable,true);assert.deepEqual(result.state,{drafts:[],edit:null});
+ }
+ assert.equal(readDiaryDrafts({getItem:()=>{throw Error('blocked')}}).unavailable,true);
+});
