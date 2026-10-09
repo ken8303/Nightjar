@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 387 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 390 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -212,3 +212,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Site-name saves retain newer selected-site metadata and refuse stale selected names/coordinates. Synthetic cross-context rename failures kept the exact name draft and made no extra site/list writes; between-write changes preserve the newer selection during rollback.
 
 - Present empty-string collections enter recovery rather than new-user defaults. Six-key synthetic checks preserved raw values with zero application collection writes; explicit repair restored Retry, saving and normal-backup preparation.
+
+- Observing reports use strict equipment reads and mark unreadable collections unavailable. Valid legacy equipment beyond the hundred-row checklist limit is explicitly counted as omitted, while storage remains intact. Both preview paths and the compact coverage note were checked.

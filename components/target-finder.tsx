@@ -13,7 +13,7 @@ import {Checkbox} from '@/components/ui/checkbox';
 import {Place,skyTargets,skyTargetLimit} from '@/lib/sky';
 import {findSkyTargets} from '@/lib/sky-target-search';
 import {printableObservingPlan} from '@/lib/observing-plan';
-import {validEquipment,type Equipment} from '@/lib/photography';
+import {readReportEquipment} from '@/lib/report-equipment';
 export default function TargetFinder({date,place,selected,onSelect}:{date:Date;place:Place;selected:string;onSelect:(name:string)=>void}){
  const reportPending=usePendingEditReporter('sky','target note edits');
  const [notes,setNotes]=useState<Record<string,string>>({}),[notesReady,setNotesReady]=useState(false),[notesStatus,setNotesStatus]=useState(''),[notesStorageError,setNotesStorageError]=useState(false);
@@ -102,9 +102,8 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
   }catch{setDownloadStatus('The observing list could not be created. Please try again.')}
  }
  function buildPrintPlan(){
-  let equipment:Equipment[]=[],equipmentUnavailable=false;
-  try{const raw:unknown=JSON.parse(localStorage.getItem('nightjar-equipment')||'[]');if(!Array.isArray(raw))throw Error();equipment=raw.filter(validEquipment).slice(0,100)}catch{equipmentUnavailable=true}
-  return printableObservingPlan({date,place,targets:savedTargets,notes,equipment,equipmentUnavailable});
+  const reportEquipment=readReportEquipment(localStorage);
+  return printableObservingPlan({date,place,targets:savedTargets,notes,...reportEquipment});
  }
  function downloadPrintPlan(){
   try{

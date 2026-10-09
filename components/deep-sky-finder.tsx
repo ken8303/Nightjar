@@ -16,7 +16,7 @@ import DeepSkyTimeline from '@/components/deep-sky-timeline';
 import {messierCatalogue,deepSkyName,deepSkyNames,deepSkyPlanNotes,findDeepSky,deepSkyRecommendations,deepSkyPositions,deepSkyWindow,bestDeepSkySample,deepSkyPhoto,type DeepSkyObject} from '@/lib/deep-sky';
 import {deepSkyListKey,readDeepSkyList,saveDeepSkyList,validMessierId} from '@/lib/deep-sky-list';
 import {printableObservingPlan} from '@/lib/observing-plan';
-import {validEquipment,type Equipment} from '@/lib/photography';
+import {readReportEquipment} from '@/lib/report-equipment';
 import {timeLabel,type Place} from '@/lib/sky';
 const constellations=Array.from(new Set(messierCatalogue.map(target=>target.constellation))).sort((a,b)=>constellationName(a).localeCompare(constellationName(b)));
 const types=Array.from(new Set(messierCatalogue.map(target=>target.type))).sort();
@@ -49,11 +49,10 @@ export default function DeepSkyFinder({date,place,onDate,onFrame,onCamera,reques
   catch(error){setUndoStatus(error instanceof Error&&error.name==='Error'?error.message:'This target could not be restored. Undo remains available; free browser storage and retry.')}
  }
  function buildPlan(){
-   let equipment:Equipment[]=[],equipmentUnavailable=false;
-   try{const raw:unknown=JSON.parse(localStorage.getItem('nightjar-equipment')||'[]');if(!Array.isArray(raw))throw Error();equipment=raw.filter(validEquipment).slice(0,100)}catch{equipmentUnavailable=true}
+   const reportEquipment=readReportEquipment(localStorage);
    const targets=savedTargets.map(target=>({name:`${target.id} · ${deepSkyName(target)}`.slice(0,100),altitude:target.altitude,azimuth:target.azimuth}));
    const notes=Object.fromEntries(savedTargets.map((target,index)=>[targets[index].name,deepSkyPlanNotes(target)]));
-   return printableObservingPlan({date,place,targets,notes,equipment,equipmentUnavailable,notesHeading:'Catalogue reference',catalogueNotice:'Deep-sky data: OpenNGC by Mattia Verga and contributors, adapted under CC BY-SA 4.0. Positions are precessed from J2000 to the selected date.'});
+   return printableObservingPlan({date,place,targets,notes,...reportEquipment,notesHeading:'Catalogue reference',catalogueNotice:'Deep-sky data: OpenNGC by Mattia Verga and contributors, adapted under CC BY-SA 4.0. Positions are precessed from J2000 to the selected date.'});
  }
  function downloadPlan(){
   try{
