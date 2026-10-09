@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 402 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 403 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -230,3 +230,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Unfinished diary forms offer read-only recovery and retain local edits/unrelated drafts. Repaired conflicts require explicit version review; synthetic read/merge/save/conflict and compact recovery checks passed.
 
 - Desktop CUA file-chooser import and browser-received JSON backup now pass on a disposable origin. Received version-4 JSON matches all six synthetic collections including Unicode notes; selected site/time remain unchanged. Physical mobile file selection/download/share-sheet and other export formats remain pending. The received Downloads file dated 9 October is a QA backup, not a backup of real observing plans.
+
+- The offline viewer distinguishes missing/valid empty collections from unreadable empty/null/wrong-shape values, preserves exact source text and identifies unavailable cards. Actual fallback-document repair/reload and compact layout checks passed; physical installed-PWA acceptance remains separate.

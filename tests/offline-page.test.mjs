@@ -93,3 +93,22 @@ test('offline diary country metadata is rendered as text alongside the original 
  const entry={target:'M31',observedAt:'2026-10-08T20:00:00.000Z',place:{name:'Paris QA',country:'France <country> 星空',latitude:48.85,longitude:2.35},outcome:'seen',equipment:'',notes:''},page=load({'nightjar-observing-diary-v1':[entry]});
  assert(page.elements.get('diary').textContent.includes('Paris QA · France <country> 星空'));assert.equal(page.elements.get('diary').children[0].children.length,2);
 });
+
+
+test('offline missing collections remain empty but present empty/null/wrong-shape values identify unavailable data',()=>{
+ const keys={'targets':'nightjar-targets-v1','deep-targets':'nightjar-deep-targets-v1','diary':'nightjar-observing-diary-v1','places':'nightjar-places','equipment':'nightjar-equipment','session':'nightjar-observing-time'};
+ const absent=load();assert.equal(absent.elements.get('storage-warning').hidden,true);
+ for(const [id,key] of Object.entries(keys)){
+  for(const raw of ['', 'null', '{}','42']){
+   const page=load({},false,{rawOverrides:{[key]:raw}});
+   assert.equal(page.elements.get('storage-warning').hidden,false);assert.equal(page.elements.get(id).children.length,0);
+   assert(page.elements.get(id+'-empty').textContent.includes('unavailable'));assert.equal(page.raw.get(key),raw);assert.equal(page.session.size,0);
+  }
+ }
+ for(const raw of ['', 'null', '[]','42']){
+  const page=load({'nightjar-targets-v1':['Vega']},false,{rawOverrides:{'nightjar-target-notes-v1':raw}});
+  assert.equal(page.elements.get('storage-warning').hidden,false);assert.equal(page.elements.get('targets').children.length,1);assert.equal(page.raw.get('nightjar-target-notes-v1'),raw);
+ }
+ const valid=load(Object.fromEntries(Object.values(keys).filter(k=>k!=='nightjar-observing-time').map(k=>[k,[]])));
+ assert.equal(valid.elements.get('storage-warning').hidden,true);
+});

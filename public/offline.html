@@ -40,7 +40,7 @@
     <p class="intro">Your plans saved on this device are below. Reconnect to open the full sky planner and refresh live conditions.</p>
     <p class="connection" id="connection" role="status">Reconnect, then try the planner again.</p>
     <a class="retry" id="retry" href="/">Try again online</a>
-    <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Your stored data has not been changed.</p>
+    <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Stored values are unchanged; a raw recovery copy can preserve unreadable data.</p>
     <div class="grid">
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
@@ -55,7 +55,8 @@
   </main>
   <script>
     (() => {
-      const read = (key, fallback) => { try { const raw=localStorage.getItem(key);if(raw!==null&&raw.length>5*1024*1024)throw Error('Oversized saved value');return JSON.parse(raw || 'null') ?? fallback; } catch { document.getElementById('storage-warning').hidden=false; return fallback; } };
+      const unavailable=new Set();
+      const read = (key, fallback, valid) => { try { const raw=localStorage.getItem(key);if(raw===null)return fallback;if(raw.length>5*1024*1024)throw Error('Oversized saved value');const value=JSON.parse(raw);if(value===null||valid&&!valid(value))throw Error('Invalid saved value');return value; } catch { unavailable.add(key);document.getElementById('storage-warning').hidden=false;return fallback; } };
       const validCoordinate=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)<=limit;
       const validDimension=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&value>0&&value<=limit;
       const safeNote=value=>typeof value==='string'?value.slice(0,2000):'';
@@ -74,10 +75,10 @@
         if (note) { const text = document.createElement('small'); text.className = 'note'; text.textContent = note; item.append(text); }
         document.getElementById(id).append(item);
       };
-      const showEmpty = id => { document.getElementById(id + '-empty').hidden = Boolean(document.getElementById(id).children.length); };
+      const showEmpty = (id,key) => { const empty=document.getElementById(id + '-empty');empty.hidden=Boolean(document.getElementById(id).children.length);if(!empty.hidden&&unavailable.has(key))empty.textContent='Saved data is unavailable in this offline view. Stored values are unchanged.'; };
 
-      const currentPlace = read('nightjar-place', null);
-      const selectedTime = read('nightjar-observing-time', null);
+      const currentPlace = read('nightjar-place', null, value=>typeof value==='object'&&!Array.isArray(value));
+      const selectedTime = read('nightjar-observing-time', null, value=>Boolean(canonicalInstant(value)));
       const instant = canonicalInstant(selectedTime);
       if (instant && instant.getUTCFullYear()>=1) {
         const siteName = currentPlace && typeof currentPlace === 'object' ? safeText(currentPlace.name) : '';
@@ -87,30 +88,30 @@
         try { localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
         catch { zone = 'UTC'; localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
         add('session', siteName ? 'At ' + siteName : 'Selected time', localTime, utcTime(selectedTime) + ' · Times are a saved snapshot, not a live forecast.');
-      }else if(selectedTime!==null)document.getElementById('storage-warning').hidden=false;
-      showEmpty('session');
+      }else if(selectedTime!==null){unavailable.add('nightjar-observing-time');document.getElementById('storage-warning').hidden=false;}
+      showEmpty('session','nightjar-observing-time');
 
-      const targets = read('nightjar-targets-v1', []);
-      const notes = read('nightjar-target-notes-v1', {});
+      const targets = read('nightjar-targets-v1', [], Array.isArray);
+      const notes = read('nightjar-target-notes-v1', {}, value=>typeof value==='object'&&!Array.isArray(value));
       const noteEntries=notes&&typeof notes==='object'&&!Array.isArray(notes)?Object.entries(notes).slice(0,100).filter(([name,text])=>name.length<=100&&typeof text==='string'):[];
       const savedNames=Array.isArray(targets)?Array.from(new Set(targets.slice(0,200).filter(name=>typeof name==='string'&&name.trim()&&name.length<=100))).slice(0,42):[];
       for (const name of savedNames) add('targets',safeText(name),'',safeNote(noteEntries.find(([key])=>key===name)?.[1]));
       for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(name),'',safeNote(note));
       document.getElementById('other-notes-card').hidden=!document.getElementById('other-notes').children.length;
-      showEmpty('targets');
+      showEmpty('targets','nightjar-targets-v1');
 
-      const deepTargets=read('nightjar-deep-targets-v1',[]);
+      const deepTargets=read('nightjar-deep-targets-v1',[],Array.isArray);
       if(Array.isArray(deepTargets))for(const id of Array.from(new Set(deepTargets.slice(0,200).filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id)))).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
-      showEmpty('deep-targets');
+      showEmpty('deep-targets','nightjar-deep-targets-v1');
 
-      const diary=read('nightjar-observing-diary-v1',[]);
+      const diary=read('nightjar-observing-diary-v1',[],Array.isArray);
       if(Array.isArray(diary))for(const entry of diary.slice(0,200).filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180)).sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
         const outcome={'seen':'Seen','not-seen':'Not seen','imaged':'Imaged'}[entry.outcome];
         add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.place.country)?' · '+safeText(entry.place.country):'')+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
       }
-      showEmpty('diary');
+      showEmpty('diary','nightjar-observing-diary-v1');
 
-      const places = read('nightjar-places', []);
+      const places = read('nightjar-places', [], Array.isArray);
       const placeList = Array.isArray(places) ? places.slice(0, 100) : [];
       if (currentPlace && typeof currentPlace === 'object' && !placeList.some(place => place && place.latitude === currentPlace.latitude && place.longitude === currentPlace.longitude)) placeList.unshift(currentPlace);
       for (const place of placeList) {
@@ -119,15 +120,15 @@
         const rating = Number.isInteger(place.bortle) && place.bortle >= 1 && place.bortle <= 9 ? ' · Bortle ' + place.bortle : '';
         if (name && validCoordinate(lat,90) && validCoordinate(lon,180)) add('places', name, lat.toFixed(3) + '°, ' + lon.toFixed(3) + '°' + rating);
       }
-      showEmpty('places');
+      showEmpty('places','nightjar-places');
 
-      const equipment = read('nightjar-equipment', []);
+      const equipment = read('nightjar-equipment', [], Array.isArray);
       if (Array.isArray(equipment)) for (const setup of equipment.slice(0, 100)) {
         if (!setup || typeof setup !== 'object') continue;
         const name = safeText(setup.name), focal = setup.focal, width = setup.width, height = setup.height, pixel = setup.pixel;
         if (name && validDimension(focal,20000) && validDimension(width,100) && validDimension(height,100) && validDimension(pixel,100)) add('equipment', name, focal + ' mm focal length · ' + width + ' × ' + height + ' mm sensor · ' + pixel + ' µm pixels');
       }
-      showEmpty('equipment');
+      showEmpty('equipment','nightjar-equipment');
       const connection=document.getElementById('connection');
       const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
