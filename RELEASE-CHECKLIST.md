@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 416 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 419 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -242,3 +242,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Sky-rating saves retain newer same-site metadata, refuse changed/unreadable selections and preserve the displayed rating on failed writes. Synthetic peer metadata/location, after-write rollback, persistent recovery and read-only repair checks passed; real cross-tab/power-loss acceptance remains pending.
 
 - Site naming checks saved-list and selected-site snapshots before writing and preserves foreign lists edited during saving. Synthetic peer additions/edits, explicit retry, retained Unicode draft and compact conflict feedback passed; 101-site legacy preservation is regression-tested.
+
+- Equipment saves replace unique whitespace-name variants without duplicate creation, keep metadata and refuse ambiguous repeated names. Existing edits retain 101-record legacy lists while additions respect capacity. Actual list preservation, distinct-name recovery and compact feedback checks passed.

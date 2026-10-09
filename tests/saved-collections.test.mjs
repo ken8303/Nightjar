@@ -80,3 +80,23 @@ test('legacy same-name equipment removes the requested dimensions and retains si
  assert.throws(()=>removeEquipmentProfile([first,other],second),/changed elsewhere/);assert.equal(removeEquipmentProfile([first,{...first}],first).length,1);
  assert.deepEqual(restoreEquipmentProfile([first,other],second,1),[first,other]);
 });
+
+
+test('a unique whitespace legacy setup is replaced canonically at full capacity without dropping metadata',()=>{
+ const current=[{...equipment[0],name:'  Setup 0  ',extra:'Keep legacy metadata'},...equipment.slice(1)],before=structuredClone(current),next=upsertEquipmentProfile(current,{...equipment[0],focal:850});
+ assert.equal(next.length,100);assert.equal(next.at(-1).name,'Setup 0');assert.equal(next.at(-1).focal,850);assert.equal(next.at(-1).extra,'Keep legacy metadata');assert.equal(next.filter(p=>p.name.trim()==='Setup 0').length,1);assert.deepEqual(current,before);assert.deepEqual(next.slice(0,-1),current.slice(1));
+});
+test('ambiguous exact or trimmed equipment names refuse saving rather than collapsing versions',()=>{
+ for(const names of [['Shared','Shared'],[' Shared ','Shared'],[' Shared','Shared ']]){
+  const current=names.map((name,i)=>({...equipment[0],name,focal:400+i*400,extra:'Version '+i})),before=structuredClone(current);
+  assert.throws(()=>upsertEquipmentProfile(current,{...equipment[0],name:'Shared',focal:1200}),/different setup name/);assert.deepEqual(current,before);
+  const distinct=upsertEquipmentProfile(current,{...equipment[0],name:'New version',focal:1200});assert.equal(distinct.length,3);assert.deepEqual(distinct.slice(0,2),current);
+ }
+});
+test('valid oversized legacy collections allow existing replacements but retain capacity protection for additions',()=>{
+ const sites=[...places,{name:'Extra legacy',latitude:1,longitude:0}],profiles=[...equipment,{...equipment[0],name:'Extra legacy',extra:'Keep extra'}];
+ const nextSites=upsertSavedPlace(sites,{...sites[0],name:'Updated legacy'}),nextProfiles=upsertEquipmentProfile(profiles,{...profiles[0],focal:800});
+ assert.equal(nextSites.length,101);assert.equal(nextSites[0].name,'Updated legacy');assert.deepEqual(nextSites.slice(1),sites.slice(1));
+ assert.equal(nextProfiles.length,101);assert.equal(nextProfiles.at(-1).focal,800);assert.equal(nextProfiles.find(p=>p.name==='Extra legacy').extra,'Keep extra');
+ assert.throws(()=>upsertSavedPlace(sites,{name:'New',latitude:2,longitude:0}),/100 places/);assert.throws(()=>upsertEquipmentProfile(profiles,{...equipment[0],name:'New'}),/100 equipment/);
+});

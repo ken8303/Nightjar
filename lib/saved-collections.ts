@@ -44,13 +44,16 @@ export function upsertSavedPlace(current:Place[],place:Place):Place[]{
  if(!validPlace(place))throw Error('Enter a valid observing place before saving.');
  const matches=(item:Place)=>Math.abs(item.latitude-place.latitude)<.0001&&Math.abs(item.longitude-place.longitude)<.0001;
  const next=current.some(matches)?current.map(item=>matches(item)?{...item,...place,bortle:place.bortle??item.bortle}:item):[...current,place];
- if(next.length>savedPlacesLimit)throw Error(`You can save up to ${savedPlacesLimit} places. Remove a saved place before adding another.`);
+ if(next.length>savedPlacesLimit&&next.length>current.length)throw Error(`You can save up to ${savedPlacesLimit} places. Remove a saved place before adding another.`);
  return next;
 }
 export function upsertEquipmentProfile(current:Equipment[],equipment:Equipment):Equipment[]{
  const profile={...equipment,name:equipment.name.trim()};
  if(!validEquipment(profile))throw Error('Complete a valid imaging setup before saving.');
- const next=[...current.filter(item=>item.name!==profile.name),profile];
- if(next.length>equipmentProfilesLimit)throw Error(`You can save up to ${equipmentProfilesLimit} equipment setups. Remove a saved setup before adding another.`);
+ const matches=current.map((item,index)=>item.name.trim()===profile.name?index:-1).filter(index=>index>=0);
+ if(matches.length>1)throw Error('More than one saved setup uses this name. Enter a different setup name to keep existing versions.');
+ const index=matches[0]??-1,updated=index<0?profile:{...current[index],...profile};
+ const next=[...current.filter((_,i)=>i!==index),updated];
+ if(next.length>equipmentProfilesLimit&&next.length>current.length)throw Error(`You can save up to ${equipmentProfilesLimit} equipment setups. Remove a saved setup before adding another.`);
  return next;
 }
