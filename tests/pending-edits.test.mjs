@@ -41,3 +41,18 @@ test('root-retained edits protect reload without blocking section changes and po
  store.change(imaging,{section:'tools',label:'imaging draft',retainedAcrossSections:true});assert.equal(store.snapshot('tools'),'');assert.equal(updates,4);
  store.change(notes,null);assert.equal(store.snapshot(),'imaging draft');store.change(imaging,null);assert.equal(store.snapshot(),'');
 });
+
+test('context-sensitive retained edits guard site changes from every section without blocking tab navigation',()=>{
+ const store=createPendingEdits(),time=Symbol(),imaging=Symbol(),notes=Symbol();let updates=0;store.subscribe(()=>updates++);
+ store.change(time,{section:'observing-time',label:'observing-time changes',retainedAcrossSections:true,contextSensitive:true});
+ store.change(imaging,{section:'tools',label:'imaging draft',retainedAcrossSections:true});
+ store.change(notes,{section:'sky',label:'notes'});
+ assert.equal(store.snapshot('tonight'),'');assert.equal(store.snapshot('sky'),'notes');
+ assert.equal(store.contextSnapshot('tonight'),'observing-time changes');
+ assert.equal(store.contextSnapshot('sky'),'notes, observing-time changes');
+ assert.equal(store.contextSnapshot('tools'),'observing-time changes');
+ assert.equal(store.snapshot(),'imaging draft, notes, observing-time changes');
+ store.change(time,{section:'observing-time',label:'observing-time changes',retainedAcrossSections:true,contextSensitive:false});
+ assert.equal(updates,4);assert.equal(store.contextSnapshot('sky'),'notes');
+ store.change(time,null);assert.equal(store.snapshot(),'imaging draft, notes');
+});

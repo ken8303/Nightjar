@@ -1,13 +1,14 @@
-type EditOwner={section:string;label:string;retainedAcrossSections?:boolean};
+type EditOwner={section:string;label:string;retainedAcrossSections?:boolean;contextSensitive?:boolean};
 export function createPendingEdits(){
  const owners=new Map<symbol,EditOwner>(),listeners=new Set<()=>void>();
  function snapshot(section?:string){return [...new Set([...owners.values()].filter(owner=>section===undefined||owner.section===section&&!owner.retainedAcrossSections).map(owner=>owner.label))].sort().join(', ')}
+ function contextSnapshot(section:string){return [...new Set([...owners.values()].filter(owner=>owner.contextSensitive||owner.section===section&&!owner.retainedAcrossSections).map(owner=>owner.label))].sort().join(', ')}
  function change(owner:symbol,value:EditOwner|null){
-  const prior=owners.get(owner);if(value?prior?.section===value.section&&prior.label===value.label&&Boolean(prior.retainedAcrossSections)===Boolean(value.retainedAcrossSections):!prior)return;
+  const prior=owners.get(owner);if(value?prior?.section===value.section&&prior.label===value.label&&Boolean(prior.retainedAcrossSections)===Boolean(value.retainedAcrossSections)&&Boolean(prior.contextSensitive)===Boolean(value.contextSensitive):!prior)return;
   if(value)owners.set(owner,value);else owners.delete(owner);
   for(const listener of listeners)listener();
  }
- return {snapshot,change,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener)}}};
+ return {snapshot,contextSnapshot,change,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener)}}};
 }
 export function preventPendingEditUnload(event:Pick<BeforeUnloadEvent,'preventDefault'|'returnValue'>,pending:string){if(!pending)return;event.preventDefault();event.returnValue='true'}
 export function watchPendingEditUnload(events:Pick<EventTarget,'addEventListener'|'removeEventListener'>,store:ReturnType<typeof createPendingEdits>){
