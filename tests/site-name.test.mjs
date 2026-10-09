@@ -44,3 +44,19 @@ test('rollback can restore a rename value written before failure but does not to
  assert.throws(()=>renameObservingSite(store,current,'Local name'),/original site was kept/);assert.deepEqual(store.values,before);
  const blocked=storage([current]);let reads=0;const get=blocked.getItem;blocked.getItem=key=>{if(++reads>2)throw Error('Read denied');return get(key)};blocked.setItem=()=>{throw Error('Quota')};assert.throws(()=>renameObservingSite(blocked,current,'Local name'),/Review your saved sites/);
 });
+
+
+test('a name-only save retains newer selected-site metadata and unknown fields',()=>{
+ const selected={...current,bortle:2,timezone:'UTC',country:'Updated country',extra:'new metadata'},store=storage([selected],selected),before=structuredClone(current);
+ const result=renameObservingSite(store,current,'New 星空');assert.equal(result.place.bortle,2);assert.equal(result.place.timezone,'UTC');assert.equal(result.place.country,'Updated country');assert.equal(result.place.extra,'new metadata');assert.equal(result.place.name,'New 星空');assert.deepEqual(current,before);
+ assert.deepEqual(JSON.parse(store.getItem('nightjar-place')),result.place);assert.deepEqual(result.places,[result.place]);
+ const cleared={name:current.name,latitude:current.latitude,longitude:current.longitude},empty=storage([cleared],cleared),renamed=renameObservingSite(empty,current,'Clear metadata');assert.equal(renamed.place.bortle,undefined);assert.equal(renamed.place.country,undefined);assert.equal(renamed.place.timezone,undefined);
+});
+test('newer selected-site names or coordinates refuse a stale rename before any writes',()=>{
+ for(const selected of [{...current,name:'Peer name'},{...current,latitude:48}]){const store=storage([current],selected),before=new Map(store.values);let writes=0;store.setItem=()=>{writes++};assert.throws(()=>renameObservingSite(store,current,'Local draft'),/changed elsewhere/);assert.equal(writes,0);assert.deepEqual(store.values,before)}
+});
+test('a selected-site change after the first rename write prevents replacement and rolls back the list',()=>{
+ const store=storage([current]),originalList=store.getItem('nightjar-places'),newer=JSON.stringify({...current,name:'Peer during save',bortle:1}),write=store.setItem;
+ store.setItem=(key,value)=>{write(key,value);if(key==='nightjar-places')store.values.set('nightjar-place',newer)};
+ assert.throws(()=>renameObservingSite(store,current,'Local name'),/changed during saving/);assert.equal(store.getItem('nightjar-place'),newer);assert.equal(store.getItem('nightjar-places'),originalList);
+});
