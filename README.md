@@ -104,7 +104,7 @@ Backup import reviews retain a snapshot of the saved plan. If that data changes 
 npm run verify
 ```
 
-This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current suite has 395 passing tests; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
+This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current passing test count is recorded in RELEASE-CHECKLIST.md; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
 
 See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
@@ -121,3 +121,5 @@ The 109-object Messier catalogue is adapted from [OpenNGC by Mattia Verga and co
 Failed note and diary-form saves keep text in the current view. Section navigation warns before discarding it; PWA and failed-view reload controls pause until it is saved or copied. Native reload/close prompts remain browser dependent. Retried target notes that conflict with a newer saved version require an explicit version review, preserving unrelated notes and unfinished edits. Long reviewed versions support keyboard scrolling. Diary snapshots retain optional site country; search includes it, reports/offline cards show it and CSV appends a Country column.
 
 Imaging fields retained during this visit now pause page-exit/update reload after a failed save. Photo tools provides a save retry and manual JSON recovery copy; moving between planner sections retains the draft. Imaging recovery files are separate from plan backups and exclude saved equipment profiles. Native phone recovery-file receipt remains to be checked.
+
+Unfinished observing-time entries retain their draft across sections and pause reload/update and site changes until resolved or explicitly reviewed. Use Review time edit in the recovery notice to focus the draft; from Aurora it opens Tonight. Repeated local clock-change times require choosing their UTC occurrence. Cancelling keeps the previously selected instant.

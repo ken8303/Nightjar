@@ -1,12 +1,13 @@
 'use client';
 import {useRef,useState,useMemo,useEffect} from 'react';
+import {observingTimeEditLabel} from '@/lib/observing-time-actions';
 import {usePendingEditReporter} from '@/hooks/use-pending-edits';
 import {CalendarDays,RefreshCw} from 'lucide-react';
 import {observingTimeCandidates,observingTimeValue,observingTimeZone} from '@/lib/observing-time';
 
 export default function ObservingTimeControl({date,timezone,onDate}:{date:Date;timezone?:string;onDate:(date:Date)=>void}){
  const timeInput=useRef<HTMLInputElement>(null);
- const reportPending=usePendingEditReporter('observing-time','observing-time changes',true,true);
+ const reportPending=usePendingEditReporter('observing-time',observingTimeEditLabel,true,true);
  const cancel=()=>{clearDraft();timeInput.current?.focus({preventScroll:true})};
  const [mode,setMode]=useState<'UTC'|'local'>('UTC');
  const siteZone=useMemo(()=>observingTimeZone(timezone),[timezone]);

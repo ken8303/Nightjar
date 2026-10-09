@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
 import {preservePlannerTime,reloadPlanner} from '@/lib/reload-planner';
+import TimeEditRecovery from '@/components/time-edit-recovery';
 import {applyPwaUpdate} from '@/lib/pwa-update';
 import {watchPwaUpdateChecks} from '@/lib/pwa-update-check';
 
@@ -71,7 +72,7 @@ export default function PwaSupport() {
   }
   return <aside id="install-app" className="pwa-support" aria-label="Nightjar app">
     {offline && <p className="offline-notice" role="status">You’re offline. Live conditions cannot refresh; any displayed forecast may be out of date.</p>}
-    {pendingText&&<p className="muted">Reload is paused while {pendingText} remain unsaved. Finish or cancel time edits; save or copy other unfinished changes before reloading.</p>}{updateWorker&&<div className="pwa-update" role="status"><p>A new Nightjar version is ready. Your saved places, targets and equipment stay on this device.</p><p>Save unfinished edits before updating. If saving fails, keep this view open and use its recovery tools first. Unsaved text can be lost on reload.</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{updating?'Updating Nightjar…':'Update and reload'}</button></div>}
+    {pendingText&&<p className="muted">Reload is paused while {pendingText} remain unsaved. Finish or cancel time edits; save or copy other unfinished changes before reloading.</p>}<TimeEditRecovery/>{updateWorker&&<div className="pwa-update" role="status"><p>A new Nightjar version is ready. Your saved places, targets and equipment stay on this device.</p><p>Save unfinished edits before updating. If saving fails, keep this view open and use its recovery tools first. Unsaved text can be lost on reload.</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{updating?'Updating Nightjar…':'Update and reload'}</button></div>}
     {updateError&&<div className="pwa-update"><p role="status">{updateError}</p><button type="button" className="button" disabled={offline||Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setUpdateError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button></div>}
     {!installed && <details open><summary>Take Nightjar with you · Install app</summary><p>Add Nightjar to your home screen for a standalone view.</p>{prompt && <button className="button primary" onClick={install}>Install Nightjar</button>}<p>On iPhone or iPad, open this site in Safari, choose Share, then Add to Home Screen. On Android or desktop, look for Install app or Add to Home screen in your browser menu.</p><p className="muted">An internet connection is needed for live conditions and to reopen the full planner. Previously opened tab files may remain available during a connection drop; the offline page can show plans saved on this device while you reconnect. Installation availability depends on your browser.</p></details>}
     {message && <p role="status">{message}</p>}

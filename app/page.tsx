@@ -22,6 +22,7 @@ import {saveForecastTimezone} from '@/lib/place-timezone';
 import {readAtlasView,saveAtlasView,readAtlasLayers,saveAtlasLayers,type AtlasView,type AtlasLayers} from '@/lib/atlas-view';
 import MobileNavigation,{plannerSections} from '@/components/planner-navigation';
 import {createPlannerNavigation,type PlannerNavigationIntent} from '@/lib/planner-navigation';
+import {reviewObservingTimeEvent} from '@/lib/observing-time-actions';
 import ObservingTimeControl from '@/components/observing-time-control';
 import AtmosphereDetails from '@/components/atmosphere-details';
 import SevenNightOutlook from '@/components/seven-night-outlook';
@@ -115,6 +116,14 @@ function Planner(){
  },[applyNavigation,navigation,setCameraOpen,tab]);
  useEffect(()=>{if(pendingIntent){pendingHeading.current?.focus({preventScroll:true});pendingHeading.current?.scrollIntoView({block:'center',behavior:'instant'})}},[pendingIntent]);
  useEffect(()=>watchPendingEditUnload(window,pendingEdits),[]);
+ useEffect(()=>{
+  const reviewTime=()=>{
+   if(tab==='aurora')flushSync(()=>setTab('tonight'));
+   const input=document.getElementById('observing-time');input?.focus({preventScroll:true});input?.closest('.time-entry')?.scrollIntoView({block:'start',behavior:'instant'});
+  };
+  window.addEventListener(reviewObservingTimeEvent,reviewTime);
+  return()=>window.removeEventListener(reviewObservingTimeEvent,reviewTime);
+ },[tab,setTab]);
  useEffect(()=>{
   if(!startupAnchor)return;
   if(tab!=='sky'){anchorStarted.current=true;return}
