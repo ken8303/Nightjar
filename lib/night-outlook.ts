@@ -1,16 +1,19 @@
 import {A, Place, bodyPosition, hourBelowAltitude, moonInfo, scoreAt} from './sky';
 
+import {utcDate} from './utc-date';
+
 type Hourly={time:number[];cloud_cover:(number|null)[]};
 export type NightOutlook={key:string;darkHours:number;forecastHours:number;best:{date:Date;hours:number;score:number;cloud:number;moonAbove:boolean;moonIllumination:number}|null};
 
 function localNightKey(date:Date,formatter:Intl.DateTimeFormat){
  const parts=formatter.formatToParts(date);
  const number=(type:string)=>Number(parts.find(part=>part.type===type)?.value);
- const night=new Date(Date.UTC(number('year'),number('month')-1,number('day')-(number('hour')<12?1:0)));
+ const localYear=parts.find(part=>part.type==='era')?.value==='BC'?1-number('year'):number('year');
+ const night=utcDate(localYear,number('month')-1,number('day')-(number('hour')<12?1:0));
  return night.toISOString().slice(0,10);
 }
 export function sevenNightOutlook(hourly:Hourly,place:Place,from=new Date()):NightOutlook[]{
- const formatter=new Intl.DateTimeFormat('en-US',{timeZone:place.timezone||'UTC',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',hourCycle:'h23'});
+ const formatter=new Intl.DateTimeFormat('en-US',{timeZone:place.timezone||'UTC',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',hourCycle:'h23',era:'short'});
  const groups=new Map<string,{date:Date;cloud:number|null;score:number|null}[]>();
  for(let i=0;i<hourly.time.length;i++){
   const date=new Date(hourly.time[i]*1000);

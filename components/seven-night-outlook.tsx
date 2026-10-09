@@ -3,6 +3,7 @@
 import {downloadFile} from '@/lib/download';
 import {useMemo, useState, type CSSProperties} from 'react';
 import {ArrowUpRight, CalendarDays, Download, Moon} from 'lucide-react';
+import {observingWindowLabel} from '@/lib/observing-window-label';
 import {observingWindowCalendar} from '@/lib/calendar';
 import {sevenNightOutlook} from '@/lib/night-outlook';
 import {Place} from '@/lib/sky';
@@ -18,8 +19,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
  const setDownloadStatus=(text:string)=>setDownloadResult({context:downloadContext,text});
  const timezone=place.timezone||'UTC';
  const dateLabel=(key:string)=>new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(`${key}T12:00:00Z`));
- const timeFormatter=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:timezone,timeZoneName:'shortOffset'});
- const windowLabel=(start:Date,hours:number)=>`${timeFormatter.format(start)} – ${timeFormatter.format(new Date(+start+hours*3600000))}`;
+ const windowLabel=(start:Date,hours:number)=>observingWindowLabel(start,hours,timezone);
  function download(night:typeof nights[number]){
   if(!night.best)return;
   try{
@@ -40,6 +40,6 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
    <span className="night-moon"><Moon size={14}/>{night.best.moonAbove?`${Math.round(night.best.moonIllumination*100)}% lit Moon up at start`:'Moon below horizon at start'}</span>
   </button><button type="button" className="night-outlook-download" onClick={()=>download(night)} aria-label={`Download calendar event for ${dateLabel(night.key)}`}><Download size={14}/> Add to calendar</button></div>:<div className="night-outlook-card unavailable" key={night.key}><span className="night-date">{dateLabel(night.key)}</span><strong>—</strong><span>{night.forecastHours?'No complete dark hour remains in this forecast.':`${night.darkHours} dark samples; cloud forecast unavailable.`}</span></div>)}</div>:<p className="empty-text">{loading?'Loading the seven-night forecast…':hourly?'No fully dark hours in the available forecast for this location.':'Seven-night weather is unavailable. Try refreshing the forecast.'}</p>}
   {downloadStatus&&<p className="night-download-status" role="status">{downloadStatus}</p>}
-  <p className="footnote">Times include UTC offsets so clock-change hours are distinct. Scores use hourly cloud cover, astronomical darkness and Moon illumination. Darkness is checked through each window at 15-minute intervals, including its end. Moon status is at the start. The best available pair of consecutive dark forecast hours is shown; a single hour is used when no pair has complete coverage. Scores are estimates, not astronomical seeing or transparency. Forecast length and coverage vary by location.</p>
+  <p className="footnote">Window endpoints include dates and UTC offsets. The card date names the observing night; a window after midnight can fall on the next calendar day. Scores use hourly cloud cover, astronomical darkness and Moon illumination. Darkness is checked through each window at 15-minute intervals, including its end. Moon status is at the start. The best available pair of consecutive dark forecast hours is shown; a single hour is used when no pair has complete coverage. Scores are estimates, not astronomical seeing or transparency. Forecast length and coverage vary by location.</p>
  </section>;
 }

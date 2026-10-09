@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 439 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 446 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -256,3 +256,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Aurora and location search show actionable messages for non-JSON server errors, malformed success bodies and transport failures. Aurora keeps its prior model/timestamps after failed refresh; search retains the query and retries without selecting a result or changing site/time. Desktop and 320-pixel checks passed with equal document/scroll widths and no captured console warnings/errors. All 439 tests, types, lint, production build and Cloudflare dry-run pass. Real-provider outages and physical phone acceptance remain pending.
 
 - Paused-reload notices offer Review time edit. Desktop/320-pixel checks retained repeated-hour drafts when returning from Aurora, focused the input in the current non-Aurora section and removed the action after resolution. Compact clock-change buttons now wrap within their warning box (245-pixel client/scroll width). Targeted time/guard/update tests, types, lint, production build and packaging pass. Physical mobile keyboard/installed-PWA acceptance remains pending.
+
+- Seven-night cards label both interval endpoint dates/years and UTC offsets, explaining their observing-night date. Desktop/320-pixel checks distinguished the Saturday-night card from its Sunday clock-change window and selected exact 00:00 UTC; card/page widths matched scroll widths. Early year/era night-key construction is regression-tested. All 446 tests, types, lint, build and packaging pass. Calendar receipt remains unverified after the earlier browser download call stalled and was interrupted; that call was not repeated.
