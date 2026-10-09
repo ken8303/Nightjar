@@ -41,6 +41,8 @@
     <p class="connection" id="connection" role="status">Reconnect, then try the planner again.</p>
     <a class="retry" id="retry" href="/">Try again online</a>
     <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Stored values are unchanged; a raw recovery copy can preserve unreadable data.</p>
+    <p id="coverage-warning" class="connection" role="status" hidden></p>
+    <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <div class="grid">
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
@@ -50,12 +52,13 @@
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
     </div>
-    <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
+
     <footer>Offline details are stored only in this browser. Positions, visibility and forecasts are not updated here; weather, location search and aurora forecasts require internet.</footer>
   </main>
   <script>
     (() => {
-      const unavailable=new Set();
+      const unavailable=new Set(),partial=new Set(),partialLabels=new Set();
+      const markPartial=(key,label)=>{partial.add(key);partialLabels.add(label)};
       const read = (key, fallback, valid) => { try { const raw=localStorage.getItem(key);if(raw===null)return fallback;if(raw.length>5*1024*1024)throw Error('Oversized saved value');const value=JSON.parse(raw);if(value===null||valid&&!valid(value))throw Error('Invalid saved value');return value; } catch { unavailable.add(key);document.getElementById('storage-warning').hidden=false;return fallback; } };
       const validCoordinate=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)<=limit;
       const validDimension=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&value>0&&value<=limit;
@@ -75,7 +78,7 @@
         if (note) { const text = document.createElement('small'); text.className = 'note'; text.textContent = note; item.append(text); }
         document.getElementById(id).append(item);
       };
-      const showEmpty = (id,key) => { const empty=document.getElementById(id + '-empty');empty.hidden=Boolean(document.getElementById(id).children.length);if(!empty.hidden&&unavailable.has(key))empty.textContent='Saved data is unavailable in this offline view. Stored values are unchanged.'; };
+      const showEmpty = (id,key) => { const empty=document.getElementById(id + '-empty');empty.hidden=Boolean(document.getElementById(id).children.length);if(!empty.hidden&&unavailable.has(key))empty.textContent='Saved data is unavailable in this offline view. Stored values are unchanged.';else if(!empty.hidden&&partial.has(key))empty.textContent='Some stored records are omitted from this offline view. Use a raw recovery copy to preserve them.'; };
 
       const currentPlace = read('nightjar-place', null, value=>typeof value==='object'&&!Array.isArray(value));
       const selectedTime = read('nightjar-observing-time', null, value=>Boolean(canonicalInstant(value)));
@@ -93,42 +96,55 @@
 
       const targets = read('nightjar-targets-v1', [], Array.isArray);
       const notes = read('nightjar-target-notes-v1', {}, value=>typeof value==='object'&&!Array.isArray(value));
-      const noteEntries=notes&&typeof notes==='object'&&!Array.isArray(notes)?Object.entries(notes).slice(0,100).filter(([name,text])=>name.length<=100&&typeof text==='string'):[];
-      const savedNames=Array.isArray(targets)?Array.from(new Set(targets.slice(0,200).filter(name=>typeof name==='string'&&name.trim()&&name.length<=100))).slice(0,42):[];
+      const noteRows=Object.entries(notes),notePrefix=noteRows.slice(0,100);
+      const noteEntries=notePrefix.filter(([name,text])=>name.trim()&&name.length<=100&&typeof text==='string');
+      if(noteRows.length>100||noteEntries.length<notePrefix.length||noteEntries.some(([,text])=>text.length>2000))markPartial('nightjar-target-notes-v1','Target notes');
+      const targetPrefix=targets.slice(0,200),targetRows=targetPrefix.filter(name=>typeof name==='string'&&name.trim()&&name.length<=100),distinctNames=Array.from(new Set(targetRows)),savedNames=distinctNames.slice(0,42);
+      if(targets.length>200||targetRows.length<targetPrefix.length||distinctNames.length>42)markPartial('nightjar-targets-v1','Saved targets');
       for (const name of savedNames) add('targets',safeText(name),'',safeNote(noteEntries.find(([key])=>key===name)?.[1]));
       for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(name),'',safeNote(note));
       document.getElementById('other-notes-card').hidden=!document.getElementById('other-notes').children.length;
       showEmpty('targets','nightjar-targets-v1');
 
       const deepTargets=read('nightjar-deep-targets-v1',[],Array.isArray);
-      if(Array.isArray(deepTargets))for(const id of Array.from(new Set(deepTargets.slice(0,200).filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id)))).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
+      const deepPrefix=deepTargets.slice(0,200),deepRows=deepPrefix.filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id));
+      if(deepTargets.length>200||deepRows.length<deepPrefix.length)markPartial('nightjar-deep-targets-v1','Saved deep-sky list');
+      for(const id of Array.from(new Set(deepRows)).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
       showEmpty('deep-targets','nightjar-deep-targets-v1');
 
       const diary=read('nightjar-observing-diary-v1',[],Array.isArray);
-      if(Array.isArray(diary))for(const entry of diary.slice(0,200).filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180)).sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
+      const diaryPrefix=diary.slice(0,200),diaryRows=diaryPrefix.filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180));
+      if(diary.length>200||diaryRows.length<diaryPrefix.length)markPartial('nightjar-observing-diary-v1','Observing diary');
+      for(const entry of diaryRows.sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
+        if(typeof entry.notes==='string'&&entry.notes.length>2000||entry.notes!=null&&typeof entry.notes!=='string'||typeof entry.equipment==='string'&&entry.equipment.trim().length>300||entry.equipment!=null&&typeof entry.equipment!=='string'||entry.place.name.trim().length>300||typeof entry.place.country==='string'&&entry.place.country.trim().length>300)markPartial('nightjar-observing-diary-v1','Observing diary');
         const outcome={'seen':'Seen','not-seen':'Not seen','imaged':'Imaged'}[entry.outcome];
         add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.place.country)?' · '+safeText(entry.place.country):'')+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
       }
       showEmpty('diary','nightjar-observing-diary-v1');
 
       const places = read('nightjar-places', [], Array.isArray);
-      const placeList = Array.isArray(places) ? places.slice(0, 100) : [];
+      const placeList=places.slice(0,100);
+      if(places.length>100)markPartial('nightjar-places','Your places');
       if (currentPlace && typeof currentPlace === 'object' && !placeList.some(place => place && place.latitude === currentPlace.latitude && place.longitude === currentPlace.longitude)) placeList.unshift(currentPlace);
       for (const place of placeList) {
-        if (!place || typeof place !== 'object') continue;
+        if (!place || typeof place !== 'object') {markPartial('nightjar-places','Your places');continue}
         const name = safeText(place.name), lat = place.latitude, lon = place.longitude;
+        if(typeof place.name==='string'&&place.name.trim().length>300)markPartial('nightjar-places','Your places');
         const rating = Number.isInteger(place.bortle) && place.bortle >= 1 && place.bortle <= 9 ? ' · Bortle ' + place.bortle : '';
-        if (name && validCoordinate(lat,90) && validCoordinate(lon,180)) add('places', name, lat.toFixed(3) + '°, ' + lon.toFixed(3) + '°' + rating);
+        if (name && validCoordinate(lat,90) && validCoordinate(lon,180)) add('places', name, lat.toFixed(3) + '°, ' + lon.toFixed(3) + '°' + rating);else markPartial('nightjar-places','Your places');
       }
       showEmpty('places','nightjar-places');
 
       const equipment = read('nightjar-equipment', [], Array.isArray);
-      if (Array.isArray(equipment)) for (const setup of equipment.slice(0, 100)) {
-        if (!setup || typeof setup !== 'object') continue;
+      if(equipment.length>100)markPartial('nightjar-equipment','Imaging setups');
+      for (const setup of equipment.slice(0,100)) {
+        if (!setup || typeof setup !== 'object') {markPartial('nightjar-equipment','Imaging setups');continue}
         const name = safeText(setup.name), focal = setup.focal, width = setup.width, height = setup.height, pixel = setup.pixel;
-        if (name && validDimension(focal,20000) && validDimension(width,100) && validDimension(height,100) && validDimension(pixel,100)) add('equipment', name, focal + ' mm focal length · ' + width + ' × ' + height + ' mm sensor · ' + pixel + ' µm pixels');
+        if(typeof setup.name==='string'&&setup.name.trim().length>300)markPartial('nightjar-equipment','Imaging setups');
+        if (name && validDimension(focal,20000) && validDimension(width,100) && validDimension(height,100) && validDimension(pixel,100)) add('equipment', name, focal + ' mm focal length · ' + width + ' × ' + height + ' mm sensor · ' + pixel + ' µm pixels');else markPartial('nightjar-equipment','Imaging setups');
       }
       showEmpty('equipment','nightjar-equipment');
+      if(partialLabels.size){const coverage=document.getElementById('coverage-warning');coverage.hidden=false;coverage.textContent='Partial offline view: '+Array.from(partialLabels).join(', ')+'. Some stored content is omitted because of display limits or unusable values. Use a raw recovery copy to preserve stored values.';}
       const connection=document.getElementById('connection');
       const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);

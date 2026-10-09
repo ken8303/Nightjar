@@ -112,3 +112,24 @@ test('offline missing collections remain empty but present empty/null/wrong-shap
  const valid=load(Object.fromEntries(Object.values(keys).filter(k=>k!=='nightjar-observing-time').map(k=>[k,[]])));
  assert.equal(valid.elements.get('storage-warning').hidden,true);
 });
+
+
+test('offline bounded and filtered views identify omitted collections without treating duplicates as missing identities',()=>{
+ const site={name:'Site QA',latitude:51,longitude:0},setup={name:'Setup QA',focal:400,width:36,height:24,pixel:3.76};
+ const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(201).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
+ const coverage=page.elements.get('coverage-warning');assert.equal(coverage.hidden,false);
+ for(const name of ['Saved targets','Saved deep-sky list','Target notes','Your places','Imaging setups'])assert(coverage.textContent.includes(name));
+ assert.equal(page.elements.get('targets').children.length,42);assert.equal(page.elements.get('places').children.length,100);assert.equal(page.elements.get('equipment').children.length,100);assert.deepEqual(page.raw,before);assert.equal(page.session.size,0);
+ const duplicate=load({'nightjar-targets-v1':['Vega','Vega'],'nightjar-deep-targets-v1':['M31','M31']});assert.equal(duplicate.elements.get('coverage-warning').hidden,true);
+ const filtered=load({'nightjar-targets-v1':[null],'nightjar-equipment':[{...setup,focal:'400'}],'nightjar-observing-diary-v1':[{}]});
+ assert.equal(filtered.elements.get('coverage-warning').hidden,false);for(const id of ['targets','equipment','diary'])assert(filtered.elements.get(id+'-empty').textContent.includes('omitted'));
+});
+
+
+test('offline clipped note and legacy label text report partial content while retaining exact raw recovery sources',()=>{
+ const note='n'.repeat(2001),longName='s'.repeat(301),entry={target:'M31',observedAt:'2026-10-09T20:30:00.000Z',place:{name:'Site',latitude:51,longitude:0},outcome:'seen',equipment:'',notes:note};
+ const page=load({'nightjar-targets-v1':['Vega'],'nightjar-target-notes-v1':{Vega:note},'nightjar-observing-diary-v1':[entry],'nightjar-places':[{...entry.place,name:longName}],'nightjar-equipment':[{name:longName,focal:400,width:36,height:24,pixel:3.76}]});
+ const coverage=page.elements.get('coverage-warning');assert.equal(coverage.hidden,false);for(const label of ['Target notes','Observing diary','Your places','Imaging setups'])assert(coverage.textContent.includes(label));
+ assert.equal(page.elements.get('targets').children[0].children[1].textContent.length,2000);assert.equal(page.elements.get('diary').children[0].children[2].textContent.length,2000);
+ assert.equal(JSON.parse(page.raw.get('nightjar-target-notes-v1')).Vega,note);assert.equal(JSON.parse(page.raw.get('nightjar-places'))[0].name,longName);assert.equal(page.session.size,0);
+});
