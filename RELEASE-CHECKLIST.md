@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 446 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 449 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -264,3 +264,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Deferred views show connection/reload guidance after 15 seconds of loading, without automatic reload or cancellation. Actual held-module tests verified unfinished-time reload guards, direct review/cancellation, late loading and usable tab changes. Final compact delayed panels use stacked layout and matched 271-pixel client/scroll widths. Types, lint, build and Cloudflare packaging pass; physical intermittent-network acceptance remains pending.
 
 - Invalid/ambiguous time input describes its warning and retained UTC instant; site-name input describes its error and receives focus after failed Save. Correcting the name removes the error association; successful Save kept site/time. Native 320-pixel focus/ARIA/layout checks and final types/lint/build/packaging passed. Calendar feedback distinguishes preparation from receipt. A normal export click completed promptly, but no new matching QA file was verified in Downloads; native receipt remains pending. VoiceOver/Android reader acceptance remains pending.
+
+- Site comparison shows both recommended interval endpoints and explains nightly pair preference before ranking nightly choices by score. Three regression groups cover pair/single policy, global score/duration ties and incomplete/already-started hours. Two-site desktop/320-pixel checks selected the exact UTC start with matching card/page widths and clear console. All 449 tests, types, lint, build and packaging pass.
