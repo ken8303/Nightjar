@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 405 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 408 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -236,3 +236,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Partial offline views name affected collections and distinguish omitted rows/clipped legacy text from genuinely empty data. Raw recovery appears before long lists. Exact-source/read-only, repair/reload and compact disclosure checks passed.
 
 - The current production service worker served the revised cached fallback after simulated HTTP failures, loaded the cached raw-recovery helper and returned online at exact saved time. Legacy source data stayed intact. Physical radio-off/installed-PWA/mobile file acceptance remains pending.
+
+- PWA reload recaptures time after activation and pauses on failed preservation. Actual waiting-worker timing fixtures verified late time changes, initial/later failures and successful manual retry without duplicate reloads; physical installed-PWA upgrade remains pending.

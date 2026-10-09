@@ -17,7 +17,7 @@ test('PWA activation preserves time before messaging and reloads exactly once',a
  const f=fixture(controller=>controller.dispatchEvent(new Event('controllerchange')));
  applyPwaUpdate(f.worker,f.controller,f.options);
  f.controller.dispatchEvent(new Event('controllerchange'));await pause();
- assert.deepEqual(f.events,['preserve',{type:'SKIP_WAITING'},'reload']);
+ assert.deepEqual(f.events,['preserve',{type:'SKIP_WAITING'},'preserve','reload']);
 });
 test('stalled activation reports recovery and ignores late controller changes',async()=>{
  const f=fixture();applyPwaUpdate(f.worker,f.controller,f.options);await pause();
@@ -59,4 +59,31 @@ test('unsaved view text blocks activation and a newly failed edit blocks reload 
  const first=fixture();first.options.canReload=()=>false;applyPwaUpdate(first.worker,first.controller,first.options);assert.equal(first.events.length,1);assert.match(first.events[0].failure,/unsaved text/);first.controller.dispatchEvent(new Event('controllerchange'));assert.equal(first.events.length,1);
  let saved=true;const later=fixture();later.options.canReload=()=>saved;applyPwaUpdate(later.worker,later.controller,later.options);saved=false;later.controller.dispatchEvent(new Event('controllerchange'));assert.deepEqual(later.events.slice(0,2),['preserve',{type:'SKIP_WAITING'}]);assert.match(later.events[2].failure,/reload was paused/);saved=true;later.controller.dispatchEvent(new Event('controllerchange'));assert.equal(later.events.length,3);
  const valid=fixture(controller=>controller.dispatchEvent(new Event('controllerchange')));valid.options.canReload=()=>true;applyPwaUpdate(valid.worker,valid.controller,valid.options);assert.equal(valid.events.at(-1),'reload');
+});
+
+
+test('activation captures time changed during the waiting interval immediately before reload',()=>{
+ let time='initial',preserved=[],reloads=[];const controller=new EventTarget();
+ const options={preserve:()=>{preserved.push(time);return true},reload:()=>reloads.push(preserved.at(-1)),onFailure:()=>assert.fail('Unexpected failure'),timeoutMs:1000};
+ const worker={state:'installed',postMessage:()=>{time='latest';controller.dispatchEvent(new Event('controllerchange'))}};
+ applyPwaUpdate(worker,controller,options);controller.dispatchEvent(new Event('controllerchange'));
+ assert.deepEqual(preserved,['initial','latest']);assert.deepEqual(reloads,['latest']);
+});
+test('failed time preservation pauses both initial activation and later reload without duplicate attempts',()=>{
+ for(const throwError of [false,true]){
+  let calls=0;const first=fixture();first.options.preserve=()=>{if(throwError)throw Error('denied');return false};applyPwaUpdate(first.worker,first.controller,first.options);
+  assert.equal(first.events.length,1);assert.match(first.events[0].failure,/could not/);first.controller.dispatchEvent(new Event('controllerchange'));assert.equal(first.events.length,1);
+  const later=fixture();later.options.preserve=()=>{calls++;if(calls===1)return true;if(throwError)throw Error('denied');return false};applyPwaUpdate(later.worker,later.controller,later.options);later.controller.dispatchEvent(new Event('controllerchange'));later.controller.dispatchEvent(new Event('controllerchange'));
+  assert.equal(calls,2);assert.equal(later.events.length,2);assert.match(later.events[1].failure,/observing time could not be preserved/);assert(!later.events.includes('reload'));
+ }
+});
+test('time tokens validate bounded canonical instants and report unavailable persistence without rewriting sources',async()=>{
+ const {preservePlannerTime}=await vite.ssrLoadModule('/lib/reload-planner.ts');
+ const expected='"2026-10-09T21:45:00.000Z"';
+ for(const bad of [null,'','{','"2026-02-30T21:45:00.000Z"','"0000-01-01T00:00:00.000Z"','x'.repeat(129)]){
+  const writes=[],session={getItem:()=>bad,setItem:(key,value)=>writes.push([key,value])};
+  assert.equal(preservePlannerTime({getItem:()=>expected},session),true);assert.deepEqual(writes,[['nightjar-recovery-time-v1',expected]]);
+ }
+ const writes=[];assert.equal(preservePlannerTime({getItem:()=>'{bad'},{getItem:()=>'{bad',setItem:()=>writes.push('write')}),false);assert.deepEqual(writes,[]);
+ assert.equal(preservePlannerTime({getItem:()=>expected},{getItem:()=>null,setItem:()=>{throw Error('denied')}}),false);
 });
