@@ -248,3 +248,7 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Recovery snapshots retain this tab’s site and exact time together without replacing newer shared selections. Waiting-worker, late time/location, cached offline, failed-token pause and online return checks passed; raw recovery includes paired session context. Physical multi-tab/installed-PWA/radio-off acceptance remains pending.
 
 - Unknown site time zones keep entry in UTC with an accessible explanation. Forecast recovery enables local entry without changing the selected instant; Hong Kong local 20:00 correctly becomes 12:00 UTC. Compact 320-pixel layout has no horizontal overflow. All 429 tests, types, lint, production build and Cloudflare dry-run pass.
+
+## Next confirmed fix
+
+- A non-JSON forecast HTTP error currently exposes a JSON parsing message in the forecast panels. Reproduced with a disposable text/plain HTTP 503 fixture; friendly error handling remains to be implemented and verified. No change to this request path was made in the final time-zone batch.
