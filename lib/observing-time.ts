@@ -3,6 +3,10 @@ export function parseObservingInstant(value:unknown):Date|null{
  if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value))return null;
  const date=new Date(value);return validObservingDate(date)&&date.toISOString()===value?date:null;
 }
+export function observingTimeZone(value:unknown):{zone:string;known:boolean}{
+ if(typeof value==='string'&&value){try{new Intl.DateTimeFormat('en',{timeZone:value});return {zone:value,known:true}}catch{}}
+ return {zone:'UTC',known:false};
+}
 function formatter(timezone:string){return new Intl.DateTimeFormat('en-GB',{timeZone:timezone,calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'})}
 function parts(date:Date,format:Intl.DateTimeFormat,seconds=false){
  const values=format.formatToParts(date);

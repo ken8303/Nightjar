@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 427 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 429 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -246,3 +246,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Equipment saves replace unique whitespace-name variants without duplicate creation, keep metadata and refuse ambiguous repeated names. Existing edits retain 101-record legacy lists while additions respect capacity. Actual list preservation, distinct-name recovery and compact feedback checks passed.
 
 - Recovery snapshots retain this tab’s site and exact time together without replacing newer shared selections. Waiting-worker, late time/location, cached offline, failed-token pause and online return checks passed; raw recovery includes paired session context. Physical multi-tab/installed-PWA/radio-off acceptance remains pending.
+
+- Unknown site time zones keep entry in UTC with an accessible explanation. Forecast recovery enables local entry without changing the selected instant; Hong Kong local 20:00 correctly becomes 12:00 UTC. Compact 320-pixel layout has no horizontal overflow. All 429 tests, types, lint, production build and Cloudflare dry-run pass.

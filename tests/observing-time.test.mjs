@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {observingTimeCandidates,observingTimeValue,parseObservingInstant}=await vite.ssrLoadModule('/lib/observing-time.ts');
+const {observingTimeCandidates,observingTimeValue,parseObservingInstant,observingTimeZone}=await vite.ssrLoadModule('/lib/observing-time.ts');
 test('UTC and quarter-hour local inputs preserve the intended instant',()=>{
  assert.equal(observingTimeCandidates('2026-10-06T20:00','UTC')[0].toISOString(),'2026-10-06T20:00:00.000Z');
  assert.equal(observingTimeCandidates('2026-10-07T01:45','Asia/Kathmandu')[0].toISOString(),'2026-10-06T20:00:00.000Z');
@@ -42,4 +42,15 @@ test('half-hour transitions and a skipped civil day retain only exact round-trip
 test('recovery instants preserve exact canonical timestamps and refuse normalized or unsupported dates',()=>{
  const exact='2026-10-07T23:59:59.987Z';assert.equal(parseObservingInstant(exact).toISOString(),exact);
  for(const value of ['2026-02-30T20:00:00.000Z','0000-01-01T00:00:00.000Z','+010000-01-01T00:00:00.000Z','2026-10-07T20:00Z','not a date',null,0])assert.equal(parseObservingInstant(value),null);
+});
+
+
+test('unknown time zones are explicit UTC fallbacks while valid UTC remains a known site zone',()=>{
+ for(const value of [undefined,null,'','Invalid/Zone',42,{}])assert.deepEqual(observingTimeZone(value),{zone:'UTC',known:false});
+ assert.deepEqual(observingTimeZone('UTC'),{zone:'UTC',known:true});assert.deepEqual(observingTimeZone('Asia/Hong_Kong'),{zone:'Asia/Hong_Kong',known:true});
+});
+test('time-zone availability keeps UTC fallback and actual local entry interpretations distinct',()=>{
+ const input='2026-10-09T20:00',fallback=observingTimeZone(undefined),known=observingTimeZone('Asia/Hong_Kong');
+ assert.equal(observingTimeCandidates(input,fallback.zone)[0].toISOString(),'2026-10-09T20:00:00.000Z');
+ assert.equal(observingTimeCandidates(input,known.zone)[0].toISOString(),'2026-10-09T12:00:00.000Z');
 });
