@@ -5,7 +5,7 @@ export function readDeepSkyList(storage:Pick<Storage,'getItem'>):string[]{
  const raw=storage.getItem(deepSkyListKey);
  if(raw!==null&&raw.length>5*1024*1024)throw Error('Saved deep-sky targets are too large to read.');
  const value:unknown=JSON.parse(raw===null?'[]':raw);
- if(!validDeepSkyList(value))throw Error('Saved deep-sky targets could not be read.');
+ if(!Array.isArray(value)||!value.every(validMessierId))throw Error('Saved deep-sky targets could not be read.');
  return [...new Set(value)];
 }
 export function saveDeepSkyList(value:string[],storage:Pick<Storage,'setItem'>){

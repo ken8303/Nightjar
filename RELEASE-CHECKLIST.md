@@ -218,3 +218,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Target-note read recovery is read-only. Reports label unreadable/shown snapshots and unsaved edits; selected-target Retry saves only actual pending fields and preserves unrelated newer notes. Synthetic repair, quota failure, peer-note update and compact preview checks passed.
 
 - Backup import uses one bounded snapshot for merge/rollback, checks keys before replacing them and tracks attempted writes. Synthetic later-key changes updated review without overwriting peer equipment; an injected adapter failure after writing restored touched collections. These are not transactional or physical-device guarantees.
+
+- Valid oversized legacy bright-target lists retain all names and allow incremental removal; additions/Undo respect the 42-target capacity. Older names reveal in twenty-row groups. Repeated deep-sky IDs are deduplicated only in memory; raw recovery retains the source. Synthetic desktop/mobile checks passed; physical-phone acceptance remains pending.
