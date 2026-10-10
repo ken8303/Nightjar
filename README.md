@@ -124,4 +124,4 @@ Imaging fields retained during this visit now pause page-exit/update reload afte
 
 Unfinished observing-time entries retain their draft across sections and pause reload/update and site changes until resolved or explicitly reviewed. Use Review time edit in the recovery notice to focus the draft; from Aurora it opens Tonight. Repeated local clock-change times require choosing their UTC occurrence. Cancelling keeps the previously selected instant.
 
-Manual coordinate drafts stay available across planner tabs and block app reloads until used or cleared. Signed pasted values and decimal commas are accepted; incomplete or invalid coordinates leave the selected site and time unchanged. Coordinate drafts are temporary and are not included in backups.
+Manual coordinate drafts stay available across planner tabs and block app reloads until used or cleared. The reload warning offers Review coordinates to reopen and focus the form. Signed pasted values and decimal commas are accepted; incomplete or invalid coordinates leave the selected site and time unchanged. Coordinate drafts are temporary and are not included in backups.

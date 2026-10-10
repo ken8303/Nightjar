@@ -11,6 +11,7 @@ import ViewingMode from '@/components/viewing-mode';
 import SkyChart from '@/components/sky-chart';
 import CoordinateEntry from '@/components/coordinate-entry';
 import {coordinateEntryMatchesPoint} from '@/lib/coordinate-entry';
+import {coordinateEntryEditLabel,reviewCoordinateEntryEvent} from '@/lib/coordinate-entry-actions';
 import SiteNameEditor from '@/components/site-name-editor';
 import SavedListControls,{savedListPageSize} from '@/components/saved-list-controls';
 import {renameObservingSite} from '@/lib/site-name';
@@ -87,7 +88,7 @@ function Planner(){
  const cameraReturnFocus=useRef<HTMLButtonElement|null>(null);
  const [tab,updateTab]=useState(()=>startupAnchor?'sky':'tonight'),[place,setPlace]=useState<Place>(setup.place),[saved,setSaved]=useState<Place[]>(setup.saved),[date,setDate]=useState<Date>(setup.date),[query,setQuery]=useState(''),[results,setResults]=useState<LocationResult[]>([]),[searching,setSearching]=useState(false),[searchError,setSearchError]=useState(''),[notice,setNotice]=useState(''),[lat,setLat]=useState(''),[lon,setLon]=useState('');
  const coordinateDraftRef=useRef({lat,lon});
- const reportCoordinateDraft=usePendingEditReporter('places','coordinate entry',true);
+ const reportCoordinateDraft=usePendingEditReporter('places',coordinateEntryEditLabel,true);
  useEffect(()=>reportCoordinateDraft(Boolean(lat||lon)),[lat,lon,reportCoordinateDraft]);
  const clearCoordinates=useCallback(()=>{coordinateDraftRef.current={lat:'',lon:''};setLat('');setLon('');reportCoordinateDraft(false)},[reportCoordinateDraft]);
  function changeCoordinate(axis:'lat'|'lon',value:string){
@@ -135,6 +136,16 @@ function Planner(){
   };
   window.addEventListener(reviewObservingTimeEvent,reviewTime);
   return()=>window.removeEventListener(reviewObservingTimeEvent,reviewTime);
+ },[tab,setTab]);
+ useEffect(()=>{
+  const reviewCoordinates=()=>{
+   if(tab!=='places')flushSync(()=>setTab('places'));
+   const input=document.getElementById('manual-latitude');
+   const disclosure=input?.closest('details');if(disclosure)disclosure.open=true;
+   input?.focus({preventScroll:true});input?.scrollIntoView({block:'center',behavior:'instant'});
+  };
+  window.addEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
+  return()=>window.removeEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
  },[tab,setTab]);
  useEffect(()=>{
   if(!startupAnchor)return;
