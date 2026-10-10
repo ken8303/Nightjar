@@ -1,12 +1,13 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {usePendingEditReporter} from '@/hooks/use-pending-edits';
+import {siteNameEditLabel} from '@/lib/site-name-actions';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Field,FieldDescription,FieldError,FieldGroup,FieldLabel} from '@/components/ui/field';
 
 export default function SiteNameEditor({name,onSave,disabled=false}:{name:string;onSave:(name:string)=>void;disabled?:boolean}){
- const reportPending=usePendingEditReporter('places','site name edits');
+ const reportPending=usePendingEditReporter('places',siteNameEditLabel);
  const [editing,setEditing]=useState(false),[draft,setDraft]=useState(''),[error,setError]=useState('');
  const input=useRef<HTMLInputElement>(null),trigger=useRef<HTMLButtonElement>(null),returnFocus=useRef(false);
  useEffect(()=>{if(editing)input.current?.focus();else if(returnFocus.current){returnFocus.current=false;trigger.current?.focus()}},[editing]);

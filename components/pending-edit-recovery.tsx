@@ -5,6 +5,7 @@ import {coordinateEntryEditLabel,reviewCoordinateEntryEvent} from '@/lib/coordin
 import {imagingDraftEditLabel,reviewImagingDraftEvent} from '@/lib/imaging-draft-actions';
 import {diaryFormEditLabel,reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
 import {targetNoteEditLabel,reviewTargetNotesEvent} from '@/lib/target-note-actions';
+import {siteNameEditLabel,reviewSiteNameEvent} from '@/lib/site-name-actions';
 
 const actions=[
  {label:observingTimeEditLabel,event:reviewObservingTimeEvent,text:'Review time edit'},
@@ -12,6 +13,7 @@ const actions=[
  {label:imagingDraftEditLabel,event:reviewImagingDraftEvent,text:'Review imaging draft'},
  {label:diaryFormEditLabel,event:reviewDiaryFormsEvent,text:'Review diary forms'},
  {label:targetNoteEditLabel,event:reviewTargetNotesEvent,text:'Review target notes'},
+ {label:siteNameEditLabel,event:reviewSiteNameEvent,text:'Review site name'},
 ];
 export default function PendingEditRecovery(){
  const pending=usePendingEdits().split(', ');

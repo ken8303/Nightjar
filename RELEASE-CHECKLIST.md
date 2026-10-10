@@ -305,3 +305,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Review diary forms works from PWA and stalled sky-overlay recovery. A denied-write mobile check retained an M31 form across choosing M42 and a later planner time, then saved its original 20:30 UTC/site/text after retry. Saved-diary storage failures show actionable guidance instead of native implementation details. Physical phone/reader acceptance remains pending.
 
 - [x] Review target notes opens the management disclosure and focuses retry guidance from PWA/sky-overlay recovery. A denied-write mobile check retained Polaris and Vega edits, saved both exact strings after retry and kept selected Vega/20:30 UTC. Physical reader testing remains pending.
+
+- [x] Review site name returns to the retained editable field after a denied save. Compact browser QA preserved Unicode text, original site and 20:30 UTC; retry saved the new name with unchanged coordinates/country/time zone and cleared protection. All six current pending-edit labels now have direct review actions.

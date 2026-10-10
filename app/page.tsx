@@ -29,6 +29,7 @@ import {createPlannerNavigation,type PlannerNavigationIntent} from '@/lib/planne
 import {reviewObservingTimeEvent} from '@/lib/observing-time-actions';
 import {reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
 import {reviewTargetNotesEvent} from '@/lib/target-note-actions';
+import {reviewSiteNameEvent} from '@/lib/site-name-actions';
 import ObservingTimeControl from '@/components/observing-time-control';
 import AtmosphereDetails from '@/components/atmosphere-details';
 import SevenNightOutlook from '@/components/seven-night-outlook';
@@ -151,6 +152,15 @@ function Planner(){
   };
   window.addEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
   return()=>window.removeEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
+ },[tab,setTab]);
+ useEffect(()=>{
+  const reviewSiteName=()=>{
+   if(tab!=='places')flushSync(()=>setTab('places'));
+   const input=document.getElementById('observing-site-name');
+   input?.focus({preventScroll:true});input?.scrollIntoView({block:'center',behavior:'instant'});
+  };
+  window.addEventListener(reviewSiteNameEvent,reviewSiteName);
+  return()=>window.removeEventListener(reviewSiteNameEvent,reviewSiteName);
  },[tab,setTab]);
  useEffect(()=>{
   const reviewNotes=()=>{
