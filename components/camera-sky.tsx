@@ -15,6 +15,7 @@ import {watchCameraLifecycle} from '@/lib/camera-lifecycle';
 import {watchCameraOrientation,type CameraOrientationReading} from '@/lib/camera-orientation';
 import {createCameraSession} from '@/lib/camera-session';
 import {watchCameraPlayback} from '@/lib/camera-playback';
+import {watchPlanningClock} from '@/lib/planning-clock';
 import {createCameraWakeLock} from '@/lib/camera-wake-lock';
 import {type Place} from '@/lib/sky';
 import {cameraOverlayFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide} from '@/lib/camera-sky';
@@ -94,7 +95,7 @@ export default function CameraSky(props:Props){
   cameraSessionRef.current=cameraSession;
   const wakeSession=createCameraWakeLock({onState:setWake,onError:()=>setWakeNotice('Could not keep the screen awake. Your browser or battery settings may prevent it; you can try again.'),onReleased:()=>setWakeNotice('Screen awake ended. Tap Keep screen awake to request it again.')});
   wakeSessionRef.current=wakeSession;
-  const clock=setInterval(()=>{if(!document.hidden)setNow(new Date())},15000);
+  const stopClock=watchPlanningClock(document,()=>setNow(new Date()),{hidden:()=>document.hidden,intervalMs:15000});
   const locationSession=createCameraLocation({onPending:setLocating,onSite:site=>{setPlace(site);setNow(new Date());setAligned(false);setAlignmentError(null);setOffset(0)},onError:()=>setLocationError('Could not get your location. Check the selected site or try again.')});
   locationSessionRef.current=locationSession;
   const invalidate=()=>{motionRequest.current++;locationSession.cancel(false)};
@@ -103,7 +104,7 @@ export default function CameraSky(props:Props){
    onSuspend:()=>{invalidate();wakeSession.stop();setWakeNotice('');cameraSession.stop();motionStopRef.current?.();setTracking(false);setMotionPending(false);setSensor(null);setSensorQuiet(false);setSensorError('');setAligned(false);setAlignmentError(null);setOffset(0);setLocating(false);setSessionNotice('Camera, motion and screen awake are off after leaving this view. Restart them when ready.')},
    onResume:()=>setNow(new Date()),
   });
-  return ()=>{clearInterval(clock);stopLifecycle();motionStopRef.current?.();invalidate();locationSessionRef.current=null;wakeSession.stop(false);wakeSessionRef.current=null;cameraSession.stop(false);cameraSessionRef.current=null};
+  return ()=>{stopClock();stopLifecycle();motionStopRef.current?.();invalidate();locationSessionRef.current=null;wakeSession.stop(false);wakeSessionRef.current=null;cameraSession.stop(false);cameraSessionRef.current=null};
  },[]);
  useEffect(()=>{const video=videoRef.current;if(!video)return;return watchCameraPlayback(video,setPlaybackPaused)},[]);
  useEffect(()=>{

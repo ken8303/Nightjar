@@ -130,3 +130,5 @@ Manual coordinate drafts stay available across planner tabs and block app reload
 Reload warnings offer direct review of unfinished observing time, coordinate entry and an imaging draft that could not be saved. Imaging review opens its retry/recovery-copy controls. Coordinate review focuses the missing longitude when latitude is already valid. Resolving one edit leaves other unfinished changes protected.
 
 Deep-sky details show catalogue J2000 coordinates in hour/minute/second and signed degree/minute/second forms. Copy J2000 coordinates includes those formatted values, the target identifier, epoch label and original decimal values. Clipboard failure leaves selectable values available. The display rounds formatted seconds to one decimal place; it does not change catalogue values or current sky calculations.
+
+Camera sky positions refresh every 15 seconds while the viewer is visible. Backgrounding cancels that timer and returning refreshes immediately; camera, motion and screen-awake requests still require an explicit restart. Closing the viewer removes its clock and listeners.

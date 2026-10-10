@@ -27,3 +27,12 @@ test('a subscriber removed during immediate return refresh leaves no new timer',
  stop=watchPlanningClock(events,()=>stop(),{hidden:()=>hidden,schedule:()=>{schedules++;return()=>{}}});
  hidden=false;events.dispatchEvent(new Event('visibilitychange'));assert.equal(schedules,0);
 });
+
+test('camera cadence stays at fifteen seconds through hide, return and disposal',()=>{
+ const events=new EventTarget(),tasks=[];let hidden=false,updates=0;
+ const stop=watchPlanningClock(events,()=>updates++,{hidden:()=>hidden,intervalMs:15000,schedule:(tick,interval)=>{const task={tick,interval,cancelled:false};tasks.push(task);return()=>{task.cancelled=true}}});
+ assert.equal(tasks[0].interval,15000);tasks[0].tick();assert.equal(updates,1);
+ hidden=true;events.dispatchEvent(new Event('visibilitychange'));assert(tasks[0].cancelled);tasks[0].tick();assert.equal(updates,1);
+ hidden=false;events.dispatchEvent(new Event('visibilitychange'));assert.equal(updates,2);assert.equal(tasks[1].interval,15000);
+ stop();assert(tasks[1].cancelled);tasks[1].tick();assert.equal(updates,2);
+});

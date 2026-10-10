@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 468 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 469 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -288,3 +288,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Deep-sky catalogue coordinates have a formatted, selectable J2000 display and copy action. Four regression groups cover known objects, carries/poles/negative zero, invalid bounds and round trips over all 109 records, retaining exact decimal values in copied text. Simulated clipboard denial/retry and delayed-copy target changes produced correct feedback; desktop/320-pixel cards fit without overflow/errors. All 464 tests, types/lint/build/packaging pass. Actual phone clipboard permission/receipt remains pending.
 
 - [x] Offline setup failure and a 20-second delay offer an explicit retry without reloading unfinished coordinates/time. Local production browser checks recovered from script and fallback-cache HTTP failures, completed a cached offline/online round trip with the original site/time, and recovered a late activation after retry. Physical installed-PWA acceptance remains pending.
+
+- [x] Camera position polling stops while hidden, resumes at the original 15-second cadence, and is removed on close. A controlled local browser lifecycle check refreshed camera live time immediately without changing the planner time. Actual phone background/resume remains pending.
