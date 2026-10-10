@@ -7,10 +7,11 @@ import {reloadPlanner} from '@/lib/reload-planner';
 
 type Props={name:string;children:ReactNode};
 
-function ViewLoading({name}:{name:string}){
+function ViewLoading({name,fallback}:{name:string;fallback?:ReactNode}){
  const [delayedName,setDelayedName]=useState<string|null>(null);
  useEffect(()=>{const timeout=setTimeout(()=>setDelayedName(name),15000);return()=>clearTimeout(timeout)},[name]);
  const delayed=delayedName===name;
+ if(!delayed&&fallback!==undefined)return fallback;
  return <section className={`panel tab-loading${delayed?' view-load-delayed':''}`} role="status" aria-label={`${name} loading`}>
   {delayed?<><h3>{name} is taking longer to load</h3><p>Check your connection. You can still use the other tabs while this view loads, or reload Nightjar to try again.</p><ViewRecovery/></>:<>Loading {name.toLowerCase()}…</>}
  </section>;
@@ -34,5 +35,5 @@ class ViewBoundary extends Component<Props,{failed:boolean}>{
 }
 
 export default function DeferredView({name,children,fallback}:Props&{fallback?:ReactNode}){
- return <ViewBoundary name={name}><Suspense fallback={fallback??<ViewLoading name={name}/>}>{children}</Suspense></ViewBoundary>;
+ return <ViewBoundary name={name}><Suspense fallback={<ViewLoading name={name} fallback={fallback}/>}>{children}</Suspense></ViewBoundary>;
 }

@@ -292,3 +292,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Camera position polling stops while hidden, resumes at the original 15-second cadence, and is removed on close. A controlled local browser lifecycle check refreshed camera live time immediately without changing the planner time. Actual phone background/resume remains pending.
 
 - [x] The native install offer has a single pending action and preserves confirmed installation when an older choice completes. Local browser event simulation verified pending/dismissal/re-offer/late success and a 320-pixel layout; actual browser installation remains pending.
+
+- [x] Custom camera/3D loading placeholders share the 15-second recovery deadline. Held-module browser checks verified guarded reload and direct time review closing each overlay, focusing the retained field, and keeping the selected instant. Normal closes still restore launcher focus. Physical phone/reader acceptance remains pending.
