@@ -178,3 +178,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .target-note-read-error{margin:14px 0}.target-note-read-error .button{max-width:100%;white-space:normal}
 
 @media(max-width:640px){.app .text-button{min-height:44px}}
+@media(max-width:700px){.top .nav-wrap{display:none}.top .brand{margin-bottom:0}}
+@media(min-width:701px) and (max-width:1000px){.top .nav-wrap{min-width:0}.top .navigation{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));height:auto!important;gap:0!important}.top .navigation button{height:48px;min-width:0;white-space:normal}}
