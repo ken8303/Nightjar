@@ -19,6 +19,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
 - Named equipment setups saved on this device. Unreadable collections show Retry guidance, preserve stored data and retain the last readable setups and current imaging fields.
 - Small-field mosaic planner with overlap, rotated panel centres and CSV export.
+- Imaging inputs accept a dot or a single decimal comma, signed values and scientific notation. Omit thousands separators. Raw incomplete/invalid text is retained separately from calculations and saved-equipment validation; malformed values cannot enable setup saving or mosaic export. Positive fields use decimal/numeric keyboard hints, and signed fields keep a keyboard with minus entry available.
 - Interactive 3D Moon with NASA surface imagery, labelled landmarks, phase lighting and a lunar phase timeline.
 - Compare up to four saved/current locations at the same UTC forecast hour, with weather, Moon visibility and an explained planning score. Previous successful forecasts remain visible during refresh/failure with explicit update status; highest-score labels require fresh results for every selected site. Each site also shows its best remaining dark forecast window and can open the Tonight planner at that site and time.
 - Upcoming lunar eclipses with global contact times and local Moon altitude at each contact, plus UTC-safe calendar downloads containing the full event and contact notes.

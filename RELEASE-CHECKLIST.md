@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 469 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 474 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -299,3 +299,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Expanded 3D recovery panels scroll instead of clipping actions in short viewports. Production browser checks covered error recovery at 800×400 and 320×568, plus delayed recovery at 800×400; keyboard scrolling reached the review/reload actions. Physical touch/reader acceptance remains pending.
 
 - [x] Deferred sky shortcuts work when native pointer activation does not focus the link. A held deep-sky import verified explicit launcher focus and eventual section/hash jump; moving focus later kept the earlier jump cancelled. Local compact checks retained selected time and matched page widths. Physical Safari/reader testing remains pending.
+
+- [x] Imaging number entry preserves decimal commas instead of silently dropping them. Local browser QA saved 12,5 as numeric 12.5 mm, calculated comma/signed mosaics and guiding, refused invalid bounds/hex/fractional rows, restored exact invalid raw drafts, and recovered a denied save. Field errors are linked and 320-pixel inputs use 16-pixel text/46-pixel height without overflow. Native keyboard/reader and recovery-file receipt remain pending.

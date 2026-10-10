@@ -11,7 +11,9 @@ export function parsePhotographyDraft(value:unknown):PhotographyDraft|null{
   const text=draft[field];if(typeof text!=='string')return null;
   if(field==='name'){if(text.length>80)return null}
   else if(field==='catalogueId'){if(text!==''&&!/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(text))return null}
-  else if(text.length>40||!/^[-+]?(?:\d*\.?\d*(?:[eE][-+]?\d*)?)$/.test(text))return null;
+  // Drafts retain bounded raw text, including invalid/incomplete input.
+  // Calculation and saved-equipment validation are separate.
+  else if(text.length>40)return null;
  }
  return Object.fromEntries(Object.keys(defaults).map(field=>[field,draft[field]])) as PhotographyDraft;
 }

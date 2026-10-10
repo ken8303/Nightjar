@@ -35,3 +35,11 @@ test('manual imaging recovery retains incomplete Unicode fields without changing
  const max={...defaultPhotographyDraft(),name:'\u0000'.repeat(80)};for(const key of Object.keys(max)){if(!['name','catalogueId'].includes(key))max[key]='1'.repeat(40)}
  assert(new TextEncoder().encode(makePhotographyDraftRecovery(max).text).length<8192);
 });
+
+test('raw localized and invalid numeric text survives storage and manual recovery within its bound',()=>{
+ const draft={...defaultPhotographyDraft(),width:'23,5',focal:'12,,5',pixel:'0x10',ra:'incomplete',dec:'−23,5',rms:'1e+',catalogueId:''};
+ const map=new Map(),storage={getItem:key=>map.get(key)??null,setItem:(key,value)=>map.set(key,value)};
+ assert.equal(savePhotographyDraft(draft,storage),true);assert.deepEqual(readPhotographyDraft(storage),{draft,status:'restored'});
+ assert.deepEqual(JSON.parse(makePhotographyDraftRecovery(draft).text).draft,draft);
+ assert.equal(savePhotographyDraft({...draft,focal:'x'.repeat(41)},storage),false);assert.deepEqual(readPhotographyDraft(storage).draft,draft);
+});
