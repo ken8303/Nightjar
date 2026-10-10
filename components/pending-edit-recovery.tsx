@@ -3,11 +3,13 @@ import {usePendingEdits} from '@/hooks/use-pending-edits';
 import {observingTimeEditLabel,reviewObservingTimeEvent} from '@/lib/observing-time-actions';
 import {coordinateEntryEditLabel,reviewCoordinateEntryEvent} from '@/lib/coordinate-entry-actions';
 import {imagingDraftEditLabel,reviewImagingDraftEvent} from '@/lib/imaging-draft-actions';
+import {diaryFormEditLabel,reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
 
 const actions=[
  {label:observingTimeEditLabel,event:reviewObservingTimeEvent,text:'Review time edit'},
  {label:coordinateEntryEditLabel,event:reviewCoordinateEntryEvent,text:'Review coordinates'},
  {label:imagingDraftEditLabel,event:reviewImagingDraftEvent,text:'Review imaging draft'},
+ {label:diaryFormEditLabel,event:reviewDiaryFormsEvent,text:'Review diary forms'},
 ];
 export default function PendingEditRecovery(){
  const pending=usePendingEdits().split(', ');

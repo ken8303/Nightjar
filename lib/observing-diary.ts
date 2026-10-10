@@ -14,5 +14,8 @@ export function normalizeDiary(value:unknown):Observation[]{
  return value.map(entry=>({id:entry.id,target:entry.target,observedAt:entry.observedAt,place:{name:entry.place.name,latitude:entry.place.latitude,longitude:entry.place.longitude,...(entry.place.country!==undefined?{country:entry.place.country}:{}),...(entry.place.timezone?{timezone:entry.place.timezone}:{}),...(entry.place.bortle?{bortle:entry.place.bortle}:{})},outcome:entry.outcome,equipment:entry.equipment,notes:entry.notes}));
 }
 export function readDiary(storage:Pick<Storage,'getItem'>){const raw=storage.getItem(diaryKey);if(raw&&raw.length>diaryMaxStoredChars)throw Error('The saved diary is too large.');return normalizeDiary(JSON.parse(raw===null?'[]':raw))}
-export function saveDiary(value:Observation[],storage:Pick<Storage,'setItem'>){storage.setItem(diaryKey,JSON.stringify(normalizeDiary(value)))}
+export function saveDiary(value:Observation[],storage:Pick<Storage,'setItem'>){
+ const text=JSON.stringify(normalizeDiary(value));
+ try{storage.setItem(diaryKey,text)}catch{throw Error('Your saved diary could not be updated. Keep this view open, restore browser storage access and retry. Your unfinished text is retained.')}
+}
 export function mergeDiary(existing:Observation[],incoming:Observation[]){const known=new Set(existing.map(entry=>entry.id));return normalizeDiary([...existing,...incoming.filter(entry=>!known.has(entry.id))])}

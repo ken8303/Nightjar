@@ -27,6 +27,7 @@ import {readAtlasView,saveAtlasView,readAtlasLayers,saveAtlasLayers,type AtlasVi
 import MobileNavigation,{plannerSections} from '@/components/planner-navigation';
 import {createPlannerNavigation,type PlannerNavigationIntent} from '@/lib/planner-navigation';
 import {reviewObservingTimeEvent} from '@/lib/observing-time-actions';
+import {reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
 import ObservingTimeControl from '@/components/observing-time-control';
 import AtmosphereDetails from '@/components/atmosphere-details';
 import SevenNightOutlook from '@/components/seven-night-outlook';
@@ -149,6 +150,15 @@ function Planner(){
   };
   window.addEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
   return()=>window.removeEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
+ },[tab,setTab]);
+ useEffect(()=>{
+  const reviewDiary=()=>{
+   if(tab!=='sky')flushSync(()=>setTab('sky'));
+   const recovery=document.getElementById('diary-form-recovery')??document.getElementById('observing-diary');
+   recovery?.focus({preventScroll:true});recovery?.scrollIntoView({block:'center',behavior:'instant'});
+  };
+  window.addEventListener(reviewDiaryFormsEvent,reviewDiary);
+  return()=>window.removeEventListener(reviewDiaryFormsEvent,reviewDiary);
  },[tab,setTab]);
  useEffect(()=>{
   const reviewImaging=()=>{

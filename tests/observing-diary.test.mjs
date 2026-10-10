@@ -37,3 +37,12 @@ test('a diary at its allowed escaped-text capacity can be read back after saving
  const source=storage(),records=Array.from({length:200},(_,index)=>({...entry,id:`escaped-${index}`,notes:'\u0000'.repeat(2000)}));
  saveDiary(records,source);assert(source.getItem('nightjar-observing-diary-v1').length>1024*1024);assert.deepEqual(readDiary(source),records);
 });
+
+test('write failures give actionable guidance without masking validation or changing source records',()=>{
+ const records=[structuredClone(entry)],before=structuredClone(records);
+ for(const failure of [new DOMException('Native quota detail','QuotaExceededError'),new DOMException('Native blocked detail','SecurityError'),Error('Opaque storage detail')]){
+  assert.throws(()=>saveDiary(records,{setItem:()=>{throw failure}}),error=>error.message==='Your saved diary could not be updated. Keep this view open, restore browser storage access and retry. Your unfinished text is retained.');
+  assert.deepEqual(records,before);
+ }
+ let writes=0;assert.throws(()=>saveDiary([{...entry,notes:'x'.repeat(2001)}],{setItem:()=>writes++}),/observing diary/);assert.equal(writes,0);
+});
