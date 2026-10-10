@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 464 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 468 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -286,3 +286,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Reload recovery uses one wrapping, labelled toolbar for time, coordinates and failed imaging-draft saves. Imaging review opens Photo tools and focuses recovery guidance; coordinate review focuses a missing longitude. Combined storage-failure/three-owner/real-waiting-worker tests preserved 777 mm, selected UTC/site and separate guards. Final 320-pixel actions have 8-pixel gaps without overflow; only resolving all owners enabled the update. Twenty-two targeted tests, final types/lint/build/packaging pass; preceding full suite 460.
 
 - Deep-sky catalogue coordinates have a formatted, selectable J2000 display and copy action. Four regression groups cover known objects, carries/poles/negative zero, invalid bounds and round trips over all 109 records, retaining exact decimal values in copied text. Simulated clipboard denial/retry and delayed-copy target changes produced correct feedback; desktop/320-pixel cards fit without overflow/errors. All 464 tests, types/lint/build/packaging pass. Actual phone clipboard permission/receipt remains pending.
+
+- [x] Offline setup failure and a 20-second delay offer an explicit retry without reloading unfinished coordinates/time. Local production browser checks recovered from script and fallback-cache HTTP failures, completed a cached offline/online round trip with the original site/time, and recovered a late activation after retry. Physical installed-PWA acceptance remains pending.
