@@ -176,3 +176,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 #visibility-planner{scroll-margin-top:24px}#visibility-planner:focus-visible{outline:2px solid var(--accent-soft);outline-offset:4px}@media(max-width:420px){.sky-shortcuts>:last-child:nth-child(odd){grid-column:1/-1}}
 
 .target-note-read-error{margin:14px 0}.target-note-read-error .button{max-width:100%;white-space:normal}
+
+@media(max-width:640px){.app .text-button{min-height:44px}}
