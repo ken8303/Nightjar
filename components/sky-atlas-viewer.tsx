@@ -5,6 +5,7 @@ import {reviewObservingTimeEvent} from '@/lib/observing-time-actions';
 import {reviewCoordinateEntryEvent} from '@/lib/coordinate-entry-actions';
 import {reviewImagingDraftEvent} from '@/lib/imaging-draft-actions';
 import {reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
+import {reviewTargetNotesEvent} from '@/lib/target-note-actions';
 import {Dialog} from 'radix-ui';
 import {Camera,Maximize2,X,Image as PhotoIcon} from 'lucide-react';
 import {type Place} from '@/lib/sky';
@@ -15,7 +16,7 @@ import ExpandedSkyAtlas from '@/components/expanded-sky-atlas';
 import SkyLayerControls,{type SkyLayerSettings} from '@/components/sky-layer-controls';
 const SkyDome=lazy(()=>import('@/components/sky-dome'));
 const CameraSky=lazy(()=>import('@/components/camera-sky'));
-const editReviewEvents=[reviewObservingTimeEvent,reviewCoordinateEntryEvent,reviewImagingDraftEvent,reviewDiaryFormsEvent];
+const editReviewEvents=[reviewObservingTimeEvent,reviewCoordinateEntryEvent,reviewImagingDraftEvent,reviewDiaryFormsEvent,reviewTargetNotesEvent];
 export type SkyAtlasProps={place:Place;date:Date;selected:string;onSelect:(name:string)=>void;showLines:boolean;showLabels:boolean;showMilkyWay:boolean};
 function focusDetails(id:string){
  const details=document.getElementById(id);

@@ -4,12 +4,14 @@ import {observingTimeEditLabel,reviewObservingTimeEvent} from '@/lib/observing-t
 import {coordinateEntryEditLabel,reviewCoordinateEntryEvent} from '@/lib/coordinate-entry-actions';
 import {imagingDraftEditLabel,reviewImagingDraftEvent} from '@/lib/imaging-draft-actions';
 import {diaryFormEditLabel,reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
+import {targetNoteEditLabel,reviewTargetNotesEvent} from '@/lib/target-note-actions';
 
 const actions=[
  {label:observingTimeEditLabel,event:reviewObservingTimeEvent,text:'Review time edit'},
  {label:coordinateEntryEditLabel,event:reviewCoordinateEntryEvent,text:'Review coordinates'},
  {label:imagingDraftEditLabel,event:reviewImagingDraftEvent,text:'Review imaging draft'},
  {label:diaryFormEditLabel,event:reviewDiaryFormsEvent,text:'Review diary forms'},
+ {label:targetNoteEditLabel,event:reviewTargetNotesEvent,text:'Review target notes'},
 ];
 export default function PendingEditRecovery(){
  const pending=usePendingEdits().split(', ');

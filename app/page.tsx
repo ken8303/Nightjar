@@ -28,6 +28,7 @@ import MobileNavigation,{plannerSections} from '@/components/planner-navigation'
 import {createPlannerNavigation,type PlannerNavigationIntent} from '@/lib/planner-navigation';
 import {reviewObservingTimeEvent} from '@/lib/observing-time-actions';
 import {reviewDiaryFormsEvent} from '@/lib/diary-form-actions';
+import {reviewTargetNotesEvent} from '@/lib/target-note-actions';
 import ObservingTimeControl from '@/components/observing-time-control';
 import AtmosphereDetails from '@/components/atmosphere-details';
 import SevenNightOutlook from '@/components/seven-night-outlook';
@@ -150,6 +151,16 @@ function Planner(){
   };
   window.addEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
   return()=>window.removeEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
+ },[tab,setTab]);
+ useEffect(()=>{
+  const reviewNotes=()=>{
+   if(tab!=='sky')flushSync(()=>setTab('sky'));
+   const recovery=document.getElementById('target-note-recovery')??document.getElementById('target-finder');
+   const disclosure=recovery?.closest('details');if(disclosure)disclosure.open=true;
+   recovery?.focus({preventScroll:true});recovery?.scrollIntoView({block:'center',behavior:'instant'});
+  };
+  window.addEventListener(reviewTargetNotesEvent,reviewNotes);
+  return()=>window.removeEventListener(reviewTargetNotesEvent,reviewNotes);
  },[tab,setTab]);
  useEffect(()=>{
   const reviewDiary=()=>{
