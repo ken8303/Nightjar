@@ -12,6 +12,8 @@ export default function PwaSupport() {
   const pendingText=usePendingEdits();
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(false);
+  const [installing,setInstalling]=useState(false);
+  const installation=useRef({pending:false,installed:false});
   const [offline, setOffline] = useState(false);
   const [message, setMessage] = useState('');
   const [setupRevision,setSetupRevision]=useState(0),[setupStarting,setSetupStarting]=useState(false),[setupIssue,setSetupIssue]=useState(''),[setupMessage,setSetupMessage]=useState('');
@@ -21,10 +23,10 @@ export default function PwaSupport() {
   const [updateError,setUpdateError]=useState('');
   useEffect(() => {
     const mode = window.matchMedia('(display-mode: standalone)');
-    const updateMode = () => setInstalled(mode.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
+    const updateMode = () => {const value=mode.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);installation.current.installed=value;setInstalled(value)};
     const updateNetwork = () => setOffline(!navigator.onLine);
-    const offerInstall = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt); };
-    const didInstall = () => { setInstalled(true); setPrompt(null); setMessage('Nightjar is installed.'); };
+    const offerInstall = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt);setMessage(''); };
+    const didInstall = () => { installation.current.installed=true;setInstalled(true);setInstalling(false);setPrompt(null);setMessage('Nightjar is installed.'); };
     updateMode(); updateNetwork();
     window.addEventListener('beforeinstallprompt', offerInstall);
     window.addEventListener('appinstalled', didInstall);
@@ -66,16 +68,17 @@ export default function PwaSupport() {
     });
   }
   async function install() {
-    if (!prompt) return;
-    try { await prompt.prompt(); const choice = await prompt.userChoice; setMessage(choice.outcome === 'accepted' ? 'Installation requested. Follow your browser’s instructions.' : 'You can install Nightjar later from your browser menu.'); }
-    catch { setMessage('Use your browser menu to add Nightjar to your home screen.'); }
-    finally { setPrompt(null); }
+    if (!prompt||installation.current.pending||installation.current.installed) return;
+    const offered=prompt;installation.current.pending=true;setInstalling(true);setMessage('');
+    try { await offered.prompt(); const choice = await offered.userChoice; if(!installation.current.installed)setMessage(choice.outcome === 'accepted' ? 'Installation requested. Follow your browser’s instructions.' : 'You can install Nightjar later from your browser menu.'); }
+    catch { if(!installation.current.installed)setMessage('Use your browser menu to add Nightjar to your home screen.'); }
+    finally { installation.current.pending=false;setInstalling(false);setPrompt(current=>current===offered?null:current); }
   }
   return <aside id="install-app" className="pwa-support" aria-label="Nightjar app">
     {offline && <p className="offline-notice" role="status">You’re offline. Live conditions cannot refresh; any displayed forecast may be out of date.</p>}
     {pendingText&&<p className="muted">Reload is paused for unfinished edits: {pendingText}. Resolve or copy them before reloading.</p>}<PendingEditRecovery/>{updateWorker&&<div className="pwa-update" role="status"><p>A new Nightjar version is ready. Your saved places, targets and equipment stay on this device.</p><p>Save unfinished edits before updating. If saving fails, keep this view open and use its recovery tools first. Unsaved text can be lost on reload.</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{updating?'Updating Nightjar…':'Update and reload'}</button></div>}
     {updateError&&<div className="pwa-update"><p role="status">{updateError}</p><button type="button" className="button" disabled={offline||Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setUpdateError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button></div>}
-    {!installed && <details open><summary>Take Nightjar with you · Install app</summary><p>Add Nightjar to your home screen for a standalone view.</p>{prompt && <button className="button primary" onClick={install}>Install Nightjar</button>}<p>On iPhone or iPad, open this site in Safari, choose Share, then Add to Home Screen. On Android or desktop, look for Install app or Add to Home screen in your browser menu.</p><p className="muted">An internet connection is needed for live conditions and to reopen the full planner. Previously opened tab files may remain available during a connection drop; the offline page can show plans saved on this device while you reconnect. Installation availability depends on your browser.</p></details>}
+    {!installed && <details open><summary>Take Nightjar with you · Install app</summary><p>Add Nightjar to your home screen for a standalone view.</p>{prompt && <button type="button" className="button primary" disabled={installing} onClick={install}>{installing?'Waiting for browser installation…':'Install Nightjar'}</button>}<p>On iPhone or iPad, open this site in Safari, choose Share, then Add to Home Screen. On Android or desktop, look for Install app or Add to Home screen in your browser menu.</p><p className="muted">An internet connection is needed for live conditions and to reopen the full planner. Previously opened tab files may remain available during a connection drop; the offline page can show plans saved on this device while you reconnect. Installation availability depends on your browser.</p></details>}
     {(setupIssue||setupStarting&&setupRevision>0)&&<div className="pwa-setup-recovery"><p role="status">{setupStarting?'Preparing offline fallback…':setupIssue}</p><button type="button" className="button" disabled={setupStarting||offline||updating} onClick={()=>{if(setupStarting||offline||updating)return;setSetupStarting(true);setSetupIssue('');setSetupMessage('');setSetupRevision(value=>value+1)}}>{setupStarting?'Preparing offline fallback…':'Retry offline setup'}</button></div>}
     {setupMessage&&<p role="status">{setupMessage}</p>}
     {message && <p role="status">{message}</p>}

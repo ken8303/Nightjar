@@ -290,3 +290,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Offline setup failure and a 20-second delay offer an explicit retry without reloading unfinished coordinates/time. Local production browser checks recovered from script and fallback-cache HTTP failures, completed a cached offline/online round trip with the original site/time, and recovered a late activation after retry. Physical installed-PWA acceptance remains pending.
 
 - [x] Camera position polling stops while hidden, resumes at the original 15-second cadence, and is removed on close. A controlled local browser lifecycle check refreshed camera live time immediately without changing the planner time. Actual phone background/resume remains pending.
+
+- [x] The native install offer has a single pending action and preserves confirmed installation when an older choice completes. Local browser event simulation verified pending/dismissal/re-offer/late success and a 320-pixel layout; actual browser installation remains pending.
