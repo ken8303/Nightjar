@@ -10,8 +10,9 @@ import { A, Place, skyBodies, bodyPosition, moonInfo, timeLabel, observingMilest
 import ViewingMode from '@/components/viewing-mode';
 import SkyChart from '@/components/sky-chart';
 import CoordinateEntry from '@/components/coordinate-entry';
-import {coordinateEntryMatchesPoint} from '@/lib/coordinate-entry';
+import {coordinateEntryMatchesPoint,coordinateEntryValue} from '@/lib/coordinate-entry';
 import {coordinateEntryEditLabel,reviewCoordinateEntryEvent} from '@/lib/coordinate-entry-actions';
+import {imagingDraftEditLabel,reviewImagingDraftEvent} from '@/lib/imaging-draft-actions';
 import SiteNameEditor from '@/components/site-name-editor';
 import SavedListControls,{savedListPageSize} from '@/components/saved-list-controls';
 import {renameObservingSite} from '@/lib/site-name';
@@ -71,7 +72,7 @@ function Planner(){
  function chooseAtlasView(view:AtlasView){setAtlasView(view);setViewStorageError(!saveAtlasView(view))}
  const [planRevision,setPlanRevision]=useState(0);
  const [imagingState,setImagingState]=useState(readPhotographyDraft);
- const reportImagingPending=usePendingEditReporter('tools','imaging draft fields',true);
+ const reportImagingPending=usePendingEditReporter('tools',imagingDraftEditLabel,true);
  const imagingDraft=useRef(imagingState.draft);
  const [focusImaging,setFocusImaging]=useState(false);
  const changeImagingDraft=useCallback((patch:Partial<PhotographyDraft>)=>{
@@ -140,12 +141,23 @@ function Planner(){
  useEffect(()=>{
   const reviewCoordinates=()=>{
    if(tab!=='places')flushSync(()=>setTab('places'));
-   const input=document.getElementById('manual-latitude');
+   const draft=coordinateDraftRef.current;
+   const field=coordinateEntryValue(draft.lat,'latitude')!==null&&coordinateEntryValue(draft.lon,'longitude')===null?'manual-longitude':'manual-latitude';
+   const input=document.getElementById(field);
    const disclosure=input?.closest('details');if(disclosure)disclosure.open=true;
    input?.focus({preventScroll:true});input?.scrollIntoView({block:'center',behavior:'instant'});
   };
   window.addEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
   return()=>window.removeEventListener(reviewCoordinateEntryEvent,reviewCoordinates);
+ },[tab,setTab]);
+ useEffect(()=>{
+  const reviewImaging=()=>{
+   flushSync(()=>{setFocusImaging(false);if(tab!=='tools')setTab('tools')});
+   const recovery=document.getElementById('imaging-draft-recovery');
+   recovery?.focus({preventScroll:true});recovery?.scrollIntoView({block:'center',behavior:'instant'});
+  };
+  window.addEventListener(reviewImagingDraftEvent,reviewImaging);
+  return()=>window.removeEventListener(reviewImagingDraftEvent,reviewImaging);
  },[tab,setTab]);
  useEffect(()=>{
   if(!startupAnchor)return;

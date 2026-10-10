@@ -2,8 +2,7 @@
 
 import {Component, Suspense, type ReactNode,useState,useEffect} from 'react';
 import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
-import TimeEditRecovery from '@/components/time-edit-recovery';
-import CoordinateEditRecovery from '@/components/coordinate-edit-recovery';
+import PendingEditRecovery from '@/components/pending-edit-recovery';
 import {reloadPlanner} from '@/lib/reload-planner';
 
 type Props={name:string;children:ReactNode};
@@ -19,7 +18,7 @@ function ViewLoading({name}:{name:string}){
 
 function ViewRecovery(){
  const pendingText=usePendingEdits(),[reloadError,setReloadError]=useState('');
- return <>{pendingText&&<p>Reload is paused for unfinished edits: {pendingText}. Resolve or copy them before reloading.</p>}<TimeEditRecovery/><CoordinateEditRecovery/><button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setReloadError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button>{reloadError&&<p role="status">{reloadError}</p>}</>;
+ return <>{pendingText&&<p>Reload is paused for unfinished edits: {pendingText}. Resolve or copy them before reloading.</p>}<PendingEditRecovery/><button type="button" className="button" disabled={Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setReloadError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button>{reloadError&&<p role="status">{reloadError}</p>}</>;
 }
 class ViewBoundary extends Component<Props,{failed:boolean}>{
  state={failed:false};
