@@ -15,7 +15,7 @@ export function coordinateInputDraft(value:string,negative:boolean){
 }
 function numericText(value:string){
  const raw=value.normalize('NFKC').trim().replace(/^−/,'-');
- return raw.replace(/^([+-]?\d+),(\d+)$/,'$1.$2');
+ return /^[-+]?(?:\d+,\d*|,\d+)(?:e[-+]?\d+)?$/i.test(raw)?raw.replace(',','.'):raw;
 }
 export function coordinateEntryValue(value:string,axis:'latitude'|'longitude'){
  const raw=numericText(value);

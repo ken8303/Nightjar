@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 455 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 456 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -274,3 +274,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Video-player errors now suppress camera labels even when cached frames still report ready/playing. A regression group covers error, stale playback events, detach, healthy recovery and disposal. A synthetic canvas stream and absolute pose showed three labels, then zero with CAMERA PAUSED on error, and three after recovery. Compact full-screen recovery fit320 pixels; physical camera failure acceptance remains pending.
 
 - PWA/deferred reload warnings offer Review coordinates for retained drafts. Desktop/320-pixel Moon/Aurora recovery opened the disclosure, focused latitude and preserved hemisphere/site/time. A separate unfinished site name survived recovery; clearing coordinates removed only its own guard/action and updates stayed disabled until the name edit was cancelled. Seventeen targeted tests, types, lint, build and packaging pass; full preceding suite455.
+
+- Fractional/trailing/exponent decimal-comma coordinates now follow the same grammar and bounds as decimal-point values. Ten targeted checks and the full456-test suite pass. Compact UI selected north0.5/west0.25 without changing UTC time; comma-only input kept the previous site and focused its error. Types/lint/build/packaging pass.

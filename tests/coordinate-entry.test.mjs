@@ -24,6 +24,12 @@ test('compound signs stay invalid through typing and hemisphere changes instead 
   }
  }
 });
+test('decimal-comma fractions and exponents use the same bounds as decimal points without inventing empty numbers',()=>{
+ for(const [text,expected] of [[',5',.5],['−,5',-.5],['33,',33],['0,',0],['1,5e1',15],['+,５',.5]])assert.equal(coordinateEntryValue(text,'latitude'),expected,text);
+ for(const text of [',','-,','+,','1,e','1,2,3','1,5e2',',5e3','1 234,5'])assert.equal(coordinateEntryValue(text,'latitude'),null,text);
+ assert.equal(coordinateEntryValue('-1,8e2','longitude'),-180);
+ assert.equal(coordinateEntryValue('-1,81e2','longitude'),null);
+});
 test('zero and poles stay valid while blanks, partial values and malformed formats cannot become coordinates',()=>{
  assert.equal(coordinateEntryValue('0','latitude'),0);assert.equal(coordinateEntryValue('-90','latitude'),-90);assert.equal(coordinateEntryValue('180','longitude'),180);
  assert(Object.is(coordinateEntryValue('-0','longitude'),-0));
