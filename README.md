@@ -134,3 +134,5 @@ Deep-sky details show catalogue J2000 coordinates in hour/minute/second and sign
 Camera sky positions refresh every 15 seconds while the viewer is visible. Backgrounding cancels that timer and returning refreshes immediately; camera, motion and screen-awake requests still require an explicit restart. Closing the viewer removes its clock and listeners.
 
 Camera and 3D loading placeholders show recovery guidance after 15 seconds. Reload pauses for unfinished entries. Reviewing an edit closes the camera/3D overlay before focusing its planner field, so the dialog cannot trap focus behind the recovery action.
+
+Long loading/error guidance in the expanded 3D dialog scrolls within its panel on short screens. The recovery panel can take keyboard focus and scroll with standard keys, keeping review and reload actions reachable.

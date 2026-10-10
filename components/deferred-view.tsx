@@ -12,7 +12,7 @@ function ViewLoading({name,fallback}:{name:string;fallback?:ReactNode}){
  useEffect(()=>{const timeout=setTimeout(()=>setDelayedName(name),15000);return()=>clearTimeout(timeout)},[name]);
  const delayed=delayedName===name;
  if(!delayed&&fallback!==undefined)return fallback;
- return <section className={`panel tab-loading${delayed?' view-load-delayed':''}`} role="status" aria-label={`${name} loading`}>
+ return <section className={`panel tab-loading${delayed?' view-load-delayed':''}`} role="status" tabIndex={delayed?0:undefined} aria-label={`${name} loading`}>
   {delayed?<><h3>{name} is taking longer to load</h3><p>Check your connection. You can still use the other tabs while this view loads, or reload Nightjar to try again.</p><ViewRecovery/></>:<>Loading {name.toLowerCase()}…</>}
  </section>;
 }
@@ -25,7 +25,7 @@ class ViewBoundary extends Component<Props,{failed:boolean}>{
  state={failed:false};
  static getDerivedStateFromError(){return {failed:true}}
  render(){
-  if(this.state.failed)return <section className="panel view-unavailable" role="alert">
+  if(this.state.failed)return <section className="panel view-unavailable" role="alert" tabIndex={0}>
    <h3>{this.props.name} is unavailable</h3>
    <p>If your connection dropped, reconnect and reload Nightjar. You can still use the other tabs.</p>
    <ViewRecovery/>

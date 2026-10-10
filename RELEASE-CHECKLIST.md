@@ -294,3 +294,6 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] The native install offer has a single pending action and preserves confirmed installation when an older choice completes. Local browser event simulation verified pending/dismissal/re-offer/late success and a 320-pixel layout; actual browser installation remains pending.
 
 - [x] Custom camera/3D loading placeholders share the 15-second recovery deadline. Held-module browser checks verified guarded reload and direct time review closing each overlay, focusing the retained field, and keeping the selected instant. Normal closes still restore launcher focus. Physical phone/reader acceptance remains pending.
+
+- [x] Timed camera coordinate review closes the overlay, focuses missing longitude and retains latitude; timed 3D imaging review focuses the retained draft and retries a failed save. A 777 mm focal length survived both section changes.
+- [x] Expanded 3D recovery panels scroll instead of clipping actions in short viewports. Production browser checks covered error recovery at 800×400 and 320×568, plus delayed recovery at 800×400; keyboard scrolling reached the review/reload actions. Physical touch/reader acceptance remains pending.

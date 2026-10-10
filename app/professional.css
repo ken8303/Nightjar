@@ -184,3 +184,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .pending-edit-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.pending-edit-actions .button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
 
 .catalogue-coordinates{margin:18px 0;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface-raised)}.catalogue-coordinates dl{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}.catalogue-coordinates dl>div{display:block;padding:0;border:0}.catalogue-coordinates dt{margin-bottom:3px}.catalogue-coordinates dd{margin:0;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;-webkit-user-select:text;user-select:text}.catalogue-coordinates .button{max-width:100%;white-space:normal}.catalogue-copy-status:empty{margin:0}
+
+/* Long recovery guidance must stay reachable inside the fixed 3D dialog. */
+.expanded-dome-dialog>.view-load-delayed,.expanded-dome-dialog>.view-unavailable{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.expanded-dome-dialog>.view-load-delayed:focus-visible,.expanded-dome-dialog>.view-unavailable:focus-visible{outline:2px solid var(--accent-soft);outline-offset:-3px}
