@@ -182,3 +182,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 @media(min-width:701px) and (max-width:1000px){.top .nav-wrap{min-width:0}.top .navigation{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));height:auto!important;gap:0!important}.top .navigation button{height:48px;min-width:0;white-space:normal}}
 
 .pending-edit-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.pending-edit-actions .button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+.catalogue-coordinates{margin:18px 0;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface-raised)}.catalogue-coordinates dl{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}.catalogue-coordinates dl>div{display:block;padding:0;border:0}.catalogue-coordinates dt{margin-bottom:3px}.catalogue-coordinates dd{margin:0;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;-webkit-user-select:text;user-select:text}.catalogue-coordinates .button{max-width:100%;white-space:normal}.catalogue-copy-status:empty{margin:0}
