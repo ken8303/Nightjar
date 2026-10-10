@@ -1,5 +1,6 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
+import {watchPlanningClock} from '@/lib/planning-clock';
 
 // Refresh only in the foreground. Resuming and reconnecting share the same
 // throttle so mobile lifecycle events cannot issue duplicate requests.
@@ -18,12 +19,10 @@ export function useForecastRefresh(maxAge=15*60*1000){
    if(age>=(reconnected?1000:maxAge))refresh();
   };
   const resume=()=>check(),online=()=>check(true);
-  const timer=setInterval(resume,30*1000);
-  document.addEventListener('visibilitychange',resume);
+  const stopClock=watchPlanningClock(document,resume,{hidden:()=>document.visibilityState==='hidden'});
   window.addEventListener('online',online);
   return()=>{
-   clearInterval(timer);
-   document.removeEventListener('visibilitychange',resume);
+   stopClock();
    window.removeEventListener('online',online);
   };
  },[maxAge,refresh]);

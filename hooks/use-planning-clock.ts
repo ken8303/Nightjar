@@ -1,10 +1,9 @@
 'use client';
 import {useSyncExternalStore} from 'react';
+import {watchPlanningClock} from '@/lib/planning-clock';
 
 function subscribe(update:()=>void){
- const timer=setInterval(update,30000);
- document.addEventListener('visibilitychange',update);
- return ()=>{clearInterval(timer);document.removeEventListener('visibilitychange',update)};
+ return watchPlanningClock(document,update,{hidden:()=>document.hidden});
 }
 const snapshot=()=>Math.floor(Date.now()/60000)*60000;
 const serverSnapshot=()=>0;

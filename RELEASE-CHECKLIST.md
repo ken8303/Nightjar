@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 456 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 460 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -278,3 +278,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Fractional/trailing/exponent decimal-comma coordinates now follow the same grammar and bounds as decimal-point values. Ten targeted checks and the full456-test suite pass. Compact UI selected north0.5/west0.25 without changing UTC time; comma-only input kept the previous site and focused its error. Types/lint/build/packaging pass.
 
 - Town search uses a search input and offers Clear location search after entry. Clear removes query/results/errors and restores focus without changing site/time. Compact planner text actions use44-pixel targets; final browser measurements confirmed44 pixels for Clear, geolocation and View conditions, with no horizontal overflow or console errors. Eight location tests, types, lint, final build and packaging pass; preceding full suite456.
+
+- Planning-clock and weather polling timers stop while hidden and refresh immediately on return, preserving request throttling and the selected site/time. Four lifecycle regression groups, full460 tests, final targeted10 tests, types/lint/build/packaging pass. A simulated lifecycle fixture measured3/0/3 foreground polling timers; two-hour return expired old windows and made one additional weather request even with repeated return events. Actual battery savings remain unmeasured.
