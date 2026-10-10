@@ -7,7 +7,7 @@ const vite=await createServer({configFile:false,root,server:{middlewareMode:true
 after(()=>vite.close());
 const {watchCameraPlayback}=await vite.ssrLoadModule('/lib/camera-playback.ts');
 class Video extends EventTarget{
- srcObject=null;paused=true;readyState=0;
+ srcObject=null;paused=true;readyState=0;error=null;
  send(type,values={}){Object.assign(this,values);this.dispatchEvent(new Event(type))}
 }
 test('a live stream with stopped playback pauses until current frames are playing again',()=>{
@@ -31,4 +31,14 @@ test('camera detach clears playback suspension and disposal ignores later media 
  const stop=watchCameraPlayback(video,value=>calls.push(value));assert.deepEqual(calls,[true]);
  video.send('emptied',{srcObject:null,readyState:0});assert.deepEqual(calls,[true,false]);
  stop();video.send('pause',{srcObject:{},paused:true});assert.deepEqual(calls,[true,false]);
+});
+test('a player error suppresses the overlay even with cached frames until a healthy stream plays',()=>{
+ const video=new Video(),calls=[];Object.assign(video,{srcObject:{},paused:false,readyState:4});
+ const stop=watchCameraPlayback(video,value=>calls.push(value));
+ video.send('error',{error:{code:3}});assert.deepEqual(calls,[true]);
+ video.send('canplay');video.send('playing');assert.deepEqual(calls,[true]);
+ video.send('emptied',{srcObject:null,readyState:0});assert.deepEqual(calls,[true,false]);
+ video.send('waiting',{srcObject:{},error:null,readyState:1});assert.deepEqual(calls,[true,false,true]);
+ video.send('playing',{paused:false,readyState:4});assert.deepEqual(calls,[true,false,true,false]);
+ stop();video.send('error',{error:{code:3}});assert.deepEqual(calls,[true,false,true,false]);
 });

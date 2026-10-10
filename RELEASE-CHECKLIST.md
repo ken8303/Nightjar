@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 454 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 455 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -270,3 +270,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Manual coordinate entry offers N/S and E/W controls for unsigned mobile decimals, accepts signed/Unicode and decimal-comma values, and refuses compound signs, incomplete values and out-of-bounds coordinates. Five helper regression groups and desktop/320-pixel UI checks verified errors/focus, zero, draft retention, queued old/new points and real waiting-update blocking/clear/reload. All 454 tests, types, lint, build and packaging pass. Physical decimal keyboard acceptance remains pending.
 
 - Editing the town query aborts the old search and clears old results immediately, so late old-town responses cannot appear under new text. Before/after held-response browser checks reproduced and fixed the mismatch; invalid input focus/description, correct selection and compact layout passed. Fourteen targeted tests plus types/lint/build/packaging pass; full preceding suite454.
+
+- Video-player errors now suppress camera labels even when cached frames still report ready/playing. A regression group covers error, stale playback events, detach, healthy recovery and disposal. A synthetic canvas stream and absolute pose showed three labels, then zero with CAMERA PAUSED on error, and three after recovery. Compact full-screen recovery fit320 pixels; physical camera failure acceptance remains pending.
