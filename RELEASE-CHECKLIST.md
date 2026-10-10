@@ -297,3 +297,5 @@ Completion percentages previously reported were estimates. Release acceptance is
 
 - [x] Timed camera coordinate review closes the overlay, focuses missing longitude and retains latitude; timed 3D imaging review focuses the retained draft and retries a failed save. A 777 mm focal length survived both section changes.
 - [x] Expanded 3D recovery panels scroll instead of clipping actions in short viewports. Production browser checks covered error recovery at 800×400 and 320×568, plus delayed recovery at 800×400; keyboard scrolling reached the review/reload actions. Physical touch/reader acceptance remains pending.
+
+- [x] Deferred sky shortcuts work when native pointer activation does not focus the link. A held deep-sky import verified explicit launcher focus and eventual section/hash jump; moving focus later kept the earlier jump cancelled. Local compact checks retained selected time and matched page widths. Physical Safari/reader testing remains pending.

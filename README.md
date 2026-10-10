@@ -136,3 +136,5 @@ Camera sky positions refresh every 15 seconds while the viewer is visible. Backg
 Camera and 3D loading placeholders show recovery guidance after 15 seconds. Reload pauses for unfinished entries. Reviewing an edit closes the camera/3D overlay before focusing its planner field, so the dialog cannot trap focus behind the recovery action.
 
 Long loading/error guidance in the expanded 3D dialog scrolls within its panel on short screens. The recovery panel can take keyboard focus and scroll with standard keys, keeping review and reload actions reachable.
+
+Sky-section shortcuts explicitly focus their link while waiting for a deferred section, so pointer activation that leaves focus elsewhere does not silently drop the jump. Moving focus to another control before the section loads still cancels the earlier jump.
