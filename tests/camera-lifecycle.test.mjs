@@ -25,3 +25,16 @@ test('initially hidden viewers suspend, and disposal removes every lifecycle lis
  const h=harness(true);assert.deepEqual(h.calls,['stop hardware']);h.stop();h.hide(false);h.page.dispatchEvent(new Event('pageshow'));h.page.dispatchEvent(new Event('pagehide'));h.hide(true);
  assert.deepEqual(h.calls,['stop hardware']);
 });
+test('visibility events cannot resume a page suspended by history navigation before pageshow',()=>{
+ const h=harness();h.page.dispatchEvent(new Event('pagehide'));h.hide(false);
+ assert.deepEqual(h.calls,['stop hardware']);h.hide(true);h.hide(false);
+ assert.deepEqual(h.calls,['stop hardware']);h.page.dispatchEvent(new Event('pageshow'));
+ assert.deepEqual(h.calls,['stop hardware','refresh time']);h.page.dispatchEvent(new Event('pageshow'));
+ assert.deepEqual(h.calls,['stop hardware','refresh time']);h.stop();
+});
+test('a hidden pageshow waits for visibility and disposal cannot revive the suspended page',()=>{
+ const h=harness();h.page.dispatchEvent(new Event('pagehide'));h.hide(true);h.page.dispatchEvent(new Event('pageshow'));
+ assert.deepEqual(h.calls,['stop hardware']);h.hide(false);assert.deepEqual(h.calls,['stop hardware','refresh time']);
+ h.page.dispatchEvent(new Event('pagehide'));h.stop();h.hide(false);h.page.dispatchEvent(new Event('pageshow'));
+ assert.deepEqual(h.calls,['stop hardware','refresh time','stop hardware']);
+});
