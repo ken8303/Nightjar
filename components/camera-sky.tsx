@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import Image from 'next/image';
 import {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,initialCameraView,type CameraCatalogue} from '@/lib/camera-catalogue';
 import {readCameraSettings,saveCameraSettings} from '@/lib/camera-settings';
@@ -21,9 +21,9 @@ import {createCameraWakeLock} from '@/lib/camera-wake-lock';
 import {type Place} from '@/lib/sky';
 import {cameraOverlayFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide} from '@/lib/camera-sky';
 
-function CameraThumbnail({name,revision}:{name:string;revision:number}){
+function CameraThumbnail({name,revision}:{name:string;revision:string}){
  const photo=cameraCataloguePhoto(name),[status,setStatus]=useState<'loading'|'loaded'|'failed'>('loading');
- const [source]=useState(()=>{if(!photo)return null;const initial=photo.thumbnailSrc??photo.src;return revision?photoRetrySource(initial,`${Date.now()}-${revision}`,window.location.href):initial});
+ const [source]=useState(()=>{if(!photo)return null;const initial=photo.thumbnailSrc??photo.src;return revision?photoRetrySource(initial,revision,window.location.href):initial});
  return <span className="camera-sky-thumbnail" aria-hidden="true">{(!photo||status!=='loaded')&&<Star size={20}/>} {photo&&source&&status!=='failed'&&<Image unoptimized src={source} alt="" width={36} height={36} referrerPolicy="no-referrer" className={status==='loaded'?'camera-sky-thumbnail-loaded':'camera-sky-thumbnail-loading'} onLoad={()=>setStatus('loaded')} onError={()=>setStatus('failed')}/>}</span>;
 }
 
@@ -47,16 +47,18 @@ export default function CameraSky(props:Props){
  const wakeSessionRef=useRef<ReturnType<typeof createCameraWakeLock>|null>(null);
  const wakeAction=wake==='on'?'Screen awake · turn off':wake==='requesting'?'Cancel screen awake request':'Keep screen awake';
  const wakeHelp=wake==='on'?'Screen awake is on while this viewer stays visible. Uses extra battery; ends when you close or leave the viewer.':wake==='requesting'?'Requesting screen awake…':'Screen awake is optional and uses extra battery.';
- const [showPhotos,setShowPhotos]=useState(initialSettings.showPhotos),[photoRevision,setPhotoRevision]=useState(0),[photoNotice,setPhotoNotice]=useState('');
+ const [showPhotos,setShowPhotos]=useState(initialSettings.showPhotos),[photoRevision,setPhotoRevision]=useState(''),[photoNotice,setPhotoNotice]=useState('');
+ const photoAttempt=useRef(0);
+ const requestPhotos=useCallback(()=>setPhotoRevision(`${Date.now()}-${++photoAttempt.current}`),[]);
  useEffect(()=>{
   if(!showPhotos)return;
   let pending=false;
-  const retry=()=>{if(document.hidden){pending=true;return}pending=false;setPhotoRevision(value=>value+1);setPhotoNotice('Connection restored. Visible reference thumbnails have been requested again.')};
+  const retry=()=>{if(document.hidden){pending=true;return}pending=false;requestPhotos();setPhotoNotice('Connection restored. Visible reference thumbnails have been requested again.')};
   const resumed=()=>{if(pending&&!document.hidden&&navigator.onLine)retry()};
   window.addEventListener('online',retry);document.addEventListener('visibilitychange',resumed);
   return()=>{window.removeEventListener('online',retry);document.removeEventListener('visibilitychange',resumed)};
- },[showPhotos]);
- function reloadPhotos(){setPhotoRevision(value=>value+1);setPhotoNotice('Visible reference thumbnails requested again. A star icon remains while an image loads or is unavailable.');}
+ },[showPhotos,requestPhotos]);
+ function reloadPhotos(){requestPhotos();setPhotoNotice('Visible reference thumbnails requested again. A star icon remains while an image loads or is unavailable.');}
  const [previousLabels,setPreviousLabels]=useState<string[]>([]);
  const badgeRef=useRef<HTMLSpanElement>(null);
  const [badgeBounds,setBadgeBounds]=useState<CameraLabelObstacle|null>(null);
