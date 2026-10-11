@@ -30,3 +30,8 @@ test('unavailable storage does not throw during setup or matching change recover
  const stop=watchSavedDataRefresh(()=>reads++,page,visibility,{storage:()=>{throw Error('Storage disabled')},key:'diary',hidden:()=>false});
  assert.equal(reads,0);const change=new Event('storage');Object.assign(change,{key:'diary',storageArea:null});page.dispatchEvent(change);assert.equal(reads,1);stop();
 });
+test('a reader failure is not mistaken for storage-access failure and invoked twice',()=>{
+ const listeners=new Map(),page={addEventListener:(name,callback)=>listeners.set(name,callback),removeEventListener:name=>listeners.delete(name)},visibility={addEventListener:()=>{},removeEventListener:()=>{}},storage={};let reads=0;
+ const failure=Error('Reader failed'),stop=watchSavedDataRefresh(()=>{reads++;throw failure},page,visibility,{storage:()=>storage,key:'diary',hidden:()=>false});
+ assert.throws(()=>listeners.get('storage')({key:'diary',storageArea:storage}),error=>error===failure);assert.equal(reads,1);stop();
+});

@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-The latest local code passed 525 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 526 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
-Latest batches improve camera caption/name spacing, orientation callback recovery, image retries, date-boundary handling, 3D graphics recovery and page-return clocks. Detailed reproductions and limitations are recorded in the development notes.
+Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 526 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
 ## After your batch push
 

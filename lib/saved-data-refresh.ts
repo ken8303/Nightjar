@@ -4,7 +4,11 @@ type Events=Pick<EventTarget,'addEventListener'|'removeEventListener'>;
 export function watchSavedDataRefresh(read:()=>void,page:Events,visibility:Events,options:{storage:()=>Storage;key:string;hidden:()=>boolean}){
  let disposed=false,pageHidden=false;
  const refresh=()=>{if(!disposed&&!pageHidden&&!options.hidden())read()};
- const stored=(event:Event)=>{const change=event as StorageEvent;if(change.key!==options.key&&change.key!==null)return;try{if(change.storageArea===options.storage())refresh()}catch{refresh()}};
+ const stored=(event:Event)=>{
+  const change=event as StorageEvent;if(change.key!==options.key&&change.key!==null)return;
+  let area:Storage;try{area=options.storage()}catch{refresh();return}
+  if(change.storageArea===area)refresh();
+ };
  const hide=()=>{pageHidden=true};
  const show=()=>{pageHidden=false;refresh()};
  page.addEventListener('storage',stored);page.addEventListener('pagehide',hide);page.addEventListener('pageshow',show);visibility.addEventListener('visibilitychange',refresh);

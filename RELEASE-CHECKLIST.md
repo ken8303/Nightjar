@@ -4,7 +4,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
-- 525 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 526 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -102,6 +102,13 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - Lost/unavailable 3D offers an interactive 2D fallback and direct Retry. Retry preserves selection/site/time/unfinished edits and restores keyboard focus. Actual desktop context loss and deliberately blocked initialization passed; native phone graphics recovery remains pending.
 - Planning clocks suspend on pagehide and refresh on return, waiting while hidden and ignoring old timer callbacks. Synthetic lifecycle checks passed; real Safari cached-page and installed-PWA restoration remain pending.
 - Visible 2D names select their own object, including expanded and graphics-fallback views. Dot and keyboard selection passed; native touch/reader acceptance remains pending.
+
+- Camera/image lifecycle handlers wait for pageshow before resuming. Image and lunar/reference-photo retries restore useful keyboard focus without overriding a later control choice. Synthetic lifecycle and compact browser checks passed; physical camera/provider-image acceptance remains pending.
+- Saved observations, targets, personal notes, places and equipment reread on visible return, preserving local drafts and selections. The offline page identifies its opening-time snapshot and offers refresh after relevant cross-tab changes. Controlled return and real cross-tab storage checks passed.
+- Forecast reconnects wait for visible restoration, coalesce and share the request throttle; an explicit weather refresh satisfies pending reconnect work. Controlled request-count tests passed with synthetic forecasts; real phone network transitions remain pending.
+- PWA offers clear when a worker stops waiting. Restored network/display indicators and browser-confirmed installation stay consistent in synthetic worker/mode tests. Actual installed-phone and multi-tab deployment updates remain pending.
+- When to look, deep-sky comparisons/timelines, Milky Way and photography-light shortcuts respect supported observing dates, with explicit shortened searches. These checks establish input consistency, not distant-date astronomical precision.
+- The focused 3D sky leaves Ctrl/Command/Alt shortcuts available while plain navigation keys still move the rendered view. Compact keyboard focus checks passed; native assistive and browser zoom behaviour remains pending.
 
 ## After the next GitHub Desktop push
 
