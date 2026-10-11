@@ -9,12 +9,18 @@ import {viewerZoomKey} from '@/lib/viewer-zoom';
 
 function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
  const [failed,setFailed]=useState(false),[loaded,setLoaded]=useState(false),[retry,setRetry]=useState(0),[slow,setSlow]=useState(false);
+ const [imageSource,setImageSource]=useState(photo.src);
+ const attempt=useRef(0);
  const frame=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(loaded||failed||!frame.current)return;return watchPhotoDelay(frame.current,()=>setSlow(true))},[loaded,failed,retry]);
- const retryPhoto=()=>{setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1)};
+ const retryPhoto=()=>{
+  const source=new URL(photo.src,window.location.href);
+  source.searchParams.set('nightjar-retry',`${Date.now()}-${++attempt.current}`);
+  setImageSource(source.href);setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1);
+ };
  return <div ref={frame} className={`${enlarged?'photo-enlarged-image':'object-photo-image'}${failed||(!loaded&&slow)?' photo-recovery-active':''}`}>
   {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<>
-   <Image key={retry} unoptimized src={photo.src} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
+   <Image key={retry} unoptimized src={imageSource} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
    {!loaded&&(slow?<div className="photo-slow-message" role="status"><p>The reference photo is taking longer than expected. It may still load; you can retry or open the image source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<span role="status">Loading reference photo…</span>)}
   </>}
  </div>;
