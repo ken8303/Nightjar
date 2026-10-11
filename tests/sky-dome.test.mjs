@@ -65,3 +65,19 @@ test('pinch cancellation and duplicate or unknown pointer events cannot leak sel
  gesture.down(point(4));gesture.down(point(5,20));gesture.up(point(5,20));gesture.up(point(4));assert.equal(taps.length,1);
  gesture.down(point(6));gesture.up(point(6));assert.equal(taps.length,2);
 });
+
+test('browser and assistive shortcuts are not consumed by the focused sky dome',async()=>{
+ const {handleSkyDomeKey}=await vite.ssrLoadModule('/lib/sky-dome.ts');
+ const calls=[],actions={rotate:()=>calls.push('rotate'),tilt:()=>calls.push('tilt'),zoom:()=>calls.push('zoom'),reset:()=>calls.push('reset')};
+ for(const modifier of ['ctrlKey','metaKey','altKey'])for(const key of ['ArrowLeft','ArrowDown','+','=','-','Home']){
+  let prevented=false;handleSkyDomeKey({key,ctrlKey:false,metaKey:false,altKey:false,[modifier]:true,preventDefault:()=>{prevented=true}},actions);assert.equal(prevented,false,`${modifier} ${key}`);
+ }
+ assert.deepEqual(calls,[]);
+});
+test('plain dome keys still rotate, tilt, zoom and reset while unrelated keys remain available',async()=>{
+ const {handleSkyDomeKey}=await vite.ssrLoadModule('/lib/sky-dome.ts');
+ const calls=[],actions={rotate:value=>calls.push(['rotate',value]),tilt:value=>calls.push(['tilt',value]),zoom:value=>calls.push(['zoom',value]),reset:()=>calls.push(['reset'])};
+ for(const key of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','Home']){let prevented=false;handleSkyDomeKey({key,ctrlKey:false,metaKey:false,altKey:false,preventDefault:()=>{prevented=true}},actions);assert(prevented)}
+ assert.equal(calls.length,7);assert(calls.some(([name,value])=>name==='rotate'&&value<0));assert(calls.some(([name,value])=>name==='zoom'&&value>1));
+ for(const [key,target] of [['Tab',actions],['Escape',actions],['Home',null]]){let prevented=false;handleSkyDomeKey({key,ctrlKey:false,metaKey:false,altKey:false,preventDefault:()=>{prevented=true}},target);assert.equal(prevented,false)}
+});

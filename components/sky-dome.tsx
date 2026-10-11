@@ -4,7 +4,7 @@ import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ArrowLeft,ArrowRight,ArrowUp,ArrowDown,Minus,Plus,RotateCcw,Crosshair} from 'lucide-react';
 import {skyTargets,lines,galacticCentrePosition} from '@/lib/sky';
-import {horizonVector,nearestProjectedTarget,zoomCameraPosition,createSkyTapSelection} from '@/lib/sky-dome';
+import {horizonVector,nearestProjectedTarget,zoomCameraPosition,createSkyTapSelection,handleSkyDomeKey} from '@/lib/sky-dome';
 import SkyChart from '@/components/sky-chart';
 import {Button} from '@/components/ui/button';
 import type {SkyAtlasProps} from '@/components/sky-atlas-viewer';
@@ -75,7 +75,7 @@ export default function SkyDome(props:SkyAtlasProps){
    const observer=new ResizeObserver(resize);observer.observe(el);disposers.push(()=>observer.disconnect());controls.addEventListener('change',render);disposers.push(()=>controls.removeEventListener('change',render));
    const tap=createSkyTapSelection((x,y)=>{const rect=canvas.getBoundingClientRect(),name=nearestProjectedTarget(projected,x-rect.left,y-rect.top);if(name)latest.current.props.onSelect(name)});
    const pointerDown=(event:PointerEvent)=>tap.down(event),pointerMove=(event:PointerEvent)=>tap.move(event),pointerUp=(event:PointerEvent)=>tap.up(event),cancel=(event:PointerEvent)=>tap.cancel(event);
-   const key=(event:KeyboardEvent)=>{const a=actions.current;if(!a)return;switch(event.key){case'ArrowLeft':a.rotate(-.18);break;case'ArrowRight':a.rotate(.18);break;case'ArrowUp':a.tilt(-.15);break;case'ArrowDown':a.tilt(.15);break;case'+':case'=':a.zoom(.85);break;case'-':a.zoom(1.18);break;case'Home':a.reset();break;default:return}event.preventDefault()};
+   const key=(event:KeyboardEvent)=>handleSkyDomeKey(event,actions.current);
    const lost=(event:Event)=>{event.preventDefault();cleanup();setFailed(true);setStatus('3D rendering stopped. Use the 2D chart or retry 3D.')};
    // Handle release before OrbitControls releases pointer capture.
    canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointermove',pointerMove);canvas.addEventListener('pointerup',pointerUp,true);canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);canvas.addEventListener('keydown',key);canvas.addEventListener('webglcontextlost',lost);
