@@ -53,7 +53,7 @@ export default function PwaSupport() {
     timeout=setTimeout(()=>failed('Offline setup is taking longer than expected. Reconnect and retry; keep this view open.'),20000);
     navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'}).then(registration=>{
       if(!active)return;
-      cleanups.push(watchPwaRegistration(registration,{onReady:ready,onFailure:()=>failed(),onWaiting:worker=>{if(active&&worker&&navigator.serviceWorker.controller)setUpdateWorker(worker)}}));
+      cleanups.push(watchPwaRegistration(registration,{onReady:ready,onFailure:()=>failed(),onWaiting:worker=>{if(active)setUpdateWorker(navigator.serviceWorker.controller?worker:null)}}));
       cleanups.push(watchPwaUpdateChecks(()=>registration.update(),window,document,{online:()=>navigator.onLine,visible:()=>document.visibilityState==='visible'}));
       if(setupRevision&&!registration.active&&!registration.installing&&!registration.waiting)void registration.update().catch(()=>failed());
     }).catch(()=>failed());
