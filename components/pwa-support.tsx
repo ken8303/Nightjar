@@ -13,7 +13,7 @@ export default function PwaSupport() {
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(false);
   const [installing,setInstalling]=useState(false);
-  const installation=useRef({pending:false,installed:false});
+  const installation=useRef({pending:false,installed:false,confirmed:false});
   const [offline, setOffline] = useState(false);
   const [message, setMessage] = useState('');
   const [setupRevision,setSetupRevision]=useState(0),[setupStarting,setSetupStarting]=useState(false),[setupIssue,setSetupIssue]=useState(''),[setupMessage,setSetupMessage]=useState('');
@@ -23,11 +23,11 @@ export default function PwaSupport() {
   const [updateError,setUpdateError]=useState('');
   useEffect(() => {
     const mode = window.matchMedia('(display-mode: standalone)');
-    const updateMode = () => {const value=mode.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);installation.current.installed=value;setInstalled(value)};
+    const updateMode = () => {const value=installation.current.confirmed || mode.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);installation.current.installed=value;setInstalled(value)};
     const updateNetwork = () => setOffline(!navigator.onLine);
     const restoreState = () => { updateMode(); updateNetwork(); };
     const offerInstall = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt);setMessage(''); };
-    const didInstall = () => { installation.current.installed=true;setInstalled(true);setInstalling(false);setPrompt(null);setMessage('Nightjar is installed.'); };
+    const didInstall = () => { installation.current.confirmed=true;installation.current.installed=true;setInstalled(true);setInstalling(false);setPrompt(null);setMessage('Nightjar is installed.'); };
     updateMode(); updateNetwork();
     window.addEventListener('beforeinstallprompt', offerInstall);
     window.addEventListener('appinstalled', didInstall);
