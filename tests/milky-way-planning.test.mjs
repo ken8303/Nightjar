@@ -42,3 +42,20 @@ test('core altitude and azimuth agree with an independent galactic-to-horizontal
   assert(Math.abs(actual.altitude-hor.lat)<1e-9);assert(Math.abs(((actual.azimuth-hor.lon+540)%360)-180)<1e-9);
  }
 });
+test('core recommendations stay within supported observing dates at the final year',()=>{
+ const date=new Date('9999-12-31T23:30:00Z'),place={name:'Boundary QA',latitude:-33.86,longitude:151.2,timezone:'UTC'};
+ const plan=milkyWayPlanning(date,place);assert.equal(plan.sampleCount,2);
+ for(const sample of [plan.first,plan.last,plan.best].filter(Boolean))assert.equal(sample.date.getUTCFullYear(),9999);
+ assert.equal(milkyWayPlanning(new Date('9999-12-31T23:59:00Z'),place).sampleCount,1);
+ for(const date of [new Date('0000-12-31T23:59Z'),new Date('+010000-01-01T00:00Z'),new Date(NaN)])assert.throws(()=>milkyWayPlanning(date,place),/UTC years 1–9999/);
+});
+test('photography windows retain complete future windows but never expose unsupported endpoints',async()=>{
+ const {photographyLightWindows}=await vite.ssrLoadModule('/lib/sky.ts');
+ const place={name:'London QA',latitude:51.5085,longitude:-.1257,timezone:'Europe/London'},date=new Date('2026-04-20T00:00:00Z');
+ const normal=photographyLightWindows(date,place);assert.equal(normal.length,4);
+ for(const window of normal){assert(window.start&&window.end);assert(+window.start>=+date);assert(+window.end>+window.start)}
+ const active=new Date(+normal[0].start+1000),later=photographyLightWindows(active,place)[0];assert(+later.start>+normal[0].end,'an in-progress window must be skipped');
+ const edge=photographyLightWindows(new Date('9999-12-31T23:30Z'),place);
+ for(const window of edge)for(const at of [window.start,window.end].filter(Boolean))assert.equal(at.getUTCFullYear(),9999);
+ for(const date of [new Date('0000-12-31T23:59Z'),new Date('+010000-01-01T00:00Z'),new Date(NaN)])assert.throws(()=>photographyLightWindows(date,place),/UTC years 1–9999/);
+});

@@ -1,5 +1,6 @@
 import * as A from 'astronomy-engine';
 import {moonPhaseName} from './moon-phase';
+import {validObservingDate} from './observing-time';
 export type Place={name:string;latitude:number;longitude:number;country?:string;timezone?:string;bortle?:number};
 export const stars:[string,number,number,number][]=[['Sirius',6.7525,-16.7161,-1.46],['Canopus',6.3992,-52.6957,-.74],['Arcturus',14.261,19.1824,-.05],['Vega',18.6156,38.7837,.03],['Capella',5.2782,45.998,.08],['Rigel',5.2423,-8.2016,.13],['Procyon',7.655,5.225,.34],['Betelgeuse',5.9195,7.407,.5],['Altair',19.8464,8.8683,.77],['Aldebaran',4.5987,16.509,.85],['Spica',13.4199,-11.1613,.97],['Antares',16.4901,-26.432,1.06],['Pollux',7.7553,28.0262,1.14],['Fomalhaut',22.9608,-29.622,1.16],['Deneb',20.6905,45.2803,1.25],['Regulus',10.1395,11.9672,1.35],['Castor',7.5767,31.8883,1.58],['Bellatrix',5.4189,6.3497,1.64],['Alnilam',5.6036,-1.2019,1.69],['Alnitak',5.6793,-1.9426,1.74],['Dubhe',11.0621,61.751,1.79],['Merak',11.0307,56.3824,2.37],['Phecda',11.8972,53.6948,2.44],['Megrez',12.257,57.0326,3.31],['Alioth',12.9005,55.9598,1.77],['Mizar',13.3987,54.9254,2.23],['Alkaid',13.7923,49.3133,1.86],['Polaris',2.5303,89.2641,1.98],['Achernar',1.6286,-57.2367,.46],['Hadar',14.0637,-60.373,.61],['Acrux',12.4433,-63.0991,.76],['Mimosa',12.7953,-59.6888,1.25],['Gacrux',12.5194,-57.1132,1.63],['Alpha Centauri',14.6601,-60.8351,-.27]];
 export const lines=[['Dubhe','Merak','Phecda','Megrez','Alioth','Mizar','Alkaid'],['Megrez','Dubhe'],['Vega','Deneb','Altair','Vega'],['Betelgeuse','Bellatrix','Rigel','Alnitak','Betelgeuse'],['Acrux','Gacrux'],['Mimosa','Alpha Centauri']];
@@ -64,17 +65,19 @@ export function observingMilestones(date:Date,p:Place){
 }
 
 export function photographyLightWindows(date:Date,p:Place){
+ if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
  const definitions=[{name:'Morning blue hour',tone:'blue',direction:1,startAltitude:-6,endAltitude:-4},{name:'Morning golden hour',tone:'gold',direction:1,startAltitude:-4,endAltitude:6},{name:'Evening golden hour',tone:'gold',direction:-1,startAltitude:6,endAltitude:-4},{name:'Evening blue hour',tone:'blue',direction:-1,startAltitude:-4,endAltitude:-6}];
- const obs=observer(p),limit=+date+48*3600000;
+ const supportedEnd=Date.parse('9999-12-31T23:59:59.999Z'),obs=observer(p),limit=Math.min(+date+48*3600000,supportedEnd);
  return definitions.map(def=>{
   let cursor=date;
   for(let attempt=0;attempt<3&&+cursor<limit;attempt++){
    const start=A.SearchAltitude(A.Body.Sun,obs,def.direction,cursor,(limit-+cursor)/86400000,def.startAltitude)?.date;
-   if(!start)break;
-   const after=new Date(+start+1000);
-   const end=A.SearchAltitude(A.Body.Sun,obs,def.direction,after,1,def.endAltitude)?.date;
-   const reversal=A.SearchAltitude(A.Body.Sun,obs,-def.direction,after,1,def.startAltitude)?.date;
-   if(end&&(!reversal||+end<+reversal))return {...def,start,end};
+   if(!start||!validObservingDate(start))break;
+   const after=new Date(+start+1000),remaining=Math.min(1,(supportedEnd-+after)/86400000);
+   if(remaining<=0)break;
+   const end=A.SearchAltitude(A.Body.Sun,obs,def.direction,after,remaining,def.endAltitude)?.date;
+   const reversal=A.SearchAltitude(A.Body.Sun,obs,-def.direction,after,remaining,def.startAltitude)?.date;
+   if(end&&validObservingDate(end)&&(!reversal||+end<+reversal))return {...def,start,end};
    cursor=new Date(+start+60000);
   }
   return {...def,start:null,end:null};
@@ -96,10 +99,13 @@ export function galacticCentrePosition(date:Date,place:Place){
  return j2000Position(galacticCentre.ra,galacticCentre.dec,date,place);
 }
 export function milkyWayPlanning(date:Date,place:Place){
+ if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
+ let sampleCount=0;
  const current=galacticCentrePosition(date,place);
  const opportunities=[] as {date:Date;altitude:number;azimuth:number;moonAltitude:number;moonIllumination:number}[];
  for(let minute=0;minute<=24*60;minute+=15){
   const sampleDate=new Date(+date+minute*60000);
+  if(!validObservingDate(sampleDate))break;sampleCount++;
   if(bodyPosition(A.Body.Sun,sampleDate,place).altitude>-18)continue;
   const position=galacticCentrePosition(sampleDate,place);
   if(position.altitude<10)continue;
@@ -111,5 +117,5 @@ export function milkyWayPlanning(date:Date,place:Place){
  let start=bestIndex,end=bestIndex;
  while(start>0&&+opportunities[start].date-+opportunities[start-1].date===15*60000)start--;
  while(end>=0&&end<opportunities.length-1&&+opportunities[end+1].date-+opportunities[end].date===15*60000)end++;
- return {current,first:start>=0?opportunities[start]:null,last:end>=0?opportunities[end]:null,best};
+ return {current,sampleCount,first:start>=0?opportunities[start]:null,last:end>=0?opportunities[end]:null,best};
 }
