@@ -54,3 +54,17 @@ test('time-zone availability keeps UTC fallback and actual local entry interpret
  assert.equal(observingTimeCandidates(input,fallback.zone)[0].toISOString(),'2026-10-09T20:00:00.000Z');
  assert.equal(observingTimeCandidates(input,known.zone)[0].toISOString(),'2026-10-09T12:00:00.000Z');
 });
+
+
+test('local display cannot mislabel a BCE date or put an expanded year into the bounded input',()=>{
+ assert.equal(observingTimeValue(new Date('0001-01-01T00:00:00Z'),'America/New_York'),'');
+ assert.equal(observingTimeValue(new Date('9999-12-31T23:59:00Z'),'Asia/Hong_Kong'),'');
+ assert.equal(observingTimeValue(new Date('0001-01-02T00:00:00Z'),'America/New_York'),'0001-01-01T19:03');
+ assert.equal(observingTimeValue(new Date('9999-12-30T23:59:00Z'),'Asia/Hong_Kong'),'9999-12-31T07:59');
+});
+test('era-aware offset sampling preserves exact local minutes near both supported UTC boundaries',()=>{
+ assert.equal(observingTimeCandidates('0001-01-01T00:00','America/New_York')[0].toISOString(),'0001-01-01T04:56:02.000Z');
+ assert.deepEqual(observingTimeCandidates('0001-01-01T00:00','Asia/Hong_Kong'),[]);
+ assert.equal(observingTimeCandidates('9999-12-31T23:59','Asia/Hong_Kong')[0].toISOString(),'9999-12-31T15:59:00.000Z');
+ assert.deepEqual(observingTimeCandidates('9999-12-31T23:59','America/New_York'),[]);
+});

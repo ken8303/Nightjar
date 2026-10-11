@@ -7,13 +7,20 @@ export function observingTimeZone(value:unknown):{zone:string;known:boolean}{
  if(typeof value==='string'&&value){try{new Intl.DateTimeFormat('en',{timeZone:value});return {zone:value,known:true}}catch{}}
  return {zone:'UTC',known:false};
 }
-function formatter(timezone:string){return new Intl.DateTimeFormat('en-GB',{timeZone:timezone,calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'})}
+function formatter(timezone:string){return new Intl.DateTimeFormat('en-GB',{timeZone:timezone,calendar:'gregory',numberingSystem:'latn',era:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'})}
 function parts(date:Date,format:Intl.DateTimeFormat,seconds=false){
  const values=format.formatToParts(date);
  const get=(name:string)=>values.find(part=>part.type===name)!.value;
- return `${get('year').padStart(4,'0')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}${seconds?':'+get('second'):''}`;
+ const year=get('era')==='BC'?1-Number(get('year')):Number(get('year'));
+ const yearText=year<0?`-${String(-year).padStart(6,'0')}`:year>9999?`+${String(year).padStart(6,'0')}`:String(year).padStart(4,'0');
+ return `${yearText}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}${seconds?':'+get('second'):''}`;
 }
-export function observingTimeValue(date:Date,timezone:string){return parts(date,formatter(timezone))}
+export function observingTimeValue(date:Date,timezone:string){
+ const value=parts(date,formatter(timezone));
+ // A UTC instant can be supported while its local calendar date is not.
+ // Never put a misleading era or expanded year into the bounded date input.
+ return /^\d{4}-/.test(value)&&Number(value.slice(0,4))>=1?value:'';
+}
 
 // Share one formatter while sampling both sides of a clock change. Historic
 // offsets can include seconds; minute-only offsets shift the chosen instant.
@@ -26,8 +33,8 @@ export function observingTimeCandidates(value:string,timezone:string):Date[]{
  for(let hours=-36;hours<=36;hours+=6){
   const sample=new Date(+nominal+hours*3600000);
   const offset=+new Date(parts(sample,format,true)+'Z')-+sample;
-  // Offset samples can cross a four-digit year boundary. Ignore expanded-year
-  // samples, and never return an instant outside the supported UTC range.
+  // Samples can cross year 0 or 10000; era-aware ISO parts preserve the
+  // offset without returning an instant outside the supported UTC range.
   if(Number.isFinite(offset)&&Math.abs(offset)<=24*3600000)offsets.add(offset);
  }
  return [...offsets].map(offset=>new Date(+nominal-offset)).filter(date=>validObservingDate(date)&&parts(date,format,true)===value+':00').sort((a,b)=>+a-+b);
