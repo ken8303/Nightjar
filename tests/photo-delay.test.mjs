@@ -40,3 +40,23 @@ test('hidden state at expiry suppresses a warning even before its event, and lat
  const cleanup=watchPhotoDelay(f.element,()=>calls++,{...f,visibility});f.emit(true);const stale=[...f.timers.values()][0];visibility.hidden=true;stale.callback();assert.equal(calls,0);
  visibility.hidden=false;visibility.dispatchEvent(new Event('visibilitychange'));const current=[...f.timers.values()].at(-1);assert.notEqual(current,stale);current.callback();assert.equal(calls,1);cleanup();
 });
+
+test('pagehide pauses a visible image deadline before visibility changes and restore starts afresh',()=>{
+ const f=fixture(),visibility=new EventTarget(),pageEvents=new EventTarget();visibility.hidden=false;let calls=0;
+ const cleanup=watchPhotoDelay(f.element,()=>calls++,{...f,visibility,pageEvents});f.emit(true);const stale=[...f.timers.values()][0];
+ pageEvents.dispatchEvent(new Event('pagehide'));assert.equal(f.timers.size,0);stale.callback();assert.equal(calls,0);
+ visibility.dispatchEvent(new Event('visibilitychange'));assert.equal(f.timers.size,0);
+ pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(f.timers.size,1);const current=[...f.timers.values()][0];assert.equal(current.delay,15000);
+ stale.callback();assert.equal(calls,0);current.callback();assert.equal(calls,1);assert.equal(f.timers.size,0);
+ pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(f.timers.size,0);cleanup();
+});
+test('restored hidden or offscreen images wait for availability and disposal removes page listeners',()=>{
+ for(const offscreen of [false,true]){
+  const f=fixture(),visibility=new EventTarget(),pageEvents=new EventTarget();visibility.hidden=false;let calls=0;
+  const cleanup=watchPhotoDelay(f.element,()=>calls++,{...f,visibility,pageEvents});f.emit(true);pageEvents.dispatchEvent(new Event('pagehide'));
+  if(offscreen)f.emit(false);else visibility.hidden=true;
+  pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(f.timers.size,0);
+  if(offscreen)f.emit(true);else{visibility.hidden=false;visibility.dispatchEvent(new Event('visibilitychange'))}
+  assert.equal(f.timers.size,1);cleanup();pageEvents.dispatchEvent(new Event('pagehide'));pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(f.timers.size,0);assert.equal(calls,0);
+ }
+});
