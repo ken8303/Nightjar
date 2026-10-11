@@ -1,4 +1,5 @@
 import catalogue from '@/data/messier.json';
+import {validObservingDate} from './observing-time';
 import {constellationName} from './constellations';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
@@ -22,9 +23,12 @@ export function findDeepSky(query:string,type:string,{constellation='',maximumMa
  const normalized=normalize(query.trim());
  return catalogue.filter(target=>(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation)].some(value=>normalize(value).includes(normalized)));
 }
+export function deepSkySampleTimes(date:Date){
+ if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
+ return Array.from({length:97},(_,index)=>new Date(+date+index*900000)).filter(validObservingDate);
+}
 export function deepSkyWindow(target:DeepSkyObject,date:Date,place:Place){
- return Array.from({length:97},(_,index)=>{
-  const time=new Date(+date+index*15*60000);
+ return deepSkySampleTimes(date).map(time=>{
   return {time,sun:bodyPosition(A.Body.Sun,time,place).altitude,...deepSkyPosition(target,time,place)};
  });
 }
@@ -48,7 +52,7 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
 export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
  if(targets.length>109)throw Error('Plan up to 109 deep-sky targets at once.');
  if(!targets.length)return new Map<string,{date:Date;altitude:number;azimuth:number}>();
- const darkTimes=Array.from({length:97},(_,index)=>new Date(+date+index*900000)).filter(time=>bodyPosition(A.Body.Sun,time,place).altitude<=-18).map(time=>({time,project:j2000Projector(time,place)}));
+ const darkTimes=deepSkySampleTimes(date).filter(time=>bodyPosition(A.Body.Sun,time,place).altitude<=-18).map(time=>({time,project:j2000Projector(time,place)}));
  const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();
  for(const target of targets){
   let best:{date:Date;altitude:number;azimuth:number}|null=null;

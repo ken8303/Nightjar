@@ -114,3 +114,20 @@ test('shared catalogue positions and dark-window transforms preserve all individ
  }
  assert.deepEqual(messierCatalogue,original);assert.equal(deepSkyRecommendations([],new Date(NaN),place).size,0);
 });
+test('deep-sky windows and shared recommendations stop before unsupported UTC dates',async()=>{
+ const {deepSkyWindow,deepSkyRecommendations}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const start=new Date('9999-12-31T23:30:00Z'),targets=['M31','M45','M57'].map(id=>findDeepSky(id,'')[0]);
+ for(const target of targets){
+  const samples=deepSkyWindow(target,start,place);assert.equal(samples.length,2);assert.equal(samples.at(-1).time.toISOString(),'9999-12-31T23:45:00.000Z');
+  const best=bestDeepSkyTime(target,start,place);if(best)assert(best.date.getUTCFullYear()===9999);
+ }
+ const shared=deepSkyRecommendations(messierCatalogue,start,place);for(const value of shared.values())assert(value.date.getUTCFullYear()===9999);
+ const single=deepSkyWindow(targets[0],new Date('9999-12-31T23:59:00Z'),place);assert.equal(single.length,1);
+ assert.equal(deepSkyWindow(targets[0],new Date('0001-01-01T00:00:00Z'),place).length,97);
+});
+test('deep-sky planning rejects unsupported starting instants',async()=>{
+ const {deepSkyWindow,deepSkyRecommendations}=await vite.ssrLoadModule('/lib/deep-sky.ts'),target=findDeepSky('M31','')[0];
+ for(const date of [new Date(NaN),new Date('+010000-01-01T00:00:00Z'),new Date('0000-12-31T23:00:00Z')]){
+  assert.throws(()=>deepSkyWindow(target,date,place),/UTC years 1–9999/);assert.throws(()=>deepSkyRecommendations([target],date,place),/UTC years 1–9999/);
+ }
+});

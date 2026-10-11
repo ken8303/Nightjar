@@ -1,4 +1,4 @@
-import {bestDeepSkySample,type DeepSkyObject,type DeepSkySample} from './deep-sky';
+import {deepSkySampleTimes,bestDeepSkySample,type DeepSkyObject,type DeepSkySample} from './deep-sky';
 import {deepSkyMoon} from './deep-sky-moon';
 import {A,bodyPosition,j2000Projector,type Place} from './sky';
 export function deepSkyOpportunity(samples:(DeepSkySample&{moonAltitude?:number})[],moonBelowOnly=false){
@@ -15,7 +15,7 @@ export function deepSkyOpportunity(samples:(DeepSkySample&{moonAltitude?:number}
 export function compareDeepSky(targets:DeepSkyObject[],date:Date,place:Place,moonBelowOnly=false){
  if(targets.length>6)throw Error('Compare up to six deep-sky targets at once.');
  if(!targets.length)return [];
- const times=Array.from({length:97},(_,index)=>{const time=new Date(+date+index*900000);return {time,project:j2000Projector(time,place),sun:bodyPosition(A.Body.Sun,time,place).altitude,moonAltitude:bodyPosition(A.Body.Moon,time,place).altitude}});
+ const times=deepSkySampleTimes(date).map(time=>{return {time,project:j2000Projector(time,place),sun:bodyPosition(A.Body.Sun,time,place).altitude,moonAltitude:bodyPosition(A.Body.Moon,time,place).altitude}});
  const rows=targets.map(target=>{const samples=times.map(({project,...sample})=>({...sample,...project(target.ra,target.dec)}));const opportunity=deepSkyOpportunity(samples,moonBelowOnly);return {target,samples,...opportunity,moonAtBest:opportunity.best?deepSkyMoon(target,opportunity.best.time,place):null}});
  return rows.sort((a,b)=>(b.best?.altitude??-Infinity)-(a.best?.altitude??-Infinity)||a.target.id.localeCompare(b.target.id));
 }

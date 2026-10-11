@@ -27,3 +27,12 @@ test('clock-change comparisons preserve absolute durations and distinguish repea
  assert.notEqual(stamp.format(row.samples[0].time),stamp.format(row.samples[4].time));
  for(const window of row.windows)assert.equal(window.minutes,(+window.end-+window.start)/60000);
 });
+test('deep-sky comparison shares bounded dates with individual windows at the final supported year',()=>{
+ const targets=['M31','M45'].map(id=>findDeepSky(id,'')[0]),start=new Date('9999-12-31T23:30:00Z');
+ for(const row of compareDeepSky(targets,start,place)){
+  assert.equal(row.samples.length,2);assert(row.samples.every(sample=>sample.time.getUTCFullYear()===9999));
+  assert.deepEqual(row.samples.map(({moonAltitude,...sample})=>sample),deepSkyWindow(row.target,start,place));
+  assert(row.windows.every(window=>window.start.getUTCFullYear()===9999&&window.end.getUTCFullYear()===9999));if(row.best)assert.equal(row.best.time.getUTCFullYear(),9999);
+ }
+ assert.throws(()=>compareDeepSky(targets,new Date('+010000-01-01T00:00:00Z'),place),/UTC years 1–9999/);
+});
