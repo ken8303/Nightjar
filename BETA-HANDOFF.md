@@ -1,6 +1,6 @@
 # Nightjar beta handoff
 
-The latest local code passed 524 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 525 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
 Latest batches improve camera caption/name spacing, orientation callback recovery, image retries, date-boundary handling, 3D graphics recovery and page-return clocks. Detailed reproductions and limitations are recorded in the development notes.
 
