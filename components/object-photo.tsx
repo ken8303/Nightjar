@@ -11,16 +11,24 @@ import {viewerZoomKey} from '@/lib/viewer-zoom';
 function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
  const [failed,setFailed]=useState(false),[loaded,setLoaded]=useState(false),[retry,setRetry]=useState(0),[slow,setSlow]=useState(false);
  const [imageSource,setImageSource]=useState(photo.src);
- const attempt=useRef(0);
+ const attempt=useRef(0),retryFocus=useRef(false),retryButton=useRef<HTMLButtonElement>(null),image=useRef<HTMLImageElement>(null);
  const frame=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(loaded||failed||!frame.current)return;return watchPhotoDelay(frame.current,()=>setSlow(true))},[loaded,failed,retry]);
+ useEffect(()=>{
+  if(!retryFocus.current||!loaded&&!failed&&!slow)return;
+  retryFocus.current=false;
+  const destination=loaded?(enlarged?frame.current?.closest<HTMLDivElement>('.photo-viewer-viewport'):image.current):retryButton.current;
+  const active=document.activeElement,dialog=frame.current?.closest('[role="dialog"]');
+  if((active===document.body||enlarged&&active===dialog)&&!document.hidden&&!destination?.closest('[aria-hidden="true"]'))destination?.focus({preventScroll:true});
+ },[loaded,failed,slow,enlarged]);
  const retryPhoto=()=>{
+  retryFocus.current=true;
   setImageSource(photoRetrySource(photo.src,`${Date.now()}-${++attempt.current}`,window.location.href));setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1);
  };
  return <div ref={frame} className={`${enlarged?'photo-enlarged-image':'object-photo-image'}${failed||(!loaded&&slow)?' photo-recovery-active':''}`}>
-  {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<>
-   <Image key={retry} unoptimized src={imageSource} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
-   {!loaded&&(slow?<div className="photo-slow-message" role="status"><p>The reference photo is taking longer than expected. It may still load; you can retry or open the image source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<span role="status">Loading reference photo…</span>)}
+  {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button ref={retryButton} className="button" onClick={retryPhoto}>Retry photo</button></div>:<>
+   <Image ref={image} tabIndex={-1} key={retry} unoptimized src={imageSource} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
+   {!loaded&&(slow?<div className="photo-slow-message" role="status"><p>The reference photo is taking longer than expected. It may still load; you can retry or open the image source below.</p><button ref={retryButton} className="button" onClick={retryPhoto}>Retry photo</button></div>:<span role="status">Loading reference photo…</span>)}
   </>}
  </div>;
 }
