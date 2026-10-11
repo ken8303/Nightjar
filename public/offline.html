@@ -37,10 +37,11 @@
   <main>
     <div class="brand">✦ nightjar.</div>
     <h1>A moment off the grid.</h1>
-    <p class="intro">Your plans saved on this device are below. Reconnect to open the full sky planner and refresh live conditions.</p>
+    <p class="intro">Saved details are a snapshot from when this page opened. Your plans saved on this device are below. Reconnect to open the full sky planner and refresh live conditions.</p>
     <p class="connection" id="connection" role="status">Reconnect, then try the planner again.</p>
     <a class="retry" id="retry" href="/">Try again online</a>
     <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Stored values are unchanged; a raw recovery copy can preserve unreadable data.</p>
+    <div id="snapshot-warning" hidden><p class="connection" role="status">Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.</p><a class="retry" id="refresh-details" href="/offline">Refresh saved details</a></div>
     <p id="coverage-warning" class="connection" role="status" hidden></p>
     <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <div class="grid">
@@ -164,6 +165,11 @@
       }
       showEmpty('equipment','nightjar-equipment');
       if(partialLabels.size){const coverage=document.getElementById('coverage-warning');coverage.hidden=false;coverage.textContent='Partial offline view: '+Array.from(partialLabels).join(', ')+'. Some stored content is omitted because of display limits or unusable values. Use a raw recovery copy to preserve stored values.';}
+      const snapshotKeys=new Set(['nightjar-place','nightjar-places','nightjar-observing-time','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-deep-targets-v1','nightjar-observing-diary-v1','nightjar-equipment']);
+      window.addEventListener('storage',event=>{
+        try{if(event.storageArea!==localStorage)return}catch{return}
+        if(event.key===null||snapshotKeys.has(event.key))document.getElementById('snapshot-warning').hidden=false;
+      });
       const connection=document.getElementById('connection');
       const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
       updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);

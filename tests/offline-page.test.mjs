@@ -24,7 +24,7 @@ function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessio
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
  for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()'),context);
- return {elements,raw,session,listeners,navigator,root,body,blobs,timers,revoked,reads,parseSizes};
+ return {storage:context.localStorage,elements,raw,session,listeners,navigator,root,body,blobs,timers,revoked,reads,parseSizes};
 }
 test('offline notes retain 2,000 characters, newlines and text markup without interpreting HTML',()=>{
  const note='<img src=x onerror=alert(1)>\n'+ 'x'.repeat(1971);
@@ -144,4 +144,16 @@ test('offline paired views and return tokens retain this tab while keeping a new
  blocked.elements.get('retry').listeners.get('click')({preventDefault:()=>{prevented=true}});assert(prevented);assert(blocked.elements.get('connection').textContent.includes('could not be preserved'));assert.equal(blocked.session.get('nightjar-recovery-context-v1'),undefined);
  const invalid=load({'nightjar-place':peer,'nightjar-observing-time':time},false,{sessionOverrides:{'nightjar-current-context-v1':'{broken'}});assert.equal(invalid.elements.get('storage-warning').hidden,false);assert(invalid.elements.get('session').textContent.includes('Shared peer QA'));
  const missing=load({'nightjar-place':peer},false,{sessionOverrides:{'nightjar-recovery-context-v1':raw,'nightjar-recovery-time-v1':JSON.stringify(time)}});missing.elements.get('retry').listeners.get('click')();assert(!missing.session.has('nightjar-recovery-context-v1'));assert(!missing.session.has('nightjar-recovery-time-v1'));
+});
+
+test('offline snapshots disclose relevant changes from another local-storage view without rewriting saved data',()=>{
+ const page=load({'nightjar-targets-v1':['Vega']}),before=Array.from(page.raw);
+ assert.equal(page.elements.get('snapshot-warning').hidden,true);
+ page.listeners.get('storage')({key:'nightjar-targets-v1',storageArea:page.storage});
+ assert.equal(page.elements.get('snapshot-warning').hidden,false);assert.deepEqual(Array.from(page.raw),before);
+ assert.equal(page.elements.get('targets').textContent,'Vega');assert.match(html,/id="refresh-details" href="\/offline"/);
+});
+test('offline snapshot notices ignore unrelated stores and include clearing relevant local data',()=>{
+ const page=load();page.listeners.get('storage')({key:'nightjar-targets-v1',storageArea:{}});page.listeners.get('storage')({key:'unrelated-app',storageArea:page.storage});assert.equal(page.elements.get('snapshot-warning').hidden,true);
+ page.listeners.get('storage')({key:null,storageArea:page.storage});assert.equal(page.elements.get('snapshot-warning').hidden,false);
 });
