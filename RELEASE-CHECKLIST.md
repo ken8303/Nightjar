@@ -94,6 +94,15 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Current-view form recovery copies prepared during actual quota and malformed-store failures without changing stored data. Retained text survived repair/retry, and copy messages hid after edits. Full-capacity Unicode/country metadata tests pass; compact controls fit without overflow/errors. Native file receipt remains pending.
 
+## Latest recovery checks — 11 October 2026
+
+- Explicit image retries request fresh URLs; returning camera labels reuse the same attempt. Hidden/offscreen image deadlines pause. Controlled stalled-image recovery and current provider response metadata passed; real phone decoding/connectivity remains pending.
+- Cancelled orientation callbacks cannot consume a newer pose. Camera captions reserve label space in manual/paused views; generated-video play/pause recovery passed. Physical sensor alignment and native stream behaviour remain pending.
+- UTC/local entry preserves the selected instant at supported calendar boundaries. Lunar/event shortcuts cannot select unsupported years; modern repeated-hour choices still passed.
+- Lost/unavailable 3D offers an interactive 2D fallback and direct Retry. Retry preserves selection/site/time/unfinished edits and restores keyboard focus. Actual desktop context loss and deliberately blocked initialization passed; native phone graphics recovery remains pending.
+- Planning clocks suspend on pagehide and refresh on return, waiting while hidden and ignoring old timer callbacks. Synthetic lifecycle checks passed; real Safari cached-page and installed-PWA restoration remain pending.
+- Visible 2D names select their own object, including expanded and graphics-fallback views. Dot and keyboard selection passed; native touch/reader acceptance remains pending.
+
 ## After the next GitHub Desktop push
 
 Repeated Edit preserves the active diary form; a different-entry Edit refuses replacing unfinished changes until save/cancel. Local mobile/desktop checks confirmed focus, reload, save-then-switch and malformed-store recovery behavior. Include repeated/different-entry clicks in physical-phone diary acceptance.

@@ -12,7 +12,7 @@ function fixture(hiddenInitially=false){
 test('planning ticks stop while hidden and returning refreshes before restarting the cadence',()=>{
  const f=fixture();assert.equal(f.scheduled[0].interval,30000);f.scheduled[0].tick();assert.deepEqual(f.calls,['update']);
  f.visibility(true);assert(f.scheduled[0].cancelled);f.scheduled[0].tick();assert.equal(f.calls.length,1);
- f.visibility(false);assert.equal(f.calls.length,2);assert.equal(f.scheduled.length,2);f.scheduled[1].tick();assert.equal(f.calls.length,3);f.stop();
+ f.visibility(false);assert.equal(f.calls.length,2);assert.equal(f.scheduled.length,2);f.scheduled[0].tick();assert.equal(f.calls.length,2);f.scheduled[1].tick();assert.equal(f.calls.length,3);f.stop();
 });
 test('a background mount starts no timer and hidden state suppresses a queued foreground tick',()=>{
  const f=fixture(true);assert.equal(f.scheduled.length,0);assert.equal(f.calls.length,0);
