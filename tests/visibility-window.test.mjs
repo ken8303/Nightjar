@@ -43,3 +43,12 @@ test('hourly UTC samples remain distinct through the repeated local hour at the 
  assert.equal(data.hours.at(-1).time.toISOString(),'2026-10-25T11:00:00.000Z');
  data.hours.slice(1).forEach((hour,i)=>assert.equal(+hour.time-+data.hours[i].time,3600000));
 });
+test('visibility samples stop at the supported UTC year boundary',()=>{
+ const data=planetVisibilityWindow(Date.parse('9999-12-31T22:00:00Z'),london);
+ assert.deepEqual(data.hours.map(hour=>hour.time.toISOString()),['9999-12-31T22:00:00.000Z','9999-12-31T23:00:00.000Z']);
+ for(const row of data.rows){assert.equal(row.positions.length,2);assert(row.positions.every(p=>p.time.getUTCFullYear()===9999));assert(row.peakSample.time.getUTCFullYear()===9999);if(row.best)assert(row.best.time.getUTCFullYear()===9999)}
+ const first=planetVisibilityWindow(Date.parse('0001-01-01T00:00:00Z'),london);assert.equal(first.hours.length,12);assert.equal(first.hours[0].time.toISOString(),'0001-01-01T00:00:00.000Z');
+});
+test('unsupported visibility start dates fail before creating actionable times',()=>{
+ for(const start of [NaN,Date.parse('+010000-01-01T00:00:00Z'),Date.parse('0000-12-31T23:00:00Z')])assert.throws(()=>planetVisibilityWindow(start,london),/UTC years 1–9999/);
+});

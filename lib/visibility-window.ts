@@ -1,4 +1,5 @@
 import {A,bodyPosition,skyBodies,type Place} from '@/lib/sky';
+import {validObservingDate} from './observing-time';
 export const minimumTargetAltitude=30;
 export type VisibilitySample={time:Date;sun:number;altitude:number;azimuth:number};
 export type VisibilitySamples={body:A.Body;positions:VisibilitySample[]};
@@ -15,8 +16,9 @@ export function rankVisibilitySamples(rows:VisibilitySamples[]){
  }).sort((a,b)=>b.peak-a.peak||a.body.localeCompare(b.body));
 }
 export function planetVisibilityWindow(start:number,place:Place){
- const hours=Array.from({length:12},(_,i)=>{
-  const time=new Date(start+i*3600000);
+ if(!validObservingDate(new Date(start)))throw Error('Choose an observing time within UTC years 1–9999.');
+ const times=Array.from({length:12},(_,i)=>new Date(start+i*3600000)).filter(validObservingDate);
+ const hours=times.map(time=>{
   return {time,sun:bodyPosition(A.Body.Sun,time,place).altitude};
  });
  const samples=skyBodies.map(body=>({
