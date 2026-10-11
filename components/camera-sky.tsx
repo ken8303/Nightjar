@@ -11,6 +11,7 @@ import {Field,FieldDescription,FieldGroup,FieldLabel} from '@/components/ui/fiel
 import {layoutCameraLabels,type CameraLabelObstacle} from '@/lib/camera-labels';
 import {createCameraLocation} from '@/lib/camera-location';
 import {cameraSkyContext,cameraCompassContext} from '@/lib/camera-context';
+import {watchPhotoReconnect} from '@/lib/photo-reconnect';
 import {watchCameraLifecycle} from '@/lib/camera-lifecycle';
 import {watchCameraOrientation,type CameraOrientationReading} from '@/lib/camera-orientation';
 import {createCameraSession} from '@/lib/camera-session';
@@ -52,11 +53,7 @@ export default function CameraSky(props:Props){
  const requestPhotos=useCallback(()=>setPhotoRevision(`${Date.now()}-${++photoAttempt.current}`),[]);
  useEffect(()=>{
   if(!showPhotos)return;
-  let pending=false;
-  const retry=()=>{if(document.hidden){pending=true;return}pending=false;requestPhotos();setPhotoNotice('Connection restored. Visible reference thumbnails have been requested again.')};
-  const resumed=()=>{if(pending&&!document.hidden&&navigator.onLine)retry()};
-  window.addEventListener('online',retry);document.addEventListener('visibilitychange',resumed);
-  return()=>{window.removeEventListener('online',retry);document.removeEventListener('visibilitychange',resumed)};
+  return watchPhotoReconnect(()=>{requestPhotos();setPhotoNotice('Connection restored. Visible reference thumbnails have been requested again.')},window,document,{visible:()=>!document.hidden,online:()=>navigator.onLine});
  },[showPhotos,requestPhotos]);
  function reloadPhotos(){requestPhotos();setPhotoNotice('Visible reference thumbnails requested again. A star icon remains while an image loads or is unavailable.');}
  const [previousLabels,setPreviousLabels]=useState<string[]>([]);
