@@ -198,3 +198,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 
 /* Fit the fallback chart inside the 3D viewport without cropping its horizon. */
 .sky-dome>.sky-chart{width:100%;height:100%;max-height:none}
+/* Visible names are part of an interactive object's selection target. */
+.sky-object .sky-label{pointer-events:all}

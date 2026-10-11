@@ -12,14 +12,15 @@ export default function SkyChart({place,date,large=false,selected="",showLines=t
  const labels=useMemo(()=>layoutSkyLabels(points,points.filter(point=>showLabels&&(large||point.mag<.4||point.planet)).map(point=>point.name),selected),[points,showLabels,large,selected]);
  const interactive=large&&Boolean(onSelect);
  const gradientId=`sky-${useId().replace(/:/g,'')}`;
+ function selectObject(name:string,svg:SVGSVGElement){
+  onSelect?.(name);
+  Array.from(svg.querySelectorAll<SVGGElement>('.sky-object')).find(element=>element.dataset.skyName===name)?.focus({preventScroll:true});
+ }
  function selectNearest(event:MouseEvent<SVGSVGElement>){
   const svg=event.currentTarget,matrix=svg.getScreenCTM();if(!matrix)return;
   const screenPoint=svg.createSVGPoint();screenPoint.x=event.clientX;screenPoint.y=event.clientY;
   const local=screenPoint.matrixTransform(matrix.inverse()),name=nearestSkyPoint(points,local.x,local.y);
-  if(name){
-   onSelect?.(name);
-   Array.from(svg.querySelectorAll<SVGGElement>('.sky-object')).find(element=>element.dataset.skyName===name)?.focus({preventScroll:true});
-  }
+  if(name)selectObject(name,svg);
  }
  return <svg className={large?'sky-chart large':'sky-chart'} viewBox="0 0 440 390" onClick={interactive?selectNearest:undefined} role={interactive?'group':'img'} aria-label={`Sky above ${place.name} at ${date.toISOString()}; north up and east left${selected?`; selected target ${selected}`:''}; star pattern lines ${showLines?'shown':'hidden'}; object labels ${showLabels?'shown':'hidden'}${showMilkyWay?'; Milky Way core direction shown when above horizon':''}`}>
   <defs><radialGradient id={gradientId}><stop stopColor="#14232e"/><stop offset="1" stopColor="#0c151d"/></radialGradient></defs>
@@ -37,7 +38,7 @@ export default function SkyChart({place,date,large=false,selected="",showLines=t
    {selected===point.name&&<circle cx={point.x} cy={point.y} r="10" fill="none" stroke="#d4ee91" strokeWidth="2"/>}
    {point.planet&&<circle cx={point.x} cy={point.y} r="8" fill="#c1df93" opacity=".09"/>}
    <circle cx={point.x} cy={point.y} r={point.planet?4:Math.max(1.5,3.5-point.mag*.7)} fill={point.planet?'#dce6a1':'#e0f1fb'}/>
-   {labels.has(point.name)&&<text className="sky-label" x={labels.get(point.name)!.x} y={labels.get(point.name)!.y} fill={point.planet?'#dce6a1':'#b7cad6'} fontSize="11">{point.name}</text>}
+   {labels.has(point.name)&&<text onClick={interactive?event=>{event.stopPropagation();const svg=event.currentTarget.ownerSVGElement;if(svg)selectObject(point.name,svg)}:undefined} className="sky-label" x={labels.get(point.name)!.x} y={labels.get(point.name)!.y} fill={point.planet?'#dce6a1':'#b7cad6'} fontSize="11">{point.name}</text>}
   </g>)}
   {showMilkyWay&&core.altitude>0&&<g className="galactic-core-marker" aria-label={`Milky Way core direction, ${core.altitude.toFixed(1)}° altitude`}><circle cx={core.x} cy={core.y} r="10" fill="none" stroke="#e9b990" strokeWidth="2" strokeDasharray="3 3"/><circle cx={core.x} cy={core.y} r="2.5" fill="#e9b990"/><text x={core.x+13} y={core.y-10} fill="#f1c9a4" fontSize="11">Core direction</text></g>}
   <g fill="#93a7b5" fontSize="12" textAnchor="middle"><text x="220" y="18">N</text><text x="220" y="382">S</text><text x="35" y="199">E</text><text x="407" y="199">W</text></g>
