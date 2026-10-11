@@ -157,3 +157,7 @@ test('offline snapshot notices ignore unrelated stores and include clearing rele
  const page=load();page.listeners.get('storage')({key:'nightjar-targets-v1',storageArea:{}});page.listeners.get('storage')({key:'unrelated-app',storageArea:page.storage});assert.equal(page.elements.get('snapshot-warning').hidden,true);
  page.listeners.get('storage')({key:null,storageArea:page.storage});assert.equal(page.elements.get('snapshot-warning').hidden,false);
 });
+test('offline diary omits unsupported year-zero observations while preserving their raw stored values',()=>{
+ const entry={target:'M31',observedAt:'0000-12-31T23:59:00.000Z',place:{name:'QA site',latitude:0,longitude:0},outcome:'seen',notes:'Unsupported QA record'},valid={...entry,target:'M45',observedAt:'0001-01-01T00:00:00.000Z',notes:'Supported QA record'};
+ const page=load({'nightjar-observing-diary-v1':[entry,valid]});assert.equal(page.elements.get('diary').children.length,1);assert(page.elements.get('diary').textContent.includes('Supported QA record'));assert(!page.elements.get('diary').textContent.includes('Unsupported QA record'));assert.equal(page.elements.get('coverage-warning').hidden,false);assert.deepEqual(JSON.parse(page.raw.get('nightjar-observing-diary-v1')),[entry,valid]);
+});

@@ -46,3 +46,11 @@ test('write failures give actionable guidance without masking validation or chan
  }
  let writes=0;assert.throws(()=>saveDiary([{...entry,notes:'x'.repeat(2001)}],{setItem:()=>writes++}),/observing diary/);assert.equal(writes,0);
 });
+test('observation dates share the supported UTC range with the planner before save or import',()=>{
+ for(const observedAt of ['0000-12-31T23:59:00.000Z','+010000-01-01T00:00:00.000Z']){
+  const invalid={...entry,observedAt},source=storage();source.values.set('nightjar-observing-diary-v1',JSON.stringify([entry]));const before=Array.from(source.values);
+  assert.throws(()=>normalizeDiary([invalid]),/invalid entries/);assert.throws(()=>saveDiary([invalid],source),/invalid entries/);assert.deepEqual(Array.from(source.values),before);
+  assert.throws(()=>parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:'2026-10-11T20:00:00.000Z',data:{...empty,diary:[invalid]}})),/invalid entries/);
+ }
+ for(const observedAt of ['0001-01-01T00:00:00.000Z','9999-12-31T23:59:59.999Z'])assert.equal(normalizeDiary([{...entry,observedAt}])[0].observedAt,observedAt);
+});
