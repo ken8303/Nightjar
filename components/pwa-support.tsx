@@ -25,6 +25,7 @@ export default function PwaSupport() {
     const mode = window.matchMedia('(display-mode: standalone)');
     const updateMode = () => {const value=mode.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);installation.current.installed=value;setInstalled(value)};
     const updateNetwork = () => setOffline(!navigator.onLine);
+    const restoreState = () => { updateMode(); updateNetwork(); };
     const offerInstall = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt);setMessage(''); };
     const didInstall = () => { installation.current.installed=true;setInstalled(true);setInstalling(false);setPrompt(null);setMessage('Nightjar is installed.'); };
     updateMode(); updateNetwork();
@@ -32,6 +33,7 @@ export default function PwaSupport() {
     window.addEventListener('appinstalled', didInstall);
     window.addEventListener('online', updateNetwork);
     window.addEventListener('offline', updateNetwork);
+    window.addEventListener('pageshow', restoreState);
     mode.addEventListener('change', updateMode);
     return () => {
       pendingUpdate.current?.();pendingUpdate.current=null;
@@ -39,6 +41,7 @@ export default function PwaSupport() {
       window.removeEventListener('appinstalled', didInstall);
       window.removeEventListener('online', updateNetwork);
       window.removeEventListener('offline', updateNetwork);
+      window.removeEventListener('pageshow', restoreState);
       mode.removeEventListener('change', updateMode);
     };
   }, []);
