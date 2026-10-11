@@ -111,7 +111,7 @@ Diary cards, controls and report/CSV local times now include offsets and precise
 
 Local integrated PWA verification passed two waiting-worker updates, retaining millisecond observing time, favourite/note and unfinished diary site/time/Unicode text. A subsequent rebuilt CSS update verified wrapped diary actions at 320/390 pixels, including snapshot and clear/undo behavior. Panel-bound checks supplement document-overflow checks because a clipped internal control can leave document width unchanged. Installed-phone and production-origin update checks below remain required.
 
-1. Check the **Validate Nightjar** action. Its first hosted run and clean Linux installation are still pending.
+1. Check the **Validate Nightjar** action. Run #7 at 37171de installed locked dependencies and passed type checking/lint, then failed three test results caused by Node/ICU fixture differences. The local compatibility repair passes the full verification command on Node 22.16.0 and all tests on Node 24.19.0; confirm the next hosted run passes every stage.
 2. Set the Workers Builds build command to `npm run verify`, with the existing deploy command `npm run deploy`. The GitHub check alone does not gate an independently configured Cloudflare build.
 3. Confirm the production home page, weather/place/aurora API responses, manifest, service worker and `/offline` page on the final HTTPS origin.
 4. Import a backup on that final origin if needed. Browser data is separate between localhost, the prior hosted site and Cloudflare.

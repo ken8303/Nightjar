@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';import {test,after} from 'node:test';import {fileURLToPath} from 'node:url';import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {printableObservingPlan,targetCoverageNotice}=await vite.ssrLoadModule('/lib/observing-plan.ts');
+// ICU versions display zero shortOffset as either GMT or GMT+0; both identify UTC.
 const input=()=>({date:new Date('2026-10-25T01:30:00Z'),place:{name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London',bortle:4},targets:[{name:'Below',altitude:-12,azimuth:90},{name:'Vega',altitude:35,azimuth:270}],notes:{Vega:'First line\nSecond line'},equipment:[{name:'Camera',width:36,height:24,focal:400,pixel:3.76}]});
 test('plan records exact UTC and DST offset, horizon status, notes, Moon and equipment',()=>{
  const plan=input(),html=printableObservingPlan(plan);
- assert(html.includes('2026-10-25 01:30:00.000 UTC'));assert(html.includes('01:30:00 GMT+0'));assert(html.includes('Bortle 4'));assert(html.includes('Moon:'));assert(html.includes('Below horizon'));assert(html.includes('First line\nSecond line'));assert(html.includes('3.76 µm pixels'));
+ assert(html.includes('2026-10-25 01:30:00.000 UTC'));assert.match(html,/01:30:00 GMT(?:\+0)? · Europe\/London/);assert(html.includes('Bortle 4'));assert(html.includes('Moon:'));assert(html.includes('Below horizon'));assert(html.includes('First line\nSecond line'));assert(html.includes('3.76 µm pixels'));
  assert(html.indexOf('<label for="target-0">Vega')<html.indexOf('>Below</label>'));assert.equal(plan.targets[0].name,'Below','export must not reorder app state');
  plan.date=new Date('2026-10-25T00:30:00Z');assert(printableObservingPlan(plan).includes('01:30:00 GMT+1'));
 });
@@ -31,7 +32,7 @@ test('plan UTC metadata round trips exact seconds and milliseconds across repeat
  for(const instant of ['2026-10-25T00:30:17.456Z','2026-10-25T01:30:17.456Z']){
   const plan={...input(),date:new Date(instant)},html=printableObservingPlan(plan),stamp=html.match(/<strong>UTC INSTANT<\/strong><span>([^<]+)<\/span>/)[1];
   assert.equal(new Date(stamp.replace(' UTC','Z').replace(' ','T')).getTime(),+plan.date);
-  assert(html.includes('01:30:17 GMT+'+(instant.includes('T00:')?'1':'0')));assert.equal(plan.date.toISOString(),instant);
+  assert.match(html,instant.includes('T00:')?/01:30:17 GMT\+1 · Europe\/London/:/01:30:17 GMT(?:\+0)? · Europe\/London/);assert.equal(plan.date.toISOString(),instant);
  }
 });
 test('local date rollover keeps the export UTC instant exact and includes quarter-hour offsets',()=>{
