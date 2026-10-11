@@ -8,12 +8,12 @@ after(()=>vite.close());
 const {watchCameraOrientation}=await vite.ssrLoadModule('/lib/camera-orientation.ts');
 function harness(){
  const events=new EventTarget(),screen=new EventTarget(),result={reading:null,quiet:false,unavailable:[],absolute:0,relative:0,reads:0,cancelled:false};
- let time=0,angle=0,tick,deferred=null;
- const dispose=watchCameraOrientation(events,screen,{onReading:reading=>{result.reading=reading;result.reads++},onQuiet:quiet=>result.quiet=quiet,onUnavailable:reason=>{result.reading=null;result.unavailable.push(reason)},onAbsolute:()=>result.absolute++,onRelative:()=>result.relative++},{angle:()=>angle,now:()=>time,schedule:callback=>{tick=callback;return()=>{result.cancelled=true}},defer:(callback,delay)=>{const work={callback,due:time+delay};deferred=work;return()=>{if(deferred===work)deferred=null}}});
+ let time=0,angle=0,tick,deferred=null;const history=[];
+ const dispose=watchCameraOrientation(events,screen,{onReading:reading=>{result.reading=reading;result.reads++},onQuiet:quiet=>result.quiet=quiet,onUnavailable:reason=>{result.reading=null;result.unavailable.push(reason)},onAbsolute:()=>result.absolute++,onRelative:()=>result.relative++},{angle:()=>angle,now:()=>time,schedule:callback=>{tick=callback;return()=>{result.cancelled=true}},defer:(callback,delay)=>{const work={callback,due:time+delay};history.push(work);deferred=work;return()=>{if(deferred===work)deferred=null}}});
  function read(values={},type='deviceorientation'){
   const event=Object.assign(new Event(type),{alpha:0,beta:90,gamma:0,absolute:false},values);events.dispatchEvent(event);
  }
- return {events,screen,result,dispose,read,advance:delta=>{time+=delta;if(deferred&&time>=deferred.due){const work=deferred;deferred=null;work.callback()}tick()},setTime:value=>time=value,rotate:value=>{angle=value;screen.dispatchEvent(new Event('change'))}};
+ return {events,screen,result,dispose,read,history,advance:delta=>{time+=delta;if(deferred&&time>=deferred.due){const work=deferred;deferred=null;work.callback()}tick()},setTime:value=>time=value,rotate:value=>{angle=value;screen.dispatchEvent(new Event('change'))}};
 }
 test('a quiet stationary phone retains its pose and marks the last reading instead of losing labels',()=>{
  const h=harness();h.read({absolute:true});const pose=h.result.reading;
@@ -216,4 +216,22 @@ test('Safari compass metadata follows fresh/coalesced readings and does not reus
  h.setTime(100);h.read({beta:120,alpha:20});h.advance(60);assert.equal(h.result.reading.absolute,true);assert.equal(h.result.reading.northReference,'magnetic');assert.equal(h.result.reading.compassAccuracy,undefined);
  h.setTime(701);h.read({beta:120,alpha:30});assert.equal(h.result.reading.absolute,false);assert.equal(h.result.reading.northReference,undefined);assert.equal(h.result.reading.compassAccuracy,undefined);h.dispose();
  const standard=harness();standard.read({absolute:true});assert.equal(standard.result.reading.northReference,undefined);assert.equal(standard.result.reading.compassAccuracy,undefined);standard.dispose();
+});
+
+
+test('a cancelled callback cannot consume a newer pose after invalidation and recovery',()=>{
+ for(const invalidate of ['invalid','rotation']){
+  const h=harness();h.read();h.setTime(20);h.read({alpha:90});const stale=h.history[0];
+  if(invalidate==='invalid')h.read({alpha:null});else h.rotate(90);
+  h.setTime(30);h.read();const current=h.result.reading;h.setTime(40);h.read({alpha:180});
+  stale.callback();assert.equal(h.result.reads,2);assert.equal(h.result.reading,current);
+  h.advance(69);assert.equal(h.result.reads,2);h.advance(1);assert.equal(h.result.reads,3);assert(h.result.reading.basis.forward[1]<-.99);h.dispose();
+ }
+});
+test('a cancelled relative callback cannot flush or detach a newer absolute pose countdown',()=>{
+ const h=harness();h.read();h.setTime(20);h.read({alpha:90});const stale=h.history[0];
+ h.setTime(30);h.read({alpha:0},'deviceorientationabsolute');const current=h.result.reading;
+ h.setTime(40);h.read({alpha:180},'deviceorientationabsolute');stale.callback();
+ assert.equal(h.result.reads,2);assert.equal(h.result.reading,current);assert.equal(h.result.absolute,1);
+ h.advance(70);assert.equal(h.result.reads,3);assert.equal(h.result.reading.absolute,true);assert(h.result.reading.basis.forward[1]<-.99);h.dispose();
 });

@@ -11,8 +11,8 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
  let lastReading=now(),lastRender=-Infinity,available=false,absolutePreferred=false,lastAbsolute=false,quiet=false,disposed=false;
  let compassOffset:number|null=null,lastCompass=-Infinity,safariStream=false,verticalCompass=false;
  const defer=options.defer??((callback,delay)=>{const timer=setTimeout(callback,delay);return()=>clearTimeout(timer)});
- let pending:Reading|null=null,cancelPending:(()=>void)|null=null;
- const clearPending=()=>{cancelPending?.();cancelPending=null;pending=null};
+ let pending:Reading|null=null,cancelPending:(()=>void)|null=null,pendingGeneration=0;
+ const clearPending=()=>{pendingGeneration++;cancelPending?.();cancelPending=null;pending=null};
  const emit=(reading:Reading)=>{lastRender=now();callbacks.onReading(reading)};
  const setQuiet=(next:boolean)=>{if(quiet!==next){quiet=next;callbacks.onQuiet(next)}};
  const read=(raw:Event)=>{
@@ -60,10 +60,16 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   // stops moving before another event arrives. Never replay it after invalidation.
   if(!refresh&&lastReading-lastRender<80){
    pending=reading;
-   if(!cancelPending)cancelPending=defer(()=>{
-    const latest=pending;cancelPending=null;pending=null;
-    if(!disposed&&available&&latest)emit(latest);
-   },80-(lastReading-lastRender));
+   if(!cancelPending){
+    const request=++pendingGeneration;
+    cancelPending=defer(()=>{
+     // Cancellation can race with a queued timeout. It must not consume or
+     // detach a later pose's countdown after rotation or source recovery.
+     if(disposed||request!==pendingGeneration)return;
+     const latest=pending;cancelPending=null;pending=null;
+     if(available&&latest)emit(latest);
+    },80-(lastReading-lastRender));
+   }
    return;
   }
   clearPending();emit(reading);
