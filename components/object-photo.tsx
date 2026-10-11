@@ -5,6 +5,7 @@ import {Dialog} from 'radix-ui';
 import {Maximize2,Minus,Plus,RotateCcw,X} from 'lucide-react';
 import {objectPhoto,type ObjectPhoto as Photo} from '@/lib/object-photos';
 import {watchPhotoDelay} from '@/lib/photo-delay';
+import {photoRetrySource} from '@/lib/photo-retry';
 import {viewerZoomKey} from '@/lib/viewer-zoom';
 
 function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
@@ -14,9 +15,7 @@ function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
  const frame=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(loaded||failed||!frame.current)return;return watchPhotoDelay(frame.current,()=>setSlow(true))},[loaded,failed,retry]);
  const retryPhoto=()=>{
-  const source=new URL(photo.src,window.location.href);
-  source.searchParams.set('nightjar-retry',`${Date.now()}-${++attempt.current}`);
-  setImageSource(source.href);setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1);
+  setImageSource(photoRetrySource(photo.src,`${Date.now()}-${++attempt.current}`,window.location.href));setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1);
  };
  return <div ref={frame} className={`${enlarged?'photo-enlarged-image':'object-photo-image'}${failed||(!loaded&&slow)?' photo-recovery-active':''}`}>
   {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button className="button" onClick={retryPhoto}>Retry photo</button></div>:<>
