@@ -109,6 +109,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - PWA offers clear when a worker stops waiting. Restored network/display indicators and browser-confirmed installation stay consistent in synthetic worker/mode tests. Actual installed-phone and multi-tab deployment updates remain pending.
 - When to look, deep-sky comparisons/timelines, Milky Way and photography-light shortcuts respect supported observing dates, with explicit shortened searches. These checks establish input consistency, not distant-date astronomical precision.
 - The focused 3D sky leaves Ctrl/Command/Alt shortcuts available while plain navigation keys still move the rendered view. Compact keyboard focus checks passed; native assistive and browser zoom behaviour remains pending.
+- The reviewed build's actual service worker served saved Vega, its exact multiline note and the London/time snapshot after a simulated server failure; online retry restored the planner. Compact/landscape camera preview decoded the actual M31 thumbnail, and generated video plus a synthetic pose showed Fomalhaut in the combined catalogue. Background/return left camera/motion off. Physical phone and deployed-origin acceptance remain pending.
 
 ## After the next GitHub Desktop push
 
