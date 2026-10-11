@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import Image from 'next/image';
 import {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,initialCameraView,type CameraCatalogue} from '@/lib/camera-catalogue';
 import {readCameraSettings,saveCameraSettings} from '@/lib/camera-settings';
@@ -34,12 +34,14 @@ export default function CameraSky(props:Props){
  const [camera,setCamera]=useState<'off'|'starting'|'on'>('off'),[cameraError,setCameraError]=useState(''),[trackPaused,setTrackPaused]=useState(false);
  const [playbackPaused,setPlaybackPaused]=useState(false);
  const cameraPaused=camera!=='off'&&(trackPaused||playbackPaused);
+ const placeholderVisible=camera!=='on'||cameraPaused;
  const [tracking,setTracking]=useState(false),[sensor,setSensor]=useState<CameraOrientationReading|null>(null),[sensorError,setSensorError]=useState(''),[aligned,setAligned]=useState(false),[offset,setOffset]=useState(0);
  const [sensorQuiet,setSensorQuiet]=useState(false),[motionSession,setMotionSession]=useState(0);
  const [motionPending,setMotionPending]=useState(false),[alignmentError,setAlignmentError]=useState<{target:string;message:string}|null>(null);
  const [initialSettings]=useState(readCameraSettings);
  const [settingsStorageError,setSettingsStorageError]=useState(false);
  const [bearing,setBearing]=useState(initialView.bearing),[altitude,setAltitude]=useState(initialView.altitude),[fov,setFov]=useState(initialSettings.fov),[ratio,setRatio]=useState(.75),[size,setSize]=useState({width:360,height:480});
+ const compactPlaceholder=camera==='off'&&size.height<220;
  const [sessionNotice,setSessionNotice]=useState('');
  const [wake,setWake]=useState<'off'|'requesting'|'on'>('off'),[wakeNotice,setWakeNotice]=useState('');
  const wakeSessionRef=useRef<ReturnType<typeof createCameraWakeLock>|null>(null);
@@ -58,6 +60,8 @@ export default function CameraSky(props:Props){
  const [previousLabels,setPreviousLabels]=useState<string[]>([]);
  const badgeRef=useRef<HTMLSpanElement>(null);
  const [badgeBounds,setBadgeBounds]=useState<CameraLabelObstacle|null>(null);
+ const placeholderCopyRef=useRef<HTMLDivElement>(null);
+ const [placeholderBounds,setPlaceholderBounds]=useState<CameraLabelObstacle|null>(null);
  const returnFocusRef=useRef<'stage'|'settings'|'alignment'|null>(null),wasFullScreenRef=useRef(false);
  const [labelMode,setLabelMode]=useState<'all'|'selected'|'hidden'>('all');
  const [catalogueMode,setCatalogueMode]=useState<CameraCatalogue>(initialView.mode),[deepSelection,setDeepSelection]=useState(initialView.selected),[targetQuery,setTargetQuery]=useState('');
@@ -109,10 +113,6 @@ export default function CameraSky(props:Props){
   return ()=>{stopClock();stopLifecycle();motionStopRef.current?.();invalidate();locationSessionRef.current=null;wakeSession.stop(false);wakeSessionRef.current=null;cameraSession.stop(false);cameraSessionRef.current=null};
  },[]);
  useEffect(()=>{const video=videoRef.current;if(!video)return;return watchCameraPlayback(video,setPlaybackPaused)},[]);
- useEffect(()=>{
-  const el=stageRef.current;if(!el)return;
-  const observer=new ResizeObserver(([entry])=>setSize({width:entry.contentRect.width,height:entry.contentRect.height}));observer.observe(el);return ()=>observer.disconnect();
- },[]);
  useEffect(()=>{
   if(!tracking)return;
   const stopMotion=watchCameraOrientation(window,window.screen.orientation??null,{
@@ -198,17 +198,26 @@ export default function CameraSky(props:Props){
    const point=projectSkyTarget(target.altitude,target.azimuth,basis,frame.width/frame.height,verticalFov);if(!point)continue;
    candidates.push({name:target.name,mag:target.mag,x:point.x*frame.width+frame.left,y:point.y*frame.height+frame.top});
   }
-  return layoutCameraLabels(candidates,frame,labelWidth,selectedName,previousLabels,[badgeBounds]);
+  return layoutCameraLabels(candidates,frame,labelWidth,selectedName,previousLabels,[badgeBounds,...(placeholderVisible&&placeholderBounds?[placeholderBounds]:[])]);
  }
- useEffect(()=>{
+ useLayoutEffect(()=>{
   const badge=badgeRef.current,stage=stageRef.current;if(!badge||!stage)return;
+  const copy=placeholderCopyRef.current;
+  let disposed=false;
+  const sameBounds=(previous:CameraLabelObstacle|null,next:CameraLabelObstacle|null)=>previous===next||Boolean(previous&&next&&Object.keys(next).every(key=>previous[key as keyof CameraLabelObstacle]===next[key as keyof CameraLabelObstacle]));
   const measure=()=>{
-   const bounds={left:badge.offsetLeft,top:badge.offsetTop,width:badge.offsetWidth,height:badge.offsetHeight};
-   setBadgeBounds(previous=>previous&&Object.keys(bounds).every(key=>previous[key as keyof CameraLabelObstacle]===bounds[key as keyof CameraLabelObstacle])?previous:bounds);
+   if(disposed)return;
+   const stageBox=stage.getBoundingClientRect();
+   const bounds=(element:HTMLElement)=>{const box=element.getBoundingClientRect();return {left:box.left-stageBox.left-stage.clientLeft,top:box.top-stageBox.top-stage.clientTop,width:box.width,height:box.height}};
+   const badgeBox=bounds(badge),copyBox=copy?bounds(copy):null;
+   setBadgeBounds(previous=>sameBounds(previous,badgeBox)?previous:badgeBox);
+   setPlaceholderBounds(previous=>sameBounds(previous,copyBox)?previous:copyBox);
+   const dimensions={width:stageBox.width-stage.clientLeft*2,height:stageBox.height-stage.clientTop*2};
+   setSize(previous=>previous.width===dimensions.width&&previous.height===dimensions.height?previous:dimensions);
   };
-  const observer=new ResizeObserver(measure);observer.observe(badge);observer.observe(stage);measure();
-  return()=>observer.disconnect();
- },[props.fullScreen]);
+  const observer=new ResizeObserver(measure);observer.observe(badge);observer.observe(stage);if(copy)observer.observe(copy);measure();
+  return()=>{disposed=true;observer.disconnect()};
+ },[props.fullScreen,placeholderVisible,compactPlaceholder]);
  const labels=projectedLabels();
  const names=labels.map(label=>label.name);
  // Guarded render-time adjustment avoids an effect painting an unstable layout
@@ -218,7 +227,7 @@ export default function CameraSky(props:Props){
  const compassSetup=tracking&&Boolean(sensor?.needsNorthAnchor)&&!aligned;
  const compassContext=tracking?cameraCompassContext(sensor,sensorQuiet):null;
  const compassHint=compassSetup?'Names paused. Tilt the phone slightly away from upright for a moment to initialize the compass, then point back at the sky. You can also align with a known object.':'';
- const labelStatus=cameraPaused?'Labels paused until the camera feed resumes.':labelMode==='hidden'?'Object names are hidden. Target guidance remains available when direction is ready.':!canLabel?!tracking?'Names hidden while live camera motion is off. Enable phone discovery.':sensor?compassHint||'Names paused. Choose Check alignment to align a known object.':'Names paused until phone orientation is available.':labelMode==='selected'&&!selected?'Choose an object to show its name.':labels.length?`${labels.length} catalogue object${labels.length===1?'':'s'} in this direction.`:labelMode==='selected'?'The selected object has no label in this view. Follow its direction below, or choose another object.':'No catalogue objects in this view. Turn the phone or change the manual direction.';
+ const labelStatus=cameraPaused?'Labels paused until the camera feed resumes.':labelMode==='hidden'?'Object names are hidden. Target guidance remains available when direction is ready.':!canLabel?!tracking?'Names hidden while live camera motion is off. Enable phone discovery.':sensor?compassHint||'Names paused. Choose Check alignment to align a known object.':'Names paused until phone orientation is available.':labelMode==='selected'&&!selected?'Choose an object to show its name.':labels.length?`${labels.length} catalogue object${labels.length===1?'':'s'} in this direction.`:labelMode==='selected'?'The selected object has no label in this view. Follow its direction below, or choose another object.':'No object labels fit in this view. Turn the phone or change the manual direction.';
  const trackingReady=tracking&&!!sensor&&(sensor.absolute||aligned);
  const trackingLabel=!tracking?'MOTION OFF':!sensor?'WAITING FOR MOTION':!trackingReady?compassSetup?'COMPASS SETUP':'ALIGNMENT NEEDED':sensorQuiet?'LAST ORIENTATION':'DISCOVERY';
  const alignment=sensor&&selected?cameraHeadingAlignment(sensor.basis,selected.altitude,selected.azimuth):null;
@@ -231,7 +240,7 @@ export default function CameraSky(props:Props){
  }
  return <div className="camera-sky-layout"><div className="camera-sky-quick-controls"><div className="camera-sky-live-context"><div><strong>Sky positions for {place.name}</strong><span>Live · {now.toISOString().slice(11,16)} UTC · {light.label}</span></div><button className="text-button" onClick={()=>focusPanel(siteRef.current)}>Check observing site</button><p>{light.message}</p></div><label>Discovery catalogue<select value={catalogueMode} onChange={event=>chooseCatalogue(event.target.value as CameraCatalogue)}><option value="bright">Stars & solar system · 42 objects</option><option value="deep-sky">Messier deep sky · 109 objects</option><option value="all">Combined catalogue · 151 objects</option></select></label>{catalogueMode!=='bright'&&<p className="camera-sky-message">Messier labels mark predicted directions. Most objects need binoculars or a telescope and will not appear in a phone camera image. Align using a known bright star first.</p>}<FieldGroup className="camera-sky-search"><Field><FieldLabel htmlFor="camera-object-search">Find camera object</FieldLabel><Input ref={searchInputRef} id="camera-object-search" type="search" maxLength={100} value={targetQuery} placeholder="Sirius, M31, Andromeda…" aria-describedby="camera-object-search-help" className="min-h-11" onChange={event=>setTargetQuery(event.target.value)}/><FieldDescription id="camera-object-search-help" role={targetQuery?'status':undefined}>{targetQuery?`${orderedTargets.length} matching ${orderedTargets.length===1?'object':'objects'} in this catalogue. Picker search does not hide discovery labels.${selectedOutsideSearch?' Your followed object stays available.':''}${orderedTargets.length===0?' Try another name or catalogue.':''}`:'Search names, Messier/NGC numbers and catalogue aliases. This filters the picker; discovery uses the chosen catalogue.'}</FieldDescription>{targetQuery&&<Button type="button" variant="outline" className="min-h-11" onClick={()=>{setTargetQuery('');searchInputRef.current?.focus()}}>Clear camera search</Button>}</Field></FieldGroup><label>Object to follow<select value={selectedName} onChange={event=>chooseTarget(event.target.value)}>{targetOptions}</select></label><div className="camera-sky-actions"><button className="button primary" disabled={camera==='starting'} onClick={camera==='on'?stopCamera:startDiscovery}>{camera==='on'?<Square size={16}/>:<Camera size={16}/>} {camera==='on'?'Stop camera':camera==='starting'?'Starting camera…':'Start camera & discovery'}</button>{camera==='starting'&&<button className="button" onClick={stopCamera}>Cancel camera request</button>}<button className="button" onClick={tracking||motionPending?manualMode:startMotion}><Compass size={16}/>{motionPending?'Cancel motion request':tracking?'Use manual direction':'Enable phone motion'}</button></div>{!tracking&&selected&&<button className="button" disabled={selected.altitude<=0} onClick={previewSelected}>Preview direction of {selected.name}</button>}<button className="button" aria-pressed={wake==='on'} aria-describedby="camera-wake-help" onClick={wake==='off'?startWake:stopWake}>{wakeAction}</button><button className="button" onClick={()=>props.onFullScreenChange(true)}><Maximize2 size={16}/>Full screen camera</button><button className="button" onClick={()=>focusPanel(settingsRef.current)}>Camera settings</button>{tracking&&<button className="button" onClick={checkAlignment}>Check alignment</button>}{tracking&&sensor&&<p role="status" className="camera-sky-message">{sensor.absolute?'Compass direction available · approximate. Check alignment if names drift.':aligned?'Object alignment applied · approximate. Check again if names drift.':compassHint||'Phone motion is available, but names are paused. Choose a known object, then check alignment.'}</p>}<p id="camera-wake-help" className="camera-sky-wake-help">{wakeHelp}</p>{wakeNotice&&<p role="status" className="camera-sky-message">{wakeNotice}</p>}{sessionNotice&&<p role="status" className="camera-sky-message">{sessionNotice}</p>}{compassContext&&<p className="camera-sky-message">{compassContext.summary}. {compassContext.detail}</p>}{tracking&&sensorQuiet&&sensor&&<p role="status" className="camera-sky-message">Using the last orientation reading. Some phones send updates only when moved. Move the phone slightly to refresh; if labels stay fixed, retry motion or use manual direction.</p>}{cameraError&&<p role="status" className="camera-sky-message">{cameraError}</p>}{sensorError&&<p role="status" className="camera-sky-message">{sensorError}</p>}{tracking&&(!sensor||sensorQuiet)&&!motionPending&&<button className="button" onClick={startMotion}>Retry phone motion</button>}{motionPending&&<p role="status">Waiting for motion permission…</p>}</div><div className="camera-sky-main"><div className="camera-sky-stage" ref={stageRef} style={{aspectRatio:ratio}} tabIndex={-1} role="region" aria-label="Camera sky object overlay">
   <video ref={videoRef} muted playsInline aria-hidden={camera!=='on'} aria-label="Live rear camera preview" onLoadedMetadata={updateVideoRatio} onResize={updateVideoRatio}/>
-  {(camera!=='on'||cameraPaused)&&<div className="camera-sky-placeholder"><Camera size={30}/><strong>{cameraPaused?'Camera paused':camera==='starting'?'Opening rear camera…':'Direction preview'}</strong><span>{cameraPaused?'The camera feed is interrupted. If it does not resume, stop and start the camera again.':'Camera is off. Start it to place names over your view.'}</span></div>}
+  {placeholderVisible&&<div className={`camera-sky-placeholder${compactPlaceholder?' camera-sky-placeholder-compact':''}`}><div ref={placeholderCopyRef} className="camera-sky-placeholder-copy"><Camera size={30}/><strong>{cameraPaused?'Camera paused':camera==='starting'?'Opening rear camera…':'Direction preview'}</strong><span>{cameraPaused?'The camera feed is interrupted. If it does not resume, stop and start the camera again.':camera==='starting'?'Waiting for camera access and usable video frames. Cancel the request if it does not finish.':'Camera is off. Start it to place names over your view.'}</span></div></div>}
   {camera==='on'&&!trackingReady&&<div className="camera-sky-discovery-notice"><strong>{!tracking?'Camera only · motion is off':!sensor?'Waiting for phone direction':'Align phone direction'}</strong><span>{!tracking?'Names follow your phone after enabling motion.':!sensor?'Move the phone slightly. Names stay hidden until direction is available.':'Choose a known object, then align the phone to show names.'}</span><button className="button" disabled={motionPending} onClick={!tracking?startMotion:!sensor?startMotion:checkAlignment}>{motionPending?'Waiting for motion permission…':!tracking?'Enable phone discovery':!sensor?'Retry phone motion':'Check alignment'}</button></div>}
   <span className="camera-sky-reticle" aria-hidden="true"/>
   {labels.map(label=><button key={label.name} className={`camera-sky-label${showPhotos?' camera-sky-label-photo':''}`} title={showPhotos?`${label.name} · reference image; open photo details for source credits`:undefined} style={{left:label.x,top:label.y}} aria-pressed={selectedName===label.name} onClick={()=>chooseTarget(label.name)}>{showPhotos&&<CameraThumbnail key={photoRevision} name={label.name} revision={photoRevision}/>}<span>{label.name}</span></button>)}
