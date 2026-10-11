@@ -4,6 +4,8 @@ The latest local code passed 526 automated tests, TypeScript, lint, production b
 
 Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 526 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
+The reviewed production build also passed an actual service-worker fallback/retry check with saved Vega, its multiline note and the selected London/time snapshot. Compact and landscape camera checks decoded the actual M31 reference thumbnail, showed Fomalhaut using generated video and a synthetic phone pose, and kept camera/motion off after background return. These local checks complement the physical-phone and deployed-origin checks below.
+
 ## After your batch push
 
 1. Check the GitHub validation workflow result for the pushed commit. Local passing checks do not establish a hosted CI result.
