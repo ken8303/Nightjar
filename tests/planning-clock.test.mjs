@@ -36,3 +36,20 @@ test('camera cadence stays at fifteen seconds through hide, return and disposal'
  hidden=false;events.dispatchEvent(new Event('visibilitychange'));assert.equal(updates,2);assert.equal(tasks[1].interval,15000);
  stop();assert(tasks[1].cancelled);tasks[1].tick();assert.equal(updates,2);
 });
+
+test('page suspension stops the cadence even before visibility changes; restore refreshes immediately',()=>{
+ const events=new EventTarget(),pageEvents=new EventTarget(),tasks=[];let updates=0;
+ const stop=watchPlanningClock(events,()=>updates++,{hidden:()=>false,pageEvents,schedule:tick=>{const task={tick,cancelled:false};tasks.push(task);return()=>{task.cancelled=true}}});
+ pageEvents.dispatchEvent(new Event('pagehide'));assert(tasks[0].cancelled);tasks[0].tick();assert.equal(updates,0);
+ events.dispatchEvent(new Event('visibilitychange'));assert.equal(tasks.length,1);
+ pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(updates,1);assert.equal(tasks.length,2);
+ tasks[0].tick();assert.equal(updates,1);tasks[1].tick();assert.equal(updates,2);
+ stop();pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(updates,2);assert(tasks[1].cancelled);
+});
+
+test('page restore while still hidden waits for foreground visibility',()=>{
+ const events=new EventTarget(),pageEvents=new EventTarget(),tasks=[];let hidden=false,updates=0;
+ const stop=watchPlanningClock(events,()=>updates++,{hidden:()=>hidden,pageEvents,schedule:tick=>{tasks.push(tick);return()=>{}}});
+ pageEvents.dispatchEvent(new Event('pagehide'));hidden=true;pageEvents.dispatchEvent(new Event('pageshow'));assert.equal(updates,0);assert.equal(tasks.length,1);
+ hidden=false;events.dispatchEvent(new Event('visibilitychange'));assert.equal(updates,1);assert.equal(tasks.length,2);stop();
+});
