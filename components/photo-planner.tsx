@@ -1,4 +1,5 @@
 'use client';
+import {watchSavedDataRefresh} from '@/lib/saved-data-refresh';
 import {downloadFile} from '@/lib/download';
 import {numberEntryValue} from '@/lib/number-entry';
 import {useCallback,useEffect,useRef,useState} from 'react';
@@ -27,11 +28,7 @@ export default function PhotoPlanner({draft,draftStatus,onChange,onRetryDraft,fo
  const setProfiles=(profiles:Equipment[])=>setProfileState({profiles,error:false});
  const refreshProfiles=useCallback(()=>{try{setProfileState({profiles:readEquipmentProfiles(localStorage),error:false})}catch{setProfileState(previous=>({...previous,error:true}))}},[]);
  useEffect(()=>{
-  const update=(event:StorageEvent)=>{
-   if(event.storageArea!==localStorage||event.key!==null&&event.key!=='nightjar-equipment')return;
-   refreshProfiles();
-  };
-  window.addEventListener('storage',update);return()=>window.removeEventListener('storage',update);
+  return watchSavedDataRefresh(refreshProfiles,window,document,{storage:()=>localStorage,key:'nightjar-equipment',hidden:()=>document.hidden});
  },[refreshProfiles]);
  function chooseTarget(id:string){const target=catalogue.find(item=>item.id===id);if(!target)return;onChange({catalogueId:id,ra:String(target.ra),dec:String(target.dec)});setNotice(`${target.id} coordinates loaded in J2000. Check your equipment and panel layout.`)}
  const number=(text:string)=>numberEntryValue(text)??NaN;

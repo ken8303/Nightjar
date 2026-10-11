@@ -1,4 +1,5 @@
 'use client';
+import {watchSavedDataRefresh} from '@/lib/saved-data-refresh';
 import {usePendingEditReporter} from '@/hooks/use-pending-edits';
 import {targetNoteEditLabel} from '@/lib/target-note-actions';
 import {downloadFile} from '@/lib/download';
@@ -33,7 +34,7 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
  const savedHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{
   const read=()=>{try{setSaved(readSavedTargets(localStorage));setSavedReadError(false);setSaveError('')}catch{setSavedReadError(true);setSaveError('Saved targets could not be loaded. The stored list and any previously loaded names were kept.')}setReady(true)};
-  read();const sync=(e:StorageEvent)=>{if(e.storageArea===localStorage&&(e.key===savedTargetsKey||e.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  read();return watchSavedDataRefresh(read,window,document,{storage:()=>localStorage,key:savedTargetsKey,hidden:()=>document.hidden});
  },[]);
  useEffect(()=>{
   const read=()=>{
@@ -44,7 +45,7 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
    }catch{setNotesReadError(true);setNotesStatus('Notes could not be loaded. The stored data is unchanged. Displayed notes, if any, are from an earlier read or edits in this view.')}
    setNotesReady(true);
   };
-  read();const sync=(e:StorageEvent)=>{if(e.storageArea===localStorage&&(e.key===targetNotesKey||e.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  read();return watchSavedDataRefresh(read,window,document,{storage:()=>localStorage,key:targetNotesKey,hidden:()=>document.hidden});
  },[]);
  function readLatestTargetNotes(){
   try{const latest=readTargetNotes(localStorage);setNotesReadError(false);return latest}catch{setNotesReadError(true);throw Error('Saved target notes could not be read. Their stored data is unchanged.')}

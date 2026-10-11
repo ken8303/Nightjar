@@ -1,6 +1,6 @@
 'use client';
 import {usePendingEditReporter} from '@/hooks/use-pending-edits';
-import {watchDiaryRefresh} from '@/lib/diary-refresh';
+import {watchSavedDataRefresh} from '@/lib/saved-data-refresh';
 import {diaryFormEditLabel} from '@/lib/diary-form-actions';
 import DocumentPreview from '@/components/document-preview';
 import {makeDiaryFormRecovery} from '@/lib/diary-form-recovery';
@@ -22,7 +22,7 @@ export default function ObservingDiary({target,date,place}:{target:string;date:D
  const undoRemovalButton=useRef<HTMLButtonElement>(null),savedDiaryHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{if(removedEntry){undoRemovalButton.current?.focus({preventScroll:true});undoRemovalButton.current?.scrollIntoView({block:'center',behavior:'instant'})}},[removedEntry]);
  const [entries,setEntries]=useState<Observation[]>([]),[ready,setReady]=useState(false),[diaryReadError,setDiaryReadError]=useState(false),[status,setStatus]=useState(''),[showAll,setShowAll]=useState(false),[visible,setVisible]=useState(10);
- useEffect(()=>{const read=()=>{try{setEntries(readDiary(localStorage));setDiaryReadError(false);setStatus('')}catch{setDiaryReadError(true);setStatus('Your saved diary could not be read. Stored data, displayed entries and unfinished forms were kept.');setReady(false);return}setReady(true)};read();return watchDiaryRefresh(read,window,document,{storage:()=>localStorage,key:diaryKey,hidden:()=>document.hidden})},[]);
+ useEffect(()=>{const read=()=>{try{setEntries(readDiary(localStorage));setDiaryReadError(false);setStatus('')}catch{setDiaryReadError(true);setStatus('Your saved diary could not be read. Stored data, displayed entries and unfinished forms were kept.');setReady(false);return}setReady(true)};read();return watchSavedDataRefresh(read,window,document,{storage:()=>localStorage,key:diaryKey,hidden:()=>document.hidden})},[]);
  const [draftState,setDraftState]=useState<DiaryDraftState>(emptyDiaryDrafts),[draftStatus,setDraftStatus]=useState('');
  const draftRef=useRef(draftState),savedDraftSnapshot=useRef<DiaryDraftState>(emptyDiaryDrafts());
  const [draftSaveFailed,setDraftSaveFailed]=useState(false),[draftReadError,setDraftReadError]=useState(false);

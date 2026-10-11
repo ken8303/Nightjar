@@ -1,4 +1,5 @@
 "use client";
+import {watchSavedDataRefresh} from '@/lib/saved-data-refresh';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {pendingEdits,usePendingEdits,usePendingEditReporter} from '@/hooks/use-pending-edits';
 import {watchPendingEditUnload} from '@/lib/pending-edits';
@@ -229,11 +230,10 @@ function Planner(){
  const stale=Boolean(forecast&&weather?.fetchedAt&&now-weather.fetchedAt>=30*60*1000);
  useEffect(()=>{savedRef.current=saved},[saved]);
  useEffect(()=>{
-  const update=(event:StorageEvent)=>{
-   if(event.storageArea!==localStorage||event.key!==null&&event.key!=='nightjar-places')return;
+  const update=()=>{
    try{const latest=readSavedPlaces(localStorage);savedRef.current=latest;setSaved(latest);setSavedReadError(false)}catch{setSavedReadError(true)}
   };
-  window.addEventListener('storage',update);return()=>window.removeEventListener('storage',update);
+  return watchSavedDataRefresh(update,window,document,{storage:()=>localStorage,key:'nightjar-places',hidden:()=>document.hidden});
  },[]);
  useEffect(()=>{placeRef.current=place},[place]);
  const choose=useCallback((p:Place,options:{date?:Date;section?:string;deepTarget?:string}={})=>{

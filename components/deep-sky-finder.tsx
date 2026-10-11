@@ -1,4 +1,5 @@
 'use client';
+import {watchSavedDataRefresh} from '@/lib/saved-data-refresh';
 import {downloadFile} from '@/lib/download';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {Bookmark,Download,Search,Telescope,X} from 'lucide-react';
@@ -36,7 +37,7 @@ export default function DeepSkyFinder({date,place,onDate,onFrame,onCamera,reques
  const savedHeading=useRef<HTMLHeadingElement>(null);
  useEffect(()=>{
   const read=()=>{try{setSaved(readDeepSkyList(localStorage));setListReadError(false);setListStatus('')}catch{setListReadError(true);setListStatus('Saved deep-sky targets could not be loaded. The stored list and any previously loaded names were kept.')}setListReady(true)};
-  read();const sync=(event:StorageEvent)=>{if(event.storageArea===localStorage&&(event.key===deepSkyListKey||event.key===null))read()};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  read();return watchSavedDataRefresh(read,window,document,{storage:()=>localStorage,key:deepSkyListKey,hidden:()=>document.hidden});
  },[]);
  const savedTargets=useMemo(()=>messierCatalogue.filter(target=>saved.includes(target.id)).map(target=>positions.get(target.id)!).sort((a,b)=>b.altitude-a.altitude),[saved,positions]);
  function readLatestDeepSkyList(){
