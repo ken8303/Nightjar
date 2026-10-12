@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Fullscreen camera target preview and photo/details actions passed compact and landscape checks. A reproduced blocked-navigation focus race is repaired: unfinished edits retain their text and the review warning receives focus after camera close.
+
 - Camera reference thumbnails detect restored connectivity from a previously observed offline state even when the online event was missed. Three reproduced regressions and a synthetic 320-pixel fullscreen browser check confirm deferred, coalesced recovery; this does not establish native phone networking.
 
 - Long unbroken site names wrap inside camera and expanded 2D/3D dialogs. Reproduced compact overflow and offscreen close controls are repaired; usable chart space and scrolling passed 320×568 and 800×400 checks without changing the stored name.

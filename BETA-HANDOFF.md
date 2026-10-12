@@ -14,6 +14,8 @@ The prior baseline eb1734c passed GitHub [Run #8](https://github.com/ken8303/Nig
 
 Camera thumbnails also recover when an offline state was observed but its later online event was missed. A synthetic compact browser check confirmed one retry on page return, successful image decoding and no repeated retry from ordinary return events. Hardware stays off. Forecast refresh also detects missed online events from an observed offline state, with one deferred request and manual-refresh deduplication.
 
+Fullscreen camera target controls now include manual direction preview and photo/details actions. Below-horizon preview stays disabled; details navigation respects unfinished edits and focuses the review warning when blocked. Compact and landscape checks passed.
+
 ## After your batch push
 
 1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
