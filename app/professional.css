@@ -200,3 +200,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .sky-dome>.sky-chart{width:100%;height:100%;max-height:none}
 /* Visible names are part of an interactive object's selection target. */
 .sky-object .sky-label{pointer-events:all}
+
+/* Portalled sky dialogs do not inherit the planner's long-name wrapping. */
+.expanded-atlas-dialog,.camera-sky-dialog{overflow-wrap:anywhere}
+.expanded-atlas-header>div,.camera-sky-live-context>div{min-width:0}
+.expanded-atlas-dialog{overflow-y:auto;overscroll-behavior:contain}
+.expanded-atlas-dialog>.expanded-atlas-header,.expanded-atlas-dialog>.expanded-atlas-tools,.expanded-atlas-dialog>.expanded-atlas-description,.expanded-atlas-dialog>.expanded-atlas-selection,.expanded-atlas-dialog>.expanded-dome-selection{flex-shrink:0}
+.expanded-2d-dialog .expanded-atlas-viewport{flex:1 0 180px;min-height:180px}
+.expanded-dome-dialog>.sky-dome-view{flex:1 0 auto}

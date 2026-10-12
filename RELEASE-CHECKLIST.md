@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Long unbroken site names wrap inside camera and expanded 2D/3D dialogs. Reproduced compact overflow and offscreen close controls are repaired; usable chart space and scrolling passed 320×568 and 800×400 checks without changing the stored name.
+
 - Forecast timestamps ahead of the device clock show an age-unconfirmed notice and suppress site comparison ranking. A synthetic offline/backward-clock/reconnect flow verified warning recovery, two-site ranking and retained time at compact width.
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.

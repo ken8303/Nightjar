@@ -6,7 +6,7 @@ Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle
 
 The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
 
-The latest batches recover forecast and PWA refresh after backward clock correction, explain uncertain retained forecast ages and reuse unchanged camera catalogue/thumbnail rendering during pose updates. Generated-video playback pause/resume and catalogue/search/image-retry flows passed compact browser checks.
+The latest batches recover forecast and PWA refresh after backward clock correction, explain uncertain retained forecast ages and reuse unchanged camera catalogue/thumbnail rendering during pose updates. Generated-video playback pause/resume and catalogue/search/image-retry flows passed compact browser checks. Long-name camera/atlas dialog overflow and offscreen close controls are repaired, with usable chart space and scrolling.
 
 The reviewed production build also passed an actual service-worker fallback/retry check with saved Vega, its multiline note and the selected London/time snapshot. Compact and landscape camera checks decoded the actual M31 reference thumbnail, showed Fomalhaut using generated video and a synthetic phone pose, and kept camera/motion off after background return. These local checks complement the physical-phone and deployed-origin checks below.
 
