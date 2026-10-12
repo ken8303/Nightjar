@@ -1,5 +1,6 @@
 "use client";
 import {watchSavedDataRefresh} from '@/lib/saved-data-refresh';
+import {watchForegroundDelay} from '@/lib/foreground-delay';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {pendingEdits,usePendingEdits,usePendingEditReporter} from '@/hooks/use-pending-edits';
 import {watchPendingEditUnload} from '@/lib/pending-edits';
@@ -206,8 +207,8 @@ function Planner(){
   if(tab!=='sky'){anchorStarted.current=true;return}
   if(anchorStarted.current)return;let active=true,initialFrame:number|null=null;
   const observer=new MutationObserver(find);
-  const timeout=setTimeout(()=>{anchorStarted.current=true;stop();setAnchorNotice(`${startupAnchor.label} has not loaded. Check your connection and try its shortcut again.`)},15000);
-  function stop(){if(!active)return;active=false;observer.disconnect();clearTimeout(timeout);if(initialFrame!==null)cancelAnimationFrame(initialFrame);window.removeEventListener('pointerdown',cancel);window.removeEventListener('keydown',cancel)}
+  const cancelDeadline=watchForegroundDelay(()=>{anchorStarted.current=true;stop();setAnchorNotice(`${startupAnchor.label} has not loaded. Check your connection and try its shortcut again.`)},window,document,{hidden:()=>document.hidden});
+  function stop(){if(!active)return;active=false;observer.disconnect();cancelDeadline();if(initialFrame!==null)cancelAnimationFrame(initialFrame);window.removeEventListener('pointerdown',cancel);window.removeEventListener('keydown',cancel)}
   function cancel(){anchorStarted.current=true;stop();setAnchorNotice('')}
   function find(){
    if(!active)return;const section=document.getElementById(startupAnchor!.id);if(!section)return;

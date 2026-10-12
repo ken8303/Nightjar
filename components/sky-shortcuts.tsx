@@ -3,6 +3,7 @@ import {useEffect,useRef,useState,type MouseEvent} from 'react';
 import {Camera} from 'lucide-react';
 
 import {skyShortcutSections as sections} from '@/lib/sky-shortcuts';
+import {watchForegroundDelay} from '@/lib/foreground-delay';
 export default function SkyShortcuts({onCamera}:{onCamera:(launcher:HTMLButtonElement)=>void}){
  const pending=useRef<(()=>void)|null>(null);
  const [status,setStatus]=useState('');
@@ -13,11 +14,11 @@ export default function SkyShortcuts({onCamera}:{onCamera:(launcher:HTMLButtonEl
   pending.current?.();pending.current=null;setStatus('');
   if(document.getElementById(id))return;
   event.preventDefault();const launcher=event.currentTarget;launcher.focus({preventScroll:true});setStatus(`Waiting for ${label.toLowerCase()} to load…`);
-  const observer=new MutationObserver(find);
-  const timeout=setTimeout(()=>{stop();setStatus(`${label} has not loaded. Check your connection and try the shortcut again, or use the section's reload control.`)},15000);
-  function stop(){observer.disconnect();clearTimeout(timeout);pending.current=null}
+  let active=true;const observer=new MutationObserver(find);
+  const cancelDeadline=watchForegroundDelay(()=>{stop();setStatus(`${label} has not loaded. Check your connection and try the shortcut again, or use the section's reload control.`)},window,document,{hidden:()=>document.hidden});
+  function stop(){if(!active)return;active=false;observer.disconnect();cancelDeadline();if(pending.current===stop)pending.current=null}
   function find(){
-   const section=document.getElementById(id);if(!section)return;
+   if(!active)return;const section=document.getElementById(id);if(!section)return;
    stop();setStatus('');
    // A later action takes priority over the earlier deferred jump.
    if(document.activeElement!==launcher)return;
