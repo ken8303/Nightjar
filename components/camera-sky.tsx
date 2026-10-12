@@ -1,5 +1,5 @@
 'use client';
-import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
+import {memo,useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import Image from 'next/image';
 import {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,initialCameraView,type CameraCatalogue} from '@/lib/camera-catalogue';
 import {readCameraSettings,saveCameraSettings} from '@/lib/camera-settings';
@@ -22,11 +22,11 @@ import {createCameraWakeLock} from '@/lib/camera-wake-lock';
 import {type Place} from '@/lib/sky';
 import {cameraOverlayFrame,cameraVerticalFov,canShowCameraLabels,cameraHeadingAlignment,cameraDirection,cameraErrorMessage,manualCameraBasis,projectSkyTarget,rotateCameraBearing,targetDirectionGuide} from '@/lib/camera-sky';
 
-function CameraThumbnail({name,revision}:{name:string;revision:string}){
+const CameraThumbnail=memo(function CameraThumbnail({name,revision}:{name:string;revision:string}){
  const photo=cameraCataloguePhoto(name),[status,setStatus]=useState<'loading'|'loaded'|'failed'>('loading');
  const [source]=useState(()=>{if(!photo)return null;const initial=photo.thumbnailSrc??photo.src;return revision?photoRetrySource(initial,revision,window.location.href):initial});
  return <span className="camera-sky-thumbnail" aria-hidden="true">{(!photo||status!=='loaded')&&<Star size={20}/>} {photo&&source&&status!=='failed'&&<Image unoptimized src={source} alt="" width={36} height={36} referrerPolicy="no-referrer" className={status==='loaded'?'camera-sky-thumbnail-loaded':'camera-sky-thumbnail-loading'} onLoad={()=>setStatus('loaded')} onError={()=>setStatus('failed')}/>}</span>;
-}
+});
 
 type Props={initialDeepTarget?:string;fullScreen:boolean;onFullScreenChange:(full:boolean)=>void;place:Place;selected:string;onSelect:(name:string)=>void;onDetails:(date:Date,place:Place,deepSkyId?:string)=>void};
 export default function CameraSky(props:Props){
@@ -169,7 +169,8 @@ export default function CameraSky(props:Props){
  const selected=targets.find(target=>target.name===selectedName);
  const orderedTargets=useMemo(()=>searchCameraTargets(targets,targetQuery).sort((a,b)=>b.altitude-a.altitude||a.name.localeCompare(b.name)),[targets,targetQuery]);
  const selectedOutsideSearch=selected&&!orderedTargets.some(target=>target.name===selected.name)?selected:null;
- const targetOptions=<><option value="">Explore all objects</option>{selectedOutsideSearch&&<optgroup label="Currently following · outside search"><option value={selectedOutsideSearch.name}>{selectedOutsideSearch.displayName} · {Math.round(selectedOutsideSearch.altitude)}°</option></optgroup>}{[true,false].map(above=><optgroup key={String(above)} label={above?'Above horizon now · highest first':'Below horizon now'}>{orderedTargets.filter(target=>(target.altitude>0)===above).map(target=><option key={target.name} value={target.name}>{target.displayName} · {Math.round(target.altitude)}°{target.altitude<=0?' · below horizon':''}</option>)}</optgroup>)}</>;
+ // Phone poses change frequently; catalogue rows depend on time/search only.
+ const targetOptions=useMemo(()=><><option value="">Explore all objects</option>{selectedOutsideSearch&&<optgroup label="Currently following · outside search"><option value={selectedOutsideSearch.name}>{selectedOutsideSearch.displayName} · {Math.round(selectedOutsideSearch.altitude)}°</option></optgroup>}{[true,false].map(above=><optgroup key={String(above)} label={above?'Above horizon now · highest first':'Below horizon now'}>{orderedTargets.filter(target=>(target.altitude>0)===above).map(target=><option key={target.name} value={target.name}>{target.displayName} · {Math.round(target.altitude)}°{target.altitude<=0?' · below horizon':''}</option>)}</optgroup>)}</>,[orderedTargets,selectedOutsideSearch]);
  const basis=tracking&&sensor?rotateCameraBearing(sensor.basis,offset):manualCameraBasis(bearing,altitude);
  const overlayFrame=cameraOverlayFrame(camera,size.width,size.height,ratio);
  const verticalFov=cameraVerticalFov(fov,overlayFrame.width/overlayFrame.height)??fov;
