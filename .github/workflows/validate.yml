@@ -34,4 +34,43 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --include=dev --include=optional --no-audit --no-fund
       - name: Validate app and Cloudflare package
-        run: npm run verify
+        id: validation
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run verify 2>&1 | tee "$RUNNER_TEMP/nightjar-validation.log"
+      - name: Summarize verification
+        if: always()
+        shell: bash
+        env:
+          VALIDATION_OUTCOME: ${{ steps.validation.outcome }}
+        run: |
+          {
+            echo '### Nightjar verification'
+            echo
+            echo "Verification step: **${VALIDATION_OUTCOME:-not run}**."
+            echo
+            echo 'Checks run in order: TypeScript, lint, tests, production build, Cloudflare packaging dry-run.'
+            echo 'A passing test count alone does not establish that the later build and packaging checks passed.'
+            echo
+            if [ -f "$RUNNER_TEMP/nightjar-validation.log" ]; then
+              echo 'The workflow attempts to retain the full output as the nightjar-validation artifact; also inspect the validation step log.'
+              echo
+              echo 'Test totals and failed test names, when available (first 50 lines):'
+              echo
+              echo '```text'
+              awk '/^# (tests|pass|fail|cancelled|skipped|todo) [0-9]+/ || /^not ok [0-9]+ - / { if (count++ < 50) print }' "$RUNNER_TEMP/nightjar-validation.log"
+              echo '```'
+            else
+              echo 'No verification log was produced. Inspect the earlier checkout, Node setup and dependency installation steps.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain verification log
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightjar-validation-${{ github.sha }}
+          path: ${{ runner.temp }}/nightjar-validation.log
+          if-no-files-found: ignore
+          retention-days: 7

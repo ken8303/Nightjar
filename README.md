@@ -108,7 +108,7 @@ npm run verify
 
 This runs TypeScript, lint, all tests, the production build and a Cloudflare packaging dry-run. The current passing test count is recorded in RELEASE-CHECKLIST.md; lint has no warnings. Parallel test files use isolated temporary Vite caches that are removed when their servers close. Packaging uses a temporary build snapshot and leaves the local generated output untouched.
 
-See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
+See [CLOUDFLARE.md](./CLOUDFLARE.md) for GitHub-connected Workers Builds configuration. The GitHub check runs on pushes and pull requests. Its job summary reports the verification outcome and any available test totals/failures; it also attempts to retain the full verification log as a seven-day workflow artifact. If verification never starts, inspect the earlier setup/install steps. Hosted CI, the final Cloudflare origin, live-phone camera alignment and installed-PWA acceptance remain release checks in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
 Catalogue lists, comparisons and imaging selectors use the first common name for readability. Alternate names remain searchable and appear in the object details; raw catalogue data is retained. Downloaded deep-sky plans include aliases, catalogue identity and full constellation names in their notes.
 

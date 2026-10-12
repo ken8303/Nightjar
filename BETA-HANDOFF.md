@@ -12,7 +12,7 @@ The reviewed production build also passed an actual service-worker fallback/retr
 
 ## After your batch push
 
-1. Check the GitHub validation workflow result for the pushed commit. Local passing checks do not establish a hosted CI result.
+1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and download the validation-log artifact if it fails. Local passing checks do not establish a hosted CI result.
 2. Check the Cloudflare build and final HTTPS origin. Confirm the planner, weather, manifest, service worker and offline fallback there. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration.
 3. Use test entries for the checks below. Verify any backup/recovery file is actually received before clearing text or leaving a failed-save view.
 
