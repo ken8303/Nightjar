@@ -4,12 +4,13 @@ import {Component, Suspense, type ReactNode,useState,useEffect} from 'react';
 import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
 import PendingEditRecovery from '@/components/pending-edit-recovery';
 import {reloadPlanner} from '@/lib/reload-planner';
+import {watchForegroundDelay} from '@/lib/foreground-delay';
 
 type Props={name:string;children:ReactNode};
 
 function ViewLoading({name,fallback}:{name:string;fallback?:ReactNode}){
  const [delayedName,setDelayedName]=useState<string|null>(null);
- useEffect(()=>{const timeout=setTimeout(()=>setDelayedName(name),15000);return()=>clearTimeout(timeout)},[name]);
+ useEffect(()=>watchForegroundDelay(()=>setDelayedName(name),window,document,{hidden:()=>document.hidden}),[name]);
  const delayed=delayedName===name;
  if(!delayed&&fallback!==undefined)return fallback;
  return <section className={`panel tab-loading${delayed?' view-load-delayed':''}`} role="status" tabIndex={delayed?0:undefined} aria-label={`${name} loading`}>
