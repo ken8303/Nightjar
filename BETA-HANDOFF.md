@@ -20,6 +20,8 @@ Meteor cards now stop at the supported UTC date range. Remaining supported occur
 
 The reset 3D Moon view now fits narrow phone canvases, using adaptive portrait framing while retaining zoom and landmark centring. The 3D Moon now supports focused keyboard rotation, tilt, zoom and near-side reset. Compact labels avoid overlap, prioritise the selected landmark and hide offscreen projections; centring a visible name retains its keyboard focus. Sky-dome label selection likewise keeps focus after click/Enter, including compact expanded views and landscape resizing.
 
+Final acceptance: 40 focused regressions also pass under Node 22 with TZ=UTC. A real waiting-worker activation/reload on a disposable local origin retained London, 21:34 UTC, saved Polaris and its multiline Unicode note. The current package manifest/icons, offline files and worker-stamp consistency were checked. The latest read-only GitHub listing still shows successful Run #8 at the earlier eb1734c baseline; current local batches need their own hosted check after your push.
+
 ## After your batch push
 
 1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
