@@ -4,6 +4,7 @@ import {watchForegroundDelay} from '@/lib/foreground-delay';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {pendingEdits,usePendingEdits,usePendingEditReporter} from '@/hooks/use-pending-edits';
 import {watchPendingEditUnload} from '@/lib/pending-edits';
+import {firstPendingEditReview} from '@/lib/pending-edit-review';
 import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { Moon, Compass, MapPin, Telescope, ArrowUpRight, Star, Search, LocateFixed, Bookmark, Cloud, Wind, Droplets, ChevronRight, Aperture, X, Trash2 } from 'lucide-react';
@@ -220,7 +221,11 @@ function Planner(){
   return()=>{stop()};
  },[startupAnchor,tab]);
 
- function keepEditing(){navigation.cancel();document.getElementById('planner-heading')?.focus()}
+ function keepEditing(){
+  const review=firstPendingEditReview(pendingText,pendingEdits.snapshot(tab));navigation.cancel();
+  if(review)queueMicrotask(()=>window.dispatchEvent(new Event(review.event)));
+  else document.getElementById('planner-heading')?.focus();
+ }
  function leaveView(){const imaging=pendingIntent?.kind==='imaging';navigation.continue(applyNavigation);if(imaging)return;requestAnimationFrame(()=>{const heading=document.getElementById('planner-heading');heading?.focus({preventScroll:true});heading?.scrollIntoView({block:'start',behavior:'instant'})})}
 
  const {revision,refresh}=useForecastRefresh();
