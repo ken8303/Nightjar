@@ -6,7 +6,8 @@ export function watchPwaUpdateChecks(update:()=>Promise<unknown>,page:EventTarge
  const available=()=>!stopped&&!pageHidden&&options.online()&&options.visible();
  async function check(){
   const time=now();
-  if(!available()||checking||time-lastCheck<(options.intervalMs??60000))return;
+  const elapsed=time-lastCheck;
+  if(!available()||checking||(elapsed>=0&&elapsed<(options.intervalMs??60000)))return;
   lastCheck=time;checking=true;
   try{await update()}catch{/* A failed background check leaves the current app usable. */}
   finally{checking=false}

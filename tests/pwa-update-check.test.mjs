@@ -74,3 +74,20 @@ test('pagehide suspends even before visibility changes and pageshow resumes with
  f.page.dispatchEvent(new Event('pageshow'));await settle();assert.equal(f.count(),1);assert.equal(f.tasks.length,2);
  f.dispose();f.time(1800000);f.page.dispatchEvent(new Event('pageshow'));f.tasks[1].task();assert.equal(f.count(),1);assert.equal(f.tasks.length,2);
 });
+
+test('backward clock correction checks once on usable return and resets the cooldown',async()=>{
+ const f=fixture();f.time(3600000);f.page.dispatchEvent(new Event('pageshow'));await settle();assert.equal(f.count(),1);
+ f.page.dispatchEvent(new Event('pagehide'));f.time(1800000);f.visibility.dispatchEvent(new Event('visibilitychange'));f.tick();assert.equal(f.count(),1);
+ f.page.dispatchEvent(new Event('pageshow'));await settle();assert.equal(f.count(),2);
+ f.page.dispatchEvent(new Event('pageshow'));f.page.dispatchEvent(new Event('online'));f.tick();assert.equal(f.count(),2);
+ f.time(1859999);f.tick();assert.equal(f.count(),2);
+ f.time(1860000);f.tick();await settle();assert.equal(f.count(),3);f.dispose();
+});
+test('backward correction cannot overlap a pending check and failed checks retain the new cooldown',async()=>{
+ let reject;const f=fixture(()=>new Promise((_,failure)=>reject=failure));
+ f.time(3600000);f.tick();assert.equal(f.count(),1);
+ f.time(1800000);f.page.dispatchEvent(new Event('pageshow'));assert.equal(f.count(),1);
+ reject(Error('Unavailable'));await settle();f.page.dispatchEvent(new Event('pageshow'));assert.equal(f.count(),2);
+ reject(Error('Unavailable'));await settle();f.tick();assert.equal(f.count(),2);
+ f.time(1860000);f.tick();assert.equal(f.count(),3);reject(Error('Unavailable'));await settle();f.dispose();
+});
