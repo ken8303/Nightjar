@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
+import {watchForegroundDelay} from '@/lib/foreground-delay';
 import {pendingEdits,usePendingEdits} from '@/hooks/use-pending-edits';
 import {preservePlannerTime,reloadPlanner} from '@/lib/reload-planner';
 import PendingEditRecovery from '@/components/pending-edit-recovery';
@@ -52,11 +53,10 @@ export default function PwaSupport() {
     if(process.env.NODE_ENV!=='production'||!('serviceWorker' in navigator))return;
     let active=true;
     const cleanups:(()=>void)[]=[];
-    let timeout:ReturnType<typeof setTimeout>|undefined;
-    const stopTimeout=()=>{if(timeout!==undefined){clearTimeout(timeout);timeout=undefined}};
+    let stopTimeout=()=>{};
     const ready=()=>{if(!active)return;stopTimeout();setSetupStarting(false);setSetupIssue('');setSetupMessage(setupRevision?'Offline fallback setup completed for this browser.':'')};
     const failed=(text='Offline setup could not finish. Reconnect and retry; the planner stays available in this view.')=>{if(!active)return;stopTimeout();setSetupStarting(false);setSetupMessage('');setSetupIssue(text)};
-    timeout=setTimeout(()=>failed('Offline setup is taking longer than expected. Reconnect and retry; keep this view open.'),20000);
+    stopTimeout=watchForegroundDelay(()=>failed('Offline setup is taking longer than expected. Reconnect and retry; keep this view open.'),window,document,{hidden:()=>document.hidden,delay:20000});
     navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'}).then(registration=>{
       if(!active)return;
       cleanups.push(watchPwaRegistration(registration,{onReady:ready,onFailure:()=>failed(),onWaiting:worker=>{if(active)setUpdateWorker(navigator.serviceWorker.controller?worker:null)}}));
