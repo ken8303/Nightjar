@@ -111,6 +111,14 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - The focused 3D sky leaves Ctrl/Command/Alt shortcuts available while plain navigation keys still move the rendered view. Compact keyboard focus checks passed; native assistive and browser zoom behaviour remains pending.
 - The reviewed build's actual service worker served saved Vega, its exact multiline note and the London/time snapshot after a simulated server failure; online retry restored the planner. Compact/landscape camera preview decoded the actual M31 thumbnail, and generated video plus a synthetic pose showed Fomalhaut in the combined catalogue. Background/return left camera/motion off. Physical phone and deployed-origin acceptance remain pending.
 
+## Additional recovery checks — 12 October 2026
+
+- Tonight event searches stop at the supported UTC boundary and explain shortened searches. Invalid forecast timestamps are rejected; incomplete final-hour windows are not recommended. Expanded local-night keys retain valid formatting and chronological order.
+- PWA connection/display indicators reread on ordinary visible return. Controlled missed-event checks updated offline warnings, update-button availability and installation guidance while retaining confirmed installation.
+- Lazy-view, PWA setup and deferred shortcut deadlines suspend on pagehide/hidden visibility and restart on usable return. Cancelled callbacks cannot consume a newer countdown. Held actual modules and delayed delivery of actual worker registration results passed compact recovery checks without losing unfinished time text.
+- Camera module recovery kept reload disabled for an unfinished time edit, closed to focus that edit, and reopened in manual mode after the real module loaded. Closing returned launcher focus; no camera/motion permissions were requested.
+- Final source passes 536 tests on Node 22.16.0 and Node 24.19.0. Node 22 full verification also passes type checking, lint, production build and Cloudflare packaging dry-run. A read-only GitHub check on 12 October still found Run #7 at 37171de as the latest run; the local repairs require the next batch push and hosted validation.
+
 ## After the next GitHub Desktop push
 
 Repeated Edit preserves the active diary form; a different-entry Edit refuses replacing unfinished changes until save/cancel. Local mobile/desktop checks confirmed focus, reload, save-then-switch and malformed-store recovery behavior. Include repeated/different-entry clicks in physical-phone diary acceptance.
