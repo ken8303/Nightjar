@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- A reproduced sky-dome label focus loss is repaired. Click/Enter retain the selected button, Tab reaches the next visible name, selected-only display and landscape resize preserve focus, and expanded close returns to its launcher.
+
 - The 3D Moon supports keyboard orbit/tilt/zoom/reset and normal Tab exit. Compact lunar labels stay within the viewer without overlap, prioritise selection and retain focus during centring; offscreen placement has a reproduced regression test.
 
 - Meteor cards filter year-10000 occurrences before calculating conditions or exposing shortcuts/exports. Final-date and partial final-year notices, a supported shortcut, and ordinary seven-card recovery passed compact browser checks.

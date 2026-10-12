@@ -50,8 +50,9 @@ export default function SkyDome(props:SkyAtlasProps){
     const occupied:{x:number;y:number;width:number;height:number}[]=[];
     [...coordinates].sort((a,b)=>(a.name===p.selected?-1:b.name===p.selected?1:0)||Number(b.planet)-Number(a.planet)||a.mag-b.mag).forEach(point=>{
      const label=labels.current.get(point.name);if(!label)return;const screen=projected.find(item=>item.name===point.name)!;
-     label.hidden=true;if(!screen.visible||(!p.showLabels&&point.name!==p.selected))return;
-     label.style.visibility='hidden';label.hidden=false;
+     if(!screen.visible||(!p.showLabels&&point.name!==p.selected)){label.hidden=true;return}
+     // Hiding an already-visible button, even briefly, drops its keyboard focus.
+     if(label.hidden){label.style.visibility='hidden';label.hidden=false}
      const width=label.offsetWidth,height=label.offsetHeight,x=Math.max(3,Math.min(el.clientWidth-width-3,screen.x+8)),y=Math.max(3,Math.min(el.clientHeight-height-3,screen.y-height/2));
      if(occupied.some(box=>x<box.x+box.width+5&&x+width+5>box.x&&y<box.y+box.height+3&&y+height+3>box.y)){label.hidden=true;label.style.visibility='';return}
      occupied.push({x,y,width,height});label.style.left=`${x}px`;label.style.top=`${y}px`;label.style.visibility='';

@@ -18,7 +18,7 @@ Fullscreen camera target controls now include manual direction preview and photo
 
 Meteor cards now stop at the supported UTC date range. Remaining supported occurrences keep their actions; the calendar explains when later annual dates are outside that range.
 
-The 3D Moon now supports focused keyboard rotation, tilt, zoom and near-side reset. Compact labels avoid overlap, prioritise the selected landmark and hide offscreen projections; centring a visible name retains its keyboard focus.
+The 3D Moon now supports focused keyboard rotation, tilt, zoom and near-side reset. Compact labels avoid overlap, prioritise the selected landmark and hide offscreen projections; centring a visible name retains its keyboard focus. Sky-dome label selection likewise keeps focus after click/Enter, including compact expanded views and landscape resizing.
 
 ## After your batch push
 
