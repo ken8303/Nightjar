@@ -10,9 +10,11 @@ The latest batches recover forecast and PWA refresh after backward clock correct
 
 The reviewed production build also passed an actual service-worker fallback/retry check with saved Vega, its multiline note and the selected London/time snapshot. Compact and landscape camera checks decoded the actual M31 reference thumbnail, showed Fomalhaut using generated video and a synthetic phone pose, and kept camera/motion off after background return. These local checks complement the physical-phone and deployed-origin checks below.
 
+The prior baseline eb1734c passed GitHub [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626), including the full verification step. The new local batches have not been pushed or verified by that run.
+
 ## After your batch push
 
-1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and download the validation-log artifact if it fails. Local passing checks do not establish a hosted CI result.
+1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
 2. Check the Cloudflare build and final HTTPS origin. Confirm the planner, weather, manifest, service worker and offline fallback there. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration.
 3. Use test entries for the checks below. Verify any backup/recovery file is actually received before clearing text or leaving a failed-save view.
 
@@ -31,4 +33,4 @@ The reviewed production build also passed an actual service-worker fallback/retr
 | Failed saves | Keep the view open. Direct review actions return to time, coordinates, imaging, diary, target-note or site-name recovery. Retry after storage is usable; verify retained text and original observation metadata. |
 | Files and accessibility | Confirm actual receipt/import/printing of intended files. Test screen-reader labels, focus after review/close, large text, and short landscape screens. Local screenshots and download-prepared messages do not prove these native behaviours. |
 
-Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and hosted GitHub/Cloudflare results remain unverified. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).
+Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and hosted GitHub/Cloudflare results for the new local batch remain unverified. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).

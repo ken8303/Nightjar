@@ -123,7 +123,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 - PWA connection/display indicators reread on ordinary visible return. Controlled missed-event checks updated offline warnings, update-button availability and installation guidance while retaining confirmed installation.
 - Lazy-view, PWA setup and deferred shortcut deadlines suspend on pagehide/hidden visibility and restart on usable return. Cancelled callbacks cannot consume a newer countdown. Held actual modules and delayed delivery of actual worker registration results passed compact recovery checks without losing unfinished time text.
 - Camera module recovery kept reload disabled for an unfinished time edit, closed to focus that edit, and reopened in manual mode after the real module loaded. Closing returned launcher focus; no camera/motion permissions were requested.
-- Final source passes 536 tests on Node 22.16.0 and Node 24.19.0. Node 22 full verification also passes type checking, lint, production build and Cloudflare packaging dry-run. A read-only GitHub check on 12 October still found Run #7 at 37171de as the latest run; the local repairs require the next batch push and hosted validation.
+- Final local source passes 540 tests on Node 22.16.0 and Node 24.19.0. Node 22 full verification also passes type checking, lint, production build and Cloudflare packaging dry-run. A final read-only check on 12 October confirmed [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626) passed the validation job and full verification step at baseline eb1734c. This confirms the earlier CI repair on GitHub; the new local batches still require their own push and hosted validation.
 
 ## After the next GitHub Desktop push
 
@@ -133,7 +133,7 @@ Diary cards, controls and report/CSV local times now include offsets and precise
 
 Local integrated PWA verification passed two waiting-worker updates, retaining millisecond observing time, favourite/note and unfinished diary site/time/Unicode text. A subsequent rebuilt CSS update verified wrapped diary actions at 320/390 pixels, including snapshot and clear/undo behavior. Panel-bound checks supplement document-overflow checks because a clipped internal control can leave document width unchanged. Installed-phone and production-origin update checks below remain required.
 
-1. Check the **Validate Nightjar** action. Run #7 at 37171de installed locked dependencies and passed type checking/lint, then failed three test results caused by Node/ICU fixture differences. The local compatibility repair passes the full verification command on Node 22.16.0 and all tests on Node 24.19.0; confirm the next hosted run passes every stage.
+1. Check the **Validate Nightjar** action for the newly pushed commit. [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626) passed at eb1734c after the earlier Run #7 CI fixture failure. Today’s additional local changes have passed 540 tests and full verification, but need their own hosted result. Read the verification summary and step log; download the log artifact when available.
 2. Set the Workers Builds build command to `npm run verify`, with the existing deploy command `npm run deploy`. The GitHub check alone does not gate an independently configured Cloudflare build.
 3. Confirm the production home page, weather/place/aurora API responses, manifest, service worker and `/offline` page on the final HTTPS origin.
 4. Import a backup on that final origin if needed. Browser data is separate between localhost, the prior hosted site and Cloudflare.
