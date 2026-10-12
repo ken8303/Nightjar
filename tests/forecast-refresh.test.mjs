@@ -25,3 +25,11 @@ test('a hidden pageshow defers reconnect work until visible and disposal rejects
 test('an explicit refresh satisfies a remembered reconnect instead of causing another early request',()=>{
  const h=harness();h.time(999);h.network(true);assert.equal(h.calls,0);h.time(1000);h.manual();assert.equal(h.calls,1);h.time(5000);h.ticks.at(-1).tick();assert.equal(h.calls,1);h.time(901000);h.ticks.at(-1).tick();assert.equal(h.calls,2);h.stop();
 });
+test('a backward clock correction refreshes once on usable return and resets the normal cadence',()=>{
+ const h=harness();h.time(3600000);h.manual();assert.equal(h.calls,1);
+ h.page.dispatchEvent(new Event('pagehide'));h.time(1800000);h.visible(true);assert.equal(h.calls,1);
+ h.page.dispatchEvent(new Event('pageshow'));assert.equal(h.calls,2);
+ h.page.dispatchEvent(new Event('pageshow'));h.ticks.at(-1).tick();assert.equal(h.calls,2);
+ h.time(2699999);h.ticks.at(-1).tick();assert.equal(h.calls,2);
+ h.time(2700000);h.ticks.at(-1).tick();assert.equal(h.calls,3);h.stop();
+});

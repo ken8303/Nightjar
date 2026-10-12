@@ -9,7 +9,8 @@ export function watchForecastRefresh(refresh:()=>void,page:Events,visibility:Eve
   if(stopped||pageHidden||options.hidden()||!options.online())return;
   const attempted=options.attemptedAt();
   if(reconnected&&attempted!==reconnectAttempt)reconnected=false;
-  if(options.now()-attempted>=(reconnected?1000:options.maxAge??15*60*1000)){reconnected=false;refresh()}
+  const age=options.now()-attempted;
+  if(age<0||age>=(reconnected?1000:options.maxAge??15*60*1000)){reconnected=false;refresh()}
  };
  const hide=()=>{pageHidden=true};
  const show=()=>{pageHidden=false};

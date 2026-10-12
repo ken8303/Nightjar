@@ -1558,3 +1558,11 @@ The unchanged viewing-mode initialization was reviewed for consistency between s
 ### Final host-timezone check
 
 Twenty foreground-delay, observing-milestone, weather-parser and nightly-outlook tests also passed under Node 22.16.0 with TZ=UTC, covering the new behavior with a hosted-runner-style host timezone. This supplements local full verification and does not establish a hosted Ubuntu result. Git whitespace/status checks passed, and all QA fixtures remained outside committed app source. No push/deployment.
+
+## 12 October 2026 — resume forecast refresh after a backward clock correction
+
+Automatic forecast refresh now treats a last-attempt timestamp in the future as due once the page is usable again. Previously, moving the device clock backward could suppress refresh until that old timestamp was reached. The added regression reproduced the stall and checks hidden/pagehide suppression, a single refresh on return, duplicate return suppression and the restored 15-minute cadence.
+
+Node 22.16.0 full verification passed all 537 tests, TypeScript, warning-free lint, production build and Cloudflare packaging dry-run; all 537 tests also passed under Node 24.19.0. Browser plugin unavailable; CUA-supported Playwright checked the production build on disposable origin 5523 with a synthetic forecast and public wall-clock/lifecycle controls. Hide → clock back two hours → visible event remained at one weather request until pageshow. Pageshow fetched the second request; repeated pageshow stayed at two. Advancing 15 minutes and returning fetched the third. The selected 2026-10-12 20:00 UTC input remained intact. At 320×568 document/client widths matched 305 pixels excluding the scrollbar; captured warning/error logs were empty. A browser screenshot was inspected/emitted without a saved file. This establishes the rendered synthetic-clock flow, not an actual operating-system clock change or physical phone return.
+
+The first preview tab timed out despite a locally responsive server. Its generated error page could not be bound by browser URL policy; a fresh tab against the ready server connected successfully. No network/security settings were changed. Awaited public-fixture cleanup removed disposable storage/workers/caches; the working tab closed, viewport reset and both owned preview processes stopped. Local changes only; no push/deployment.
