@@ -26,6 +26,7 @@ export default function PwaSupport() {
     const updateMode = () => {const value=installation.current.confirmed || mode.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);installation.current.installed=value;setInstalled(value)};
     const updateNetwork = () => setOffline(!navigator.onLine);
     const restoreState = () => { updateMode(); updateNetwork(); };
+    const restoreVisibleState = () => { if(!document.hidden)restoreState(); };
     const offerInstall = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt);setMessage(''); };
     const didInstall = () => { installation.current.confirmed=true;installation.current.installed=true;setInstalled(true);setInstalling(false);setPrompt(null);setMessage('Nightjar is installed.'); };
     updateMode(); updateNetwork();
@@ -34,6 +35,7 @@ export default function PwaSupport() {
     window.addEventListener('online', updateNetwork);
     window.addEventListener('offline', updateNetwork);
     window.addEventListener('pageshow', restoreState);
+    document.addEventListener('visibilitychange', restoreVisibleState);
     mode.addEventListener('change', updateMode);
     return () => {
       pendingUpdate.current?.();pendingUpdate.current=null;
@@ -42,6 +44,7 @@ export default function PwaSupport() {
       window.removeEventListener('online', updateNetwork);
       window.removeEventListener('offline', updateNetwork);
       window.removeEventListener('pageshow', restoreState);
+      document.removeEventListener('visibilitychange', restoreVisibleState);
       mode.removeEventListener('change', updateMode);
     };
   }, []);
