@@ -4,16 +4,15 @@ import {downloadFile} from '@/lib/download';
 import {useMemo} from 'react';
 import {ArrowUpRight, Download, Moon, Star} from 'lucide-react';
 import {meteorCalendar} from '@/lib/calendar';
-import {utcDate} from '@/lib/utc-date';
-import {meteorCloudSummary, meteorConditions, meteorEvents, nextMeteorYear} from '@/lib/meteor-planning';
+import {meteorCloudSummary, meteorConditions, meteorEvents, upcomingMeteorOccurrences} from '@/lib/meteor-planning';
 import {Place} from '@/lib/sky';
 
 type Hourly={time:number[];cloud_cover:(number|null)[]};
 export default function MeteorPlanner({date,place,hourly,onExplore,onNotice}:{date:Date;place:Place;hourly?:Hourly;onExplore:(date:Date)=>void;onNotice:(message:string)=>void}){
- const plans=useMemo(()=>meteorEvents.map(event=>{
-  const year=nextMeteorYear(event,date,place.timezone||'UTC');
-  return {event,year,conditions:meteorConditions(event,year,place,hourly,date),peak:utcDate(year,event.month,event.day)};
- }).sort((a,b)=>+a.peak-+b.peak),[date,place,hourly]);
+ const plans=useMemo(()=>upcomingMeteorOccurrences(date,place.timezone||'UTC').map(occurrence=>({
+  ...occurrence,conditions:meteorConditions(occurrence.event,occurrence.year,place,hourly,date),
+ })),[date,place,hourly]);
+ const omitted=meteorEvents.length-plans.length;
  const timezone=place.timezone||'UTC';
  const format=(value:Date)=>new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:timezone}).format(value);
  function download(name:string,year:number,month:number,day:number){
@@ -22,7 +21,7 @@ export default function MeteorPlanner({date,place,hourly,onExplore,onNotice}:{da
    onNotice('Calendar file prepared for download. Import it into your calendar app.');
   }catch{onNotice('The calendar file could not be created. Please try again.')}
  }
- return <><div className="section-intro"><h3>The next meteor showers</h3><p className="muted">Upcoming or ongoing typical peak nights. Only complete hours after your selected observing time are sampled for {place.name} in {timezone}; they are not predictions of meteor counts.</p></div><div className="event-grid">{plans.map(({event,year,conditions,peak})=>{
+ return <><div className="section-intro"><h3>The next meteor showers</h3><p className="muted">Upcoming or ongoing typical peak nights. Only complete hours after your selected observing time are sampled for {place.name} in {timezone}; they are not predictions of meteor counts.</p></div>{omitted>0&&<p role="status" className="muted">{plans.length?`${omitted} upcoming typical peak ${omitted===1?'night falls':'nights fall'} beyond supported UTC years 1–9999. Only supported occurrences are shown.`:'No further typical meteor peak nights within supported UTC years 1–9999. Choose an earlier observing time.'}</p>}<div className="event-grid">{plans.map(({event,year,conditions,peak})=>{
   const {darkHours,moonFreeHours,window,moonIllumination}=conditions;
   return <section className="panel event-card" key={event.name}>
    <div className="section-label"><span>{event.date.toUpperCase()} · {year}</span><Star size={18}/></div>

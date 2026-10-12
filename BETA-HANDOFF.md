@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-The latest local code passed 550 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 554 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
-Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 550 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
+Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 554 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
 The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
 
@@ -15,6 +15,8 @@ The prior baseline eb1734c passed GitHub [Run #8](https://github.com/ken8303/Nig
 Camera thumbnails also recover when an offline state was observed but its later online event was missed. A synthetic compact browser check confirmed one retry on page return, successful image decoding and no repeated retry from ordinary return events. Hardware stays off. Forecast refresh also detects missed online events from an observed offline state, with one deferred request and manual-refresh deduplication.
 
 Fullscreen camera target controls now include manual direction preview and photo/details actions. Below-horizon preview stays disabled; details navigation respects unfinished edits and focuses the review warning when blocked. Compact and landscape checks passed. Keep editing now returns to the relevant retained field or recovery panel, reviewing current-section forms before another retained draft and prioritising globally accessible time edits.
+
+Meteor cards now stop at the supported UTC date range. Remaining supported occurrences keep their actions; the calendar explains when later annual dates are outside that range.
 
 ## After your batch push
 

@@ -6,7 +6,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {utcDate}=await vite.ssrLoadModule('/lib/utc-date.ts');
 const {meteorCalendar}=await vite.ssrLoadModule('/lib/calendar.ts');
-const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
+const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary,upcomingMeteorOccurrences}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
 test('meteor dates and next-year selection preserve early years rather than adding 1900',()=>{
  for(const year of [1,99,100,2026]){
   const padded=String(year).padStart(4,'0');
@@ -74,4 +74,20 @@ test('meteor cloud estimates report complete, partial and missing coverage witho
  const elapsed=meteorConditions(event,2026,place,hourly,new Date('2026-12-14T12:00:00Z'));
  assert.equal(elapsed.cloudSampleHours,0);assert.equal(elapsed.cloudForecastHours,0);assert.equal(meteorCloudSummary(elapsed),'No remaining dark hours to check against the cloud forecast.');
  assert.deepEqual(hourly,original);
+});
+
+test('upcoming meteor cards contain no year-10000 occurrence at the final supported date',()=>{
+ assert.deepEqual(upcomingMeteorOccurrences(utcDate(9999,11,31,12),'UTC'),[]);
+});
+test('late final-year planning keeps only remaining supported annual occurrences',()=>{
+ const january=upcomingMeteorOccurrences(utcDate(9999,0,6),'UTC');assert.equal(january.length,6);assert(!january.some(plan=>plan.event.name==='Quadrantids'));assert(january.every(plan=>plan.year===9999));
+ const december=upcomingMeteorOccurrences(utcDate(9999,11,1),'Europe/London');assert.equal(december.length,1);assert.equal(december[0].event.name,'Geminids');assert.equal(december[0].year,9999);
+});
+test('ordinary upcoming meteor ordering and year rollover remain available',()=>{
+ const plans=upcomingMeteorOccurrences(utcDate(2026,9,12),'Europe/London');assert.equal(plans.length,7);assert.equal(plans[0].event.name,'Orionids');assert.equal(plans[0].year,2026);assert.equal(plans.find(plan=>plan.event.name==='Quadrantids').year,2027);
+ assert(plans.every((plan,index)=>index===0||+plan.peak>+plans[index-1].peak));
+});
+test('supported early meteor occurrences preserve year one and reject invalid planner dates',()=>{
+ const plans=upcomingMeteorOccurrences(utcDate(1,0,1),'UTC');assert.equal(plans.length,7);assert.equal(plans[0].peak.toISOString(),'0001-01-04T00:00:00.000Z');
+ for(const date of [new Date(NaN),utcDate(0,0,1),utcDate(10000,0,1)])assert.throws(()=>upcomingMeteorOccurrences(date),/UTC years 1–9999/);
 });

@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Meteor cards filter year-10000 occurrences before calculating conditions or exposing shortcuts/exports. Final-date and partial final-year notices, a supported shortcut, and ordinary seven-card recovery passed compact browser checks.
+
 - Fullscreen camera target preview and photo/details actions passed compact and landscape checks. A reproduced blocked-navigation focus race is repaired: unfinished edits retain their text and the review warning receives focus after camera close.
 
 - Camera reference thumbnails detect restored connectivity from a previously observed offline state even when the online event was missed. Three reproduced regressions and a synthetic 320-pixel fullscreen browser check confirm deferred, coalesced recovery; this does not establish native phone networking.
@@ -14,7 +16,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 550 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 554 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.

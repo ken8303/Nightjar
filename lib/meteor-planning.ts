@@ -1,7 +1,7 @@
 import {A, Place, hourBelowAltitude, moonInfo} from './sky';
 import {forecastHourIndex} from './weather-hours';
 import {utcDate} from './utc-date';
-import {observingTimeCandidates} from './observing-time';
+import {observingTimeCandidates,validObservingDate} from './observing-time';
 
 export const meteorEvents=[
  {name:'Quadrantids',date:'January 3–4',month:0,day:4,rate:'Up to 120',note:'A short, sharp peak. Best suited to northern latitudes.'},
@@ -20,6 +20,15 @@ export function nextMeteorYear(event:MeteorEvent,from:Date,timezone='UTC'){
  const candidates=observingTimeCandidates(noon.toISOString().slice(0,16),timezone);
  const end=candidates.at(-1)??noon;
  return +from>=+end?year+1:year;
+}
+// Upcoming annual dates can advance beyond the planner's supported UTC year.
+// Filter before calculating conditions or exposing an exploration/export action.
+export function upcomingMeteorOccurrences(from:Date,timezone='UTC'){
+ if(!validObservingDate(from))throw Error('Choose an observing time within UTC years 1–9999.');
+ return meteorEvents.flatMap(event=>{
+  const year=nextMeteorYear(event,from,timezone),peak=utcDate(year,event.month,event.day);
+  return validObservingDate(peak)?[{event,year,peak}]:[];
+ }).sort((a,b)=>+a.peak-+b.peak);
 }
 function localDateHour(date:Date,formatter:Intl.DateTimeFormat){
  const parts=formatter.formatToParts(date);
