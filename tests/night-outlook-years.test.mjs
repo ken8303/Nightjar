@@ -18,3 +18,9 @@ test('the prior local night across UTC year one uses the BCE year rather than an
  assert(bodyPosition(A.Body.Sun,new Date(start),place).altitude<-18);
  const rows=sevenNightOutlook(hourly,place,new Date(start));assert(rows.length>0);assert(rows.some(row=>row.key==='0000-12-31'));assert(!rows.some(row=>row.key.startsWith('1901')));
 });
+test('local night keys retain complete expanded years at the upper UTC boundary',()=>{
+ const start=Date.parse('9999-12-30T23:00Z'),place={name:'Local boundary QA',latitude:89,longitude:0,timezone:'Pacific/Kiritimati'};
+ const rows=sevenNightOutlook({time:[start/1000,(start+86400000)/1000],cloud_cover:[20,20]},place,new Date(start));
+ assert.deepEqual(rows.map(row=>row.key),['9999-12-31','+010000-01-01']);assert(rows[0].best);assert.equal(rows[1].best,null);
+ for(const row of rows)assert.doesNotThrow(()=>new Intl.DateTimeFormat('en-GB',{timeZone:'UTC',day:'numeric',month:'short'}).format(new Date(row.key+'T12:00:00Z')));
+});

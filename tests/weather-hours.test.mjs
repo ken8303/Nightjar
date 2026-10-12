@@ -15,6 +15,10 @@ test('forecast preserves UTC clock-change samples, zero coverage and source inde
 test('empty, oversized, duplicate, reversed and overlapping forecast timestamps are rejected',()=>{
  for(const time of [[],Array.from({length:241},(_,i)=>start+i*3600),[start,start],[start+3600,start],[start,start+3599],[start,start+241*3600],[start,NaN],[start,'invalid']])assert.throws(()=>parseWeatherForecast({hourly:{time,cloud_cover:time.map(()=>0)}}),/timestamps/);
 });
+test('forecast timestamps must remain in the supported observing calendar',()=>{
+ for(const time of [Date.parse('0000-12-31T23:00Z')/1000,Date.parse('+010000-01-01T00:00Z')/1000])assert.throws(()=>parseWeatherForecast({hourly:{time:[time],cloud_cover:[0]}}),/timestamps/);
+ for(const time of [Date.parse('0001-01-01T00:00Z')/1000,Date.parse('9999-12-31T23:00Z')/1000])assert.equal(parseWeatherForecast({hourly:{time:[time],cloud_cover:[0]}}).hourly.time[0],time);
+});
 test('hourly gaps remain explicit and cannot make an adjacent-hour match',()=>{
  const parsed=parseWeatherForecast({hourly:{time:[start,start+7200],cloud_cover:[10,20]}});
  assert.equal(forecastHourIndex(parsed.hourly.time,new Date((start+3600)*1000)),-1);

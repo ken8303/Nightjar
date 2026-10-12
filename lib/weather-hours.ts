@@ -1,4 +1,5 @@
 import {Place, scoreAt} from './sky';
+import {validObservingDate} from './observing-time';
 
 export type HourlyForecast={time:number[];cloud_cover:(number|null)[];[field:string]:(number|null)[]};
 export type WeatherForecast={hourly:HourlyForecast;timezone?:string};
@@ -10,7 +11,7 @@ export function parseWeatherForecast(value:unknown):WeatherForecast{
  if(!data||typeof data!=='object')throw new Error(typeof raw.error==='string'?raw.error:'Forecast unavailable');
  const fields=data as Record<string,unknown>;
  const times=fields.time;
- if(!Array.isArray(times)||times.length===0||times.length>240||!times.every((time,index)=>finite(time)&&Number.isFinite(+new Date(time*1000))&&(index===0||time-times[index-1]>=3600))||times[times.length-1]-times[0]>240*3600)throw new Error('Forecast timestamps are unavailable. Please retry.');
+ if(!Array.isArray(times)||times.length===0||times.length>240||!times.every((time,index)=>finite(time)&&validObservingDate(new Date(time*1000))&&(index===0||time-times[index-1]>=3600))||times[times.length-1]-times[0]>240*3600)throw new Error('Forecast timestamps are unavailable. Please retry.');
  if(!Array.isArray(fields.cloud_cover)||fields.cloud_cover.length!==times.length)throw new Error('Forecast cloud coverage is unavailable. Please retry.');
  const hourly:HourlyForecast={time:[...times],cloud_cover:[]};
  const allowed=['cloud_cover','temperature_2m','relative_humidity_2m','wind_speed_10m','cloud_cover_low','cloud_cover_mid','cloud_cover_high','dew_point_2m','visibility'];

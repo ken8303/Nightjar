@@ -4,8 +4,17 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {sevenNightOutlook,bestNightWindow}=await vite.ssrLoadModule('/lib/night-outlook.ts');
+const {hourBelowAltitude,bodyPosition,A}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'Window policy QA',latitude:51.5,longitude:0,timezone:'UTC'},from=new Date('2026-10-09T19:30Z');
 const hourly=(times,cloud)=>({time:times.map(value=>Date.parse(value)/1000),cloud_cover:cloud});
+test('a supported final-year sample cannot recommend an hour ending outside the calendar',()=>{
+ const last=new Date('9999-12-31T23:00Z');assert(bodyPosition(A.Body.Sun,last,place).altitude<-18,'fixture must be dark');
+ const nights=sevenNightOutlook({time:[+last/1000],cloud_cover:[0]},place,last);
+ assert.equal(nights.length,1);assert.equal(nights[0].best,null);
+ assert.equal(hourBelowAltitude(A.Body.Sun,last,place,90),false);
+ assert.equal(hourBelowAltitude(A.Body.Sun,new Date('9999-12-31T22:00Z'),place,90),true);
+ assert.deepEqual(sevenNightOutlook({time:[Date.parse('+010000-01-01T00:00Z')/1000],cloud_cover:[0]},place,last),[]);
+});
 test('a nightly choice prefers a complete pair even when a disconnected single hour scores higher',()=>{
  const data=hourly(['2026-10-09T20:00Z','2026-10-09T21:00Z','2026-10-09T23:00Z'],[90,90,0]),before=structuredClone(data);
  const nights=sevenNightOutlook(data,place,from);assert.equal(nights.length,1);assert.equal(nights[0].best.hours,2);assert.equal(nights[0].best.date.toISOString(),'2026-10-09T20:00:00.000Z');assert(nights[0].best.score<100);assert.deepEqual(data,before);

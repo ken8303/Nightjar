@@ -24,6 +24,7 @@ export function j2000Position(ra:number,dec:number,date:Date,place:Place){
 export function moonInfo(date:Date,p:Place){const phase=A.MoonPhase(date),illumination=A.Illumination(A.Body.Moon,date).phase_fraction;return {phase,illumination,name:moonPhaseName(phase),altitude:bodyPosition(A.Body.Moon,date,p).altitude}}
 export function scoreAt(cloud:number,date:Date,p:Place){const sun=bodyPosition(A.Body.Sun,date,p).altitude,moon=moonInfo(date,p);if(sun>-6)return 0;return Math.round(Math.max(0,Math.min(100,(100-cloud)*.8+Math.min(1,(-sun-6)/12)*20-(moon.altitude>0?moon.illumination*20:0))))}
 export function hourBelowAltitude(body:A.Body,date:Date,place:Place,altitude:number){
+ if(!validObservingDate(date)||!validObservingDate(new Date(+date+3600000)))return false;
  for(let minutes=0;minutes<=60;minutes+=15){
   if(bodyPosition(body,new Date(+date+minutes*60000),place).altitude>=altitude)return false;
  }

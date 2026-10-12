@@ -1,6 +1,7 @@
 import {A, Place, bodyPosition, hourBelowAltitude, moonInfo, scoreAt} from './sky';
 
 import {utcDate} from './utc-date';
+import {validObservingDate} from './observing-time';
 
 type Hourly={time:number[];cloud_cover:(number|null)[]};
 export type NightOutlook={key:string;darkHours:number;forecastHours:number;best:{date:Date;hours:number;score:number;cloud:number;moonAbove:boolean;moonIllumination:number}|null};
@@ -10,14 +11,14 @@ function localNightKey(date:Date,formatter:Intl.DateTimeFormat){
  const number=(type:string)=>Number(parts.find(part=>part.type===type)?.value);
  const localYear=parts.find(part=>part.type==='era')?.value==='BC'?1-number('year'):number('year');
  const night=utcDate(localYear,number('month')-1,number('day')-(number('hour')<12?1:0));
- return night.toISOString().slice(0,10);
+ return night.toISOString().split('T')[0];
 }
 export function sevenNightOutlook(hourly:Hourly,place:Place,from=new Date()):NightOutlook[]{
  const formatter=new Intl.DateTimeFormat('en-US',{timeZone:place.timezone||'UTC',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',hourCycle:'h23',era:'short'});
  const groups=new Map<string,{date:Date;cloud:number|null;score:number|null}[]>();
  for(let i=0;i<hourly.time.length;i++){
   const date=new Date(hourly.time[i]*1000);
-  if(!Number.isFinite(+date)||+date<+from||bodyPosition(A.Body.Sun,date,place).altitude>=-18)continue;
+  if(!validObservingDate(date)||+date<+from||bodyPosition(A.Body.Sun,date,place).altitude>=-18)continue;
   const key=localNightKey(date,formatter);
   const cloud=hourly.cloud_cover?.[i],valid=typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100;
   const samples=groups.get(key)||[];
@@ -33,7 +34,7 @@ export function sevenNightOutlook(hourly:Hourly,place:Place,from=new Date()):Nig
   }
   return fullHours.get(instant)!;
  }
- return [...groups.entries()].sort(([a],[b])=>a.localeCompare(b)).slice(0,7).map(([key,samples])=>{
+ return [...groups.entries()].sort(([a],[b])=>Date.parse(a+'T12:00:00Z')-Date.parse(b+'T12:00:00Z')).slice(0,7).map(([key,samples])=>{
   let choice:{date:Date;hours:number;score:number;cloud:number}|null=null;
   for(let i=0;i<samples.length;i++){
    const first=samples[i],second=samples[i+1];
