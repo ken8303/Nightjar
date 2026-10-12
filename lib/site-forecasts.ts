@@ -1,4 +1,5 @@
 import {type WeatherForecast} from './weather-hours';
+import {forecastFreshness} from './forecast-freshness';
 
 export type SiteForecast={data?:WeatherForecast;fetchedAt?:number;error?:string;requestKey:string};
 export function storeSiteForecast(previous:Record<string,SiteForecast>,id:string,result:SiteForecast,active:string[]){
@@ -9,5 +10,5 @@ export function storeSiteForecast(previous:Record<string,SiteForecast>,id:string
 }
 export function siteForecastState(result:SiteForecast|undefined,requestKey:string,now:number){
  const loading=result?.requestKey!==requestKey;
- return {loading,error:loading?'':result?.error||'',stale:Boolean(result?.data&&result.fetchedAt!==undefined&&now-result.fetchedAt>=30*60000)};
+ return {loading,error:loading?'':result?.error||'',...forecastFreshness(result?.data?result.fetchedAt:undefined,now)};
 }

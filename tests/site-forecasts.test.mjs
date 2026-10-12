@@ -21,10 +21,18 @@ test('site results remain isolated by coordinates and only active site records a
  assert.deepEqual(storeSiteForecast(previous,'a',{requestKey:'late',data},['b']),{b:previous.b});
 });
 test('refresh state hides an obsolete error while loading and exposes failure and stale age after settlement',()=>{
- assert.deepEqual(siteForecastState(undefined,'new',1000),{loading:true,error:'',stale:false});
+ assert.deepEqual(siteForecastState(undefined,'new',1000),{loading:true,error:'',stale:false,clockChanged:false});
  const result={data,requestKey:'old',fetchedAt:1000,error:'Failed'};
- assert.deepEqual(siteForecastState(result,'new',1000),{loading:true,error:'',stale:false});
- assert.deepEqual(siteForecastState(result,'old',1800999),{loading:false,error:'Failed',stale:false});
- assert.deepEqual(siteForecastState(result,'old',1801000),{loading:false,error:'Failed',stale:true});
- assert.deepEqual(siteForecastState({requestKey:'new',error:'Failed'},'new',1801000),{loading:false,error:'Failed',stale:false});
+ assert.deepEqual(siteForecastState(result,'new',1000),{loading:true,error:'',stale:false,clockChanged:false});
+ assert.deepEqual(siteForecastState(result,'old',1800999),{loading:false,error:'Failed',stale:false,clockChanged:false});
+ assert.deepEqual(siteForecastState(result,'old',1801000),{loading:false,error:'Failed',stale:true,clockChanged:false});
+ assert.deepEqual(siteForecastState({requestKey:'new',error:'Failed'},'new',1801000),{loading:false,error:'Failed',stale:false,clockChanged:false});
+});
+
+test('retained forecasts identify a backward clock correction beyond the minute-resolution tolerance',()=>{
+ const result={data,requestKey:'current',fetchedAt:7200000};
+ assert.equal(siteForecastState(result,'current',3600000).clockChanged,true);
+ assert.equal(siteForecastState(result,'current',7140000).clockChanged,false);
+ assert.equal(siteForecastState(result,'current',7200000).clockChanged,false);
+ assert.equal(siteForecastState({requestKey:'current'},'current',3600000).clockChanged,false);
 });

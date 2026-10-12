@@ -48,7 +48,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   const opportunity=h?bestNightWindow(sevenNightOutlook(h,{...place,timezone},new Date(now))):null;
   return {id,place,result,...state,h,i,at,score,cloud,timezone,opportunity,moon:moonInfo(at,place),sun:bodyPosition(A.Body.Sun,at,place).altitude};
  }),[selected,options,results,instant,requestKey,now]);
- const complete=rows.length>1&&rows.every(r=>r.score!==null&&!r.loading&&!r.error&&!r.stale);
+ const complete=rows.length>1&&rows.every(r=>r.score!==null&&!r.loading&&!r.error&&!r.stale&&!r.clockChanged);
  const best=complete?Math.max(...rows.map(r=>r.score!)):null;
  return <section className="panel place-comparison" aria-labelledby="comparison-heading">
   <div className="comparison-heading"><div><h2 id="comparison-heading">Compare your observing sites</h2><p className="muted">Choose up to four places. Every site is evaluated at {new Date(instant*1000).toISOString().slice(0,16).replace('T',' ')} UTC, using the hourly forecast covering that time.</p></div><button className="text-button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}><RefreshCw size={16}/>{rows.some(row=>row.loading)?'Refreshing forecasts…':rows.some(row=>row.error)?'Retry forecasts':'Refresh forecasts'}</button></div>
@@ -59,6 +59,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
    <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={`Stop comparing ${r.place.name}`}>Stop comparing this site</button><p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}</p>
    <p className="comparison-darkness">{r.place.bortle?`Your sky rating: Bortle ${r.place.bortle} / 9`:'Sky darkness: not rated'}</p>
    {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?'Refreshing; previous forecast shown.':'Loading forecast…':r.error?r.result?.data?'Refresh failed; previous forecast shown. Retry forecasts to update it.':r.error:'This forecast was fetched over 30 minutes ago. Refresh before relying on it.'}</p>}
+   {r.clockChanged&&<p className="notice" role="status">The weather update time is ahead of your device clock. Its age cannot be confirmed; check your clock and refresh before relying on this forecast.</p>}
    {r.result?.data&&r.result.fetchedAt!==undefined&&<p className="comparison-local">Last successful update: {new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:r.timezone,timeZoneName:'shortOffset'}).format(new Date(r.result.fetchedAt))}</p>}
    {r.result?.data&&(r.i<0?<p className="muted">This hour is outside the available forecast. Choose a time within the next seven days.</p>:<>
     <div className="comparison-score"><strong>{r.score??'—'}</strong><span>/ 100<br/>planning score</span></div>
