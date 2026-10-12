@@ -52,12 +52,15 @@ export function nextObservingTime(from:Date,p:Place){
  return nextHour;
 }
 export function observingMilestones(date:Date,p:Place){
- const obs=observer(p);
- const rise=(body:A.Body,direction:number)=>A.SearchRiseSet(body,obs,direction,date,2)?.date||null;
+ if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
+ const obs=observer(p),end=Math.min(+date+48*3600000,Date.parse('9999-12-31T23:59:59.999Z')),days=(end-+date)/86400000;
+ const supported=(crossing:Date|undefined)=>crossing&&validObservingDate(crossing)&&+crossing>=+date&&+crossing<=end?crossing:null;
+ const rise=(body:A.Body,direction:number)=>days>0?supported(A.SearchRiseSet(body,obs,direction,date,days)?.date):null;
+ const darkness=(direction:number)=>days>0?supported(A.SearchAltitude(A.Body.Sun,obs,direction,date,days,-18)?.date):null;
  return [
   {label:'Next sunset',date:rise(A.Body.Sun,-1)},
-  {label:'Full darkness begins',date:A.SearchAltitude(A.Body.Sun,obs,-1,date,2,-18)?.date||null},
-  {label:'Full darkness ends',date:A.SearchAltitude(A.Body.Sun,obs,1,date,2,-18)?.date||null},
+  {label:'Full darkness begins',date:darkness(-1)},
+  {label:'Full darkness ends',date:darkness(1)},
   {label:'Next sunrise',date:rise(A.Body.Sun,1)},
   {label:'Next moonrise',date:rise(A.Body.Moon,1)},
   {label:'Next moonset',date:rise(A.Body.Moon,-1)},
