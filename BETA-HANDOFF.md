@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-The latest local code passed 559 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 562 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
-Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 559 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
+Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 562 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
 The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
 
@@ -18,7 +18,7 @@ Fullscreen camera target controls now include manual direction preview and photo
 
 Meteor cards now stop at the supported UTC date range. Remaining supported occurrences keep their actions; the calendar explains when later annual dates are outside that range.
 
-The 3D Moon now supports focused keyboard rotation, tilt, zoom and near-side reset. Compact labels avoid overlap, prioritise the selected landmark and hide offscreen projections; centring a visible name retains its keyboard focus. Sky-dome label selection likewise keeps focus after click/Enter, including compact expanded views and landscape resizing.
+The reset 3D Moon view now fits narrow phone canvases, using adaptive portrait framing while retaining zoom and landmark centring. The 3D Moon now supports focused keyboard rotation, tilt, zoom and near-side reset. Compact labels avoid overlap, prioritise the selected landmark and hide offscreen projections; centring a visible name retains its keyboard focus. Sky-dome label selection likewise keeps focus after click/Enter, including compact expanded views and landscape resizing.
 
 ## After your batch push
 

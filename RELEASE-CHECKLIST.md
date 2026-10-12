@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Reproduced default lunar cropping on a 235×320 phone canvas is repaired with adaptive portrait projection. The reset globe fits fully; zoom, selected-landmark focus, landscape framing and the unchanged sky-dome projection passed browser checks.
+
 - A reproduced sky-dome label focus loss is repaired. Click/Enter retain the selected button, Tab reaches the next visible name, selected-only display and landscape resize preserve focus, and expanded close returns to its launcher.
 
 - The 3D Moon supports keyboard orbit/tilt/zoom/reset and normal Tab exit. Compact lunar labels stay within the viewer without overlap, prioritise selection and retain focus during centring; offscreen placement has a reproduced regression test.
@@ -20,7 +22,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 559 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 562 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
