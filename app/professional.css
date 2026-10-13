@@ -219,3 +219,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .light-window-endpoint{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}.light-window-endpoint small{font-size:12px;line-height:1.3;color:var(--text-secondary)}
 
 #install-app:focus-visible{outline:2px solid var(--accent-soft);outline-offset:4px}
+
+/* Keep altitude/timeline labels readable instead of scaling SVG text down. */
+.deep-sky-plot{display:grid;grid-template-columns:36px minmax(0,1fr);grid-template-rows:180px 22px;column-gap:4px;row-gap:8px;margin:24px 0;min-width:0}
+.deep-sky-plot>svg{grid-column:2;grid-row:1;width:100%;height:100%;display:block;overflow:visible}
+.deep-sky-plot-altitudes{grid-column:1;grid-row:1;position:relative;color:var(--text-secondary);font-size:12px;line-height:1.2}
+.deep-sky-plot-altitudes span{position:absolute;right:0;transform:translateY(-50%)}
+.deep-sky-plot-ticks{grid-column:2;grid-row:2;position:relative;color:var(--text-secondary);font-size:12px;line-height:1.4}
+.deep-sky-plot-ticks span{position:absolute;top:0;white-space:nowrap}
