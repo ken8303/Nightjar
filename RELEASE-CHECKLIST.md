@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Photography light windows distinguish each endpoint’s UTC offset and boundary-year era. Grouped time/offset labels stayed within cards at 320, 800 and 1024 pixels; a Honolulu BC-date midpoint preserved its exact computed UTC timestamp.
+
 - Eclipse selection follows UTC peak identity through observing-time changes. Compact checks retained July/August events as earlier entries expired, preserved the exact peak shortcut, and used the next event only after the selected one expired; landscape remained contained.
 
 - Healthy camera playback clears an obsolete resume error without clearing distinct camera-access errors. Generated-video checks passed ordinary/fullscreen spontaneous recovery, track-ended guidance and busy-camera failure.
@@ -54,7 +56,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 589 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 592 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.

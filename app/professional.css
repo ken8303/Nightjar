@@ -214,3 +214,6 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .time-entry .control-bar,.time-entry .control-bar>div{min-width:0}
 
 .site-darkness p.error{color:#f3b49d;font-size:14px;overflow-wrap:anywhere}
+
+.light-window{min-width:0}.light-window-time{white-space:normal;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.light-window-endpoint{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}.light-window-endpoint small{font-size:12px;line-height:1.3;color:var(--text-secondary)}
