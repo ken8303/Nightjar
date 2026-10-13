@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-The latest local code passed 562 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 564 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
-Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 562 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
+Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 564 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
 The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
 
@@ -23,6 +23,8 @@ The reset 3D Moon view now fits narrow phone canvases, using adaptive portrait f
 Final acceptance: 40 focused regressions also pass under Node 22 with TZ=UTC. A real waiting-worker activation/reload on a disposable local origin retained London, 21:34 UTC, saved Polaris and its multiline Unicode note. The current package manifest/icons, offline files and worker-stamp consistency were checked. The latest read-only GitHub listing still shows successful Run #8 at the earlier eb1734c baseline; current local batches need their own hosted check after your push.
 
 The Moon landmark list now exposes its selection and has a corresponding Centre control in the globe. This restores offscreen landmarks after rotation and works with labels hidden; compact keyboard and landscape checks passed.
+
+Camera playback now keeps labels paused through a late pause notification while only cached frames remain. Generated-video and synthetic readiness checks also passed ordinary pause/resume and camera-off manual preview recovery.
 
 ## After your batch push
 

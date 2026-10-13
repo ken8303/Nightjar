@@ -42,3 +42,21 @@ test('a player error suppresses the overlay even with cached frames until a heal
  video.send('playing',{paused:false,readyState:4});assert.deepEqual(calls,[true,false,true,false]);
  stop();video.send('error',{error:{code:3}});assert.deepEqual(calls,[true,false,true,false]);
 });
+
+test('a queued pause event cannot reopen stalled labels when only a cached frame remains',()=>{
+ const video=new Video(),calls=[];Object.assign(video,{srcObject:{},paused:false,readyState:4});
+ const stop=watchCameraPlayback(video,value=>calls.push(value));
+ video.send('waiting',{readyState:2});assert.deepEqual(calls,[true]);
+ // Playback is not explicitly paused, but future frames are still unavailable.
+ video.send('pause');assert.deepEqual(calls,[true]);
+ video.send('canplay',{readyState:3});assert.deepEqual(calls,[true,false]);
+ video.send('pause');assert.deepEqual(calls,[true,false]);stop();
+});
+test('a late pause event cannot clear an initially interrupted player without recovery',()=>{
+ const video=new Video(),calls=[];Object.assign(video,{srcObject:{},paused:false,readyState:2});
+ const stop=watchCameraPlayback(video,value=>calls.push(value));assert.deepEqual(calls,[true]);
+ video.send('pause');assert.deepEqual(calls,[true]);
+ video.send('playing');assert.deepEqual(calls,[true,false]);
+ // The playing event allows the current frame, including a late pause notification.
+ video.send('pause');assert.deepEqual(calls,[true,false]);stop();
+});

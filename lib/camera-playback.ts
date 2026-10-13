@@ -5,8 +5,9 @@ export function watchCameraPlayback(video:Video,onPaused:(paused:boolean)=>void)
  let last=false,disposed=false;
  const changed=(event?:Event)=>{
   if(disposed)return;
-  // 'playing' allows the current frame; waiting/canplay require future data.
-  const minimum=event?.type==='playing'||event?.type==='pause'?2:3;
+  // 'playing' allows the current frame. A late pause notification may retain
+  // healthy playback, but must not recover an already interrupted player.
+  const minimum=event?.type==='playing'||event?.type==='pause'&&!last?2:3;
   const paused=Boolean(video.srcObject)&&(Boolean(video.error)||video.paused||video.readyState<minimum);
   if(paused!==last){last=paused;onPaused(paused)}
  };
