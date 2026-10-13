@@ -13,14 +13,15 @@ class Element{
  set innerHTML(_value){throw Error('Offline saved text must never use innerHTML')}
  addEventListener(name,callback){this.listeners.set(name,callback)}
  click(){this.clicked=true}
+ focus(){this.focused=true}
  remove(){this.removed=true}
 }
-function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessionWriteBlocked=false,sessionOverrides={},importFailed=false}={}){
+function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessionWriteBlocked=false,sessionOverrides={},importFailed=false,recoveryLoader=null}={}){
  const elements=new Map([...html.matchAll(/id="([^"]+)"/g)].map(match=>[match[1],new Element()]));
  const raw=new Map(Object.entries(data).map(([key,value])=>[key,key==='nightjar-red-light'?value:JSON.stringify(value)]));
  for(const [key,value] of Object.entries(rawOverrides))raw.set(key,value);
  const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),visibilityListeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
- const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return {makePlannerRecovery}}};
+ const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
  for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()'),context);
@@ -194,4 +195,29 @@ test('network return cannot hide a failed context-preservation message; a succes
  page.listeners.get('pagehide')?.();page.listeners.get('pageshow')?.({persisted:true});assert(page.elements.get('connection').textContent.includes('could not be preserved'));
  page.allowSessionWrites();prevented=false;page.elements.get('retry').listeners.get('click')({preventDefault:()=>prevented=true});assert.equal(prevented,false);assert(page.elements.get('connection').textContent.includes('may be available'));
  assert.equal(JSON.parse(page.session.get('nightjar-recovery-context-v1')).time,time);
+});
+
+
+test('cancelling recovery preparation ignores a module that arrives later without downloading or replacing feedback',async()=>{
+ let release;const page=load({'nightjar-targets-v1':['Polaris']},false,{recoveryLoader:()=>new Promise(resolve=>release=resolve)});
+ const pending=page.elements.get('download-recovery').listeners.get('click')();
+ page.elements.get('cancel-recovery')?.listeners.get('click')?.();release({makePlannerRecovery});await pending;
+ assert.equal(page.blobs.length,0);assert.equal(page.elements.get('download-recovery').disabled,false);assert(page.elements.get('recovery-status').textContent.includes('cancelled'));
+ assert.equal(page.elements.get('cancel-recovery').hidden,true);assert.equal(page.raw.get('nightjar-targets-v1'),'["Polaris"]');
+});
+test('an obsolete recovery completion cannot enable a newer request or download its snapshot',async()=>{
+ const work=[],page=load({'nightjar-targets-v1':['Polaris']},false,{recoveryLoader:()=>new Promise(resolve=>work.push(resolve))});
+ const first=page.elements.get('download-recovery').listeners.get('click')();page.elements.get('cancel-recovery')?.listeners.get('click')?.();
+ const second=page.elements.get('download-recovery').listeners.get('click')();work[0]({makePlannerRecovery});await first;
+ assert.equal(work.length,2);assert.equal(page.blobs.length,0);assert.equal(page.elements.get('download-recovery').disabled,true);assert.equal(page.elements.get('cancel-recovery').hidden,false);
+ page.raw.set('nightjar-target-notes-v1',JSON.stringify({Polaris:'Current copy 星空'}));work[1]({makePlannerRecovery});await second;
+ assert.equal(page.blobs.length,1);assert.equal(page.elements.get('download-recovery').disabled,false);assert.equal(page.elements.get('cancel-recovery').hidden,true);
+ assert.equal(JSON.parse(await page.blobs[0].text()).stores.local['nightjar-target-notes-v1'],JSON.stringify({Polaris:'Current copy 星空'}));
+});
+test('a cancelled module failure cannot replace a newer pending recovery request with an error',async()=>{
+ const work=[],page=load({},false,{recoveryLoader:()=>new Promise((resolve,reject)=>work.push({resolve,reject}))});
+ const first=page.elements.get('download-recovery').listeners.get('click')();page.elements.get('cancel-recovery')?.listeners.get('click')?.();const second=page.elements.get('download-recovery').listeners.get('click')();
+ work[0].reject(Error('Late module failure'));await first;
+ assert.equal(work.length,2);assert.equal(page.elements.get('download-recovery').disabled,true);assert.equal(page.elements.get('recovery-status').textContent,'Preparing a recovery copy…');
+ work[1].resolve({makePlannerRecovery});await second;assert.equal(page.blobs.length,1);assert(page.elements.get('recovery-status').textContent.includes('Recovery copy prepared'));
 });

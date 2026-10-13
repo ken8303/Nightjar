@@ -145,3 +145,5 @@ For the next physical-phone and hosted-release checks, see [BETA-HANDOFF.md](./B
 Observing plan previews and atlas hour labels identify the local era near the earliest supported UTC date, preserving the exact UTC instant. Time-entry explanations span the full control layout so date/zone/precision guidance stays readable in landscape.
 
 The offline page resamples its connection hint on foreground return and offers a manual refresh of saved details. A return notice says the snapshot may have changed; a storage event identifies a known change. Failed site/time preservation stays visible until an explicit retry succeeds. These notices leave saved data and displayed notes intact.
+
+While the offline recovery module loads, Cancel preparing recovery copy keeps the page and stored data intact and returns focus to Download. Cancelled preparation cannot trigger a late download; try again explicitly when ready.

@@ -43,7 +43,7 @@
     <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Stored values are unchanged; a raw recovery copy can preserve unreadable data.</p>
     <div id="snapshot-warning" hidden><p id="snapshot-message" class="connection" role="status">Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.</p><a class="retry" id="refresh-details" href="/offline">Refresh saved details</a></div>
     <p id="coverage-warning" class="connection" role="status" hidden></p>
-    <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
+    <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><button type="button" id="cancel-recovery" hidden>Cancel preparing recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <div class="grid">
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
@@ -198,19 +198,23 @@
           preservationFailed=false;updateConnection();
         }catch{preservationFailed=true;event?.preventDefault();connection.textContent='Your observing site and time could not be preserved. Keep this page open, restore browser storage access and try again.'}
       });
-      const recoveryButton=document.getElementById('download-recovery'),recoveryStatus=document.getElementById('recovery-status');
+      const recoveryButton=document.getElementById('download-recovery'),recoveryStatus=document.getElementById('recovery-status'),cancelRecovery=document.getElementById('cancel-recovery');
+      let recoveryRequest=0;
+      cancelRecovery.addEventListener('click',()=>{if(!recoveryButton.disabled)return;recoveryRequest++;recoveryButton.disabled=false;cancelRecovery.hidden=true;recoveryStatus.textContent='Recovery preparation cancelled. Your stored plans are unchanged; you can try again.';recoveryButton.focus({preventScroll:true})});
       recoveryButton.addEventListener('click',async()=>{
         if(recoveryButton.disabled)return;
-        recoveryButton.disabled=true;recoveryStatus.textContent='Preparing a recovery copy…';
+        const request=++recoveryRequest;
+        recoveryButton.disabled=true;cancelRecovery.hidden=false;recoveryStatus.textContent='Preparing a recovery copy…';
         try{
           const {makePlannerRecovery}=await import('/planner-recovery.mjs');
+          if(request!==recoveryRequest)return;
           const copy=makePlannerRecovery({getItem:key=>localStorage.getItem(key)},{getItem:key=>sessionStorage.getItem(key)});
           const url=URL.createObjectURL(new Blob([copy.text],{type:'application/json'}));
           try{const link=document.createElement('a');link.href=url;link.download='nightjar-raw-recovery-'+copy.exportedAt.slice(0,10)+'.json';document.body.append(link);try{link.click()}finally{link.remove()}}
           finally{setTimeout(()=>URL.revokeObjectURL(url),60000)}
           recoveryStatus.textContent='Recovery copy prepared'+(copy.unreadable.length?' with '+copy.unreadable.length+' unreadable or oversized entries excluded and listed.':'.')+' Verify the file is saved before leaving; it cannot be imported as a plan backup.';
-        }catch(error){recoveryStatus.textContent=error instanceof Error&&error.message.includes('storage')?error.message:'The recovery copy could not be prepared. Keep this page open and restore storage or connection access before retrying.'}
-        finally{recoveryButton.disabled=false}
+        }catch(error){if(request!==recoveryRequest)return;recoveryStatus.textContent=error instanceof Error&&error.message.includes('storage')?error.message:'The recovery copy could not be prepared. Keep this page open and restore storage or connection access before retrying.'}
+        finally{if(request===recoveryRequest){const returnFocus=document.activeElement===cancelRecovery;recoveryButton.disabled=false;cancelRecovery.hidden=true;if(returnFocus)recoveryButton.focus({preventScroll:true})}}
       });
     })();
   </script>

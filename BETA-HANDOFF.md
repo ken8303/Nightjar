@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-The latest local code passed 575 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 578 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
-Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 575 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
+Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 578 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
 The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
 
@@ -33,6 +33,8 @@ Site renames also refuse a sibling alias’s existing name before creating ambig
 Earliest-year plan and When to look labels now distinguish local BC/AD dates and preserve the exact UTC instant. A reproduced landscape observing-time overflow is repaired: date/zone/precision explanations span both layout columns. Boundary, fine-time and unknown-zone checks passed at compact and landscape widths.
 
 Offline fallback now resamples connectivity on foreground return and offers a manual refresh of its retained saved snapshot. Failed site/time-preservation feedback stays visible until explicit retry succeeds. A real worker fallback/retry check retained London, saved Polaris, a multiline Unicode note and millisecond observing time.
+
+Offline raw-copy preparation can now be cancelled while its module loads. Cancelled work cannot initiate a late download or change a newer request’s feedback; compact checks verified focus return, retained text/time and one copy requested only by explicit retry.
 
 ## After your batch push
 
