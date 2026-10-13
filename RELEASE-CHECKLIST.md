@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Eclipse selection follows UTC peak identity through observing-time changes. Compact checks retained July/August events as earlier entries expired, preserved the exact peak shortcut, and used the next event only after the selected one expired; landscape remained contained.
+
 - Healthy camera playback clears an obsolete resume error without clearing distinct camera-access errors. Generated-video checks passed ordinary/fullscreen spontaneous recovery, track-ended guidance and busy-camera failure.
 
 - Resume camera feed retries paused video in ordinary and fullscreen controls without reacquiring the stream. Failure keeps the feed paused for explicit retry; success focuses the stage. Pending duplicate requests are disabled and late results after close/replacement are ignored. Generated video/synthetic poses passed compact and landscape checks; physical phone acceptance remains pending.
