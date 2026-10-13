@@ -60,7 +60,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 592 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 593 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
@@ -183,7 +183,7 @@ Diary cards, controls and report/CSV local times now include offsets and precise
 
 Local integrated PWA verification passed two waiting-worker updates, retaining millisecond observing time, favourite/note and unfinished diary site/time/Unicode text. A subsequent rebuilt CSS update verified wrapped diary actions at 320/390 pixels, including snapshot and clear/undo behavior. Panel-bound checks supplement document-overflow checks because a clipped internal control can leave document width unchanged. Installed-phone and production-origin update checks below remain required.
 
-1. Check the **Validate Nightjar** action for the newly pushed commit. [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626) passed at eb1734c after the earlier Run #7 CI fixture failure. Today’s additional local changes have passed 540 tests and full verification, but need their own hosted result. Read the verification summary and step log; download the log artifact when available.
+1. Check the **Validate Nightjar** action for the newly pushed commit. A read-only check on 13 October confirmed [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730) passed at remote main 8d44d72, covering the preceding 592-test batch. The newer local build-hook coverage passes 593 tests and full verification, but still needs its own hosted result after your next push. Read the verification summary and step log; download the log artifact when available.
 2. Set the Workers Builds build command to `npm run verify`, with the existing deploy command `npm run deploy`. The GitHub check alone does not gate an independently configured Cloudflare build.
 3. Confirm the production home page, weather/place/aurora API responses, manifest, service worker and `/offline` page on the final HTTPS origin.
 4. Import a backup on that final origin if needed. Browser data is separate between localhost, the prior hosted site and Cloudflare.
