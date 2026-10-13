@@ -5,7 +5,7 @@ import {useMemo,useState} from 'react';
 import DeepSkyMoonContext from '@/components/deep-sky-moon';
 import {messierCatalogue,deepSkyName} from '@/lib/deep-sky';
 import {compareDeepSky} from '@/lib/deep-sky-comparison';
-import {deepSkyComparisonFormatter} from '@/lib/deep-sky-comparison-time';
+import {deepSkyTimestampFormatter} from '@/lib/deep-sky-time';
 import {timeLabel,type Place} from '@/lib/sky';
 function comparisonRows(ids:string,date:Date,place:Place,moonBelowOnly:boolean){const targets=ids.split(',').flatMap(id=>{const target=messierCatalogue.find(value=>value.id===id);return target?[target]:[]});return compareDeepSky(targets,date,place,moonBelowOnly)}
 function useComparisonRows(open:boolean,ids:string,instant:number,latitude:number,longitude:number,moonBelowOnly:boolean){return useMemo(()=>open&&ids?comparisonRows(ids,new Date(instant),{name:'Selected site',latitude,longitude},moonBelowOnly):[],[open,ids,instant,latitude,longitude,moonBelowOnly])}
@@ -21,7 +21,7 @@ export default function DeepSkyComparison({saved,date,place,onPlan}:{saved:strin
  const setCalendarStatus=(text:string)=>setCalendarResult({context:calendarContext,text});
  const rows=useComparisonRows(open,key,instant,latitude,longitude,moonBelowOnly);
  const available=rows.filter(row=>row.best),unavailable=rows.filter(row=>!row.best);
- const stamp=deepSkyComparisonFormatter(date,place.timezone||'UTC');
+ const stamp=deepSkyTimestampFormatter(date,place.timezone||'UTC');
  function downloadWindow(row:ReturnType<typeof compareDeepSky>[number],window:{start:Date;end:Date}){
   try{const calendar=deepSkyWindowCalendar({target:row.target,place,start:window.start,end:window.end,samples:row.samples,moonBelowOnly});downloadFile(new Blob([calendar],{type:'text/calendar;charset=utf-8'}),`nightjar-${row.target.id}-${window.start.toISOString().slice(0,16).replaceAll(':','-')}.ics`);setCalendarStatus(`${row.target.id} calendar window prepared: ${stamp.format(window.start)} to ${stamp.format(window.end)}. Import the file in your calendar; recheck conditions before observing.`);}
   catch(error){setCalendarStatus(error instanceof Error?error.message:'The calendar window could not be prepared. Your saved list is unchanged.');}

@@ -19,6 +19,7 @@ import {messierCatalogue,deepSkyName,deepSkyNames,deepSkyPlanNotes,findDeepSky,d
 import {deepSkyListKey,readDeepSkyList,saveDeepSkyList,validMessierId} from '@/lib/deep-sky-list';
 import {printableObservingPlan} from '@/lib/observing-plan';
 import {readReportEquipment} from '@/lib/report-equipment';
+import {deepSkyTimestampFormatter} from '@/lib/deep-sky-time';
 import {timeLabel,type Place} from '@/lib/sky';
 const constellations=Array.from(new Set(messierCatalogue.map(target=>target.constellation))).sort((a,b)=>constellationName(a).localeCompare(constellationName(b)));
 const types=Array.from(new Set(messierCatalogue.map(target=>target.type))).sort();
@@ -29,7 +30,7 @@ export default function DeepSkyFinder({date,place,onDate,onFrame,onCamera,reques
  if(request&&request.revision!==handledRequest&&messierCatalogue.some(target=>target.id===request.id)){setHandledRequest(request.revision);setSelected(request.id)}
  useEffect(()=>{if(request?.revision===handledRequest)onRequestHandled?.()},[request,handledRequest,onRequestHandled]);
  const positions=useMemo(()=>new Map(deepSkyPositions(messierCatalogue,date,place).map(target=>[target.id,target])),[date,place]);
- const windowFormatter=useMemo(()=>new Intl.DateTimeFormat('en-GB',{timeZone:place.timezone||'UTC',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'shortOffset'}),[place.timezone]);
+ const windowFormatter=useMemo(()=>deepSkyTimestampFormatter(date,place.timezone||'UTC'),[date,place.timezone]);
  const recommendations=useMemo(()=>darkOnly?deepSkyRecommendations(messierCatalogue,date,place):null,[darkOnly,date,place]);
  const results=useMemo(()=>findDeepSky(query,type,{constellation,maximumMagnitude:magnitude?Number(magnitude):undefined}).map(target=>positions.get(target.id)!).filter(target=>(!above||target.altitude>30)&&(!recommendations||recommendations.has(target.id))).sort((a,b)=>(recommendations?recommendations.get(b.id)!.altitude-recommendations.get(a.id)!.altitude:b.altitude-a.altitude)||a.id.localeCompare(b.id)),[query,type,constellation,magnitude,positions,above,recommendations]);
  const [saved,setSaved]=useState<string[]>([]),[listReady,setListReady]=useState(false),[listStatus,setListStatus]=useState(''),[listReadError,setListReadError]=useState(false);

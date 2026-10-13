@@ -1,10 +1,11 @@
 'use client';
+import {deepSkyTimestampFormatter} from '@/lib/deep-sky-time';
 import {type DeepSkySample} from '@/lib/deep-sky';
 import {type Place,timeLabel} from '@/lib/sky';
 export default function DeepSkyTimeline({name,samples,place,onDate}:{name:string;samples:DeepSkySample[];place:Place;onDate:(date:Date)=>void}){
  if(!samples.length)return <section className="deep-sky-timeline"><p role="status">No supported planning samples are available.</p></section>;
  const intervals=Math.max(1,samples.length-1),ticks=[...new Set([0,.25,.5,.75,1].map(fraction=>Math.round((samples.length-1)*fraction)))];
- const zone=place.timezone||'UTC',stamp=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:zone,timeZoneName:'shortOffset'});
+ const zone=place.timezone||'UTC',stamp=deepSkyTimestampFormatter(samples[0].time,zone);
  const x=(index:number)=>40+index/intervals*920,y=(altitude:number)=>20+(90-altitude)/180*200;
  const light=(sun:number)=>sun<=-18?'Dark':sun<=-6?'Twilight':'Day / civil';
  const path=samples.map((sample,index)=>`${index?'L':'M'}${x(index).toFixed(2)},${y(sample.altitude).toFixed(2)}`).join(' ');
