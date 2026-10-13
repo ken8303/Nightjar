@@ -14,6 +14,7 @@ export default function PwaSupport() {
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(false);
   const [installing,setInstalling]=useState(false);
+  const installPanel=useRef<HTMLElement>(null);
   const installation=useRef({pending:false,installed:false,confirmed:false});
   const [offline, setOffline] = useState(false);
   const [message, setMessage] = useState('');
@@ -78,9 +79,9 @@ export default function PwaSupport() {
     const offered=prompt;installation.current.pending=true;setInstalling(true);setMessage('');
     try { await offered.prompt(); const choice = await offered.userChoice; if(!installation.current.installed)setMessage(choice.outcome === 'accepted' ? 'Installation requested. Follow your browser’s instructions.' : 'You can install Nightjar later from your browser menu.'); }
     catch { if(!installation.current.installed)setMessage('Use your browser menu to add Nightjar to your home screen.'); }
-    finally { installation.current.pending=false;setInstalling(false);setPrompt(current=>current===offered?null:current); }
+    finally { installation.current.pending=false;setInstalling(false);setPrompt(current=>current===offered?null:current);installPanel.current?.focus({preventScroll:true}); }
   }
-  return <aside id="install-app" className="pwa-support" aria-label="Nightjar app">
+  return <aside ref={installPanel} id="install-app" className="pwa-support" aria-label="Nightjar app" tabIndex={-1}>
     {offline && <p className="offline-notice" role="status">You’re offline. Live conditions cannot refresh; any displayed forecast may be out of date.</p>}
     {pendingText&&<p className="muted">Reload is paused for unfinished edits: {pendingText}. Resolve or copy them before reloading.</p>}<PendingEditRecovery/>{updateWorker&&<div className="pwa-update" role="status"><p>A new Nightjar version is ready. Your saved places, targets and equipment stay on this device.</p><p>Save unfinished edits before updating. If saving fails, keep this view open and use its recovery tools first. Unsaved text can be lost on reload.</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{updating?'Updating Nightjar…':'Update and reload'}</button></div>}
     {updateError&&<div className="pwa-update"><p role="status">{updateError}</p><button type="button" className="button" disabled={offline||Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setUpdateError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button></div>}

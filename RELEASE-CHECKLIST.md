@@ -4,6 +4,10 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Install action completion restores focus to the stable Nightjar app panel. Simulated dismissed, rejected and accepted choices passed at 320 pixels; no native installation was performed.
+
+- A real update between two different local production builds retained the selected site/metadata, saved Polaris, exact Unicode note and 2026-10-25T01:30:17.456Z after blocking an unfinished time draft. The old offline cache namespace was replaced, the new panel markup adopted and warning/error logs remained empty. Final deployed and installed-phone migration remain pending.
+
 - Photography light windows distinguish each endpoint’s UTC offset and boundary-year era. Grouped time/offset labels stayed within cards at 320, 800 and 1024 pixels; a Honolulu BC-date midpoint preserved its exact computed UTC timestamp.
 
 - Eclipse selection follows UTC peak identity through observing-time changes. Compact checks retained July/August events as earlier entries expired, preserved the exact peak shortcut, and used the next event only after the selected one expired; landscape remained contained.
