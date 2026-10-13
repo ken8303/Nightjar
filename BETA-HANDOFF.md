@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-The latest local code passed 568 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+The latest local code passed 571 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
 
-Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 568 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
+Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 571 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
 
 The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
 
@@ -29,6 +29,8 @@ Camera playback now keeps labels paused through a late pause notification while 
 Legacy saved-place entries sharing coordinates now retain separate names and sky ratings during Save, rename and rating changes. Ambiguous same-name versions refuse without writing; a compact check retained the blocked rename draft through duplicate removal and retry.
 
 Site renames also refuse a sibling alias’s existing name before creating ambiguous versions. A retained spaced draft and distinct Unicode-name retry passed the compact production check.
+
+Earliest-year plan and When to look labels now distinguish local BC/AD dates and preserve the exact UTC instant. A reproduced landscape observing-time overflow is repaired: date/zone/precision explanations span both layout columns. Boundary, fine-time and unknown-zone checks passed at compact and landscape widths.
 
 ## After your batch push
 

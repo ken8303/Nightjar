@@ -38,3 +38,12 @@ test('forecast arrival and expiry boundaries keep only future periods within twe
  const data=hourly([0,1,2],40),before=new Date((start-3600)*1000),planned=forecastPlanning(weatherHours(data,before,place),before,place);assert.equal(planned.current,undefined);assert.equal(planned.score,null);assert.equal(+planned.best.date,start*1000);
  assert.deepEqual(weatherHours(data,new Date((start+3*3600)*1000),place),[]);assert.deepEqual(weatherHours(data,new Date((start-12*3600)*1000),place),[]);assert.deepEqual(weatherHours(data,new Date('invalid'),place),[]);
 });
+
+test('shared atlas-hour labels distinguish local BC and AD dates at the supported UTC boundary',()=>{
+ const first=new Date('0001-01-01T00:00:00.000Z'),later=new Date('0001-01-01T06:00:00.000Z');
+ const bc=forecastHourLabel(first,'America/New_York'),ad=forecastHourLabel(later,'America/New_York');
+ assert.match(bc.full,/31 Dec 1 BC/);assert.match(bc.detail,/31 Dec 1 BC · GMT-4:56:02/);
+ assert.match(ad.full,/1 Jan 1 AD/);assert.match(ad.detail,/1 Jan 1 AD · GMT-4:56:02/);
+ assert.equal(first.toISOString(),'0001-01-01T00:00:00.000Z');assert.equal(later.toISOString(),'0001-01-01T06:00:00.000Z');
+ assert.equal(forecastHourLabel(new Date('2026-10-12T20:00:00.000Z'),'America/New_York').detail,'12 Oct · GMT-4');
+});

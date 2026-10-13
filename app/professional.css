@@ -208,3 +208,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .expanded-atlas-dialog>.expanded-atlas-header,.expanded-atlas-dialog>.expanded-atlas-tools,.expanded-atlas-dialog>.expanded-atlas-description,.expanded-atlas-dialog>.expanded-atlas-selection,.expanded-atlas-dialog>.expanded-dome-selection{flex-shrink:0}
 .expanded-2d-dialog .expanded-atlas-viewport{flex:1 0 180px;min-height:180px}
 .expanded-dome-dialog>.sky-dome-view{flex:1 0 auto}
+
+/* Date/zone explanations share both columns instead of widening the mode picker. */
+.time-entry>p{grid-column:1/-1;min-width:0;overflow-wrap:anywhere}
+.time-entry .control-bar,.time-entry .control-bar>div{min-width:0}

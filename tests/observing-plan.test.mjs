@@ -66,3 +66,15 @@ test('invalid omission counts cannot make inaccurate checklist coverage claims',
  }
  assert.throws(()=>printableObservingPlan({...input(),targetsOmitted:Number.MAX_SAFE_INTEGER}));
 });
+
+test('supported first-year plans identify a local BC rollover and retain the exact UTC instant',()=>{
+ const plan={...input(),date:new Date('0001-01-01T00:00:00.000Z'),place:{...input().place,name:'New York boundary site',timezone:'America/New_York'}},html=printableObservingPlan(plan);
+ assert.match(html,/31 Dec 1 BC/);assert(html.includes('GMT-4:56:02'));assert(html.includes('0001-01-01 00:00:00.000 UTC'));
+ assert.equal(plan.date.toISOString(),'0001-01-01T00:00:00.000Z');
+ const utc=printableObservingPlan({...plan,place:{...plan.place,timezone:'UTC'}});assert.match(utc,/1 Jan 1 AD/);
+});
+test('observing checklists reject finite dates outside the supported UTC years before generating a report',()=>{
+ for(const instant of ['0000-12-31T23:59:59.999Z','+010000-01-01T00:00:00.000Z']){
+  assert.throws(()=>printableObservingPlan({...input(),date:new Date(instant)}),/observing plan contains invalid data/);
+ }
+});

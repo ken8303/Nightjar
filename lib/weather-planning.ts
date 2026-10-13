@@ -16,7 +16,7 @@ export function forecastPlanning(hours:readonly Hour[],date:Date,place:Place){
  return {current,score,best,total:hours.length,scored,missing:hours.length-scored};
 }
 export function forecastHourLabel(date:Date,timezone:string){
- const formatter=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset'});
+ const formatter=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset',...(date.getUTCFullYear()<=1?{era:'short' as const}:{})});
  const parts=formatter.formatToParts(date),part=(type:string)=>parts.find(value=>value.type===type)?.value||'';
- return {time:`${part('hour')}:${part('minute')}`,detail:`${part('day')} ${part('month')} · ${part('timeZoneName')}`,full:formatter.format(date)};
+ return {time:`${part('hour')}:${part('minute')}`,detail:`${part('day')} ${part('month')}${part('era')?` ${part('year')} ${part('era')}`:''} · ${part('timeZoneName')}`,full:formatter.format(date)};
 }

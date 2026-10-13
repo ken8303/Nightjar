@@ -141,3 +141,5 @@ Long loading/error guidance in the expanded 3D dialog scrolls within its panel o
 Sky-section shortcuts explicitly focus their link while waiting for a deferred section, so pointer activation that leaves focus elsewhere does not silently drop the jump. Moving focus to another control before the section loads still cancels the earlier jump.
 
 For the next physical-phone and hosted-release checks, see [BETA-HANDOFF.md](./BETA-HANDOFF.md).
+
+Observing plan previews and atlas hour labels identify the local era near the earliest supported UTC date, preserving the exact UTC instant. Time-entry explanations span the full control layout so date/zone/precision guidance stays readable in landscape.

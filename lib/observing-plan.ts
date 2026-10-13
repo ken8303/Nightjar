@@ -1,5 +1,6 @@
 import {A,bodyPosition,moonInfo,skyTargetLimit,type Place} from './sky';
 import {validPlace} from './planner-state';
+import {validObservingDate} from './observing-time';
 import {type Equipment,validEquipment} from './photography';
 
 type Target={name:string;altitude:number;azimuth:number};
@@ -16,11 +17,11 @@ export function targetCoverageNotice(omitted:number){
 export function printableObservingPlan(input:Plan):string{
  const {date,place,targets,notes,equipment}=input,omitted=input.equipmentOmitted??0;
  if(!Number.isSafeInteger(omitted)||omitted<0||!Number.isSafeInteger(equipment.length+omitted)||input.equipmentUnavailable&&omitted>0)throw Error('The equipment coverage is invalid.');
- if(!Number.isFinite(+date)||!validPlace(place)||targets.length>skyTargetLimit+109||!targets.every(target=>typeof target.name==='string'&&target.name.length<=100&&Number.isFinite(target.altitude)&&Math.abs(target.altitude)<=90&&Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<=360)||equipment.length>100||!equipment.every(validEquipment))throw Error('The observing plan contains invalid data.');
+ if(!validObservingDate(date)||!validPlace(place)||targets.length>skyTargetLimit+109||!targets.every(target=>typeof target.name==='string'&&target.name.length<=100&&Number.isFinite(target.altitude)&&Math.abs(target.altitude)<=90&&Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<=360)||equipment.length>100||!equipment.every(validEquipment))throw Error('The observing plan contains invalid data.');
  const targetsNotice=targetCoverageNotice(input.targetsOmitted??0);
  if(!Number.isSafeInteger(targets.length+(input.targetsOmitted??0)))throw Error('The target coverage is invalid.');
  const zone=place.timezone||'UTC',notesNotice=notesCoverageNotice(Boolean(input.notesUnavailable),Boolean(input.notesUnsaved));
- const local=new Intl.DateTimeFormat('en-GB',{timeZone:zone,weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'shortOffset'}).format(date);
+ const local=new Intl.DateTimeFormat('en-GB',{timeZone:zone,weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'shortOffset',...(date.getUTCFullYear()<=1?{era:'short' as const}:{})}).format(date);
  const moon=moonInfo(date,place),sun=bodyPosition(A.Body.Sun,date,place).altitude;
  const night=sun<-18?'Astronomical darkness':sun<=-6?'Twilight':'Daylight / civil twilight';
  const sorted=[...targets].sort((a,b)=>b.altitude-a.altitude);
