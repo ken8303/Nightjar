@@ -1,44 +1,18 @@
 # Nightjar beta handoff
 
-The latest local code passed 579 automated tests, TypeScript, lint, production build and Cloudflare packaging dry-run. Changes are committed locally for a batch push through GitHub Desktop. No push or deployment was performed by the development agent.
+Current local verification passes **579 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 579 tests also pass under Node 24.19. Nine implementation commits were added during this 13 October development window, with detailed reproductions in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). They are committed locally for your batch push through GitHub Desktop; no push or deployment was performed by the development agent.
 
-Latest batches repair the Node 22 CI fixtures and improve camera/image lifecycle recovery, keyboard focus, supported-date shortcuts, saved-collection return checks, forecast reconnect throttling and PWA indicators. All 579 tests also pass under Node 24.19. Detailed reproductions and limitations are recorded in the development notes.
+The remote main branch still points to eb1734c, which passed GitHub [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626). The older Runs #7/#6 failed. That hosted result does not cover the newer local code. Check the workflow for your pushed commit and the resulting Cloudflare build.
 
-The 12 October batches also repair ordinary foreground PWA status reads, pause view/setup/shortcut recovery deadlines during suspension, and bound Tonight event searches and forecast recommendations to supported dates. Compact loading-recovery checks kept unfinished time text and its original selected instant; camera review/close returned useful keyboard focus without starting hardware.
+## Current-window changes and evidence
 
-The latest batches recover forecast and PWA refresh after backward clock correction, explain uncertain retained forecast ages and reuse unchanged camera catalogue/thumbnail rendering during pose updates. Generated-video playback pause/resume and catalogue/search/image-retry flows passed compact browser checks. Long-name camera/atlas dialog overflow and offscreen close controls are repaired, with usable chart space and scrolling.
+- **Camera:** interrupted playback stays paused through a late pause notification until frames recover. Manual preview is offered with camera off. The live stage explains upright compass initialisation and prioritises paused-feed recovery. Generated-video and synthetic reading checks restored labels, retained selected time and returned close focus; these do not establish physical-phone alignment.
+- **Moon:** the landmark list exposes its selected name, and Centre brings that landmark back after rotation or with labels hidden. Compact keyboard activation and landscape controls passed local checks.
+- **Saved places:** separately named coordinate aliases retain their names, ratings and metadata during edits. Ambiguous names, new sibling-name collisions and stale ratings after a peer selects another alias refuse before writing. Compact checks retained a blocked rename draft, placed rating feedback beside its selector and permitted explicit selection/retry.
+- **Time and reports:** earliest-year labels distinguish local BC/AD dates while preserving exact UTC. A reproduced landscape time-control overflow is repaired. Boundary, missing-zone and sub-minute-time checks passed at compact/landscape widths, including seconds/milliseconds after a cancelled edit.
+- **Offline recovery:** foreground return samples missed network events and offers manual snapshot refresh. Preservation failures remain visible until explicit retry succeeds. Actual worker fallback/retry retained London, Polaris, a multiline Unicode note and millisecond time. Pending raw-copy preparation can be cancelled without a late download; delayed-module checks verified focus return and one copy requested by explicit retry. Native file receipt remains unverified.
 
-The reviewed production build also passed an actual service-worker fallback/retry check with saved Vega, its multiline note and the selected London/time snapshot. Compact and landscape camera checks decoded the actual M31 reference thumbnail, showed Fomalhaut using generated video and a synthetic phone pose, and kept camera/motion off after background return. These local checks complement the physical-phone and deployed-origin checks below.
-
-The prior baseline eb1734c passed GitHub [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626), including the full verification step. The new local batches have not been pushed or verified by that run.
-
-Camera thumbnails also recover when an offline state was observed but its later online event was missed. A synthetic compact browser check confirmed one retry on page return, successful image decoding and no repeated retry from ordinary return events. Hardware stays off. Forecast refresh also detects missed online events from an observed offline state, with one deferred request and manual-refresh deduplication.
-
-Fullscreen camera target controls now include manual direction preview and photo/details actions. Below-horizon preview stays disabled; details navigation respects unfinished edits and focuses the review warning when blocked. Compact and landscape checks passed. Keep editing now returns to the relevant retained field or recovery panel, reviewing current-section forms before another retained draft and prioritising globally accessible time edits.
-
-Meteor cards now stop at the supported UTC date range. Remaining supported occurrences keep their actions; the calendar explains when later annual dates are outside that range.
-
-The reset 3D Moon view now fits narrow phone canvases, using adaptive portrait framing while retaining zoom and landmark centring. The 3D Moon now supports focused keyboard rotation, tilt, zoom and near-side reset. Compact labels avoid overlap, prioritise the selected landmark and hide offscreen projections; centring a visible name retains its keyboard focus. Sky-dome label selection likewise keeps focus after click/Enter, including compact expanded views and landscape resizing.
-
-Final acceptance: 40 focused regressions also pass under Node 22 with TZ=UTC. A real waiting-worker activation/reload on a disposable local origin retained London, 21:34 UTC, saved Polaris and its multiline Unicode note. The current package manifest/icons, offline files and worker-stamp consistency were checked. The latest read-only GitHub listing still shows successful Run #8 at the earlier eb1734c baseline; current local batches need their own hosted check after your push.
-
-The Moon landmark list now exposes its selection and has a corresponding Centre control in the globe. This restores offscreen landmarks after rotation and works with labels hidden; compact keyboard and landscape checks passed.
-
-Camera playback now keeps labels paused through a late pause notification while only cached frames remain. Generated-video and synthetic readiness checks also passed ordinary pause/resume and camera-off manual preview recovery.
-
-Legacy saved-place entries sharing coordinates now retain separate names and sky ratings during Save, rename and rating changes. Ambiguous same-name versions refuse without writing; a compact check retained the blocked rename draft through duplicate removal and retry.
-
-Site renames also refuse a sibling alias’s existing name before creating ambiguous versions. A retained spaced draft and distinct Unicode-name retry passed the compact production check.
-
-Earliest-year plan and When to look labels now distinguish local BC/AD dates and preserve the exact UTC instant. A reproduced landscape observing-time overflow is repaired: date/zone/precision explanations span both layout columns. Boundary, fine-time and unknown-zone checks passed at compact and landscape widths.
-
-Offline fallback now resamples connectivity on foreground return and offers a manual refresh of its retained saved snapshot. Failed site/time-preservation feedback stays visible until explicit retry succeeds. A real worker fallback/retry check retained London, saved Polaris, a multiline Unicode note and millisecond observing time.
-
-Offline raw-copy preparation can now be cancelled while its module loads. Cancelled work cannot initiate a late download or change a newer request’s feedback; compact checks verified focus return, retained text/time and one copy requested only by explicit retry.
-
-A sky rating now refuses a stale action after another view selects a different named coordinate alias. Its feedback appears beside the selector. The compact check preserved both versions and allowed a safe retry after explicit site selection.
-
-The live camera stage now shows the specific upright-compass tilt instruction and keeps feed-recovery guidance primary while video is paused. Generated-video/Safari-style reading checks restored Polaris discovery after setup and retained close focus/time.
+Earlier validated batches repair the Node 22 CI fixtures, forecast/image/PWA lifecycle recovery, backward-clock checks, camera fullscreen actions, retained-edit review focus, meteor date bounds, portrait lunar framing and stable globe-label focus. Their individual evidence and limitations remain in the release checklist and development notes. Final local checks also passed 114 focused regressions with TZ=UTC and confirmed the current manifest/icon dimensions, offline files and worker-stamp consistency. Physical-device and hosted acceptance below is still required.
 
 ## After your batch push
 
