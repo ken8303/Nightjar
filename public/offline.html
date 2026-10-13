@@ -41,7 +41,7 @@
     <p class="connection" id="connection" role="status">Reconnect, then try the planner again.</p>
     <a class="retry" id="retry" href="/">Try again online</a>
     <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Stored values are unchanged; a raw recovery copy can preserve unreadable data.</p>
-    <div id="snapshot-warning" hidden><p class="connection" role="status">Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.</p><a class="retry" id="refresh-details" href="/offline">Refresh saved details</a></div>
+    <div id="snapshot-warning" hidden><p id="snapshot-message" class="connection" role="status">Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.</p><a class="retry" id="refresh-details" href="/offline">Refresh saved details</a></div>
     <p id="coverage-warning" class="connection" role="status" hidden></p>
     <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <div class="grid">
@@ -166,16 +166,26 @@
       showEmpty('equipment','nightjar-equipment');
       if(partialLabels.size){const coverage=document.getElementById('coverage-warning');coverage.hidden=false;coverage.textContent='Partial offline view: '+Array.from(partialLabels).join(', ')+'. Some stored content is omitted because of display limits or unusable values. Use a raw recovery copy to preserve stored values.';}
       const snapshotKeys=new Set(['nightjar-place','nightjar-places','nightjar-observing-time','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-deep-targets-v1','nightjar-observing-diary-v1','nightjar-equipment']);
+      const snapshotWarning=document.getElementById('snapshot-warning'),snapshotMessage=document.getElementById('snapshot-message');
       window.addEventListener('storage',event=>{
         try{if(event.storageArea!==localStorage)return}catch{return}
-        if(event.key===null||snapshotKeys.has(event.key))document.getElementById('snapshot-warning').hidden=false;
+        if(event.key===null||snapshotKeys.has(event.key)){snapshotMessage.textContent='Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.';snapshotWarning.hidden=false;}
       });
       const connection=document.getElementById('connection');
-      const updateConnection=()=>{connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
-      updateConnection();window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
+      let pageHidden=false,wasHidden=Boolean(document.hidden),preservationFailed=false;
+      const updateConnection=()=>{if(preservationFailed)return;connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
+      const resume=returned=>{
+        if(pageHidden||document.hidden)return;
+        updateConnection();
+        if(returned&&snapshotWarning.hidden){snapshotMessage.textContent='Saved details may have changed while this page was away. Refresh them to read current stored values; the displayed snapshot is kept until then.';snapshotWarning.hidden=false;}
+      };
+      updateConnection();window.addEventListener('online',()=>resume(false));window.addEventListener('offline',()=>resume(false));
+      window.addEventListener('pagehide',()=>{pageHidden=true});
+      window.addEventListener('pageshow',event=>{const returned=pageHidden||Boolean(event.persisted);pageHidden=false;wasHidden=Boolean(document.hidden);resume(returned)});
+      document.addEventListener('visibilitychange',()=>{const hidden=Boolean(document.hidden),returned=wasHidden&&!hidden;wasHidden=hidden;resume(returned)});
       document.getElementById('retry').addEventListener('click',event=>{
         try{
-          if(!instant||instant.getUTCFullYear()<1){sessionStorage.removeItem('nightjar-recovery-context-v1');sessionStorage.removeItem('nightjar-recovery-time-v1');return}
+          if(!instant||instant.getUTCFullYear()<1){sessionStorage.removeItem('nightjar-recovery-context-v1');sessionStorage.removeItem('nightjar-recovery-time-v1');preservationFailed=false;updateConnection();return}
           if(instant&&instant.getUTCFullYear()>=1){
             if(validContextPlace(currentPlace)){
               sessionStorage.setItem('nightjar-recovery-context-v1',JSON.stringify({version:1,time:selectedTime,place:contextPlace(currentPlace)}));
@@ -185,7 +195,8 @@
               sessionStorage.setItem('nightjar-recovery-time-v1',JSON.stringify(selectedTime));
             }
           }
-        }catch{event?.preventDefault();connection.textContent='Your observing site and time could not be preserved. Keep this page open, restore browser storage access and try again.'}
+          preservationFailed=false;updateConnection();
+        }catch{preservationFailed=true;event?.preventDefault();connection.textContent='Your observing site and time could not be preserved. Keep this page open, restore browser storage access and try again.'}
       });
       const recoveryButton=document.getElementById('download-recovery'),recoveryStatus=document.getElementById('recovery-status');
       recoveryButton.addEventListener('click',async()=>{

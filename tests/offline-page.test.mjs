@@ -19,12 +19,12 @@ function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessio
  const elements=new Map([...html.matchAll(/id="([^"]+)"/g)].map(match=>[match[1],new Element()]));
  const raw=new Map(Object.entries(data).map(([key,value])=>[key,key==='nightjar-red-light'?value:JSON.stringify(value)]));
  for(const [key,value] of Object.entries(rawOverrides))raw.set(key,value);
- const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
- const context={document:{documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return {makePlannerRecovery}}};
+ const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),visibilityListeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
+ const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return {makePlannerRecovery}}};
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
  for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()'),context);
- return {storage:context.localStorage,elements,raw,session,listeners,navigator,root,body,blobs,timers,revoked,reads,parseSizes};
+ return {allowSessionWrites:()=>{sessionWriteBlocked=false},storage:context.localStorage,document:context.document,elements,raw,session,listeners,visibilityListeners,navigator,root,body,blobs,timers,revoked,reads,parseSizes};
 }
 test('offline notes retain 2,000 characters, newlines and text markup without interpreting HTML',()=>{
  const note='<img src=x onerror=alert(1)>\n'+ 'x'.repeat(1971);
@@ -160,4 +160,38 @@ test('offline snapshot notices ignore unrelated stores and include clearing rele
 test('offline diary omits unsupported year-zero observations while preserving their raw stored values',()=>{
  const entry={target:'M31',observedAt:'0000-12-31T23:59:00.000Z',place:{name:'QA site',latitude:0,longitude:0},outcome:'seen',notes:'Unsupported QA record'},valid={...entry,target:'M45',observedAt:'0001-01-01T00:00:00.000Z',notes:'Supported QA record'};
  const page=load({'nightjar-observing-diary-v1':[entry,valid]});assert.equal(page.elements.get('diary').children.length,1);assert(page.elements.get('diary').textContent.includes('Supported QA record'));assert(!page.elements.get('diary').textContent.includes('Unsupported QA record'));assert.equal(page.elements.get('coverage-warning').hidden,false);assert.deepEqual(JSON.parse(page.raw.get('nightjar-observing-diary-v1')),[entry,valid]);
+});
+
+
+test('ordinary pageshow resamples a missed network event without implying the snapshot changed at mount',()=>{
+ const page=load({'nightjar-targets-v1':['Vega']});page.navigator.onLine=true;
+ page.listeners.get('pageshow')?.({persisted:false});
+ assert(page.elements.get('connection').textContent.includes('may be available'));assert.equal(page.elements.get('snapshot-warning').hidden,true);
+ assert.equal(page.session.size,0);assert.equal(page.elements.get('targets').textContent,'Vega');
+});
+test('cached-page return defers silent network recovery until pageshow and keeps saved text as a snapshot',()=>{
+ const note='Retained 星空\nSecond line',page=load({'nightjar-targets-v1':['Vega'],'nightjar-target-notes-v1':{Vega:note}}),before=new Map(page.raw);
+ page.listeners.get('pagehide')?.();page.navigator.onLine=true;
+ page.visibilityListeners.get('visibilitychange')?.();assert(page.elements.get('connection').textContent.includes('You are offline'));assert.equal(page.elements.get('snapshot-warning').hidden,true);
+ page.listeners.get('pageshow')?.({persisted:true});assert(page.elements.get('connection').textContent.includes('may be available'));assert.equal(page.elements.get('snapshot-warning').hidden,false);
+ assert(page.elements.get('snapshot-message').textContent.includes('may have changed'));assert(page.elements.get('targets').textContent.includes(note));assert.deepEqual(page.raw,before);assert.equal(page.session.size,0);
+});
+test('visible return resamples a missed disconnect and a later storage notice names a known change',()=>{
+ const page=load({'nightjar-targets-v1':['Polaris']});page.navigator.onLine=true;page.listeners.get('online')();
+ page.document.hidden=true;page.visibilityListeners.get('visibilitychange')?.();page.navigator.onLine=false;
+ page.visibilityListeners.get('visibilitychange')?.();assert(page.elements.get('connection').textContent.includes('may be available'));
+ page.document.hidden=false;page.visibilityListeners.get('visibilitychange')?.();assert(page.elements.get('connection').textContent.includes('You are offline'));assert.equal(page.elements.get('snapshot-warning').hidden,false);
+ assert(page.elements.get('snapshot-message').textContent.includes('may have changed'));
+ page.listeners.get('storage')({key:'nightjar-targets-v1',storageArea:page.storage});assert(page.elements.get('snapshot-message').textContent.includes('changed in another view'));
+ assert.equal(page.elements.get('targets').textContent,'Polaris');assert.equal(page.session.size,0);
+});
+
+
+test('network return cannot hide a failed context-preservation message; a successful explicit retry clears it',()=>{
+ const time='2026-10-25T01:30:17.456Z',page=load({'nightjar-observing-time':time,'nightjar-place':{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'}},false,{sessionWriteBlocked:true});let prevented=false;
+ page.elements.get('retry').listeners.get('click')({preventDefault:()=>prevented=true});assert(prevented);assert(page.elements.get('connection').textContent.includes('could not be preserved'));
+ page.navigator.onLine=true;page.listeners.get('online')();assert(page.elements.get('connection').textContent.includes('could not be preserved'));
+ page.listeners.get('pagehide')?.();page.listeners.get('pageshow')?.({persisted:true});assert(page.elements.get('connection').textContent.includes('could not be preserved'));
+ page.allowSessionWrites();prevented=false;page.elements.get('retry').listeners.get('click')({preventDefault:()=>prevented=true});assert.equal(prevented,false);assert(page.elements.get('connection').textContent.includes('may be available'));
+ assert.equal(JSON.parse(page.session.get('nightjar-recovery-context-v1')).time,time);
 });

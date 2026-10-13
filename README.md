@@ -143,3 +143,5 @@ Sky-section shortcuts explicitly focus their link while waiting for a deferred s
 For the next physical-phone and hosted-release checks, see [BETA-HANDOFF.md](./BETA-HANDOFF.md).
 
 Observing plan previews and atlas hour labels identify the local era near the earliest supported UTC date, preserving the exact UTC instant. Time-entry explanations span the full control layout so date/zone/precision guidance stays readable in landscape.
+
+The offline page resamples its connection hint on foreground return and offers a manual refresh of saved details. A return notice says the snapshot may have changed; a storage event identifies a known change. Failed site/time preservation stays visible until an explicit retry succeeds. These notices leave saved data and displayed notes intact.

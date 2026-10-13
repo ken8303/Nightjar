@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Offline foreground return resamples missed network events and offers manual snapshot refresh, preserving displayed data. A failed context-preservation message stays visible until explicit retry succeeds. Four reproduced regressions and an actual worker fallback/retry integration retained Unicode notes and millisecond time.
+
 - Earliest-year observing plans and shared atlas-hour labels identify local BC/AD dates with explicit offsets and exact UTC metadata. A reproduced landscape time-explanation overflow is repaired; date-limit, fine-time and missing-zone guidance passed compact/landscape checks, retaining seconds and milliseconds.
 
 - A selected lunar landmark can be centred from the controls after rotation or with labels hidden. Compact Enter activation restores an offscreen name and retains focus; landscape controls and selected time passed checks.
@@ -30,7 +32,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 571 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 575 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
