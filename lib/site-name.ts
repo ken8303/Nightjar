@@ -9,7 +9,8 @@ export function renameObservingSite(storage:SiteStorage,current:Place,value:stri
  const originalPlaces=storage.getItem('nightjar-places'),originalPlace=storage.getItem('nightjar-place');
  const latest=readSavedPlaces({getItem:()=>originalPlaces});
  const selected=readObservingSite({getItem:()=>originalPlace});
- if(originalPlace!==null&&!selected.error){
+ if(selected.error)throw Error('The selected observing site could not be read. Its stored data was kept; restore storage access or recover the site before saving its name. Your name edit is still here.');
+ if(originalPlace!==null){
   if(!samePlaceCoordinates(selected.place,current)||selected.place.name!==current.name)throw Error('The selected observing site changed elsewhere. Choose the site again before saving its name. Your name edit is still here.');
   place={...current,...selected.place,country:selected.place.country,timezone:selected.place.timezone,bortle:selected.place.bortle,name:place.name};
  }

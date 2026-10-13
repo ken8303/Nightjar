@@ -33,6 +33,17 @@ test('invalid saved data prevents rename writes and rollback failure is reported
  const failed=storage([current]);failed.setItem=()=>{throw Error('Blocked')};assert.throws(()=>renameObservingSite(failed,current,'New'),/original site was kept/);
 });
 
+test('an unreadable selected-site snapshot refuses rename without replacing stored recovery data',()=>{
+ for(const raw of ['broken JSON','null',JSON.stringify({...current,latitude:91}),JSON.stringify({...current,timezone:'Invalid/Zone'}),'x'.repeat(5*1024*1024+1)]){
+  const store=storage([current]);store.values.set('nightjar-place',raw);const before=new Map(store.values);let writes=0;
+  const set=store.setItem;store.setItem=(key,value)=>{writes++;set(key,value)};
+  assert.throws(()=>renameObservingSite(store,current,'Kept draft 星空'),/selected observing site could not be read/);
+  assert.equal(writes,0);assert.deepEqual(store.values,before);
+  store.values.set('nightjar-place',JSON.stringify(current));
+  const result=renameObservingSite(store,current,'Kept draft 星空');assert.equal(result.place.name,'Kept draft 星空');assert.equal(result.places[0].name,'Kept draft 星空');
+ }
+});
+
 
 test('failed rename rollback keeps newer site values and reports that review is needed',()=>{
  const store=storage([current]),set=store.setItem,newerPlaces=JSON.stringify([{...current,name:'Peer name',bortle:1}]),newerPlace=JSON.stringify({...current,name:'Peer active site',latitude:48});let calls=0;
