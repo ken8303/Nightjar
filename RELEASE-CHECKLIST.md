@@ -183,7 +183,7 @@ Diary cards, controls and report/CSV local times now include offsets and precise
 
 Local integrated PWA verification passed two waiting-worker updates, retaining millisecond observing time, favourite/note and unfinished diary site/time/Unicode text. A subsequent rebuilt CSS update verified wrapped diary actions at 320/390 pixels, including snapshot and clear/undo behavior. Panel-bound checks supplement document-overflow checks because a clipped internal control can leave document width unchanged. Installed-phone and production-origin update checks below remain required.
 
-1. Check the **Validate Nightjar** action for the newly pushed commit. A read-only check on 13 October confirmed [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730) passed at remote main 8d44d72, covering the preceding 592-test batch. The newer local build-hook coverage and comparison timestamp changes pass 596 tests and full verification, but still needs its own hosted result after your next push. Read the verification summary and step log; download the log artifact when available.
+1. Check the **Validate Nightjar** action for the newly pushed commit. A read-only check on 13 October confirmed [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730) passed at remote main 8d44d72, covering the preceding 592-test batch. The newer local release checks, dated deep-sky views, camera/PWA focus recovery and enlarged framing viewer pass 596 tests and verification, but still need their own hosted result after your next push. Read the verification summary and step log; download the log artifact when available.
 2. Set the Workers Builds build command to `npm run verify`, with the existing deploy command `npm run deploy`. The GitHub check alone does not gate an independently configured Cloudflare build.
 3. Confirm the production home page, weather/place/aurora API responses, manifest, service worker and `/offline` page on the final HTTPS origin.
 4. Import a backup on that final origin if needed. Browser data is separate between localhost, the prior hosted site and Cloudflare.
@@ -388,3 +388,12 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Review target notes opens the management disclosure and focuses retry guidance from PWA/sky-overlay recovery. A denied-write mobile check retained Polaris and Vega edits, saved both exact strings after retry and kept selected Vega/20:30 UTC. Physical reader testing remains pending.
 
 - [x] Review site name returns to the retained editable field after a denied save. Compact browser QA preserved Unicode text, original site and 20:30 UTC; retry saved the new name with unchanged coordinates/country/time zone and cleared protection. All six current pending-edit labels now have direct review actions.
+
+
+## Final local package evidence — 13 October
+
+- Current source has 596 passing tests on Node 22 and Node 24.19, with typecheck/lint and production build/Cloudflare packaging passing. The final CSS-only framing height-fit adjustment was followed by successful build/packaging and rendered verification.
+- The final 90-input client-bundle reconstruction matches worker release `671014f3f94a1e6957871a60136ee0940c257cb695df6319474ac8b4e8719c63`. It includes the original emitted .assetsignore bytes and excludes post-build unreferenced copies; the earlier captured bundle established that distinction. Removing the generated stamp restores the exact public worker source. Built offline HTML and recovery module match source byte-for-byte.
+- All 332 literal relative JavaScript/CSS asset references scanned in current generated client chunks resolve to files. This is static artifact validation, not a promise about every runtime request or the final hosted origin.
+- Manifest display is standalone with root start/scope; declared 192/512/512 PNG icons have valid signatures and matching dimensions. Native masking/install appearance still needs phone acceptance.
+- Remote main remains 8d44d72 with successful Run #10 at the last read-only check. New local commits have not been pushed or deployed by the agent. Confirm their own CI and Cloudflare results after the next batch push.
