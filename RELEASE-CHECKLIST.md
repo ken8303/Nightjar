@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Sky ratings refuse stale actions after a peer selects another named coordinate alias, before any writes. Adjacent accessible feedback and explicit site selection/retry passed the compact check, preserving sibling ratings and metadata.
+
 - Pending offline recovery preparation can be cancelled without a late download or stale completion overriding a newer request. Three reproduced async regressions and a delayed-module compact check passed, retaining notes/time and returning focus to Download. Native file receipt remains pending.
 
 - Offline foreground return resamples missed network events and offers manual snapshot refresh, preserving displayed data. A failed context-preservation message stays visible until explicit retry succeeds. Four reproduced regressions and an actual worker fallback/retry integration retained Unicode notes and millisecond time.
@@ -34,7 +36,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 578 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 579 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.

@@ -50,3 +50,10 @@ test('rating a named coordinate alias preserves sibling ratings and ambiguous ve
  const ambiguous=fixture([current,{...current,bortle:2}]),before=new Map(ambiguous.values);
  assert.throws(()=>rateObservingSite(ambiguous,current,6),/More than one saved place/);assert.equal(ambiguous.writes.length,0);assert.deepEqual(ambiguous.values,before);
 });
+
+test('a peer selecting another named coordinate alias refuses a stale rating before any writes',()=>{
+ const sibling={...current,name:'Roof alias',bortle:2,extra:'Peer roof'},store=fixture([current,sibling],sibling),before=new Map(store.values);
+ assert.throws(()=>rateObservingSite(store,current,8),/selected observing site changed elsewhere/);assert.equal(store.writes.length,0);assert.deepEqual(store.values,before);
+ const reselected=fixture([current,sibling],current),result=rateObservingSite(reselected,current,8);
+ assert.deepEqual(result.places,[{...current,bortle:8},sibling]);assert.deepEqual(result.place,{...current,bortle:8});
+});

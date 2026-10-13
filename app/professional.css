@@ -212,3 +212,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 /* Date/zone explanations share both columns instead of widening the mode picker. */
 .time-entry>p{grid-column:1/-1;min-width:0;overflow-wrap:anywhere}
 .time-entry .control-bar,.time-entry .control-bar>div{min-width:0}
+
+.site-darkness p.error{color:#f3b49d;font-size:14px;overflow-wrap:anywhere}

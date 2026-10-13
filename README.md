@@ -147,3 +147,5 @@ Observing plan previews and atlas hour labels identify the local era near the ea
 The offline page resamples its connection hint on foreground return and offers a manual refresh of saved details. A return notice says the snapshot may have changed; a storage event identifies a known change. Failed site/time preservation stays visible until an explicit retry succeeds. These notices leave saved data and displayed notes intact.
 
 While the offline recovery module loads, Cancel preparing recovery copy keeps the page and stored data intact and returns focus to Download. Cancelled preparation cannot trigger a late download; try again explicitly when ready.
+
+Sky-rating conflicts appear beside the rating selector. When another view selects a different named version at the same coordinates, choose the intended site again before rating; sibling saved versions and their metadata are preserved.

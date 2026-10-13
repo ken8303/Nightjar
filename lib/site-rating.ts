@@ -13,7 +13,7 @@ export function rateObservingSite(storage:SiteStorage,current:Place,bortle:numbe
  try{originalPlace=storage.getItem('nightjar-place')}catch{throw new SiteRatingReadError('selected')}
  const selected=readObservingSite({getItem:()=>originalPlace});
  if(selected.error)throw new SiteRatingReadError('selected');
- if(originalPlace!==null&&!samePlaceCoordinates(selected.place,current))throw Error('The selected observing site changed elsewhere. Choose the site again before changing its sky rating.');
+ if(originalPlace!==null&&(!samePlaceCoordinates(selected.place,current)||selected.place.name!==current.name&&latest.filter(item=>samePlaceCoordinates(item,current)).length>1))throw Error('The selected observing site changed elsewhere. Choose the site again before changing its sky rating.');
  const place:Place=originalPlace===null?{...current,bortle}:{...current,...selected.place,country:selected.place.country,timezone:selected.place.timezone,bortle};
  const index=savedPlaceUpdateIndex(latest,current);
  const places=latest.map((item,i)=>i===index?{...item,bortle}:item);
