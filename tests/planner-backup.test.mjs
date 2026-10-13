@@ -154,3 +154,12 @@ test('a peer change before a later import key rolls back local writes without ov
  let changed;try{restorePlannerBackup(current,parsePlannerBackup(file({places:[site],targets:['Vega'],notes:{Vega:'Incoming'},equipment:[camera]})))}catch(error){changed=error}
  assert(changed instanceof PlannerReviewChangedError);assert.equal(current.getItem(keys[3]),peer);before.set(keys[3],peer);assert.deepEqual(current.values,before);assert.deepEqual(changed.current.equipment,[{...camera,name:'Peer equipment'}]);
 });
+
+test('a peer replacement of an already written collection stops import and retains the newer record',()=>{
+ for(const afterKey of [keys[0],keys[5]]){
+  const current=storage(),before=new Map(current.values),set=current.setItem,peer=JSON.stringify([{...site,name:'Newer peer site'}]);let injected=false;
+  current.setItem=(key,value)=>{set(key,value);if(key===afterKey&&!injected){injected=true;current.values.set(keys[0],peer)}};
+  assert.throws(()=>restorePlannerBackup(current,parsePlannerBackup(file({places:[site],targets:['Vega'],notes:{Vega:'Incoming'},equipment:[camera]}))),/some changes could not be undone/);
+  before.set(keys[0],peer);assert.deepEqual(current.values,before);
+ }
+});

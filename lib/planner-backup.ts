@@ -79,12 +79,18 @@ export function restorePlannerBackup(storage:StorageAccess,backup:PlannerBackup,
  const previous=snapshot.raw;
  const values=[merged.places,merged.targets,merged.notes,merged.equipment,merged.deepTargets||[],merged.diary||[]].map(value=>JSON.stringify(value));
  let attempted=0,changed=false;
- try{for(let i=0;i<keys.length;i++){if(storage.getItem(keys[i])!==previous[i]){changed=true;throw Error('Saved plans changed during import.')}attempted=i+1;storage.setItem(keys[i],values[i])}}
+ const check=()=>{for(let i=0;i<keys.length;i++)if(storage.getItem(keys[i])!==(i<attempted?values[i]:previous[i])){changed=true;throw Error('Saved plans changed during import.')}};
+ try{
+  // Recheck earlier writes too: another page can replace them before a later
+  // write or the success report. Storage has no multi-key transaction API.
+  for(let i=0;i<keys.length;i++){check();attempted=i+1;storage.setItem(keys[i],values[i])}
+  check();
+ }
  catch{
   let rollbackFailed=false;
   for(let i=attempted-1;i>=0;i--){try{const stored=storage.getItem(keys[i]);if(stored===previous[i])continue;if(stored!==values[i]){rollbackFailed=true;continue}const value=previous[i];if(value===null)storage.removeItem(keys[i]);else storage.setItem(keys[i],value)}catch{rollbackFailed=true}}
   if(changed&&!rollbackFailed)throw new PlannerReviewChangedError(readSavedPlan(storage));
-  throw Error(rollbackFailed?'Storage failed and some changes could not be undone. Keep your backup file and check your saved plans.':'This browser could not save the imported plans. Your existing data has not been changed.');
+  throw Error(rollbackFailed?`${changed?'Saved plans changed during import':'Storage failed'} and some changes could not be undone. Keep your backup file and check your saved plans.`:'This browser could not save the imported plans. Your existing data has not been changed.');
  }
  return merged;
 }
