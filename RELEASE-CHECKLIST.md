@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Healthy camera playback clears an obsolete resume error without clearing distinct camera-access errors. Generated-video checks passed ordinary/fullscreen spontaneous recovery, track-ended guidance and busy-camera failure.
+
 - Resume camera feed retries paused video in ordinary and fullscreen controls without reacquiring the stream. Failure keeps the feed paused for explicit retry; success focuses the stage. Pending duplicate requests are disabled and late results after close/replacement are ignored. Generated video/synthetic poses passed compact and landscape checks; physical phone acceptance remains pending.
 
 - Diary filters reject year 0000, preserve supported UTC boundary dates and disable exports for invalid filters. Clear returns focus to Search diary; compact boundary/report and landscape keyboard checks passed without replacing site/time.
