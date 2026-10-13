@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Resume camera feed retries paused video in ordinary and fullscreen controls without reacquiring the stream. Failure keeps the feed paused for explicit retry; success focuses the stage. Pending duplicate requests are disabled and late results after close/replacement are ignored. Generated video/synthetic poses passed compact and landscape checks; physical phone acceptance remains pending.
+
 - Diary filters reject year 0000, preserve supported UTC boundary dates and disable exports for invalid filters. Clear returns focus to Search diary; compact boundary/report and landscape keyboard checks passed without replacing site/time.
 
 - Successful backup import restores focus to the file picker instead of the page body. Enter activation, visible focus, subsequent Tab progression and landscape cancel passed rendered checks.
@@ -48,7 +50,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 584 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 589 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.

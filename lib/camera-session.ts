@@ -3,18 +3,21 @@ type Callbacks={
  attach:(stream:MediaStream|null)=>void;
  onState:(state:'off'|'starting'|'on')=>void;
  onPaused:(paused:boolean)=>void;
+ onResuming?:(resuming:boolean)=>void;
  onError:(error:unknown)=>void;
+ onResumeError?:(error:unknown)=>void;
+ onResumed?:()=>void;
  onEnded:()=>void;
 };
 // Own streams and listeners together. A cancelled permission/playback promise
 // cannot attach a stream or change a newer session's UI.
 export function createCameraSession(callbacks:Callbacks){
- let generation=0,active:MediaStream|null=null;
+ let generation=0,active:MediaStream|null=null,resuming=false;
  let removeListeners=()=>{};
  function stop(notify=true){
-  generation++;removeListeners();removeListeners=()=>{};
+  generation++;resuming=false;removeListeners();removeListeners=()=>{};
   const stream=active;active=null;stopCameraStream(stream);callbacks.attach(null);
-  if(notify){callbacks.onPaused(false);callbacks.onState('off')}
+  if(notify){callbacks.onResuming?.(false);callbacks.onPaused(false);callbacks.onState('off')}
  }
  async function start(acquire:()=>Promise<MediaStream>,play:()=>Promise<void>,canUse=()=>true){
   stop();const request=generation;callbacks.onState('starting');
@@ -39,5 +42,22 @@ export function createCameraSession(callbacks:Callbacks){
    stop();callbacks.onError(error);return 'failed' as const;
   }
  }
- return {start,stop,hasStream:()=>active!==null};
+ async function resume(play:()=>Promise<void>,canUse=()=>true){
+  const stream=active,request=generation;
+  if(!stream)return 'cancelled' as const;
+  if(resuming)return 'pending' as const;
+  if(!canUse()){stop();return 'cancelled' as const}
+  const current=()=>request===generation&&active===stream;
+  resuming=true;callbacks.onResuming?.(true);
+  try{
+   await play();
+   if(!current())return 'cancelled' as const;
+   if(!canUse()){stop();return 'cancelled' as const}
+   resuming=false;callbacks.onResuming?.(false);callbacks.onResumed?.();return 'resumed' as const;
+  }catch(error){
+   if(!current())return 'cancelled' as const;
+   resuming=false;callbacks.onResuming?.(false);(callbacks.onResumeError??callbacks.onError)(error);return 'failed' as const;
+  }
+ }
+ return {start,resume,stop,hasStream:()=>active!==null};
 }

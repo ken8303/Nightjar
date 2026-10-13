@@ -140,6 +140,8 @@ Reload warnings offer direct review of unfinished observing time, coordinates, i
 
 Deep-sky details show catalogue J2000 coordinates in hour/minute/second and signed degree/minute/second forms. Copy J2000 coordinates includes those formatted values, the target identifier, epoch label and original decimal values. Clipboard failure leaves selectable values available. The display rounds formatted seconds to one decimal place; it does not change catalogue values or current sky calculations.
 
+If camera video pauses while its track remains available, use Resume camera feed in ordinary or fullscreen controls. It retries playback without reacquiring the camera or clearing the followed object/alignment. A still-muted track needs to recover or the camera can be stopped and restarted. Late playback results cannot revive a closed or replaced viewer.
+
 Camera sky positions refresh every 15 seconds while the viewer is visible. Backgrounding cancels that timer and returning refreshes immediately; camera, motion and screen-awake requests still require an explicit restart. Closing the viewer removes its clock and listeners.
 
 Camera and 3D loading placeholders show recovery guidance after 15 seconds. Reload pauses for unfinished entries. Reviewing an edit closes the camera/3D overlay before focusing its planner field, so the dialog cannot trap focus behind the recovery action.
