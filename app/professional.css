@@ -227,3 +227,8 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .deep-sky-plot-altitudes span{position:absolute;right:0;transform:translateY(-50%)}
 .deep-sky-plot-ticks{grid-column:2;grid-row:2;position:relative;color:var(--text-secondary);font-size:12px;line-height:1.4}
 .deep-sky-plot-ticks span{position:absolute;top:0;white-space:nowrap}
+
+.framing-viewer-canvas{width:max(calc(500px * var(--framing-zoom)),calc(min(100cqw,151.515cqh) * var(--framing-zoom)));margin:0 auto}
+.framing-viewer-canvas>svg{display:block;width:100%;height:auto}
+.framing-viewer-caption .framing-fit{padding:12px;border:1px solid #725e45;border-radius:6px;color:#efba82;background:#30291f}
+.framing-viewer-caption:focus-visible{outline:2px solid var(--accent-soft);outline-offset:2px}
