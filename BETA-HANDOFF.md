@@ -22,6 +22,8 @@ The reset 3D Moon view now fits narrow phone canvases, using adaptive portrait f
 
 Final acceptance: 40 focused regressions also pass under Node 22 with TZ=UTC. A real waiting-worker activation/reload on a disposable local origin retained London, 21:34 UTC, saved Polaris and its multiline Unicode note. The current package manifest/icons, offline files and worker-stamp consistency were checked. The latest read-only GitHub listing still shows successful Run #8 at the earlier eb1734c baseline; current local batches need their own hosted check after your push.
 
+The Moon landmark list now exposes its selection and has a corresponding Centre control in the globe. This restores offscreen landmarks after rotation and works with labels hidden; compact keyboard and landscape checks passed.
+
 ## After your batch push
 
 1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
