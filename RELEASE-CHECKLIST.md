@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Live camera-stage guidance distinguishes upright compass setup from manual alignment and paused video. Generated-video/Safari-style reading checks passed the tilt, pause/resume and Polaris-discovery flow; physical sensor acceptance remains pending.
+
 - Sky ratings refuse stale actions after a peer selects another named coordinate alias, before any writes. Adjacent accessible feedback and explicit site selection/retry passed the compact check, preserving sibling ratings and metadata.
 
 - Pending offline recovery preparation can be cancelled without a late download or stale completion overriding a newer request. Three reproduced async regressions and a delayed-module compact check passed, retaining notes/time and returning focus to Download. Native file receipt remains pending.

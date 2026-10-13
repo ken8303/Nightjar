@@ -38,6 +38,8 @@ Offline raw-copy preparation can now be cancelled while its module loads. Cancel
 
 A sky rating now refuses a stale action after another view selects a different named coordinate alias. Its feedback appears beside the selector. The compact check preserved both versions and allowed a safe retry after explicit site selection.
 
+The live camera stage now shows the specific upright-compass tilt instruction and keeps feed-recovery guidance primary while video is paused. Generated-video/Safari-style reading checks restored Polaris discovery after setup and retained close focus/time.
+
 ## After your batch push
 
 1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
