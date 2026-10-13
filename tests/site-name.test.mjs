@@ -88,3 +88,11 @@ test('renaming a uniquely named coordinate alias preserves other saved names and
  const duplicate=storage([current,{...current,bortle:2}]),before=new Map(duplicate.values);
  assert.throws(()=>renameObservingSite(duplicate,current,'Ambiguous rename'),/More than one saved place/);assert.deepEqual(duplicate.values,before);
 });
+
+test('renaming an alias to a sibling name refuses before creating ambiguous saved versions',()=>{
+ const sibling={...current,name:'Roof alias',bortle:2,extra:'Keep roof'},store=storage([current,sibling]),before=new Map(store.values);
+ assert.throws(()=>renameObservingSite(store,current,'  Roof alias  '),/already uses this name/);assert.deepEqual(store.values,before);
+ const differentCoordinates={...sibling,latitude:48},allowed=storage([current,differentCoordinates]);
+ assert.deepEqual(renameObservingSite(allowed,current,'Roof alias').places,[{...current,name:'Roof alias'},differentCoordinates]);
+ const unchanged=storage([current,sibling]);assert.deepEqual(renameObservingSite(unchanged,current,current.name).places,[current,sibling]);
+});

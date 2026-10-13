@@ -14,6 +14,7 @@ export function renameObservingSite(storage:SiteStorage,current:Place,value:stri
   place={...current,...selected.place,country:selected.place.country,timezone:selected.place.timezone,bortle:selected.place.bortle,name:place.name};
  }
  const index=savedPlaceUpdateIndex(latest,current);
+ if(latest.some((item,i)=>i!==index&&samePlaceCoordinates(item,current)&&item.name===place.name))throw Error('Another saved place at these coordinates already uses this name. Choose a different site name; your edit is kept.');
  const places=latest.map((item,i)=>i===index?{...item,name:place.name}:item);
  const writes:[string,string|null,string][]=[];let selectedChanged=false,placesChanged=false,guardUnreadable=false;
  const check=(key:string,expected:string|null)=>{
