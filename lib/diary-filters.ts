@@ -1,13 +1,14 @@
 import catalogue from '../data/messier.json';
 import {type Observation} from './observing-diary';
+import {validObservingDate} from './observing-time';
 export type DiaryFilters={query:string;outcome:''|Observation['outcome'];from:string;through:string};
 export const emptyDiaryFilters:DiaryFilters={query:'',outcome:'',from:'',through:''};
 const names=new Map(catalogue.map(target=>[target.id,`${target.name} ${target.catalogue}`]));
 const normalize=(text:string)=>text.normalize('NFKC').toLowerCase().replace(/\b(m|ngc|ic)\s*0*(\d+)/g,'$1$2').replace(/\s+/g,' ').trim();
 export function diaryDateInput(value:string){return /^\d{8}$/.test(value)?`${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6)}`:value}
-function validDate(value:string){return /^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(+new Date(value+'T00:00:00.000Z'))&&new Date(value+'T00:00:00.000Z').toISOString().slice(0,10)===value}
+function validDate(value:string){const date=new Date(value+'T00:00:00.000Z');return /^\d{4}-\d{2}-\d{2}$/.test(value)&&validObservingDate(date)&&date.toISOString().slice(0,10)===value}
 export function filterDiary(entries:Observation[],filters:DiaryFilters){
- if((filters.from&&!validDate(filters.from))||(filters.through&&!validDate(filters.through)))return {entries:[] as Observation[],error:'Enter valid dates in year-month-day format.'};
+ if((filters.from&&!validDate(filters.from))||(filters.through&&!validDate(filters.through)))return {entries:[] as Observation[],error:'Enter valid dates from year 0001 to 9999 in year-month-day format.'};
  if(filters.from&&filters.through&&filters.from>filters.through)return {entries:[] as Observation[],error:'The from date must be on or before the through date.'};
  const query=normalize(filters.query);
  return {error:'',entries:entries.filter(entry=>{

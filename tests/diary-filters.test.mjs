@@ -20,6 +20,15 @@ test('invalid calendar dates and reversed ranges report errors and return no dow
  assert.equal(filterDiary(entries,{...emptyDiaryFilters,from:'2024-02-29'}).error,'');assert.equal(filterDiary([],emptyDiaryFilters).entries.length,0);
 });
 
+test('date filters reject year zero and retain the supported UTC boundary years',()=>{
+ for(const patch of [{from:'0000-01-01'},{through:'0000-12-31'}]){
+  const result=filterDiary(entries,{...emptyDiaryFilters,...patch});assert(result.error);assert.equal(result.entries.length,0);
+ }
+ const earliest={...first,id:'earliest',observedAt:'0001-01-01T00:00:00.000Z'},latest={...first,id:'latest',observedAt:'9999-12-31T23:59:59.999Z'};
+ assert.deepEqual(filterDiary([earliest,latest],{...emptyDiaryFilters,from:'0001-01-01',through:'0001-01-01'}).entries,[earliest]);
+ assert.deepEqual(filterDiary([earliest,latest],{...emptyDiaryFilters,from:'9999-12-31',through:'9999-12-31'}).entries,[latest]);
+});
+
 test('mobile numeric date entry normalizes eight digits while keeping partial input editable',()=>{assert.equal(diaryDateInput('20261005'),'2026-10-05');assert.equal(diaryDateInput('2026-10-05'),'2026-10-05');assert.equal(diaryDateInput('202610'),'202610');assert.equal(diaryDateInput(''),'');assert(filterDiary(entries,{...emptyDiaryFilters,from:diaryDateInput('20260230')}).error)});
 
 

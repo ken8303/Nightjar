@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Diary filters reject year 0000, preserve supported UTC boundary dates and disable exports for invalid filters. Clear returns focus to Search diary; compact boundary/report and landscape keyboard checks passed without replacing site/time.
+
 - Successful backup import restores focus to the file picker instead of the page body. Enter activation, visible focus, subsequent Tab progression and landscape cancel passed rendered checks.
 
 - Backup import detects replacements of earlier writes, including at the final write, before reporting success. A compact synthetic peer check retained newer data, returned focus to the error and required a fresh review before successful explicit retry. Storage has no atomic multi-key transaction; this is guarded verification and rollback.
@@ -46,7 +48,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 583 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 584 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.
