@@ -36,6 +36,7 @@ export default function CameraSky(props:Props){
  const [playbackPaused,setPlaybackPaused]=useState(false);
  const [playbackResuming,setPlaybackResuming]=useState(false);
  const [playbackError,setPlaybackError]=useState('');
+ const playbackPausedRef=useRef(false);
  const cameraPaused=camera!=='off'&&(trackPaused||playbackPaused);
  const placeholderVisible=camera!=='on'||cameraPaused;
  const [tracking,setTracking]=useState(false),[sensor,setSensor]=useState<CameraOrientationReading|null>(null),[sensorError,setSensorError]=useState(''),[aligned,setAligned]=useState(false),[offset,setOffset]=useState(0);
@@ -98,7 +99,7 @@ export default function CameraSky(props:Props){
  useEffect(()=>{
   const cameraSession=createCameraSession({
    attach:stream=>{if(videoRef.current)videoRef.current.srcObject=stream},onState:setCamera,onPaused:setTrackPaused,onResuming:setPlaybackResuming,
-   onResumeError:()=>setPlaybackError('Camera playback could not resume. Try Resume camera feed again, or stop and start the camera if it stays paused.'),onResumed:()=>focusPanel(stageRef.current),
+   onResumeError:()=>{if(playbackPausedRef.current)setPlaybackError('Camera playback could not resume. Try Resume camera feed again, or stop and start the camera if it stays paused.')},onResumed:()=>focusPanel(stageRef.current),
    onError:error=>setCameraError(cameraErrorMessage(error)),onEnded:()=>setCameraError('Camera access ended. Start the camera again to resume.'),
   });
   cameraSessionRef.current=cameraSession;
@@ -115,7 +116,7 @@ export default function CameraSky(props:Props){
   });
   return ()=>{stopClock();stopLifecycle();motionStopRef.current?.();invalidate();locationSessionRef.current=null;wakeSession.stop(false);wakeSessionRef.current=null;cameraSession.stop(false);cameraSessionRef.current=null};
  },[]);
- useEffect(()=>{const video=videoRef.current;if(!video)return;return watchCameraPlayback(video,paused=>{setPlaybackPaused(paused);if(!paused)setPlaybackError('')})},[]);
+ useEffect(()=>{const video=videoRef.current;if(!video)return;return watchCameraPlayback(video,paused=>{playbackPausedRef.current=paused;setPlaybackPaused(paused);if(!paused)setPlaybackError('')})},[]);
  useEffect(()=>{
   if(!tracking)return;
   const stopMotion=watchCameraOrientation(window,window.screen.orientation??null,{
