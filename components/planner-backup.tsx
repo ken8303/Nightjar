@@ -13,7 +13,8 @@ export default function PlannerBackupPanel({onRestore}:{onRestore:(data:SavedPla
  const generation=useRef(0),reviewHeading=useRef<HTMLHeadingElement>(null),fileInput=useRef<HTMLInputElement>(null),errorNotice=useRef<HTMLParagraphElement>(null);
  useEffect(()=>{if(preview){reviewHeading.current?.focus({preventScroll:true});reviewHeading.current?.scrollIntoView({block:'start',behavior:'instant'})}},[preview]);
  useEffect(()=>{if(error){errorNotice.current?.focus({preventScroll:true});errorNotice.current?.scrollIntoView({block:'center',behavior:'instant'})}},[error]);
- function cancelImport(){setPreview(null);setError('');setStatus('Import review cancelled.');fileInput.current?.focus({preventScroll:true});fileInput.current?.scrollIntoView({block:'center',behavior:'instant'})}
+ function focusPicker(){fileInput.current?.focus({preventScroll:true});fileInput.current?.scrollIntoView({block:'center',behavior:'instant'})}
+ function cancelImport(){setPreview(null);setError('');setStatus('Import review cancelled.');focusPicker()}
  function download(){
   try{
    const backup=makePlannerBackup(localStorage);
@@ -37,7 +38,7 @@ export default function PlannerBackupPanel({onRestore}:{onRestore:(data:SavedPla
  }
  function restore(){
   if(!preview)return;
-  try{const data=restorePlannerBackup(localStorage,preview.backup,preview.current);onRestore(data);setPreview(null);setStatus('Saved plans imported. Your observing site and time are unchanged.');setError('')}
+  try{const data=restorePlannerBackup(localStorage,preview.backup,preview.current);onRestore(data);setPreview(null);setStatus('Saved plans imported. Your observing site and time are unchanged.');setError('');focusPicker()}
   catch(error){
    if(error instanceof PlannerReviewChangedError){
     try{setPreview({...preview,current:error.current,review:previewPlannerMerge(error.current,preview.backup.data),notice:error.message});setStatus('');setError('')}

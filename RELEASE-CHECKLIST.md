@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Successful backup import restores focus to the file picker instead of the page body. Enter activation, visible focus, subsequent Tab progression and landscape cancel passed rendered checks.
+
 - Backup import detects replacements of earlier writes, including at the final write, before reporting success. A compact synthetic peer check retained newer data, returned focus to the error and required a fresh review before successful explicit retry. Storage has no atomic multi-key transaction; this is guarded verification and rollback.
 
 - Choosing a named alias among several places at the same coordinates keeps its own rating and metadata. Unrated/unknown fields are not filled from a sibling, and ambiguous names do not invent metadata; selection and Save passed the compact browser check.
