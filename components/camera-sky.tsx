@@ -1,5 +1,5 @@
 'use client';
-import {memo,useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
+import {memo,useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState,type MouseEvent} from 'react';
 import Image from 'next/image';
 import {cameraCatalogueTargets,cameraCataloguePhoto,searchCameraTargets,initialCameraView,type CameraCatalogue} from '@/lib/camera-catalogue';
 import {readCameraSettings,saveCameraSettings} from '@/lib/camera-settings';
@@ -37,6 +37,7 @@ export default function CameraSky(props:Props){
  const [playbackResuming,setPlaybackResuming]=useState(false);
  const [playbackError,setPlaybackError]=useState('');
  const playbackPausedRef=useRef(false);
+ const resumeFocusOwner=useRef<HTMLButtonElement|null>(null);
  const cameraPaused=camera!=='off'&&(trackPaused||playbackPaused);
  const placeholderVisible=camera!=='on'||cameraPaused;
  const [tracking,setTracking]=useState(false),[sensor,setSensor]=useState<CameraOrientationReading|null>(null),[sensorError,setSensorError]=useState(''),[aligned,setAligned]=useState(false),[offset,setOffset]=useState(0);
@@ -98,8 +99,12 @@ export default function CameraSky(props:Props){
  function updateVideoRatio(){const video=videoRef.current;if(video?.videoWidth&&video.videoHeight)setRatio(video.videoWidth/video.videoHeight)}
  useEffect(()=>{
   const cameraSession=createCameraSession({
-   attach:stream=>{if(videoRef.current)videoRef.current.srcObject=stream},onState:setCamera,onPaused:setTrackPaused,onResuming:setPlaybackResuming,
-   onResumeError:()=>{if(playbackPausedRef.current)setPlaybackError('Camera playback could not resume. Try Resume camera feed again, or stop and start the camera if it stays paused.')},onResumed:()=>focusPanel(stageRef.current),
+   attach:stream=>{if(videoRef.current)videoRef.current.srcObject=stream},onState:state=>{setCamera(state);if(state==='off')resumeFocusOwner.current=null},onPaused:setTrackPaused,onResuming:setPlaybackResuming,
+   onResumeError:()=>{resumeFocusOwner.current=null;if(playbackPausedRef.current)setPlaybackError('Camera playback could not resume. Try Resume camera feed again, or stop and start the camera if it stays paused.')},
+   onResumed:()=>{
+    const owner=resumeFocusOwner.current;resumeFocusOwner.current=null;
+    if(!document.hidden&&(document.activeElement===owner||document.activeElement===document.body))focusPanel(stageRef.current);
+   },
    onError:error=>setCameraError(cameraErrorMessage(error)),onEnded:()=>setCameraError('Camera access ended. Start the camera again to resume.'),
   });
   cameraSessionRef.current=cameraSession;
@@ -139,7 +144,8 @@ export default function CameraSky(props:Props){
   );
  }
  function startDiscovery(){if(!tracking&&!motionPending)void startMotion();void startCamera()}
- function resumeCamera(){
+ function resumeCamera(event:MouseEvent<HTMLButtonElement>){
+  resumeFocusOwner.current=event.currentTarget;
   setPlaybackError('');
   void cameraSessionRef.current?.resume(async()=>{const video=videoRef.current;if(!video)throw Error('Camera viewer closed');await video.play()},()=>!document.hidden&&!!videoRef.current);
  }
