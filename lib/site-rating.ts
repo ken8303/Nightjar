@@ -1,6 +1,6 @@
 import {type Place} from './sky';
 import {validPlace,samePlaceCoordinates,readObservingSite} from './planner-state';
-import {readSavedPlaces} from './saved-collections';
+import {readSavedPlaces,savedPlaceUpdateIndex} from './saved-collections';
 
 type SiteStorage=Pick<Storage,'getItem'|'setItem'|'removeItem'>;
 export class SiteRatingReadError extends Error{
@@ -15,7 +15,8 @@ export function rateObservingSite(storage:SiteStorage,current:Place,bortle:numbe
  if(selected.error)throw new SiteRatingReadError('selected');
  if(originalPlace!==null&&!samePlaceCoordinates(selected.place,current))throw Error('The selected observing site changed elsewhere. Choose the site again before changing its sky rating.');
  const place:Place=originalPlace===null?{...current,bortle}:{...current,...selected.place,country:selected.place.country,timezone:selected.place.timezone,bortle};
- const places=latest.map(item=>samePlaceCoordinates(item,current)?{...item,bortle}:item);
+ const index=savedPlaceUpdateIndex(latest,current);
+ const places=latest.map((item,i)=>i===index?{...item,bortle}:item);
  const values=[JSON.stringify(places),JSON.stringify(place)],writes:[string,string|null,string][]=[];
  let changed=false;
  const check=(key:string,expected:string|null)=>{if(storage.getItem(key)!==expected){changed=true;throw Error('Site settings changed during saving.')}};

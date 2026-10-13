@@ -43,3 +43,10 @@ test('changes before and during rating writes retain peer selections and roll ba
  failed.setItem=(key,value)=>{replace(key,value);if(key==='nightjar-place'){failed.values.set(key,JSON.stringify(peer));throw Error('Peer write')}};
  assert.throws(()=>rateObservingSite(failed,current,2),/Some changes may remain/);assert.equal(failed.getItem('nightjar-places'),before);assert.deepEqual(JSON.parse(failed.getItem('nightjar-place')),peer);
 });
+
+test('rating a named coordinate alias preserves sibling ratings and ambiguous versions make zero writes',()=>{
+ const sibling={...current,name:'Roof alias',bortle:2,extra:'Keep roof'},store=fixture([current,sibling]);
+ const result=rateObservingSite(store,current,6);assert.deepEqual(result.places,[{...current,bortle:6},sibling]);
+ const ambiguous=fixture([current,{...current,bortle:2}]),before=new Map(ambiguous.values);
+ assert.throws(()=>rateObservingSite(ambiguous,current,6),/More than one saved place/);assert.equal(ambiguous.writes.length,0);assert.deepEqual(ambiguous.values,before);
+});

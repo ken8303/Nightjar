@@ -81,3 +81,10 @@ test('guarded name edits preserve every valid legacy saved-place record above no
  const legacy=Array.from({length:101},(_,i)=>({...current,name:'Legacy '+i,longitude:i/10,extra:'Metadata '+i})),store=storage(legacy),result=renameObservingSite(store,current,'Updated name');
  assert.equal(result.places.length,101);assert.equal(result.places[0].name,'Updated name');assert.deepEqual(result.places.slice(1),legacy.slice(1));assert.equal(JSON.parse(store.getItem('nightjar-places'))[100].extra,'Metadata 100');
 });
+
+test('renaming a uniquely named coordinate alias preserves other saved names and refuses ambiguity before writes',()=>{
+ const other={...current,name:'Other alias',bortle:2,extra:'Keep other'},store=storage([current,other]);
+ const result=renameObservingSite(store,current,'Updated chosen alias');assert.deepEqual(result.places,[{...current,name:'Updated chosen alias'},other]);
+ const duplicate=storage([current,{...current,bortle:2}]),before=new Map(duplicate.values);
+ assert.throws(()=>renameObservingSite(duplicate,current,'Ambiguous rename'),/More than one saved place/);assert.deepEqual(duplicate.values,before);
+});

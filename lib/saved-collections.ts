@@ -40,10 +40,19 @@ export function restoreEquipmentProfile(current:Equipment[],removed:Equipment,in
  if(!validEquipment(removed))throw Error('This equipment setup cannot be restored.');
  const next=[...current];next.splice(Math.max(0,Math.min(index,next.length)),0,removed);return next;
 }
+// Legacy lists can contain several names at the same coordinates. A chosen
+// name identifies one alias; never replace every version during one edit.
+export function savedPlaceUpdateIndex(current:Place[],place:Place){
+ const matches=current.map((item,index)=>samePlaceCoordinates(item,place)?index:-1).filter(index=>index>=0);
+ if(matches.length<=1)return matches[0]??-1;
+ const named=matches.filter(index=>current[index].name===place.name);
+ if(named.length===1)return named[0];
+ throw Error('More than one saved place uses these coordinates. Review the saved list and choose a uniquely named entry before changing this site.');
+}
 export function upsertSavedPlace(current:Place[],place:Place):Place[]{
  if(!validPlace(place))throw Error('Enter a valid observing place before saving.');
- const matches=(item:Place)=>Math.abs(item.latitude-place.latitude)<.0001&&Math.abs(item.longitude-place.longitude)<.0001;
- const next=current.some(matches)?current.map(item=>matches(item)?{...item,...place,bortle:place.bortle??item.bortle}:item):[...current,place];
+ const index=savedPlaceUpdateIndex(current,place);
+ const next=index>=0?current.map((item,i)=>i===index?{...item,...place,bortle:place.bortle??item.bortle}:item):[...current,place];
  if(next.length>savedPlacesLimit&&next.length>current.length)throw Error(`You can save up to ${savedPlacesLimit} places. Remove a saved place before adding another.`);
  return next;
 }

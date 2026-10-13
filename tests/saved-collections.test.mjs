@@ -100,3 +100,11 @@ test('valid oversized legacy collections allow existing replacements but retain 
  assert.equal(nextProfiles.length,101);assert.equal(nextProfiles.at(-1).focal,800);assert.equal(nextProfiles.find(p=>p.name==='Extra legacy').extra,'Keep extra');
  assert.throws(()=>upsertSavedPlace(sites,{name:'New',latitude:2,longitude:0}),/100 places/);assert.throws(()=>upsertEquipmentProfile(profiles,{...equipment[0],name:'New'}),/100 equipment/);
 });
+
+test('saving a named coordinate alias updates that version without overwriting sibling names or ratings',()=>{
+ const first={name:'Garden',latitude:51.5,longitude:0,bortle:2,extra:'garden'},second={...first,name:'Roof',bortle:4,extra:'roof'},current=[first,second],before=structuredClone(current);
+ const result=upsertSavedPlace(current,{...first,bortle:3});
+ assert.deepEqual(result,[{...first,bortle:3},second]);assert.deepEqual(current,before);
+ assert.throws(()=>upsertSavedPlace(current,{...first,name:'New alias'}),/More than one saved place/);
+ assert.throws(()=>upsertSavedPlace([first,{...first,bortle:4}],first),/More than one saved place/);assert.deepEqual(current,before);
+});

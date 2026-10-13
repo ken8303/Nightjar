@@ -1,6 +1,6 @@
 import {type Place} from './sky';
 import {validPlace,samePlaceCoordinates,readObservingSite} from './planner-state';
-import {readSavedPlaces} from './saved-collections';
+import {readSavedPlaces,savedPlaceUpdateIndex} from './saved-collections';
 
 type SiteStorage=Pick<Storage,'getItem'|'setItem'|'removeItem'>;
 export function renameObservingSite(storage:SiteStorage,current:Place,value:string){
@@ -13,7 +13,8 @@ export function renameObservingSite(storage:SiteStorage,current:Place,value:stri
   if(!samePlaceCoordinates(selected.place,current)||selected.place.name!==current.name)throw Error('The selected observing site changed elsewhere. Choose the site again before saving its name. Your name edit is still here.');
   place={...current,...selected.place,country:selected.place.country,timezone:selected.place.timezone,bortle:selected.place.bortle,name:place.name};
  }
- const places=latest.map(item=>samePlaceCoordinates(item,current)?{...item,name:place.name}:item);
+ const index=savedPlaceUpdateIndex(latest,current);
+ const places=latest.map((item,i)=>i===index?{...item,name:place.name}:item);
  const writes:[string,string|null,string][]=[];let selectedChanged=false,placesChanged=false,guardUnreadable=false;
  const check=(key:string,expected:string|null)=>{
   let stored:string|null;try{stored=storage.getItem(key)}catch{guardUnreadable=true;throw Error('Current site settings are unavailable.')}
