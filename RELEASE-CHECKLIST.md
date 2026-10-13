@@ -4,6 +4,8 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Verified locally
 
+- Choosing a named alias among several places at the same coordinates keeps its own rating and metadata. Unrated/unknown fields are not filled from a sibling, and ambiguous names do not invent metadata; selection and Save passed the compact browser check.
+
 - Renaming refuses unreadable selected-site snapshots before any writes. The compact browser check retained the name draft, returned focus, preserved both alias records and permitted the same draft to save after explicit recovery.
 
 - Live camera-stage guidance distinguishes upright compass setup from manual alignment and paused video. Generated-video/Safari-style reading checks passed the tilt, pause/resume and Polaris-discovery flow; physical sensor acceptance remains pending.
@@ -40,7 +42,7 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 - Backward device-clock corrections trigger one forecast refresh on usable foreground return and reset the ordinary cadence. A built-app synthetic clock/lifecycle check retained observing time at 320 pixels; native operating-system clock changes remain pending.
 
-- 580 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
+- 582 automated tests pass, with the earlier 183-test suite passing three consecutive runs after isolating parallel test caches; TypeScript, lint (without warnings) and production build pass.
 - Cloudflare Worker packaging dry-run passes without publishing or requiring app storage bindings.
 - Camera mathematical projection, label bounds, interruption state and manual-preview flows have regression coverage.
 - Deep-sky catalogue search, coordinates, altitude/Moon filtering and imaging geometry have calculation coverage.

@@ -54,7 +54,11 @@ export function readPlannerSetup(now=new Date()){
 export function samePlaceCoordinates(a:Place,b:Place){return Math.abs(a.latitude-b.latitude)<.0001&&Math.abs(a.longitude-b.longitude)<.0001}
 export function resolveObservingPlace(candidate:Place,saved:Place[],current?:Place):Place{
  if(!validPlace(candidate))throw Error('Invalid observing place.');
- const known=saved.find(site=>samePlaceCoordinates(site,candidate));
- const active=current&&samePlaceCoordinates(current,candidate)?current:undefined;
+ const matches=saved.filter(site=>samePlaceCoordinates(site,candidate));
+ const named=matches.filter(site=>site.name===candidate.name);
+ // Coordinate-only recovery is safe with one saved identity. Several aliases
+ // require a unique name; absent fields must not come from a sibling alias.
+ const known=matches.length<=1?matches[0]:named.length===1?named[0]:undefined;
+ const active=matches.length<=1&&current&&samePlaceCoordinates(current,candidate)?current:undefined;
  return {...candidate,country:candidate.country??known?.country??active?.country,timezone:candidate.timezone??known?.timezone??active?.timezone,bortle:candidate.bortle??known?.bortle??active?.bortle};
 }

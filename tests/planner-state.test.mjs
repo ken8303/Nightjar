@@ -19,3 +19,22 @@ test('metadata never leaks between different sites and missing saved fields can 
 test('invalid selected coordinates or time zones cannot replace valid observing context',()=>{
  for(const patch of [{latitude:91},{longitude:Infinity},{timezone:'Not/AZone'},{name:''}])assert.throws(()=>resolveObservingPlace({...saved,...patch},[saved]),/Invalid observing place/);
 });
+
+test('choosing a named coordinate alias does not inherit a sibling rating or cleared metadata',()=>{
+ const roof={name:'Unrated roof',latitude:saved.latitude,longitude:saved.longitude},before=structuredClone([saved,roof]);
+ const result=resolveObservingPlace(roof,[saved,roof],saved);
+ assert.equal(result.name,roof.name);assert.equal(result.bortle,undefined);assert.equal(result.country,undefined);assert.equal(result.timezone,undefined);
+ assert.deepEqual([saved,roof],before);
+ const rated={...roof,bortle:7,timezone:'UTC',country:'Roof country'};
+ assert.deepEqual(resolveObservingPlace(roof,[saved,rated],saved),rated);
+});
+
+test('ambiguous coordinate aliases do not invent metadata for an unrelated or duplicate name',()=>{
+ const other={...saved,name:'Second alias',bortle:8,timezone:'UTC'},candidate={name:'Coordinate search',latitude:saved.latitude,longitude:saved.longitude};
+ const result=resolveObservingPlace(candidate,[saved,other],saved);
+ assert.equal(result.bortle,undefined);assert.equal(result.country,undefined);assert.equal(result.timezone,undefined);
+ const duplicate={...saved,bortle:8,timezone:'UTC'},requested={...candidate,name:saved.name};
+ const ambiguous=resolveObservingPlace(requested,[saved,duplicate],saved);
+ assert.equal(ambiguous.bortle,undefined);assert.equal(ambiguous.country,undefined);assert.equal(ambiguous.timezone,undefined);
+ const explicit={...candidate,bortle:3,timezone:'Europe/London'};assert.equal(resolveObservingPlace(explicit,[saved,other],saved).bortle,3);
+});

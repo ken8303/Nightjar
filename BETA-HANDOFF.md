@@ -1,6 +1,6 @@
 # Nightjar beta handoff
 
-Current local verification passes **580 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 580 tests also pass under Node 24.19. Ten implementation commits have been added across the 13 October usage windows, with detailed reproductions in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). They are committed locally for your batch push through GitHub Desktop; no push or deployment was performed by the development agent.
+Current local verification passes **582 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The saved-site selection/edit suite also passes 41 tests under Node 24.19; the preceding full suite passed all 580 tests there. Eleven implementation commits have been added across the 13 October usage windows, with detailed reproductions in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). They are committed locally for your batch push through GitHub Desktop; no push or deployment was performed by the development agent.
 
 The remote main branch still points to eb1734c, which passed GitHub [Run #8](https://github.com/ken8303/Nightjar/actions/runs/38237947626). The older Runs #7/#6 failed. That hosted result does not cover the newer local code. Check the workflow for your pushed commit and the resulting Cloudflare build.
 
