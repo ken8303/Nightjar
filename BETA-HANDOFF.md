@@ -6,6 +6,8 @@ A read-only GitHub check on 13 October confirmed remote main at 8d44d72 and succ
 
 ## Recent changes and evidence
 
+- **Saved-list pagination:** delayed Show more/Show fewer focus no longer interrupts a different active field or a closed/hidden list. Only the newest queued pagination action can move focus. Compact editing, keyboard pagination, consecutive expansion and leaving Photo tools passed locally.
+
 - **Large unfinished forms:** the reader and writer share a bounded limit that fits the full form schema after JSON escaping. Previously accepted files over the old reader limit now restore. A 109-form file, note editing, mobile reload and retained site/time passed locally; oversized JSON envelopes still refuse without modifying storage.
 
 - **Equipment Undo:** legacy names with surrounding whitespace match their canonical re-saved names. Undo keeps newer peer settings instead of restoring a visually identical duplicate. A two-tab reproduction, 320-pixel draft-preservation/focus check and ordinary desktop Undo passed locally.
