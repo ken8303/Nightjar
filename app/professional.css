@@ -232,3 +232,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .framing-viewer-canvas>svg{display:block;width:100%;height:auto}
 .framing-viewer-caption .framing-fit{padding:12px;border:1px solid #725e45;border-radius:6px;color:#efba82;background:#30291f}
 .framing-viewer-caption:focus-visible{outline:2px solid var(--accent-soft);outline-offset:2px}
+
+.camera-sky-fullscreen-controls>.camera-sky-fullscreen-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;margin-top:8px}.camera-sky-fullscreen-search label{grid-column:1/-1;font-size:12px;color:var(--text-secondary)}.camera-sky-fullscreen-search input{width:100%;min-width:0}.camera-sky-fullscreen-search .button{flex:none;max-width:110px}

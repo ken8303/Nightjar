@@ -142,6 +142,8 @@ Deep-sky details show catalogue J2000 coordinates in hour/minute/second and sign
 
 If camera video pauses while its track remains available, use Resume camera feed in ordinary or fullscreen controls. It retries playback without reacquiring the camera or clearing the followed object/alignment. A still-muted track needs to recover or the camera can be stopped and restarted. Late playback results cannot revive a closed or replaced viewer.
 
+The full-screen camera picker includes object search and Clear search. Its query is shared with Settings, preserves your followed object even outside the results, and does not filter discovery labels. Clear search returns focus to the active search field.
+
 Camera sky positions refresh every 15 seconds while the viewer is visible. Backgrounding cancels that timer and returning refreshes immediately; camera, motion and screen-awake requests still require an explicit restart. Closing the viewer removes its clock and listeners.
 
 Camera and 3D loading placeholders show recovery guidance after 15 seconds. Reload pauses for unfinished entries. Reviewing an edit closes the camera/3D overlay before focusing its planner field, so the dialog cannot trap focus behind the recovery action.
