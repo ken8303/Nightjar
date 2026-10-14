@@ -407,3 +407,11 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Worker installation caches only the offline page and recovery module. Static cache handling is restricted to immutable app paths under `/_next/static/`; manifest/icon requests bypass it. Public manifest/icon bytes are therefore not omitted cached resources in the worker release fingerprint.
 - A fresh read-only GitHub check confirms main at 8d44d72 and successful Run #10, covering the prior 592-test batch. The newer local 607-test batch still needs its own GitHub/Cloudflare result after the user's push. No push or deploy was performed by the development agent.
 - Camera catalogue/search/scroll controls, smart-quote/full-designation matching, large draft restoration and delayed-focus protections have local browser evidence. Physical camera/compass alignment, native keyboards and installed-PWA migration still require phone acceptance.
+
+
+### Additional local review batch — 14 October 2026
+
+- Node 22 full verification: 611 tests, types, lint, production build and Cloudflare packaging pass. All 611 tests also pass on Node 24.19.
+- Final site-name/rating snapshots, explicit navigation continuation focus and cancellable backup reads have deterministic reproduction and rendered mobile/desktop evidence in DEVELOPMENT-NOTES.md.
+- New local worker release: `bae3281f91aca3afaf69c060ff2a8da2503a97854a0154a54e7655ab92a489c1`; complete reconstruction from 91 inputs; 334 literal relative JS/CSS references resolve. Offline/recovery bytes and manifest/icon dimensions match. Dry-run stages 113 client files without bindings.
+- This supersedes the preceding local package fingerprint for the current source. Hosted CI, Cloudflare deployment and physical-phone acceptance of this batch remain pending the user's push/testing. No agent push or deployment occurred.
