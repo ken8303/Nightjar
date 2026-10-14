@@ -8,7 +8,7 @@ A read-only GitHub check on 14 October confirmed remote main at 8d44d72 and succ
 
 - **Search spellings:** Atlas, camera and diary searches accept full Messier designations and smart apostrophes. Messier 31/zero-padded/full-width equivalents find M31, and Bode’s Galaxy finds M81. Browser checks retained filters, time and close focus; stored names and records remain unchanged.
 
-- **Camera control layout:** phone catalogue values fit a full-width chooser. Overflow guidance is based on measured content and stays visible during native panel scrolling; it disappears when desktop controls fit. Portrait, landscape and desktop checks passed with no dialog overflow.
+- **Camera control layout:** the phone catalogue chooser spans the panel width, giving its mode and count more room. Overflow guidance is based on measured content and stays visible during native panel scrolling; it disappears when desktop controls fit. Portrait, landscape and desktop checks passed with no dialog overflow.
 
 - **Mobile/viewer handoffs:** deferred navigation captures the originating action and preserves a later active field. Missing, detached, background or modal-hidden destinations do not receive focus. Mobile menu navigation, retained time drafts, camera-to-review guidance and ordinary 2D/3D details handoffs passed locally.
 

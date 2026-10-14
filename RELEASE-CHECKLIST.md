@@ -397,3 +397,13 @@ Completion percentages previously reported were estimates. Release acceptance is
 - All 332 literal relative JavaScript/CSS asset references scanned in current generated client chunks resolve to files. This is static artifact validation, not a promise about every runtime request or the final hosted origin.
 - Manifest display is standalone with root start/scope; declared 192/512/512 PNG icons have valid signatures and matching dimensions. Native masking/install appearance still needs phone acceptance.
 - Remote main remains 8d44d72 with successful Run #10 at the last read-only check. New local commits have not been pushed or deployed by the agent. Confirm their own CI and Cloudflare results after the next batch push.
+
+
+## Final local release evidence — 14 October 2026
+
+- Current source passes all 607 tests on Node 22 and Node 24.19. Typecheck, lint, production build and Cloudflare packaging dry-run pass. Known experimental-glob, chunk-size and module-classification build notices remain.
+- The generated worker release is `0a617585d1df9ef32e1a1cb0e4cadac3dbdfc29fcfe1565244b7723636feefca`. Reconstructing all 90 emitted/recovery inputs reproduces its complete contents exactly. Offline HTML and recovery-module output match their source bytes.
+- All 332 scanned literal relative JavaScript/CSS references in those emitted inputs resolve. This is a filesystem check, not a guarantee about deployed/dynamic requests. Manifest id/start/scope remain `/`, display is standalone, and PNG signatures/dimensions match the three declared 192/512/512 icons. Native appearance and installation remain device gates.
+- Worker installation caches only the offline page and recovery module. Static cache handling is restricted to immutable app paths under `/_next/static/`; manifest/icon requests bypass it. Public manifest/icon bytes are therefore not omitted cached resources in the worker release fingerprint.
+- A fresh read-only GitHub check confirms main at 8d44d72 and successful Run #10, covering the prior 592-test batch. The newer local 607-test batch still needs its own GitHub/Cloudflare result after the user's push. No push or deploy was performed by the development agent.
+- Camera catalogue/search/scroll controls, smart-quote/full-designation matching, large draft restoration and delayed-focus protections have local browser evidence. Physical camera/compass alignment, native keyboards and installed-PWA migration still require phone acceptance.
