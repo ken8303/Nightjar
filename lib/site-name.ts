@@ -27,6 +27,9 @@ export function renameObservingSite(storage:SiteStorage,current:Place,value:stri
   if(JSON.stringify(places)!==JSON.stringify(latest)){const value=JSON.stringify(places);writes.push(['nightjar-places',originalPlaces,value]);storage.setItem('nightjar-places',value)}
   check('nightjar-places',writes.length?writes[0][2]:originalPlaces);check('nightjar-place',originalPlace);
   const value=JSON.stringify(place);writes.push(['nightjar-place',originalPlace,value]);storage.setItem('nightjar-place',value);
+  // The final write can race with another tab too. Verify both snapshots
+  // before returning success; rollback below preserves any peer replacement.
+  check('nightjar-place',value);check('nightjar-places',writes.find(([key])=>key==='nightjar-places')?.[2]??originalPlaces);
  }catch{
   let restored=true;
   for(const [key,raw,written] of writes.reverse())try{const stored=storage.getItem(key);if(stored===raw)continue;if(stored!==written){restored=false;continue}if(raw===null)storage.removeItem(key);else storage.setItem(key,raw)}catch{restored=false}

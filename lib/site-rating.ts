@@ -25,6 +25,8 @@ export function rateObservingSite(storage:SiteStorage,current:Place,bortle:numbe
   if(JSON.stringify(places)!==JSON.stringify(latest)){writes.push(['nightjar-places',originalPlaces,values[0]]);storage.setItem('nightjar-places',values[0])}
   check('nightjar-places',writes.length?values[0]:originalPlaces);check('nightjar-place',originalPlace);
   writes.push(['nightjar-place',originalPlace,values[1]]);storage.setItem('nightjar-place',values[1]);
+  // Do not report a saved rating after a peer replaced either final snapshot.
+  check('nightjar-place',values[1]);check('nightjar-places',writes.find(([key])=>key==='nightjar-places')?.[2]??originalPlaces);
  }catch{
   let restored=true;
   for(const [key,raw,written] of writes.reverse())try{const stored=storage.getItem(key);if(stored===raw)continue;if(stored!==written){restored=false;continue}if(raw===null)storage.removeItem(key);else storage.setItem(key,raw)}catch{restored=false}

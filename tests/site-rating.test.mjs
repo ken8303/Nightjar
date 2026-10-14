@@ -51,6 +51,27 @@ test('rating a named coordinate alias preserves sibling ratings and ambiguous ve
  assert.throws(()=>rateObservingSite(ambiguous,current,6),/More than one saved place/);assert.equal(ambiguous.writes.length,0);assert.deepEqual(ambiguous.values,before);
 });
 
+test('a peer replacement after the final rating write cannot report success or overwrite the peer',()=>{
+ for(const key of ['nightjar-place','nightjar-places']){
+  const store=fixture(),before=new Map(store.values),set=store.setItem;
+  const peer=JSON.stringify(key==='nightjar-place'?{...current,name:'Peer selected',extra:'Keep peer'}:[{...current,name:'Peer list',bortle:1}]);
+  let injected=false;
+  store.setItem=(written,value)=>{set(written,value);if(written==='nightjar-place'&&!injected){injected=true;store.values.set(key,peer)}};
+  assert.throws(()=>rateObservingSite(store,current,8),/Some changes may remain/);
+  assert.equal(store.getItem(key),peer);
+  assert.equal(store.getItem(key==='nightjar-place'?'nightjar-places':'nightjar-place'),before.get(key==='nightjar-place'?'nightjar-places':'nightjar-place'));
+ }
+});
+test('final rating verification protects an unchanged list and rolls back after an unreadable final check',()=>{
+ const store=fixture([]),set=store.setItem,original=store.getItem('nightjar-place'),peer=JSON.stringify([{...current,name:'Peer added'}]);
+ store.setItem=(key,value)=>{set(key,value);if(key==='nightjar-place')store.values.set('nightjar-places',peer)};
+ assert.throws(()=>rateObservingSite(store,current,8),/changed during saving/);
+ assert.equal(store.getItem('nightjar-places'),peer);assert.equal(store.getItem('nightjar-place'),original);
+ const unreadable=fixture(),before=new Map(unreadable.values),get=unreadable.getItem,write=unreadable.setItem;let checkFails=false,injectedReadFailure=false;
+ unreadable.setItem=(key,value)=>{write(key,value);if(key==='nightjar-place'&&!injectedReadFailure){checkFails=true;injectedReadFailure=true}};
+ unreadable.getItem=key=>{if(checkFails){checkFails=false;throw Error('Final read denied')}return get(key)};
+ assert.throws(()=>rateObservingSite(unreadable,current,8),/original settings were kept/);assert.deepEqual(unreadable.values,before);
+});
 test('a peer selecting another named coordinate alias refuses a stale rating before any writes',()=>{
  const sibling={...current,name:'Roof alias',bortle:2,extra:'Peer roof'},store=fixture([current,sibling],sibling),before=new Map(store.values);
  assert.throws(()=>rateObservingSite(store,current,8),/selected observing site changed elsewhere/);assert.equal(store.writes.length,0);assert.deepEqual(store.values,before);

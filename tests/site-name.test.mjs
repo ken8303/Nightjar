@@ -6,6 +6,27 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {renameObservingSite}=await vite.ssrLoadModule('/lib/site-name.ts');
 const current={name:'Coordinate site',latitude:51.5,longitude:0,country:'United Kingdom',timezone:'Europe/London',bortle:4};
+test('a peer replacement after the final rename write cannot report success or overwrite the peer',()=>{
+ for(const key of ['nightjar-place','nightjar-places']){
+  const store=storage([current]),before=new Map(store.values),set=store.setItem;
+  const peer=JSON.stringify(key==='nightjar-place'?{...current,name:'Peer selected',extra:'Keep peer'}:[{...current,name:'Peer list',bortle:1}]);
+  let injected=false;
+  store.setItem=(written,value)=>{set(written,value);if(written==='nightjar-place'&&!injected){injected=true;store.values.set(key,peer)}};
+  assert.throws(()=>renameObservingSite(store,current,'Local draft'),/Review your saved sites/);
+  assert.equal(store.getItem(key),peer);
+  assert.equal(store.getItem(key==='nightjar-place'?'nightjar-places':'nightjar-place'),before.get(key==='nightjar-place'?'nightjar-places':'nightjar-place'));
+ }
+});
+test('final rename verification protects an unchanged list and rolls back after an unreadable final check',()=>{
+ const store=storage([]),set=store.setItem,original=store.getItem('nightjar-place'),peer=JSON.stringify([{...current,name:'Peer added'}]);
+ store.setItem=(key,value)=>{set(key,value);if(key==='nightjar-place')store.values.set('nightjar-places',peer)};
+ assert.throws(()=>renameObservingSite(store,current,'Unsaved local name'),/Saved places changed during saving/);
+ assert.equal(store.getItem('nightjar-places'),peer);assert.equal(store.getItem('nightjar-place'),original);
+ const unreadable=storage([current]),before=new Map(unreadable.values),get=unreadable.getItem,write=unreadable.setItem;let checkFails=false,injectedReadFailure=false;
+ unreadable.setItem=(key,value)=>{write(key,value);if(key==='nightjar-place'&&!injectedReadFailure){checkFails=true;injectedReadFailure=true}};
+ unreadable.getItem=key=>{if(checkFails){checkFails=false;throw Error('Final read denied')}return get(key)};
+ assert.throws(()=>renameObservingSite(unreadable,current,'Local draft'),/original site was kept/);assert.deepEqual(unreadable.values,before);
+});
 function storage(places=[],place=current){const values=new Map([['nightjar-places',JSON.stringify(places)],['nightjar-place',JSON.stringify(place)]]);return {values,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)}}
 test('renaming updates the saved identity while preserving newer metadata, unrelated sites and the source',()=>{
  const latest={...current,bortle:2,timezone:'UTC'},other={...current,name:'Other',latitude:48},store=storage([latest,other]),snapshot=structuredClone(current);
