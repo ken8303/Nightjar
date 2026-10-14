@@ -6,6 +6,8 @@ A read-only GitHub check on 14 October confirmed remote main at 8d44d72 and succ
 
 ## Recent changes and evidence
 
+- **Manual coordinate copy:** clipboard failure reveals selectable full J2000 text with exact decimals. The bounded read-only box fits phones, Select marks the complete value, switching targets hides stale fallback text, and simulated retry succeeds. Native clipboard/file receipt still needs phone testing.
+
 - **Selected-object dates and search focus:** the remaining deep-sky recommendation label uses the shared year/offset/era formatter. BC, AD, a modern UTC-year window and exact time activation passed locally. Clear filters in both target finders returns keyboard focus to the appropriate search input.
 
 - **2D core label:** Core direction uses the chart’s bounded label layout, fixing clipped text near the horizon. Compact/enlarged views, independent layer toggles, target selection and close focus passed locally; the marker position is unchanged.
