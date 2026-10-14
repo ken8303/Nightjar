@@ -37,3 +37,11 @@ test('country search matches stored observing sites with Unicode normalization a
  for(const query of ['united kingdom','星空','Dark field'])assert.deepEqual(filterDiary([country,second],{...emptyDiaryFilters,query}).entries,query==='Dark field'?[second,country]:[country]);
  assert.deepEqual(country,before);assert.deepEqual(filterDiary([first,second],{...emptyDiaryFilters,query:'united kingdom'}).entries,[]);
 });
+
+test('full Messier identifiers and smart apostrophes work across diary names and free-text references',()=>{
+ const mention={...second,id:'mention',notes:'Compared it with Messier 0031.'},bodes={...first,id:'bodes',target:'M81',notes:'Spiral reference'},collection=[...entries,mention,bodes],before=structuredClone(collection);
+ for(const query of ['Messier 31','messier0031','Ｍｅｓｓｉｅｒ ００３１'])assert.deepEqual(filterDiary(collection,{...emptyDiaryFilters,query}).entries,[mention,first]);
+ for(const query of ['Bode’s Galaxy','Bode‘s Galaxy'])assert.deepEqual(filterDiary(collection,{...emptyDiaryFilters,query}).entries,[bodes]);
+ assert.deepEqual(filterDiary(collection,{...emptyDiaryFilters,query:'Messier 31',outcome:'not-seen'}).entries,[mention]);
+ assert.deepEqual(collection,before);
+});

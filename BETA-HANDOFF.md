@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **605 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 605 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **607 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 607 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A read-only GitHub check on 13 October confirmed remote main at 8d44d72 and successful [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730). Run #9 also passed; the older Run #7 failed. Run #10 covers the preceding 592-test batch, not subsequent local additions. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A read-only GitHub check on 14 October confirmed remote main at 8d44d72 and successful [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730). Run #9 also passed; the older Run #7 failed. Run #10 covers the preceding 592-test batch, not subsequent local additions. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Search spellings:** Atlas, camera and diary searches accept full Messier designations and smart apostrophes. Messier 31/zero-padded/full-width equivalents find M31, and Bode’s Galaxy finds M81. Browser checks retained filters, time and close focus; stored names and records remain unchanged.
 
 - **Camera control layout:** phone catalogue values fit a full-width chooser. Overflow guidance is based on measured content and stays visible during native panel scrolling; it disappears when desktop controls fit. Portrait, landscape and desktop checks passed with no dialog overflow.
 

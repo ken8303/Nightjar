@@ -131,3 +131,15 @@ test('deep-sky planning rejects unsupported starting instants',async()=>{
   assert.throws(()=>deepSkyWindow(target,date,place),/UTC years 1–9999/);assert.throws(()=>deepSkyRecommendations([target],date,place),/UTC years 1–9999/);
  }
 });
+
+test('full Messier designations and smart apostrophes match the same catalogue and camera objects',async()=>{
+ const {cameraCatalogueTargets,searchCameraTargets}=await vite.ssrLoadModule('/lib/camera-catalogue.ts');
+ const before=structuredClone(messierCatalogue),targets=cameraCatalogueTargets(new Date('2026-10-14T20:00:00Z'),place,'all');
+ for(const [query,id] of [['Messier 31','M31'],['messier0031','M31'],['Ｍｅｓｓｉｅｒ ００３１','M31'],['Bode’s Galaxy','M81'],['Bode‘s Galaxy','M81'],['Ptolemy’s Cluster','M7']]){
+  assert.deepEqual(findDeepSky(query,'').map(target=>target.id),[id]);
+  assert.deepEqual(searchCameraTargets(targets,query).map(target=>target.name),[id]);
+ }
+ assert.deepEqual(findDeepSky('Messier 31','Open cluster'),[]);assert.deepEqual(findDeepSky('Messier -31',''),[]);
+ assert.deepEqual(findDeepSky('Messier 31','',{constellation:'Cyg'}),[]);
+ assert.deepEqual(messierCatalogue,before);
+});
