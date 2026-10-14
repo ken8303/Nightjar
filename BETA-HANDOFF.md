@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **600 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The preceding 596-test suite passed under Node 24.19; the current eight visibility-window, 15 saved-collection and 19 diary-form/recovery tests also pass there. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **605 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The preceding 596-test suite passed under Node 24.19; the current eight visibility-window, 15 saved-collection and 19 diary-form/recovery and five deferred-focus tests also pass there. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
 A read-only GitHub check on 13 October confirmed remote main at 8d44d72 and successful [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730). Run #9 also passed; the older Run #7 failed. Run #10 covers the preceding 592-test batch, not subsequent local additions. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Mobile/viewer handoffs:** deferred navigation captures the originating action and preserves a later active field. Missing, detached, background or modal-hidden destinations do not receive focus. Mobile menu navigation, retained time drafts, camera-to-review guidance and ordinary 2D/3D details handoffs passed locally.
 
 - **Saved-list pagination:** delayed Show more/Show fewer focus no longer interrupts a different active field or a closed/hidden list. Only the newest queued pagination action can move focus. Compact editing, keyboard pagination, consecutive expansion and leaving Photo tools passed locally.
 
