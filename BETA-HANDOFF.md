@@ -6,6 +6,8 @@ A read-only GitHub check on 14 October confirmed remote main at 8d44d72 and succ
 
 ## Recent changes and evidence
 
+- **Explicit continuation focus:** Leave without saving uses the same ownership guard as menu/viewer navigation. A delayed continuation preserves a newly active imaging field; ordinary compact keyboard continuation still focuses the destination heading.
+
 - **Final site-save verification:** site-name and sky-rating saves check both stored snapshots after their final write before reporting success. A final peer replacement is preserved, other matching writes roll back, and the name draft remains available. Compact conflict checks and ordinary desktop saves passed locally.
 
 - **Search spellings:** Atlas, camera and diary searches accept full Messier designations and smart apostrophes. Messier 31/zero-padded/full-width equivalents find M31, and Bode’s Galaxy finds M81. Browser checks retained filters, time and close focus; stored names and records remain unchanged.

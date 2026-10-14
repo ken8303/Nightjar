@@ -46,6 +46,7 @@ import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-respon
 import {forecastPlanning,forecastHourLabel} from '@/lib/weather-planning';
 import {validPlace,readPlannerSetup,readObservingSite,recoveryPlannerContextKey,resolveObservingPlace,samePlaceCoordinates as same} from '@/lib/planner-state';
 import {upsertSavedPlace,readSavedPlaces,removeSavedPlace,restoreSavedPlace,savedPlacesLimit} from '@/lib/saved-collections';
+import {deferFocusAndScroll} from '@/lib/deferred-focus';
 import {useClientReady} from '@/hooks/use-client-ready';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
@@ -226,7 +227,7 @@ function Planner(){
   if(review)queueMicrotask(()=>window.dispatchEvent(new Event(review.event)));
   else document.getElementById('planner-heading')?.focus();
  }
- function leaveView(){const imaging=pendingIntent?.kind==='imaging';navigation.continue(applyNavigation);if(imaging)return;requestAnimationFrame(()=>{const heading=document.getElementById('planner-heading');heading?.focus({preventScroll:true});heading?.scrollIntoView({block:'start',behavior:'instant'})})}
+ function leaveView(){const owner=document.activeElement,imaging=pendingIntent?.kind==='imaging';if(!navigation.continue(applyNavigation)||imaging)return;deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner})}
 
  const {revision,refresh}=useForecastRefresh();
  const now=usePlanningClock();
