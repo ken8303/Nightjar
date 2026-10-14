@@ -108,3 +108,14 @@ test('saving a named coordinate alias updates that version without overwriting s
  assert.throws(()=>upsertSavedPlace(current,{...first,name:'New alias'}),/More than one saved place/);
  assert.throws(()=>upsertSavedPlace([first,{...first,bortle:4}],first),/More than one saved place/);assert.deepEqual(current,before);
 });
+
+test('equipment Undo recognises trimmed legacy names and preserves a newer peer save',()=>{
+ const removed={...equipment[0],name:'  Portable scope  ',focal:400},newer={...removed,name:'Portable scope',focal:800,pixel:2.4,extra:'New peer metadata'};
+ for(const current of [[newer],[{...newer,name:'\u00a0Portable scope\u00a0'}],[newer,...equipment.slice(1)]]){
+  const before=structuredClone(current),restored=restoreEquipmentProfile(current,removed,0);
+  assert.deepEqual(restored,before);assert.deepEqual(current,before);
+  assert.equal(restored[0].focal,800);assert.equal(restored[0].pixel,2.4);assert.equal(restored[0].extra,'New peer metadata');
+  assert.notEqual(restored,current,'the returned list is a new snapshot');
+ }
+ assert.deepEqual(restoreEquipmentProfile([equipment[1]],removed,0),[removed,equipment[1]],'an absent identity still restores its exact legacy name');
+});

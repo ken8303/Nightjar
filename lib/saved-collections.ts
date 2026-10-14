@@ -35,7 +35,9 @@ export function removeEquipmentProfile(current:Equipment[],expected:Equipment):E
  return current.filter((_,i)=>i!==index);
 }
 export function restoreEquipmentProfile(current:Equipment[],removed:Equipment,index:number):Equipment[]{
- if(current.some(item=>item.name===removed.name))return [...current];
+ // Saving trims legacy names; Undo must recognise the same identity after
+ // another tab re-saves it, rather than reintroducing an ambiguous duplicate.
+ if(current.some(item=>item.name.trim()===removed.name.trim()))return [...current];
  if(current.length>=equipmentProfilesLimit)throw Error(`Your ${equipmentProfilesLimit}-setup list is full. This removal cannot be undone until there is space.`);
  if(!validEquipment(removed))throw Error('This equipment setup cannot be restored.');
  const next=[...current];next.splice(Math.max(0,Math.min(index,next.length)),0,removed);return next;

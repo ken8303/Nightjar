@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **597 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The preceding 596-test suite passed under Node 24.19; the current eight visibility-window tests also pass there. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **598 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The preceding 596-test suite passed under Node 24.19; the current eight visibility-window and 15 saved-collection tests also pass there. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
 A read-only GitHub check on 13 October confirmed remote main at 8d44d72 and successful [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730). Run #9 also passed; the older Run #7 failed. Run #10 covers the preceding 592-test batch, not subsequent local additions. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Equipment Undo:** legacy names with surrounding whitespace match their canonical re-saved names. Undo keeps newer peer settings instead of restoring a visually identical duplicate. A two-tab reproduction, 320-pixel draft-preservation/focus check and ordinary desktop Undo passed locally.
 
 - **14 October bug review:** framing panel numbers render above catalogue outlines, with the middle number clear of the target marker; single-panel captions use “1 panel.” After-twilight shortcuts sort by their actual observing altitude and omit objects without an eligible sample. The hourly table retains its full-window peak ranking. Mobile/desktop rendering, zoom/close focus and Saturn time/target selection passed locally. Main tabs and the camera dialog loaded with no warning/error logs in the disposable preview.
 

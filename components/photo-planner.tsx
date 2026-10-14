@@ -52,7 +52,7 @@ export default function PhotoPlanner({draft,draftStatus,onChange,onRetryDraft,fo
   if(!removedProfile)return;
   try{
    const latest=readLatestProfiles();
-   if(latest.some(profile=>profile.name===removedProfile.profile.name)){setProfiles(latest);setNotice('A setup with this name is already saved. Its current settings were kept.')}
+   if(latest.some(profile=>profile.name.trim()===removedProfile.profile.name.trim())){setProfiles(latest);setNotice('A setup with this name is already saved. Its current settings were kept.')}
    else if(!persist(restoreEquipmentProfile(latest,removedProfile.profile,removedProfile.index),`${removedProfile.profile.name} restored to saved equipment.`)){setNotice('');setProfileUndoStatus('This setup could not be saved. Undo remains available; free browser storage and retry.');return}
    setRemovedProfile(null);setProfileUndoStatus('');equipmentHeadingRef.current?.focus();
   }catch(error){setNotice('');setProfileUndoStatus(error instanceof Error?error.message:'This setup could not be restored. Undo remains available.')}
