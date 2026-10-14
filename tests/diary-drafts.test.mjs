@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts,diaryDraftConflicts,resolveDiaryDraftConflicts,startDiaryEdit}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
+const {diaryDraftMaxStoredChars,readDiaryDrafts,saveDiaryDrafts,normalizeDiaryDrafts,sameObservation,discardCompletedDrafts,mergeDiaryDraftChanges,readStoredDiaryDrafts,diaryDraftConflicts,resolveDiaryDraftConflicts,startDiaryEdit}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
 const entry={id:'draft-M31',target:'M31',observedAt:'2026-10-06T20:00:00.000Z',place:{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},outcome:'seen',equipment:'',notes:'Unfinished\n星空'};
 test('opening the active diary edit retains its original snapshot and current text, even after the saved entry changes',()=>{
  const state={drafts:[{...entry,id:'pending-M45',target:'M45'}],edit:{original:entry,draft:{...entry,notes:'Current unsaved changes 星空',equipment:'Binoculars',outcome:'imaged'}}},before=structuredClone(state);
@@ -23,7 +23,7 @@ test('new and edit drafts retain original metadata and unfinished text without t
  assert(readDiaryDrafts(storage).status.includes('restored'));assert(saveDiaryDrafts({drafts:[],edit:null},storage));assert.equal(readDiaryDrafts(storage).status,'');
 });
 test('corrupt, future or oversized drafts remain untouched and blocked storage reports failure',()=>{
- for(const raw of ['{',JSON.stringify({version:2,drafts:[],edit:null}),'x'.repeat(1024*1024+1)]){const result=readDiaryDrafts({getItem:()=>raw});assert.equal(result.state.drafts.length,0);assert(result.status.includes('could not'))}
+ for(const raw of ['{',JSON.stringify({version:2,drafts:[],edit:null}),'x'.repeat(diaryDraftMaxStoredChars+1)]){const result=readDiaryDrafts({getItem:()=>raw});assert.equal(result.state.drafts.length,0);assert(result.status.includes('could not'))}
  assert(!saveDiaryDrafts({drafts:[entry],edit:null},{setItem:()=>{throw Error('quota')}}));assert(readDiaryDrafts({getItem:()=>{throw Error('denied')}}).status.includes('could not'));
 });
 test('draft schema rejects duplicates, changed edit metadata and unbounded text',()=>{
@@ -54,7 +54,7 @@ test('edit-draft conflicts are refused while unrelated new forms and latest edit
  assert.throws(()=>mergeDiaryDraftChanges({drafts:[],edit}, {drafts:[],edit:null},{drafts:[],edit:{...edit,draft:{...original,notes:'Peer edit'}}}),/edit form changed/);
 });
 test('strict draft reads refuse corruption and storage failures so pending text cannot replace unreadable data',()=>{
- for(const raw of ['{','x'.repeat(1024*1024+1),JSON.stringify({version:2,drafts:[],edit:null})])assert.throws(()=>readStoredDiaryDrafts({getItem:()=>raw}));
+ for(const raw of ['{','x'.repeat(diaryDraftMaxStoredChars+1),JSON.stringify({version:2,drafts:[],edit:null})])assert.throws(()=>readStoredDiaryDrafts({getItem:()=>raw}));
  assert.throws(()=>readStoredDiaryDrafts({getItem:()=>{throw Error('Blocked')}}),/storage is unavailable/);
  assert.deepEqual(readStoredDiaryDrafts({getItem:()=>null}),{drafts:[],edit:null});
 });
@@ -92,4 +92,23 @@ test('unfinished-form recovery exposes read failures separately from a valid emp
   const result=readDiaryDrafts({getItem:()=>raw});assert.equal(result.unavailable,true);assert.deepEqual(result.state,{drafts:[],edit:null});
  }
  assert.equal(readDiaryDrafts({getItem:()=>{throw Error('blocked')}}).unavailable,true);
+});
+
+test('full-capacity escaped diary forms save and restore without crossing the read limit',()=>{
+ const ids=Array.from({length:110},(_,i)=>`M${i+1}`).filter(id=>id!=='M102');
+ const drafts=ids.map(target=>({...entry,id:'size-'+target,target,place:{...entry.place,name:'A'+'\0'.repeat(198),country:'B'+'\0'.repeat(198)},equipment:'\0'.repeat(100),notes:'\0'.repeat(2000)}));
+ const original={...drafts[0],id:'saved-original'},state={drafts,edit:{original,draft:{...original,notes:'\u0001'.repeat(2000)}}},before=structuredClone(state);
+ let text='';let writes=0;
+ const storage={getItem:()=>text,setItem:(_key,value)=>{text=value;writes++}};
+ assert(saveDiaryDrafts(state,storage));assert.equal(writes,1);
+ assert(text.length>1024*1024,'this valid document exceeded the former read limit');
+ assert(text.length<=diaryDraftMaxStoredChars);
+ const restored=readDiaryDrafts(storage);assert.equal(restored.unavailable,false);assert.deepEqual(restored.state,state);assert.deepEqual(state,before);
+ // Already-saved documents from the old writer can now be read as well.
+ assert.deepEqual(readStoredDiaryDrafts({getItem:()=>text}),state);
+});
+test('the shared diary-form read limit still rejects an oversized valid JSON envelope before normalising it',()=>{
+ const text=JSON.stringify({version:1,drafts:[],edit:null,padding:'x'.repeat(diaryDraftMaxStoredChars)});
+ assert.throws(()=>readStoredDiaryDrafts({getItem:()=>text}),/too large/);
+ const restored=readDiaryDrafts({getItem:()=>text});assert.equal(restored.unavailable,true);assert.deepEqual(restored.state,{drafts:[],edit:null});
 });

@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **598 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The preceding 596-test suite passed under Node 24.19; the current eight visibility-window and 15 saved-collection tests also pass there. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **600 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. The preceding 596-test suite passed under Node 24.19; the current eight visibility-window, 15 saved-collection and 19 diary-form/recovery tests also pass there. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
 A read-only GitHub check on 13 October confirmed remote main at 8d44d72 and successful [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730). Run #9 also passed; the older Run #7 failed. Run #10 covers the preceding 592-test batch, not subsequent local additions. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Large unfinished forms:** the reader and writer share a bounded limit that fits the full form schema after JSON escaping. Previously accepted files over the old reader limit now restore. A 109-form file, note editing, mobile reload and retained site/time passed locally; oversized JSON envelopes still refuse without modifying storage.
 
 - **Equipment Undo:** legacy names with surrounding whitespace match their canonical re-saved names. Undo keeps newer peer settings instead of restoring a visually identical duplicate. A two-tab reproduction, 320-pixel draft-preservation/focus check and ordinary desktop Undo passed locally.
 

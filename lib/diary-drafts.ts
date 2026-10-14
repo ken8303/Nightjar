@@ -1,5 +1,8 @@
 import {normalizeDiary,type Observation} from './observing-diary';
 export const diaryDraftKey='nightjar-diary-drafts-v1';
+// JSON escaping can expand valid form text sixfold. The full 109-form schema,
+// plus an edit's original/draft pair, must fit both the writer and the reader.
+export const diaryDraftMaxStoredChars=2*1024*1024;
 export type DiaryDraftState={drafts:Observation[];edit:{original:Observation;draft:Observation}|null};
 export function emptyDiaryDrafts():DiaryDraftState{return {drafts:[],edit:null}}
 export function sameObservation(first:Observation,second:Observation){return JSON.stringify(normalizeDiary([first])[0])===JSON.stringify(normalizeDiary([second])[0])}
@@ -30,7 +33,7 @@ export function readStoredDiaryDrafts(storage:Pick<Storage,'getItem'>):DiaryDraf
  let raw:string|null;
  try{raw=storage.getItem(diaryDraftKey)}catch{throw Error('Browser storage is unavailable. Keep this view open or download a form recovery copy before leaving, then restore storage access and retry.');}
  if(raw===null)return emptyDiaryDrafts();
- if(raw.length>1024*1024)throw Error('Stored unfinished forms are too large to read safely. Existing data is unchanged; keep this view open or download a form recovery copy before leaving.');
+ if(raw.length>diaryDraftMaxStoredChars)throw Error('Stored unfinished forms are too large to read safely. Existing data is unchanged; keep this view open or download a form recovery copy before leaving.');
  try{return normalizeDiaryDrafts(JSON.parse(raw))}catch{throw Error('Stored unfinished forms contain invalid data. They were not changed. Keep this view open or download a form recovery copy before leaving.');}
 }
 export function readDiaryDrafts(storage?:Pick<Storage,'getItem'>):{state:DiaryDraftState;status:string;unavailable:boolean}{
@@ -88,7 +91,7 @@ export function mergeDiaryDraftChanges(base:DiaryDraftState,desired:DiaryDraftSt
  }
  return normalize({drafts,edit});
 }
-export function saveDiaryDrafts(state:DiaryDraftState,storage?:Pick<Storage,'setItem'>){try{(storage??localStorage).setItem(diaryDraftKey,JSON.stringify({version:1,...normalizeDiaryDrafts({version:1,...state})}));return true}catch{return false}}
+export function saveDiaryDrafts(state:DiaryDraftState,storage?:Pick<Storage,'setItem'>){try{const text=JSON.stringify({version:1,...normalizeDiaryDrafts({version:1,...state})});if(text.length>diaryDraftMaxStoredChars)return false;(storage??localStorage).setItem(diaryDraftKey,text);return true}catch{return false}}
 
 export function discardCompletedDrafts(state:DiaryDraftState,saved:Observation[]):DiaryDraftState{return {...state,drafts:state.drafts.filter(draft=>!saved.some(entry=>entry.id===draft.id&&sameObservation(entry,draft)))}}
 
