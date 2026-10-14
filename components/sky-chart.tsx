@@ -9,7 +9,11 @@ export default function SkyChart({place,date,large=false,selected="",showLines=t
   return {...target,x:Number((220-radius*Math.sin(angle)).toFixed(3)),y:Number((195-radius*Math.cos(angle)).toFixed(3))};
  }),[place,date]);
  const core=useMemo(()=>{const position=galacticCentrePosition(date,place),radius=(90-position.altitude)/90*166,angle=position.azimuth*Math.PI/180;return {...position,x:220-radius*Math.sin(angle),y:195-radius*Math.cos(angle)}},[date,place]);
- const labels=useMemo(()=>layoutSkyLabels(points,points.filter(point=>showLabels&&(large||point.mag<.4||point.planet)).map(point=>point.name),selected),[points,showLabels,large,selected]);
+ const labels=useMemo(()=>{
+  const marker=showMilkyWay&&core.altitude>0?{name:'Core direction',x:core.x,y:core.y,mag:99}:null;
+  return layoutSkyLabels(marker?[...points,marker]:points,[...points.filter(point=>showLabels&&(large||point.mag<.4||point.planet)).map(point=>point.name),...(marker?[marker.name]:[])],selected);
+ },[points,core,showMilkyWay,showLabels,large,selected]);
+ const coreLabel=labels.get('Core direction');
  const interactive=large&&Boolean(onSelect);
  const gradientId=`sky-${useId().replace(/:/g,'')}`;
  function selectObject(name:string,svg:SVGSVGElement){
@@ -40,7 +44,7 @@ export default function SkyChart({place,date,large=false,selected="",showLines=t
    <circle cx={point.x} cy={point.y} r={point.planet?4:Math.max(1.5,3.5-point.mag*.7)} fill={point.planet?'#dce6a1':'#e0f1fb'}/>
    {labels.has(point.name)&&<text onClick={interactive?event=>{event.stopPropagation();const svg=event.currentTarget.ownerSVGElement;if(svg)selectObject(point.name,svg)}:undefined} className="sky-label" x={labels.get(point.name)!.x} y={labels.get(point.name)!.y} fill={point.planet?'#dce6a1':'#b7cad6'} fontSize="11">{point.name}</text>}
   </g>)}
-  {showMilkyWay&&core.altitude>0&&<g className="galactic-core-marker" aria-label={`Milky Way core direction, ${core.altitude.toFixed(1)}° altitude`}><circle cx={core.x} cy={core.y} r="10" fill="none" stroke="#e9b990" strokeWidth="2" strokeDasharray="3 3"/><circle cx={core.x} cy={core.y} r="2.5" fill="#e9b990"/><text x={core.x+13} y={core.y-10} fill="#f1c9a4" fontSize="11">Core direction</text></g>}
+  {showMilkyWay&&core.altitude>0&&<g className="galactic-core-marker" aria-label={`Milky Way core direction, ${core.altitude.toFixed(1)}° altitude`}><circle cx={core.x} cy={core.y} r="10" fill="none" stroke="#e9b990" strokeWidth="2" strokeDasharray="3 3"/><circle cx={core.x} cy={core.y} r="2.5" fill="#e9b990"/>{coreLabel&&<text x={coreLabel.x} y={coreLabel.y} fill="#f1c9a4" fontSize="11">Core direction</text>}</g>}
   <g fill="#93a7b5" fontSize="12" textAnchor="middle"><text x="220" y="18">N</text><text x="220" y="382">S</text><text x="35" y="199">E</text><text x="407" y="199">W</text></g>
  </svg>;
 }
