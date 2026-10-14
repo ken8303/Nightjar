@@ -415,3 +415,11 @@ Completion percentages previously reported were estimates. Release acceptance is
 - Final site-name/rating snapshots, explicit navigation continuation focus and cancellable backup reads have deterministic reproduction and rendered mobile/desktop evidence in DEVELOPMENT-NOTES.md.
 - New local worker release: `bae3281f91aca3afaf69c060ff2a8da2503a97854a0154a54e7655ab92a489c1`; complete reconstruction from 91 inputs; 334 literal relative JS/CSS references resolve. Offline/recovery bytes and manifest/icon dimensions match. Dry-run stages 113 client files without bindings.
 - This supersedes the preceding local package fingerprint for the current source. Hosted CI, Cloudflare deployment and physical-phone acceptance of this batch remain pending the user's push/testing. No agent push or deployment occurred.
+
+
+### Latest local release evidence — 14 October 2026
+
+- Full Node22 verify passes615 tests, types, lint, build and packaging; all615 tests also pass under Node24.19.
+- Worker release `a994dd49fc2d9b840d605e4d31cbf0490ae9b35ea7106ae0bb532a3325e853af` matches complete91-input reconstruction. All335 scanned literal relative JS/CSS references resolve. Offline/recovery bytes match source; manifest/icon checks pass. Dry-run stages113 client files without bindings.
+- Live public-provider API/UI paths and an actual received calendar event passed locally. Full-planner and cached-fallback raw recovery downloads preserve the new red-light key and exact Unicode notes; a controlled503 demonstrates the real cached fallback/module path. See DEVELOPMENT-NOTES.md for scope and fixture corrections.
+- Existing chunk-size/experimental glob/module-classification build notices remain informational; lint is clean. Native phone sensors/install/keyboard/clipboard/calendar import, hosted CI and Cloudflare deployment of the new local batch remain pending. Agent has not pushed or deployed.

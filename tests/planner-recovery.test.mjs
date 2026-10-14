@@ -6,6 +6,16 @@ const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../'
 const {makePlannerRecovery}=await vite.ssrLoadModule('/lib/planner-recovery.ts');
 const {parsePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 const now=new Date('2026-10-07T20:00:00.123Z');
+test('raw recovery preserves exact red-light preferences and identifies denied reads',()=>{
+ for(const value of ['on','off','malformed preference',null]){
+  const raw=JSON.parse(makePlannerRecovery({getItem:key=>key==='nightjar-red-light'?value:null},{getItem:()=>null},now).text);
+  assert(Object.hasOwn(raw.stores.local,'nightjar-red-light'));
+  assert.equal(raw.stores.local['nightjar-red-light'],value);
+ }
+ const result=makePlannerRecovery({getItem:key=>{if(key==='nightjar-red-light')throw Error('Denied');return null}},{getItem:()=>null},now);
+ assert.deepEqual(result.unreadable,[{area:'local',key:'nightjar-red-light'}]);
+ assert(!Object.hasOwn(JSON.parse(result.text).stores.local,'nightjar-red-light'));
+});
 test('raw recovery keeps exact malformed and Unicode data, missing/null distinctions and only known app keys',()=>{
  const local=new Map([['nightjar-target-notes-v1','{broken\n星空'],['nightjar-diary-drafts-v1','unfinished text'],['nightjar-places',''],['unrelated-secret','excluded']]),session=new Map([['nightjar-current-time-v1','"2026-10-07T20:00:00.000Z"']]),calls=[];
  const read=map=>({getItem:key=>{calls.push(key);return map.get(key)??null}}),before=structuredClone([local,session]),result=makePlannerRecovery(read(local),read(session),now),raw=JSON.parse(result.text);

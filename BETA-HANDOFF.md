@@ -1,10 +1,13 @@
 # Nightjar beta handoff
 
-Current local verification passes **614 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 614 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **615 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 615 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the previous camera, data-preservation, time-label and PWA batches at 8d44d72. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
 A read-only GitHub check on 14 October confirmed remote main at 8d44d72 and successful [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730). Run #9 also passed; the older Run #7 failed. Run #10 covers the preceding 592-test batch, not subsequent local additions. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Raw recovery preferences:** full-planner and cached-fallback recovery files preserve the saved red-light value, exact multiline Unicode notes and only known storage keys. Actual received desktop files passed content checks.
+- **Successful provider paths:** live weather, London search and NOAA aurora responses/rendering passed. Selecting a real forecast window retained its exact UTC time, and its received calendar event matched the displayed two-hour interval. Physical-phone/native acceptance remains pending.
 
 - **Red-light preference events:** queued events read the current stored value, so an older event cannot undo a newer setting. Blocked storage preserves the current display without an unhandled error. Peer changes and shared camera/main controls passed compact checks.
 
