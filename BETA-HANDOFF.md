@@ -6,6 +6,8 @@ A read-only GitHub check on 14 October confirmed remote main at 8d44d72 and succ
 
 ## Recent changes and evidence
 
+- **Selected-object dates and search focus:** the remaining deep-sky recommendation label uses the shared year/offset/era formatter. BC, AD, a modern UTC-year window and exact time activation passed locally. Clear filters in both target finders returns keyboard focus to the appropriate search input.
+
 - **2D core label:** Core direction uses the chart’s bounded label layout, fixing clipped text near the horizon. Compact/enlarged views, independent layer toggles, target selection and close focus passed locally; the marker position is unchanged.
 
 - **Backup file reading:** a delayed read can be cancelled and retried. Cancelled/unmounted reads cannot replace a later review, and delayed review/error feedback preserves a newly active editor. Compact, short-landscape, retry, late-result and ordinary desktop feedback checks passed locally.
