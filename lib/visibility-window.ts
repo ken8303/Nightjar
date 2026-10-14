@@ -15,6 +15,12 @@ export function rankVisibilitySamples(rows:VisibilitySamples[]){
   return [{...row,peak:peakSample.altitude,peakSample,best}];
  }).sort((a,b)=>b.peak-a.peak||a.body.localeCompare(b.body));
 }
+// Twilight opportunities have their own ranking: a high daytime peak must
+// not put a lower observing opportunity ahead of a higher one.
+export function visibilityOpportunities(rows:ReturnType<typeof rankVisibilitySamples>){
+ return rows.flatMap(row=>row.best?[{body:row.body,best:row.best}]:[])
+  .sort((a,b)=>b.best.altitude-a.best.altitude||a.body.localeCompare(b.body));
+}
 export function planetVisibilityWindow(start:number,place:Place){
  if(!validObservingDate(new Date(start)))throw Error('Choose an observing time within UTC years 1–9999.');
  const times=Array.from({length:12},(_,i)=>new Date(start+i*3600000)).filter(validObservingDate);

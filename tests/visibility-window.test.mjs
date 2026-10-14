@@ -5,7 +5,7 @@ import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
-const {rankVisibilitySamples,planetVisibilityWindow}=await vite.ssrLoadModule('/lib/visibility-window.ts');
+const {rankVisibilitySamples,planetVisibilityWindow,visibilityOpportunities}=await vite.ssrLoadModule('/lib/visibility-window.ts');
 const london={name:'London',latitude:51.5074,longitude:-.1278,timezone:'Europe/London'};
 const sample=(altitude,sun=-18,hour=0)=>({time:new Date(Date.UTC(2026,9,3,hour)),altitude,sun,azimuth:180});
 test('visibility rows strictly exclude 30 degrees and below, with stable highest-first ordering',()=>{
@@ -51,4 +51,21 @@ test('visibility samples stop at the supported UTC year boundary',()=>{
 });
 test('unsupported visibility start dates fail before creating actionable times',()=>{
  for(const start of [NaN,Date.parse('+010000-01-01T00:00:00Z'),Date.parse('0000-12-31T23:00:00Z')])assert.throws(()=>planetVisibilityWindow(start,london),/UTC years 1–9999/);
+});
+
+test('twilight shortcuts rank observing altitudes independently of daytime peaks',()=>{
+ const ranked=rankVisibilitySamples([
+  {body:'Jupiter',positions:[sample(70,10),sample(38,-6,1)]},
+  {body:'Saturn',positions:[sample(40,-18,1)]},
+  {body:'Mars',positions:[sample(40,-18,1)]},
+  {body:'Venus',positions:[sample(60,10),sample(30,-18,1)]},
+ ]),before=structuredClone(ranked),opportunities=visibilityOpportunities(ranked);
+ assert.deepEqual(ranked.map(row=>row.body),['Jupiter','Venus','Mars','Saturn']);
+ assert.deepEqual(opportunities.map(row=>row.body),['Mars','Saturn','Jupiter']);
+ assert(opportunities.every(row=>row.best.altitude>30&&row.best.sun<=-6));
+ assert.deepEqual(ranked,before);
+ assert.deepEqual(visibilityOpportunities(rankVisibilitySamples([{body:'Venus',positions:[sample(60,10)]}])),[]);
+ const actual=visibilityOpportunities(planetVisibilityWindow(Date.parse('2026-10-14T20:00:00Z'),london).rows);
+ assert(actual.findIndex(row=>row.body==='Saturn')<actual.findIndex(row=>row.body==='Jupiter'));
+ actual.slice(1).forEach((row,index)=>assert(actual[index].best.altitude>=row.best.altitude));
 });
