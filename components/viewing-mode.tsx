@@ -1,7 +1,8 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {readViewingModeChange,viewingModeKey as key} from '@/lib/viewing-mode';
 
-const key='nightjar-red-light',changeEvent='nightjar-viewing-mode-change';
+const changeEvent='nightjar-viewing-mode-change';
 function currentMode(){
  try{const current=document.documentElement.dataset.redLight;if(current)return current==='on';return localStorage.getItem(key)==='on'}catch{return false}
 }
@@ -10,7 +11,7 @@ export default function ViewingMode({inline=false}:{inline?:boolean}){
  const [storageError,setStorageError]=useState(false);
  useEffect(()=>{
   const initial=currentMode();document.documentElement.dataset.redLight=initial?'on':'off';
-  const sync=(event:StorageEvent)=>{if(event.storageArea===localStorage&&(event.key===key||event.key===null)){const value=event.newValue==='on';setEnabled(value);document.documentElement.dataset.redLight=value?'on':'off'}};
+  const sync=(event:StorageEvent)=>{const value=readViewingModeChange(event);if(value===null)return;setEnabled(value);setStorageError(false);document.documentElement.dataset.redLight=value?'on':'off'};
   const syncCurrent=()=>setEnabled(document.documentElement.dataset.redLight==='on');
   window.addEventListener('storage',sync);window.addEventListener(changeEvent,syncCurrent);
   return()=>{window.removeEventListener('storage',sync);window.removeEventListener(changeEvent,syncCurrent)};
