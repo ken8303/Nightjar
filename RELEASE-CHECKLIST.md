@@ -419,10 +419,10 @@ Completion percentages previously reported were estimates. Release acceptance is
 
 ### Latest local release evidence — 14 October 2026
 
-- Full Node22 verify passes615 tests, types, lint, build and packaging; all615 tests also pass under Node24.19.
-- Worker release `a994dd49fc2d9b840d605e4d31cbf0490ae9b35ea7106ae0bb532a3325e853af` matches complete91-input reconstruction. All335 scanned literal relative JS/CSS references resolve. Offline/recovery bytes match source; manifest/icon checks pass. Dry-run stages113 client files without bindings.
+- Full Node 22 verify passes 615 tests, types, lint, build and packaging; all 615 tests also pass under Node 24.19.
+- Worker release `a994dd49fc2d9b840d605e4d31cbf0490ae9b35ea7106ae0bb532a3325e853af` matches complete 91-input reconstruction. All335 scanned literal relative JS/CSS references resolve. Offline/recovery bytes match source; manifest/icon checks pass. Dry-run stages 113 client files without bindings.
 - Live public-provider API/UI paths and an actual received calendar event passed locally. Full-planner and cached-fallback raw recovery downloads preserve the new red-light key and exact Unicode notes; a controlled503 demonstrates the real cached fallback/module path. See DEVELOPMENT-NOTES.md for scope and fixture corrections.
 - Existing chunk-size/experimental glob/module-classification build notices remain informational; lint is clean. Native phone sensors/install/keyboard/clipboard/calendar import, hosted CI and Cloudflare deployment of the new local batch remain pending. Agent has not pushed or deployed.
 
 
-Latest read-only hosted check on14 October: remote main is `bb1908e8a280a851e3cfabf3d72fbcda7778a9ee` and [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462) completed successfully. This supersedes the earlier Run #10/8d44d72 snapshot and covers607 tests. Current615-test additions remain local and need the user's batch push before hosted validation.
+Latest read-only hosted check on 14 October: remote main is `bb1908e8a280a851e3cfabf3d72fbcda7778a9ee` and [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462) completed successfully. This supersedes the earlier Run #10/8d44d72 snapshot and covers 607 tests. Current615-test additions remain local and need the user's batch push before hosted validation.
