@@ -145,7 +145,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 
 .camera-sky-quick-controls>.camera-sky-search{flex:1;min-width:220px;width:auto}.camera-sky-search [data-slot="field"]{gap:8px;min-width:0}.camera-sky-search [data-slot="field-description"]{overflow-wrap:anywhere}@media(max-width:700px){.camera-sky-quick-controls>.camera-sky-search{flex-basis:100%;min-width:0}}
 
-.camera-sky-fullscreen-controls:focus-visible{outline:2px solid var(--accent-soft);outline-offset:-3px}.camera-sky-fullscreen-controls .camera-sky-control-scroll-hint{display:none}@media(max-height:700px){.camera-sky-fullscreen-controls .camera-sky-control-scroll-hint{display:block;margin:0 0 8px}}
+.camera-sky-fullscreen-controls:focus-visible{outline:2px solid var(--accent-soft);outline-offset:-3px}.camera-sky-fullscreen-controls .camera-sky-control-scroll-hint{display:none}.camera-sky-fullscreen-controls[data-scrollable="true"] .camera-sky-control-scroll-hint{display:block;position:sticky;top:-8px;z-index:2;background:var(--surface);margin:0 0 8px;padding:4px 0 6px;border-bottom:1px solid var(--line)}
 
 .aurora-outlook .score-row{grid-template-columns:minmax(0,1fr) 108px}
 @media(max-width:600px){.aurora-outlook .score-row{grid-template-columns:minmax(0,1fr);gap:16px}.aurora-outlook .score-row h2,.aurora-outlook .score-row p{max-width:none}.aurora-outlook .aurora-value{min-width:0;justify-self:start;text-align:left}}
@@ -233,4 +233,6 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .framing-viewer-caption .framing-fit{padding:12px;border:1px solid #725e45;border-radius:6px;color:#efba82;background:#30291f}
 .framing-viewer-caption:focus-visible{outline:2px solid var(--accent-soft);outline-offset:2px}
 
-.camera-sky-fullscreen-controls>.camera-sky-fullscreen-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;margin-top:8px}.camera-sky-fullscreen-search label{grid-column:1/-1;font-size:12px;color:var(--text-secondary)}.camera-sky-fullscreen-search input{width:100%;min-width:0}.camera-sky-fullscreen-search .button{flex:none;max-width:110px}
+.camera-sky-fullscreen-body>.camera-sky-fullscreen-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;margin-top:8px}.camera-sky-fullscreen-search label{grid-column:1/-1;font-size:12px;color:var(--text-secondary)}.camera-sky-fullscreen-search input{width:100%;min-width:0}.camera-sky-fullscreen-search .button{flex:none;max-width:110px}
+
+.camera-sky-fullscreen-controls>.camera-sky-fullscreen-body{display:block}.camera-sky-fullscreen-body>div{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:500px){.camera-sky-fullscreen-catalogue{flex-direction:column;align-items:stretch;gap:6px}.camera-sky-fullscreen-catalogue select{width:100%}}
