@@ -1,6 +1,6 @@
 # Nightjar development notes
 
-Detailed implementation and local QA notes accumulated during development. Earlier validation counts and limitations may be superseded by later entries. For current scope and acceptance, see [README.md](./README.md) and [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
+Detailed implementation and local QA notes accumulated during development. Earlier validation counts and limitations may be superseded by later entries. For current scope and acceptance, see [BETA-HANDOFF.md](./BETA-HANDOFF.md) and [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
 
 ## Cloudflare deployment from GitHub
 
@@ -2194,3 +2194,10 @@ The seven known task-only baseline/fixed text downloads were validated before be
 Node 22 full npm run verify passes all 624 tests, types, lint, production build and Cloudflare packaging dry-run. All 624 tests also pass under Node 24.19. The formatter's existing repeated-hour, fractional, historical-offset and era regressions pass; the small export integration was verified through received files instead of a JSX-mirroring test. Shared formatter reuse emits one additional shared client module: final worker release f8de1f9f8ce326e875ea2adf38734bd93afaae9cc51884494107e8edb0744120 reconstructs exactly from 92 inputs, all 338 scanned literal asset references resolve, and packaging stages 114 client files without bindings. Offline/recovery bytes and manifest/icon checks pass.
 
 A fresh read-only GitHub check on 15 October still confirms remote main bb1908e and successful Run #11 for the preceding 607-test batch. Current local changes remain unpushed; no deployment was performed.
+
+
+## 15 October 2026 — final review and fixture cleanup
+
+Final review of the continuation's runtime diff found no additional confirmed defect. The backup merge keeps original-device conflicts protected, comparison handoffs distinguish display fallback from known site metadata, maps preserve exact observing coordinates, and text exports retain exact source UTC while sharing the tested local formatter. The final helper module's shared chunk and recovery resources match the verified release package above. Both runtime versions were read directly (v22.16.0/v24.19.0). No runtime changes followed the successful full checks.
+
+All owned tabs for this continuation were closed. Authored cleanup controls cleared only the disposable 5676–5680 origins' synthetic local/session data, service-worker registrations and caches. Temporary viewport overrides were reset, the preview/proxy/cleanup servers were stopped, and no listeners remained on those ports. Validated task-only received files remain reversibly in the temporary directories recorded above; no unrelated user files or browser origins were cleared. No push, deployment, native hardware permission or native installation occurred.

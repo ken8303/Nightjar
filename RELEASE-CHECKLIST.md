@@ -2,6 +2,8 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
+Current evidence, 15 October 2026: **624 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `f8de1f9f8ce326e875ea2adf38734bd93afaae9cc51884494107e8edb0744120` matches 92 build/recovery inputs; 338 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+
 ## Verified locally
 
 - Install action completion restores focus to the stable Nightjar app panel. Simulated dismissed, rejected and accepted choices passed at 320 pixels; no native installation was performed.
