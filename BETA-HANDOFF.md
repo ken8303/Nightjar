@@ -6,6 +6,8 @@ A fresh read-only GitHub check on 15 October confirmed remote main at bb1908e an
 
 ## Recent changes and evidence
 
+- **Lunar time labels:** phase and eclipse dates include numeric UTC offsets, with explicit UTC fallback guidance for unknown site zones. Phase cards stack below 381 pixels. Compact/landscape/desktop checks preserve exact phase/eclipse instants; local update retains an unknown-zone site and millisecond peak.
+
 - **Calendar time-zone notes:** eclipse, deep-sky and forecast exports distinguish an unknown site zone from UTC event timestamps. Compact/desktop received files retain exact displayed intervals and a known London zone; all 626 tests and build/package checks pass. Native calendar-app import remains pending.
 
 - **Raw recovery preferences:** full-planner and cached-fallback recovery files preserve the saved red-light value, exact multiline Unicode notes and only known storage keys. Actual received desktop files passed content checks.

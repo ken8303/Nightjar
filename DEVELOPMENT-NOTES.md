@@ -4,7 +4,7 @@ Detailed implementation and local QA notes accumulated during development. Earli
 
 ## Cloudflare deployment from GitHub
 
-See [CLOUDFLARE.md](./CLOUDFLARE.md) for Workers Builds settings. Build with `npm run build`, deploy with `npm run deploy`, and validate packaging without publishing with `npm run deploy:check`.
+See [CLOUDFLARE.md](./CLOUDFLARE.md) for Workers Builds settings. Use `npm run verify` as the Workers Builds build command to check types, lint, tests, production output and packaging before `npm run deploy`. To check packaging separately without publishing, use `npm run deploy:check`.
 
 Optional red-light display mode tints the page, including charts and Moon imagery, and remembers the setting in browser local storage. It does not control screen brightness or browser/OS surfaces; colour-coded charts change appearance while enabled.
 
@@ -2212,3 +2212,18 @@ Two regression tests fail against the prior implementation and pass after the fi
 At 320 × 800, unknown-zone local entry remained disabled; received nightjar-2026-10-15.ics declares site zone unavailable and uses DTSTART 20261015T210000Z / DTEND 20261015T230000Z. At 1024 × 900, selecting the known London fixture enabled site-local entry; the received file declares Europe/London and the same exact UTC interval. The saved-site action already returned to Tonight, so a subsequent attempted View conditions locator had no match; the fresh state confirmed the correct destination and the export proceeded there. No application errors, framework overlay or document overflow; document widths 305/305 and 1009/1009. Compact screenshot emitted inline. Native calendar-app/phone import remains unverified.
 
 Received test-only downloads were moved reversibly to temporary receipt folders nightjar-calendar-unknown-4_etr1y4 and nightjar-calendar-known-7iarlefd after checking content. The real production worker fingerprint reconstructs as 96bf173b3fb5b34db654157ba313942678f9607cf5f7bdc2741f91006a960cf8 from 92 inputs, with 338 asset references resolving and 114 packaged client files. Detailed command logs: /tmp/nightjar-calendar-zone-verify.log and /tmp/nightjar-calendar-zone-node24.log. No push/deploy.
+
+
+## Lunar clocks and narrow phase cards — 15 October 2026
+
+The Moon phase and eclipse views still omitted numeric UTC offsets used elsewhere in planning. They now reuse the existing dated year/offset/era formatter, with an import alias to describe its general planning use. Phase cards show a dated timestamp and the site zone separately; missing zones explicitly explain UTC fallback. Eclipse contacts carry the same offset-aware timestamp. No astronomy calculations or event instants changed. A 320-pixel screenshot showed cramped two-column phase text splitting Europe/London awkwardly; cards now stack below 381 pixels, while landscape/desktop retain two/four columns.
+
+Full Node 22 verify passes types, lint, all 626 tests, production build and Cloudflare dry-run. The subsequent CSS-only layout adjustment passed build and packaging again. The seven existing formatter/lunar-event regressions also pass on Node 24.19; no JSX-mirroring tests were added. Relevant logs: /tmp/nightjar-lunar-offset-verify.log, /tmp/nightjar-lunar-offset-node24.log, /tmp/nightjar-lunar-mobile-build.log and /tmp/nightjar-lunar-mobile-package.log. The current Cloudflare deployment note was aligned with CLOUDFLARE.md: Workers Builds should use npm run verify, not just build.
+
+CUA Playwright fallback (Browser plugin unavailable) exercised Moon phase/eclipse controls on the same disposable origin. London phase cards span GMT+1 in October and GMT+0 after the seasonal change; eclipse choices show GMT+0 in February and GMT+1 in July/August. Selecting the July eclipse and Use peak retained exact UTC 2027-07-18T16:02:54.880Z. Unknown-zone guidance remained explicit; selecting Last quarter retained UTC 2027-07-26T16:55:28.698Z. Compact screenshot shows 235-pixel stacked cards with readable date/zone text. At 568 × 320 and 1024 × 900, two/four phase columns remain; document widths 305/305, 553/553 and 1009/1009 show no horizontal overflow. Screenshots emitted inline, not saved as repository assets.
+
+During the local live-build replacement, the older tab logged stale place-comparison/planner-backup chunk failures (20:40:55 UTC), so the entire old-tab log is not claimed clean. An explicit offered Update and reload retained the unknown-zone site and exact July eclipse milliseconds; current Moon rendering and interactions then passed. This is a local update preservation check, not a hosted migration or native-install claim. A received eclipse calendar from the prior committed calendar batch also confirms Europe/London and contact-enclosing UTC bounds; its test-only file was moved to temporary folder nightjar-eclipse-zone-gp7_j62h. Physical camera/motion and native files/calendar imports remain pending.
+
+Final release 1b847cf60abd9b7fb68219f04a06d574a3d94475ec5384c83fdbd5cda1693ccd matches 93 emitted/recovery inputs, 341 scanned relative references and 115 packaged client files. Manifest/icons/offline source checks pass. No agent push/deploy.
+
+Fresh production-tab follow-up: current page identity/nonblank Moon content, no framework overlay and empty warning/error logs were confirmed. Selecting the July eclipse rendered the expected GMT+0 fallback contacts at the unknown-zone fixture; a desktop screenshot was emitted. The earlier stale-chunk logs did not recur in this fresh tab.

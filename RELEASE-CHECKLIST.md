@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 15 October 2026: **626 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `96bf173b3fb5b34db654157ba313942678f9607cf5f7bdc2741f91006a960cf8` matches 92 build/recovery inputs; 338 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 15 October 2026: **626 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `1b847cf60abd9b7fb68219f04a06d574a3d94475ec5384c83fdbd5cda1693ccd` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -469,3 +469,11 @@ Additional local update acceptance on 15 October: real worker activation from 44
 - All 626 tests pass on Node 22.16.0 and Node 24.19.0; typecheck, lint, production build and Cloudflare packaging dry-run pass. Two new regressions fail before the fix and verify unknown versus actual UTC site zones while preserving UTC event bounds.
 - Browser export on the disposable origin at 320 × 800 and 1024 × 900 produced received calendar files with the unknown-zone explanation or known Europe/London zone, respectively. Both match the displayed UTC 21:00–23:00 interval on 15 October. No application console errors or horizontal overflow. Native phone/calendar-app acceptance remains pending.
 - Release `96bf173b3fb5b34db654157ba313942678f9607cf5f7bdc2741f91006a960cf8` matches all 92 emitted/recovery inputs; all 338 scanned asset references resolve. Packaging stages 114 client files without bindings. Manifest/icons and offline/recovery resource checks pass. This supersedes the earlier text-clock fingerprint. Changes remain local, with no agent push or deploy.
+
+
+## Lunar clock and compact-card verification, 15 October
+
+- Phase, eclipse-picker and eclipse-contact labels use the existing year/offset/era-aware formatter; unknown zones explicitly explain UTC fallback. Selecting a phase/eclipse keeps its source instant, including milliseconds. Phase cards stack at widths up to 380 pixels.
+- Full Node 22 verification passes 626 tests, types, lint, build and packaging; the final CSS-only change was followed by passing build/packaging. Seven relevant formatter/lunar-event tests pass on Node 24.19. The preceding calendar batch's full 626-test Node 24 run also passed.
+- Rendered checks at 320 × 800, 568 × 320 and 1024 × 900 fit without document overflow. London winter/summer offsets, unknown-zone text, exact phase/eclipse handoffs and a real local Update and reload preservation check pass. Final fresh-tab console check is recorded in development notes. Phone/native acceptance remains pending.
+- Final worker release `1b847cf60abd9b7fb68219f04a06d574a3d94475ec5384c83fdbd5cda1693ccd` reconstructs from 93 inputs, with 341 scanned relative asset references resolving. Packaging stages 115 client files without bindings; manifest, icons and recovery resources pass. Shared formatter reuse emits one additional module. No push or deployment.
