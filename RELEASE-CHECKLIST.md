@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 15 October 2026: **624 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `f8de1f9f8ce326e875ea2adf38734bd93afaae9cc51884494107e8edb0744120` matches 92 build/recovery inputs; 338 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 15 October 2026: **626 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `96bf173b3fb5b34db654157ba313942678f9607cf5f7bdc2741f91006a960cf8` matches 92 build/recovery inputs; 338 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -462,3 +462,10 @@ Additional local update acceptance on 15 October: real worker activation from 44
 - Current release `f8de1f9f8ce326e875ea2adf38734bd93afaae9cc51884494107e8edb0744120` reproduces exactly from 92 emitted/recovery inputs; all 338 scanned literal relative JS/CSS references resolve. Reusing the exact local-time formatter creates one additional shared module. Packaging stages 114 client files without bindings. Offline/recovery resources match source; manifest id/start/scope `/`, standalone display and 192/512/512 PNG checks pass. This supersedes the 4124ad3c package fingerprint.
 - The actual local PWA activation check above covered 44cbf21a to 4124ad3c and preserved legacy groups and precise context; it does not claim native installation or activation of every subsequent build. The final text-export build has production-browser and package evidence.
 - Fresh read-only GitHub evidence on 15 October: main remains bb1908e, Run #11 is successful and covers the preceding 607-test batch. Current 624-test changes remain local for the user's batch push. No agent push/deploy occurred; new hosted CI/Cloudflare and phone acceptance remain pending.
+
+
+## Calendar site-zone provenance, 15 October
+
+- All 626 tests pass on Node 22.16.0 and Node 24.19.0; typecheck, lint, production build and Cloudflare packaging dry-run pass. Two new regressions fail before the fix and verify unknown versus actual UTC site zones while preserving UTC event bounds.
+- Browser export on the disposable origin at 320 × 800 and 1024 × 900 produced received calendar files with the unknown-zone explanation or known Europe/London zone, respectively. Both match the displayed UTC 21:00–23:00 interval on 15 October. No application console errors or horizontal overflow. Native phone/calendar-app acceptance remains pending.
+- Release `96bf173b3fb5b34db654157ba313942678f9607cf5f7bdc2741f91006a960cf8` matches all 92 emitted/recovery inputs; all 338 scanned asset references resolve. Packaging stages 114 client files without bindings. Manifest/icons and offline/recovery resource checks pass. This supersedes the earlier text-clock fingerprint. Changes remain local, with no agent push or deploy.

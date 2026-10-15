@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **624 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 624 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the preceding 607-test camera, search, data-preservation, time-label and PWA batch at bb1908e. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **626 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 626 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the preceding 607-test camera, search, data-preservation, time-label and PWA batch at bb1908e. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at bb1908e and successful [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462). This covers the preceding 607-test batch; the current 624-test additions remain local. Runs #9/#10 also passed; the older Run #7 failed. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 15 October confirmed remote main at bb1908e and successful [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462). This covers the preceding 607-test batch; the current 626-test additions remain local. Runs #9/#10 also passed; the older Run #7 failed. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Calendar time-zone notes:** eclipse, deep-sky and forecast exports distinguish an unknown site zone from UTC event timestamps. Compact/desktop received files retain exact displayed intervals and a known London zone; all 626 tests and build/package checks pass. Native calendar-app import remains pending.
 
 - **Raw recovery preferences:** full-planner and cached-fallback recovery files preserve the saved red-light value, exact multiline Unicode notes and only known storage keys. Actual received desktop files passed content checks.
 - **Successful provider paths:** live weather, London search and NOAA aurora responses/rendering passed. Selecting a real forecast window retained its exact UTC time, and its received calendar event matched the displayed two-hour interval. Physical-phone/native acceptance remains pending.

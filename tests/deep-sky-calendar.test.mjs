@@ -31,3 +31,11 @@ test('invalid targets, sites, calendar years and intervals cannot generate misle
  for(const patch of [{target:{...target,id:'M102'}},{place:{...place,latitude:91}},{start:new Date(NaN)},{end:new Date('2026-10-25T00:15Z')},{end:new Date('2026-10-26T02:15Z')},{target:{...target,ra:24}}])assert.throws(()=>deepSkyWindowCalendar({...fixture(),...patch},created),/Invalid/);
  const early=fixture(new Date('0099-10-25T00:15Z'));assert(unfold(deepSkyWindowCalendar(early,created)).includes('DTSTART:00991025T001500Z'));assert.throws(()=>deepSkyWindowCalendar(fixture(new Date('0000-10-25T00:15Z')),created),/Invalid/);assert.throws(()=>deepSkyWindowCalendar(fixture(),new Date(NaN)),/Invalid/);
 });
+
+test('deep-sky event notes preserve unknown site zones instead of declaring UTC as the site zone',()=>{
+ const f=fixture(),unknown=unfold(deepSkyWindowCalendar({...f,place:{...place,timezone:undefined}},created)),known=unfold(deepSkyWindowCalendar({...f,place:{...place,timezone:'UTC'}},created));
+ assert(unknown.includes('Site time zone unavailable; event times use UTC.'.replaceAll(';','\\;')));
+ assert(!unknown.includes('Site time zone: UTC.'));
+ assert(known.includes('Site time zone: UTC.')&&!known.includes('Site time zone unavailable'));
+ for(const property of ['DTSTART:','DTEND:'])assert.equal(unknown.split('\r\n').find(line=>line.startsWith(property)),known.split('\r\n').find(line=>line.startsWith(property)));
+});

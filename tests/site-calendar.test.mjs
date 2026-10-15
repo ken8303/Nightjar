@@ -28,3 +28,16 @@ test('invalid contact chains, coordinates and peak metadata cannot produce misle
 test('calendar metadata keeps Unicode within 75-byte content lines and legacy coordinate-free calls remain accepted',()=>{
  for(const [input,calendar] of [[forecast,observingWindowCalendar],[eclipse,lunarEclipseCalendar]]){const text=calendar({...input,place:'星空'.repeat(80)+'; \nSite'},created);for(const line of text.split('\r\n'))assert(new TextEncoder().encode(line).length<=75);assert(unfold(text).includes('\\nSite'));const legacy={...input};delete legacy.latitude;delete legacy.longitude;assert.doesNotThrow(()=>calendar(legacy,created));assert(!unfold(calendar(legacy,created)).includes('GEO:'))}
 });
+
+test('calendar notes distinguish missing site time zones from a genuine UTC site without changing event bounds',()=>{
+ for(const [input,calendar] of [[forecast,observingWindowCalendar],[eclipse,lunarEclipseCalendar]]){
+  const unknown=unfold(calendar({...input,timezone:undefined},created));
+  assert(unknown.includes('Site time zone unavailable; event times use UTC.'.replaceAll(';','\\;')));
+  assert(!unknown.includes('Site time zone: UTC.')&&!unknown.includes('Observing site: Shared site name (UTC).'));
+  const known=unfold(calendar({...input,timezone:'UTC'},created));
+  assert(!known.includes('Site time zone unavailable'));
+  assert(known.includes('Site time zone: UTC.'));
+  assert(unfold(calendar(input,created)).includes('Site time zone: Europe/London.'));
+  for(const property of ['DTSTART:','DTEND:'])assert.equal(unknown.split('\r\n').find(line=>line.startsWith(property)),known.split('\r\n').find(line=>line.startsWith(property)));
+ }
+});
