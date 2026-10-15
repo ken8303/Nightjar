@@ -452,3 +452,11 @@ Latest read-only hosted check on 14 October: remote main is `bb1908e8a280a851e3c
 
 
 Additional local update acceptance on 15 October: real worker activation from 44cbf21a to 4124ad3c retained the selected Roof alias, Bortle 4 and exact UTC 2026-10-14T20:00:37.125Z. Received pre/post-update backups have identical saved-plan data, including all legacy groups. The old offline release cache was removed; no waiting worker remained. This supplements the current 624-test release evidence, while native install/device lifecycle and hosted acceptance remain pending. No runtime changes, push or deploy accompanied this check.
+
+
+### Final text-export and package follow-up — 15 October 2026
+
+- All 624 tests pass on both Node 22 and Node 24.19; types, lint, production build and Cloudflare packaging dry-run pass. Received observing-list files verify exact local fractions/offsets, earliest-year BC, repeated local hours and explicit missing-zone treatment. Details and receipt cleanup are recorded in DEVELOPMENT-NOTES.md.
+- Current release `f8de1f9f8ce326e875ea2adf38734bd93afaae9cc51884494107e8edb0744120` reproduces exactly from 92 emitted/recovery inputs; all 338 scanned literal relative JS/CSS references resolve. Reusing the exact local-time formatter creates one additional shared module. Packaging stages 114 client files without bindings. Offline/recovery resources match source; manifest id/start/scope `/`, standalone display and 192/512/512 PNG checks pass. This supersedes the 4124ad3c package fingerprint.
+- The actual local PWA activation check above covered 44cbf21a to 4124ad3c and preserved legacy groups and precise context; it does not claim native installation or activation of every subsequent build. The final text-export build has production-browser and package evidence.
+- Fresh read-only GitHub evidence on 15 October: main remains bb1908e, Run #11 is successful and covers the preceding 607-test batch. Current 624-test changes remain local for the user's batch push. No agent push/deploy occurred; new hosted CI/Cloudflare and phone acceptance remain pending.

@@ -17,6 +17,7 @@ import {Place,skyTargets,skyTargetLimit} from '@/lib/sky';
 import {findSkyTargets} from '@/lib/sky-target-search';
 import {printableObservingPlan,notesCoverageNotice,targetCoverageNotice} from '@/lib/observing-plan';
 import {readReportEquipment} from '@/lib/report-equipment';
+import {diaryLocalTime} from '@/lib/diary-time';
 export default function TargetFinder({date,place,selected,onSelect}:{date:Date;place:Place;selected:string;onSelect:(name:string)=>void}){
  const reportPending=usePendingEditReporter('sky',targetNoteEditLabel);
  const [notes,setNotes]=useState<Record<string,string>>({}),[notesReady,setNotesReady]=useState(false),[notesStatus,setNotesStatus]=useState(''),[notesStorageError,setNotesStorageError]=useState(false),[notesReadError,setNotesReadError]=useState(false);
@@ -112,8 +113,8 @@ export default function TargetFinder({date,place,selected,onSelect}:{date:Date;p
  const direction=(az:number)=>['N','NE','E','SE','S','SW','W','NW'][Math.round(az/45)%8];
  function downloadTargets(){
   try{
-   const localTime=new Intl.DateTimeFormat('en-GB',{dateStyle:'full',timeStyle:'short',timeZone:place.timezone||'UTC'}).format(date);
-   const text=['NIGHTJAR — OBSERVING LIST',`Place: ${place.name.replace(/[\r\n]/g,' ')}`,`Coordinates: ${place.latitude.toFixed(4)}, ${place.longitude.toFixed(4)}`,`Time (UTC): ${date.toISOString()}`,`Local time: ${localTime} (${place.timezone||'UTC'})`,...(notesCoverageNotice(notesReadError,Object.keys(pendingNotes.current).length>0)?['Notes status: '+notesCoverageNotice(notesReadError,Object.keys(pendingNotes.current).length>0)]:[]),'','Saved targets — highest altitude first',...(otherSaved.length?[targetCoverageNotice(otherSaved.length)]:[]),'',...savedTargets.flatMap(t=>[`[ ] ${t.name}`,`    Altitude: ${t.altitude.toFixed(1)}° | Azimuth: ${t.azimuth.toFixed(1)}° (${direction(t.azimuth)}) | ${t.altitude>0?'Above horizon':'Below horizon'}`,'    Notes:',...(notes[t.name]||'').split('\n').map(line=>`    ${line}`),'']),'Positions are a snapshot at the time and place above. Star positions are approximate.','Above the horizon does not guarantee visibility: daylight, weather and obstructions matter.',''].join('\n');
+   const localTime=place.timezone?diaryLocalTime({observedAt:date.toISOString(),place}):null;
+   const text=['NIGHTJAR — OBSERVING LIST',`Place: ${place.name.replace(/[\r\n]/g,' ')}`,`Coordinates: ${place.latitude.toFixed(4)}, ${place.longitude.toFixed(4)}`,`Time (UTC): ${date.toISOString()}`,localTime===null?'Site time zone unavailable. The time above is UTC.':`Local time: ${localTime} (${place.timezone})`,...(notesCoverageNotice(notesReadError,Object.keys(pendingNotes.current).length>0)?['Notes status: '+notesCoverageNotice(notesReadError,Object.keys(pendingNotes.current).length>0)]:[]),'','Saved targets — highest altitude first',...(otherSaved.length?[targetCoverageNotice(otherSaved.length)]:[]),'',...savedTargets.flatMap(t=>[`[ ] ${t.name}`,`    Altitude: ${t.altitude.toFixed(1)}° | Azimuth: ${t.azimuth.toFixed(1)}° (${direction(t.azimuth)}) | ${t.altitude>0?'Above horizon':'Below horizon'}`,'    Notes:',...(notes[t.name]||'').split('\n').map(line=>`    ${line}`),'']),'Positions are a snapshot at the time and place above. Star positions are approximate.','Above the horizon does not guarantee visibility: daylight, weather and obstructions matter.',''].join('\n');
    downloadFile(new Blob([text],{type:'text/plain;charset=utf-8'}),`nightjar-targets-${date.toISOString().slice(0,10)}.txt`);
    setDownloadStatus('Observing list prepared for download. Open the text file to read or print it.');
   }catch{setDownloadStatus('The observing list could not be created. Please try again.')}
