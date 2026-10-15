@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 15 October 2026: **626 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `1b847cf60abd9b7fb68219f04a06d574a3d94475ec5384c83fdbd5cda1693ccd` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 15 October 2026: **628 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `fc776f73d0a6df5747fcdf660ab23c82d7c859b9d4168739545d474ac0c32fd4` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #11 covers the earlier 607-test push; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -477,3 +477,11 @@ Additional local update acceptance on 15 October: real worker activation from 44
 - Full Node 22 verification passes 626 tests, types, lint, build and packaging; the final CSS-only change was followed by passing build/packaging. Seven relevant formatter/lunar-event tests pass on Node 24.19. The preceding calendar batch's full 626-test Node 24 run also passed.
 - Rendered checks at 320 × 800, 568 × 320 and 1024 × 900 fit without document overflow. London winter/summer offsets, unknown-zone text, exact phase/eclipse handoffs and a real local Update and reload preservation check pass. Final fresh-tab console check is recorded in development notes. Phone/native acceptance remains pending.
 - Final worker release `1b847cf60abd9b7fb68219f04a06d574a3d94475ec5384c83fdbd5cda1693ccd` reconstructs from 93 inputs, with 341 scanned relative asset references resolving. Packaging stages 115 client files without bindings; manifest, icons and recovery resources pass. Shared formatter reuse emits one additional module. No push or deployment.
+
+
+## Atlas and diary unknown-zone follow-up, 15 October
+
+- Full Node 22 verify and all Node 24.19 tests pass at 628 tests. The unknown-zone export regression fails before the fix; its companion regression protects actual UTC sites. Atlas fallback labels UTC; diary CSV keeps exact UTC while leaving unavailable local-time/zone fields empty. UI/HTML explain fallback and retain original record metadata.
+- Compact/desktop browser checks verify actual received CSV/HTML files, report preview and close focus, exact fractional times/Unicode notes, unknown and known site labels, and record independence after changing the planner site. No console errors, framework overlay or document overflow in the final flow.
+- Camera manual smoke checks at compact/landscape widths passed catalogue search, Vega/M31 preview, real loaded reference photos, fullscreen exit, clear-search focus and exact live-time details handoff. No hardware or device permission was started; physical acceptance remains pending.
+- Current release `fc776f73d0a6df5747fcdf660ab23c82d7c859b9d4168739545d474ac0c32fd4` reconstructs from 93 emitted/recovery inputs. All 341 scanned relative references resolve; 115 client files package without bindings. Manifest/icons/offline resources pass. No push or deployment.

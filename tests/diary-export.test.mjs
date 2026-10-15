@@ -28,3 +28,14 @@ test('country is escaped in reports and appended safely to CSV while the existin
  for(const country of ['=1+1','+SUM(1,2)','  @value'])assert.equal(parseCSV(diaryCSV([{...record,place:{...record.place,country}}]).slice(1))[1][12],"'"+country);
  assert.equal(parseCSV(diaryCSV([entry]).slice(1))[1][12],'');
 });
+
+test('diary exports leave unknown local-time metadata empty while preserving the exact UTC observation',()=>{
+ const record={...entry,observedAt:'2026-10-25T00:30:59.987Z',place:{...entry.place,timezone:undefined}},before=structuredClone(record),row=parseCSV(diaryCSV([record]).slice(1))[1],html=diaryReport([record]);
+ assert.equal(row[2],record.observedAt);assert.equal(row[3],'');assert.equal(row[4],'');
+ assert(html.includes('site time zone unavailable'));assert(html.includes(record.observedAt));assert(html.includes('00:30:59.987 GMT'));
+ assert.deepEqual(record,before);
+});
+test('a real UTC site keeps populated local-time and zone metadata in diary exports',()=>{
+ const record={...entry,place:{...entry.place,timezone:'UTC'}},row=parseCSV(diaryCSV([record]).slice(1))[1],html=diaryReport([record]);
+ assert.equal(row[4],'UTC');assert(row[3].includes('00:30:00 GMT'));assert(!html.includes('site time zone unavailable'));assert(html.includes(' · UTC</p>'));
+});
