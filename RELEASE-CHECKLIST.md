@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 15 October 2026: **629 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `000210ed016c1263313ca4e53ba247a75819d532d46b6c11f07af3f3bf363de2` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 15 October 2026: **629 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `b05392886ae0eef04459504188a080447386563c76000f5600f7c791813985a5` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -495,3 +495,12 @@ Hosted evidence refresh, 15 October: read-only git ls-remote and GitHub API chec
 - All 629 tests pass on Node 22.16.0 and Node 24.19.0; types, lint, build and Cloudflare packaging pass. A new regression verifies fixed 200-pixel bounds, degrees/RA conversion, matching red-band field and preserved full references/source credits.
 - Real browser M33 loads 200 × 200 instead of the previously observed 3564 × 3564 survey image in a tiny label. A controlled 503 retains the label/placeholder; restored service plus explicit Retry loads the 200-pixel image. Full details retain the original 60-arcminute STScI request. Native phone memory/network speed is not measured.
 - Current release `000210ed016c1263313ca4e53ba247a75819d532d46b6c11f07af3f3bf363de2` matches 93 emitted/recovery inputs and 341 scanned references; 115 client files package without bindings. Manifest/icons/offline checks pass. Full field/cutout-provider documentation and QA fixture limitations are in development notes. No push/deploy.
+
+
+## Camera catalogue selection continuity, 15 October
+
+- Compatible catalogue switches retain a followed object; excluding it returns the picker to Explore all objects. Fullscreen and regular pickers share the rule, while search still preserves a followed object outside its results.
+- Full Node 22 verify passes 629 tests, types, lint, build and packaging. Ten relevant camera-catalogue tests also pass under Node 24.19. Mobile/desktop browser checks cover Vega bright/combined, M33 deep-sky/combined, incompatible resets, search, fullscreen exit and Open camera focus return with empty app warning/error logs.
+- Release `b05392886ae0eef04459504188a080447386563c76000f5600f7c791813985a5` reproduces from 93 inputs; all 341 scanned references resolve and 115 client files package without bindings. Recovery resources, manifest and icons pass. No agent push/deploy; phone hardware acceptance remains pending.
+
+Final source also passes all 629 tests on Node 24.19.0. Owned test origins/tabs/servers and viewport overrides are cleaned up; details are in development notes. The current release fingerprint above is unchanged by these documentation-only additions.

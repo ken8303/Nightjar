@@ -72,7 +72,11 @@ export default function CameraSky(props:Props){
  const [catalogueMode,setCatalogueMode]=useState<CameraCatalogue>(initialView.mode),[deepSelection,setDeepSelection]=useState(initialView.selected),[targetQuery,setTargetQuery]=useState('');
  const selectedName=deepSelection||props.selected;
  function chooseTarget(name:string){if(/^M\d+$/.test(name)){setDeepSelection(name);props.onSelect('')}else{setDeepSelection('');props.onSelect(name)}}
- function chooseCatalogue(mode:CameraCatalogue){setCatalogueMode(mode);setDeepSelection('');props.onSelect('');setPreviousLabels([]);setAlignmentError(null)}
+ function chooseCatalogue(mode:CameraCatalogue){
+  setCatalogueMode(mode);setPreviousLabels([]);setAlignmentError(null);
+  if(selected&&(mode==='all'||selected.deepSky===(mode==='deep-sky')))return;
+  setDeepSelection('');props.onSelect('');
+ }
  const [locating,setLocating]=useState(false),[locationError,setLocationError]=useState('');
  const searchInputRef=useRef<HTMLInputElement>(null),fullScreenSearchInputRef=useRef<HTMLInputElement>(null),videoRef=useRef<HTMLVideoElement>(null),stageRef=useRef<HTMLDivElement>(null),motionRequest=useRef(0),settingsRef=useRef<HTMLDivElement>(null),siteRef=useRef<HTMLDivElement>(null),calibrationRef=useRef<HTMLDivElement>(null);
  const locationSessionRef=useRef<ReturnType<typeof createCameraLocation>|null>(null);

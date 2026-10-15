@@ -6,6 +6,8 @@ A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` 
 
 ## Recent changes and evidence
 
+- **Followed camera objects:** compatible catalogue switches retain the followed object. An excluding catalogue returns to Explore all objects. Mobile/desktop, fullscreen search, selected-name priority and close-focus checks pass.
+
 - **Small survey thumbnails:** camera survey images request 200 × 200 red-band CDS cutouts at the same catalogue centre/field, retaining full STScI references in details. Actual M33 dimensions, fullscreen rendering, controlled failure/Retry and full-reference handoff passed. All 629 tests and build/package checks pass; native phone memory/performance remains unmeasured.
 
 - **Unknown-zone atlas and diary:** the atlas labels its fallback clock UTC. Diary CSV leaves unknown site-local time/zone cells empty, while UI/HTML explicitly explain UTC fallback; real UTC records retain their zone. Received compact CSV/HTML, report preview, known-site switching and all 628 tests pass.
