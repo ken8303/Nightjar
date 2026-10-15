@@ -9,6 +9,8 @@ A fresh read-only GitHub check on 14 October confirmed remote main at bb1908e an
 - **Raw recovery preferences:** full-planner and cached-fallback recovery files preserve the saved red-light value, exact multiline Unicode notes and only known storage keys. Actual received desktop files passed content checks.
 - **Successful provider paths:** live weather, London search and NOAA aurora responses/rendering passed. Selecting a real forecast window retained its exact UTC time, and its received calendar event matched the displayed two-hour interval. Physical-phone/native acceptance remains pending.
 
+- **Local PWA update acceptance:** an actual offered update activated the new worker, removed the old offline release cache, and retained a selected site alias, Bortle rating and exact seconds/milliseconds. Received pre/post-update backups contain identical saved-plan data, including both equipment versions and Unicode notes. Native installation/phone lifecycle remains pending.
+
 - **Backup legacy versions:** new incoming groups retain all same-coordinate site aliases and same-name setup versions already present in the file. Existing-device conflicts remain protected, repeated import has no false sibling conflicts, and capacity counts every record. Compact import/review, desktop setup loading, an actual received backup and capacity-refusal checks passed.
 
 - **Comparison time zones:** UTC display fallback no longer becomes a saved claim about an unknown site's local clock. Both planning actions preserve unknown zones, while known site/provider zones still enable local entry correctly. Compact/desktop missing-zone, resolved-zone and exact-window handoffs passed.
