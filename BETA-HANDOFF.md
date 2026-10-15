@@ -1,13 +1,15 @@
 # Nightjar beta handoff
 
-Current local verification passes **618 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 618 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the preceding 607-test camera, search, data-preservation, time-label and PWA batch at bb1908e. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **620 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 620 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the preceding 607-test camera, search, data-preservation, time-label and PWA batch at bb1908e. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 14 October confirmed remote main at bb1908e and successful [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462). This covers the preceding 607-test batch; the current 618-test additions remain local. Runs #9/#10 also passed; the older Run #7 failed. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 14 October confirmed remote main at bb1908e and successful [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462). This covers the preceding 607-test batch; the current 620-test additions remain local. Runs #9/#10 also passed; the older Run #7 failed. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
 
 - **Raw recovery preferences:** full-planner and cached-fallback recovery files preserve the saved red-light value, exact multiline Unicode notes and only known storage keys. Actual received desktop files passed content checks.
 - **Successful provider paths:** live weather, London search and NOAA aurora responses/rendering passed. Selecting a real forecast window retained its exact UTC time, and its received calendar event matched the displayed two-hour interval. Physical-phone/native acceptance remains pending.
+
+- **Comparison time zones:** UTC display fallback no longer becomes a saved claim about an unknown site's local clock. Both planning actions preserve unknown zones, while known site/provider zones still enable local entry correctly. Compact/desktop missing-zone, resolved-zone and exact-window handoffs passed.
 
 - **Polar site maps:** unsupported polar views show an explanation while exact coordinates remain usable for sky planning and saved sites. Near the map boundary, both bounds shrink together to keep the pin visible. North/south poles, both map edges/date-line longitudes, ordinary mapping, compact layout and site editing passed locally.
 

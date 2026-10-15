@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {storeSiteForecast,siteForecastState}=await vite.ssrLoadModule('/lib/site-forecasts.ts');
+const {storeSiteForecast,siteForecastState,siteForecastContext}=await vite.ssrLoadModule('/lib/site-forecasts.ts');
 const data={timezone:'Europe/London',hourly:{time:[1791403200],cloud_cover:[20]}};
 test('failed site refresh preserves the exact successful forecast and timestamp, then retry replaces both',()=>{
  const previous={a:{data,requestKey:'a:0',fetchedAt:1000}},before=structuredClone(previous);
@@ -35,4 +35,26 @@ test('retained forecasts identify a backward clock correction beyond the minute-
  assert.equal(siteForecastState(result,'current',7140000).clockChanged,false);
  assert.equal(siteForecastState(result,'current',7200000).clockChanged,false);
  assert.equal(siteForecastState({requestKey:'current'},'current',3600000).clockChanged,false);
+});
+
+
+test('comparison display fallback never invents a known time zone for planning',()=>{
+ const place={name:'Coordinate-only site',latitude:51.5,longitude:0,bortle:3,extra:'Keep metadata'},before=structuredClone(place);
+ for(const forecast of [undefined,{hourly:data.hourly}]){
+  const context=siteForecastContext(place,forecast);
+  assert.equal(context.timezone,'UTC');assert.equal(context.timezoneKnown,false);
+  assert.equal(context.planningPlace,place);assert.equal(Object.hasOwn(context.planningPlace,'timezone'),false);
+ }
+ assert.deepEqual(place,before);
+});
+test('comparison planning keeps known site zones and adopts a provider zone without changing other metadata',()=>{
+ const place={name:'Saved site',latitude:51.5,longitude:0,timezone:'America/New_York',bortle:3,extra:'Keep metadata'},before=structuredClone(place);
+ for(const forecast of [undefined,{hourly:data.hourly}]){
+  const context=siteForecastContext(place,forecast);
+  assert.equal(context.timezone,'America/New_York');assert.equal(context.timezoneKnown,true);assert.deepEqual(context.planningPlace,place);
+ }
+ const resolved=siteForecastContext(place,data);
+ assert.equal(resolved.timezone,'Europe/London');assert.equal(resolved.timezoneKnown,true);assert.deepEqual(resolved.planningPlace,{...place,timezone:'Europe/London'});assert.deepEqual(place,before);
+ const utc=siteForecastContext({...place,timezone:undefined},{...data,timezone:'UTC'});
+ assert.equal(utc.timezoneKnown,true);assert.equal(utc.planningPlace.timezone,'UTC');
 });

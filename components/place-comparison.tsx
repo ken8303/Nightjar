@@ -9,7 +9,7 @@ import {usePlanningClock} from '@/hooks/use-planning-clock';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {forecastHourIndex} from '@/lib/weather-hours';
 import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
-import {storeSiteForecast,siteForecastState,type SiteForecast} from '@/lib/site-forecasts';
+import {storeSiteForecast,siteForecastState,siteForecastContext,type SiteForecast} from '@/lib/site-forecasts';
 import { A, bodyPosition, moonInfo, Place, scoreAt, timeLabel } from '@/lib/sky';
 
 const key = (p: Place) => `${p.latitude},${p.longitude}`;
@@ -44,9 +44,9 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   const h=result?.data?.hourly; const i=forecastHourIndex(h?.time,new Date(instant*1000));
   const at=new Date(instant*1000),cloud=i>=0?h?.cloud_cover?.[i]:null;
   const score=typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?scoreAt(cloud,at,place):null;
-  const timezone=result?.data?.timezone||place.timezone||'UTC';
+  const {timezone,timezoneKnown,planningPlace}=siteForecastContext(place,result?.data);
   const opportunity=h?bestNightWindow(sevenNightOutlook(h,{...place,timezone},new Date(now))):null;
-  return {id,place,result,...state,h,i,at,score,cloud,timezone,opportunity,moon:moonInfo(at,place),sun:bodyPosition(A.Body.Sun,at,place).altitude};
+  return {id,place,result,...state,h,i,at,score,cloud,timezone,timezoneKnown,planningPlace,opportunity,moon:moonInfo(at,place),sun:bodyPosition(A.Body.Sun,at,place).altitude};
  }),[selected,options,results,instant,requestKey,now]);
  const complete=rows.length>1&&rows.every(r=>r.score!==null&&!r.loading&&!r.error&&!r.stale&&!r.clockChanged);
  const best=complete?Math.max(...rows.map(r=>r.score!)):null;
@@ -56,7 +56,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   {options.length<2&&<p className="muted">Save another place above to compare conditions before choosing where to go.</p>}
   {!selected.length&&<p className="muted">Select a place to see its forecast.</p>}
   <div className="comparison-grid">{rows.map(r=><article className="comparison-card" key={r.id}>
-   <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={`Stop comparing ${r.place.name}`}>Stop comparing this site</button><p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}</p>
+   <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={`Stop comparing ${r.place.name}`}>Stop comparing this site</button><p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}{!r.timezoneKnown?' · site time zone unavailable':''}</p>
    <p className="comparison-darkness">{r.place.bortle?`Your sky rating: Bortle ${r.place.bortle} / 9`:'Sky darkness: not rated'}</p>
    {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?'Refreshing; previous forecast shown.':'Loading forecast…':r.error?r.result?.data?'Refresh failed; previous forecast shown. Retry forecasts to update it.':r.error:'This forecast was fetched over 30 minutes ago. Refresh before relying on it.'}</p>}
    {r.clockChanged&&<p className="notice" role="status">The weather update time is ahead of your device clock. Its age cannot be confirmed; check your clock and refresh before relying on this forecast.</p>}
@@ -66,8 +66,8 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
     <p className="comparison-best">{best!==null&&r.score===best&&best>0?'Highest score among selected sites':r.sun>-6?'Daylight or civil twilight':r.sun>-18?'Twilight at this hour':'Astronomical darkness'}</p>
     <dl><div><dt>Cloud cover</dt><dd>{metric(r.cloud,'%')}</dd></div><div><dt>Temperature</dt><dd>{metric(r.h?.temperature_2m?.[r.i],' °C')}</dd></div><div><dt>Wind</dt><dd>{metric(r.h?.wind_speed_10m?.[r.i],' km/h')}</dd></div><div><dt>Humidity</dt><dd>{metric(r.h?.relative_humidity_2m?.[r.i],'%')}</dd></div><div><dt>Moon</dt><dd>{Math.round(r.moon.illumination*100)}% · {r.moon.altitude>0?'above':'below'} horizon</dd></div></dl>
    </>)}
-   {r.opportunity?.best?<div className="comparison-window"><small>BEST UPCOMING DARK WINDOW</small><strong>{r.opportunity.best.score}/100 · {observingWindowLabel(r.opportunity.best.date,r.opportunity.best.hours,r.timezone)}</strong><span>{r.opportunity.best.hours} {r.opportunity.best.hours===1?'hour':'hours'} · {r.opportunity.best.cloud}% cloud · {r.opportunity.forecastHours}/{r.opportunity.darkHours} dark hours scored</span><button className="text-button" onClick={()=>onPlan({...r.place,timezone:r.timezone},r.opportunity!.best!.date)}>Plan this window <ArrowUpRight size={16}/></button></div>:r.result?.data?<p className="comparison-no-window">No scored dark window in the remaining forecast.</p>:null}
-   <button className="text-button" onClick={()=>onChoose({...r.place,timezone:r.timezone})}>Plan here at selected time <ArrowUpRight size={16}/></button>
+   {r.opportunity?.best?<div className="comparison-window"><small>BEST UPCOMING DARK WINDOW</small><strong>{r.opportunity.best.score}/100 · {observingWindowLabel(r.opportunity.best.date,r.opportunity.best.hours,r.timezone)}</strong><span>{r.opportunity.best.hours} {r.opportunity.best.hours===1?'hour':'hours'} · {r.opportunity.best.cloud}% cloud · {r.opportunity.forecastHours}/{r.opportunity.darkHours} dark hours scored</span><button className="text-button" onClick={()=>onPlan(r.planningPlace,r.opportunity!.best!.date)}>Plan this window <ArrowUpRight size={16}/></button></div>:r.result?.data?<p className="comparison-no-window">No scored dark window in the remaining forecast.</p>:null}
+   <button className="text-button" onClick={()=>onChoose(r.planningPlace)}>Plan here at selected time <ArrowUpRight size={16}/></button>
   </article>)}</div>
   <p className="footnote">Same-hour scores and best upcoming windows use cloud cover, Sun altitude and moonlight. Each night prefers a complete two-hour window; a single hour is used when no pair is available. The best upcoming window is the highest-scoring of those nightly choices after now, with longer windows winning tied scores. It may be on a different night for each site. User-entered Bortle ratings are separate and are not map measurements. Scores do not measure seeing, transparency or light pollution. Weather: Open-Meteo. Missing data is never scored as clear skies.</p>
  </section>;

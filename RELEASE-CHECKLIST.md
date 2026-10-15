@@ -434,3 +434,10 @@ Latest read-only hosted check on 14 October: remote main is `bb1908e8a280a851e3c
 - Reproduced and repaired shared red-light save feedback, ambiguous repeated-hour forecast recommendations, and polar-map/edge-marker failures. Browser evidence and the partial-map-adjustment corrections are recorded in DEVELOPMENT-NOTES.md.
 - Worker release `eed4f6aaae482d75d0c0af0d2d4f58d3b4f71a7d3474974a6b81a5771bac0bb4` matches complete reconstruction from 91 emitted/recovery inputs. All 335 scanned literal relative JS/CSS references resolve. Offline/recovery bytes match source; manifest id/start/scope `/`, standalone display and 192/512/512 icon signatures/dimensions pass. Dry-run stages 113 client files, without bindings.
 - The last hosted check remains Run #11/main bb1908e, covering the preceding 607-test batch. The new 618-test local batch has not been pushed or deployed by the agent. GitHub/Cloudflare validation after the user's batch push and physical-phone acceptance remain pending.
+
+
+### Comparison time-zone follow-up — 15 October 2026
+
+- Final Node 22 verification and all Node 24.19 tests pass at 620 tests. Both comparison handoffs preserve unknown time-zone metadata instead of persisting their UTC display fallback; known/provider zone and exact-window checks passed locally.
+- Current worker release is `44cbf21afeafd36d33d440e1b6d44ea6defe22af497d711d4017abbba776228d`, reproduced exactly from 91 inputs. All 335 scanned literal relative JS/CSS references resolve; offline/recovery bytes, manifest and 192/512/512 PNG checks pass. Packaging stages 113 client files without bindings. This supersedes the earlier 618-test package fingerprint.
+- No agent push/deploy occurred. The last hosted result covers the preceding 607-test batch; the new local 620-test source still requires GitHub/Cloudflare validation after the user's batch push and the documented phone acceptance checks.
