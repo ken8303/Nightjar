@@ -9,6 +9,8 @@ A fresh read-only GitHub check on 14 October confirmed remote main at bb1908e an
 - **Raw recovery preferences:** full-planner and cached-fallback recovery files preserve the saved red-light value, exact multiline Unicode notes and only known storage keys. Actual received desktop files passed content checks.
 - **Successful provider paths:** live weather, London search and NOAA aurora responses/rendering passed. Selecting a real forecast window retained its exact UTC time, and its received calendar event matched the displayed two-hour interval. Physical-phone/native acceptance remains pending.
 
+- **Shared red-light save feedback:** a successful change in camera settings clears an older main-page save warning. Camera-side failures also update the mounted main control. Compact/desktop controlled failure, recovery, retained-time and close-focus checks passed.
+
 - **Red-light preference events:** queued events read the current stored value, so an older event cannot undo a newer setting. Blocked storage preserves the current display without an unhandled error. Peer changes and shared camera/main controls passed compact checks.
 
 - **Manual coordinate copy:** clipboard failure reveals selectable full J2000 text with exact decimals. The bounded read-only box fits phones, Select marks the complete value, switching targets hides stale fallback text, and simulated retry succeeds. Native clipboard/file receipt still needs phone testing.
