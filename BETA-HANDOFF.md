@@ -1,8 +1,8 @@
 # Nightjar beta handoff
 
-Current local verification passes **628 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 628 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Your latest push includes the preceding 607-test camera, search, data-preservation, time-label and PWA batch at bb1908e. Subsequent verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **628 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 628 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Three new verified commits are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at bb1908e and successful [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462). This covers the preceding 607-test batch; the current 628-test additions remain local. Runs #9/#10 also passed; the older Run #7 failed. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 628-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
 
