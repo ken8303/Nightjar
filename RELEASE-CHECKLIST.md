@@ -426,3 +426,11 @@ Completion percentages previously reported were estimates. Release acceptance is
 
 
 Latest read-only hosted check on 14 October: remote main is `bb1908e8a280a851e3cfabf3d72fbcda7778a9ee` and [Run #11](https://github.com/ken8303/Nightjar/actions/runs/38569760462) completed successfully. This supersedes the earlier Run #10/8d44d72 snapshot and covers 607 tests. Current615-test additions remain local and need the user's batch push before hosted validation.
+
+
+### Latest local release evidence — 15 October 2026
+
+- All 618 tests pass on Node 22 and Node 24.19; types, lint, production build and Cloudflare packaging dry-run pass. Known informational build notices remain.
+- Reproduced and repaired shared red-light save feedback, ambiguous repeated-hour forecast recommendations, and polar-map/edge-marker failures. Browser evidence and the partial-map-adjustment corrections are recorded in DEVELOPMENT-NOTES.md.
+- Worker release `eed4f6aaae482d75d0c0af0d2d4f58d3b4f71a7d3474974a6b81a5771bac0bb4` matches complete reconstruction from 91 emitted/recovery inputs. All 335 scanned literal relative JS/CSS references resolve. Offline/recovery bytes match source; manifest id/start/scope `/`, standalone display and 192/512/512 icon signatures/dimensions pass. Dry-run stages 113 client files, without bindings.
+- The last hosted check remains Run #11/main bb1908e, covering the preceding 607-test batch. The new 618-test local batch has not been pushed or deployed by the agent. GitHub/Cloudflare validation after the user's batch push and physical-phone acceptance remain pending.
