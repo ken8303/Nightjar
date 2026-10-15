@@ -19,5 +19,8 @@ export function objectPhoto(name:string):ObjectPhoto|undefined{
 }
 export function skySurveyPhoto(name:string,ra:number,dec:number,field=15):ObjectPhoto{
  const params=new URLSearchParams({v:'poss2ukstu_red',r:sexagesimal(ra),d:sexagesimal(dec,true),e:'J2000',h:String(field),w:String(field),f:'gif',c:'none'});
- return{src:`https://archive.stsci.edu/cgi-bin/dss_search?${params}`,alt:`Photographic sky-survey field centred on the catalogue position of ${name}`,caption:`Archival red-band photographic field, ${field} × ${field} arcminutes. Bright stars may saturate; this is a sky field, not a resolved stellar surface or a live view.`,credit:'Digitized Sky Survey / STScI · survey plates: Caltech, AAO, UK SERC/PPARC; digitisation: AURA',source:'https://archive.stsci.edu/dss/copyright.html',survey:true};
+ // Survey GIFs can decode to millions of pixels even in a 36px camera label.
+ // HiPS2FITS uses degrees for both RA and field; the full reference stays intact.
+ const thumbnail=new URLSearchParams({hips:'CDS/P/DSS2/red',width:'200',height:'200',projection:'TAN',coordsys:'icrs',ra:String(ra*15),dec:String(dec),fov:String(field/60),format:'jpg'});
+ return{src:`https://archive.stsci.edu/cgi-bin/dss_search?${params}`,thumbnailSrc:`https://alasky.cds.unistra.fr/hips-image-services/hips2fits?${thumbnail}`,alt:`Photographic sky-survey field centred on the catalogue position of ${name}`,caption:`Archival red-band photographic field, ${field} × ${field} arcminutes. Bright stars may saturate; this is a sky field, not a resolved stellar surface or a live view.`,credit:'Digitized Sky Survey / STScI · survey plates: Caltech, AAO, UK SERC/PPARC; digitisation: AURA; camera thumbnails: CDS HiPS2FITS',source:'https://archive.stsci.edu/dss/copyright.html',survey:true};
 }

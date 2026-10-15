@@ -71,3 +71,14 @@ test('camera thumbnails share attributed featured references with the explorer a
  const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
  for(const id of ['M13','M31']){const target=messierCatalogue.find(t=>t.id===id),photo=cameraCataloguePhoto(id);assert.deepEqual(photo,deepSkyPhoto(target));assert.equal(new URL(photo.thumbnailSrc).searchParams.get('w'),'200');assert.match(photo.credit,/NASA/)}
 });
+
+test('survey camera thumbnails request a bounded red-band image with the same catalogue centre and field',()=>{
+ for(const name of ['M33','Polaris','Sirius']){
+  const photo=cameraCataloguePhoto(name),full=new URL(photo.src),thumb=new URL(photo.thumbnailSrc),params=thumb.searchParams;
+  assert.equal(thumb.origin,'https://alasky.cds.unistra.fr');assert.equal(params.get('width'),'200');assert.equal(params.get('height'),'200');assert.equal(params.get('format'),'jpg');assert.equal(params.get('hips'),'CDS/P/DSS2/red');assert.equal(params.get('projection'),'TAN');assert.equal(params.get('coordsys'),'icrs');assert.equal(Number(params.get('fov')),Number(full.searchParams.get('h'))/60);
+  const value=(text)=>{const sign=text.startsWith('-')?-1:1;const parts=text.replace(/^[-+]/,'').split(':').map(Number);return sign*(parts[0]+parts[1]/60+parts[2]/3600)};
+  assert(Math.abs(Number(params.get('ra'))-value(full.searchParams.get('r'))*15)<=15/7200);
+  assert(Math.abs(Number(params.get('dec'))-value(full.searchParams.get('d')))<=1/7200);
+  assert.equal(full.hostname,'archive.stsci.edu');assert.equal(full.searchParams.get('e'),'J2000');assert(photo.credit.includes('CDS'));
+ }
+});

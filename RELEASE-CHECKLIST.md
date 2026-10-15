@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 15 October 2026: **628 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `fc776f73d0a6df5747fcdf660ab23c82d7c859b9d4168739545d474ac0c32fd4` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the three new local commits still need the user's GitHub Desktop push and hosted validation.
+Current evidence, 15 October 2026: **629 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `000210ed016c1263313ca4e53ba247a75819d532d46b6c11f07af3f3bf363de2` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -488,3 +488,10 @@ Additional local update acceptance on 15 October: real worker activation from 44
 
 
 Hosted evidence refresh, 15 October: read-only git ls-remote and GitHub API checks confirm main at 7d3ee06457687412bcba57d589c9cc715fef8512 and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release, superseding bb1908e/Run #11 for current release status. Three new commits with 628 passing local tests remain ahead. No agent push/deploy occurred; Cloudflare/phone acceptance is separate.
+
+
+## Bounded camera survey thumbnails, 15 October
+
+- All 629 tests pass on Node 22.16.0 and Node 24.19.0; types, lint, build and Cloudflare packaging pass. A new regression verifies fixed 200-pixel bounds, degrees/RA conversion, matching red-band field and preserved full references/source credits.
+- Real browser M33 loads 200 × 200 instead of the previously observed 3564 × 3564 survey image in a tiny label. A controlled 503 retains the label/placeholder; restored service plus explicit Retry loads the 200-pixel image. Full details retain the original 60-arcminute STScI request. Native phone memory/network speed is not measured.
+- Current release `000210ed016c1263313ca4e53ba247a75819d532d46b6c11f07af3f3bf363de2` matches 93 emitted/recovery inputs and 341 scanned references; 115 client files package without bindings. Manifest/icons/offline checks pass. Full field/cutout-provider documentation and QA fixture limitations are in development notes. No push/deploy.

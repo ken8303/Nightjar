@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **628 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 628 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Three new verified commits are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **629 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 629 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 628-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 629-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Small survey thumbnails:** camera survey images request 200 × 200 red-band CDS cutouts at the same catalogue centre/field, retaining full STScI references in details. Actual M33 dimensions, fullscreen rendering, controlled failure/Retry and full-reference handoff passed. All 629 tests and build/package checks pass; native phone memory/performance remains unmeasured.
 
 - **Unknown-zone atlas and diary:** the atlas labels its fallback clock UTC. Diary CSV leaves unknown site-local time/zone cells empty, while UI/HTML explicitly explain UTC fallback; real UTC records retain their zone. Received compact CSV/HTML, report preview, known-site switching and all 628 tests pass.
 
