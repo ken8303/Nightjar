@@ -163,3 +163,42 @@ test('a peer replacement of an already written collection stops import and retai
   before.set(keys[0],peer);assert.deepEqual(current.values,before);
  }
 });
+
+test('blank-device restore preserves valid aliases and setup versions already together in a backup',()=>{
+ const roof={...site,name:'Roof',bortle:6},long={...camera,focal:800};
+ const data={...empty(),places:[site,roof,{...roof}],equipment:[camera,long,{...long}],targets:['Vega'],notes:{Vega:'Legacy versions 星空'}};
+ const before=structuredClone(data),backup=makePlannerBackup(storage(data)),destination=storage();
+ assert.deepEqual(backup.data.places,data.places);assert.deepEqual(backup.data.equipment,data.equipment);
+ assert.deepEqual(restorePlannerBackup(destination,backup),backup.data);
+ assert.deepEqual(readSavedPlan(destination),backup.data);assert.deepEqual(data,before);
+});
+test('new imported groups retain all versions beside unrelated saved records and repeated import is unchanged',()=>{
+ const existing={...empty(),places:[{...site,name:'Elsewhere',latitude:40}],equipment:[{...camera,name:'Other camera'}]};
+ const incoming={...empty(),places:[site,{...site,name:'Roof',bortle:6}],equipment:[camera,{...camera,focal:800}]};
+ const before=structuredClone({existing,incoming}),review=previewPlannerMerge(existing,incoming);
+ assert.equal(review.added.places,2);assert.equal(review.added.equipment,2);
+ assert.deepEqual(review.merged.places,[...existing.places,...incoming.places]);assert.deepEqual(review.merged.equipment,[...existing.equipment,...incoming.equipment]);
+ const again=previewPlannerMerge(review.merged,incoming);
+ assert.equal(again.added.places,0);assert.equal(again.added.equipment,0);assert.deepEqual(again.kept,{places:[],equipment:[],notes:[],diary:[]});assert.deepEqual(again.merged,review.merged);
+ assert.deepEqual({existing,incoming},before);
+});
+test('legacy conflict review recognises exact sibling versions and names the changed site alias',()=>{
+ const roof={...site,name:'Roof',bortle:6},long={...camera,focal:800};
+ const existing={...empty(),places:[site,roof],equipment:[camera,long]};
+ assert.deepEqual(previewPlannerMerge(existing,existing).kept,{places:[],equipment:[],notes:[],diary:[]});
+ const incoming={...empty(),places:[{...roof,bortle:8}],equipment:[{...long,focal:1200}]},review=previewPlannerMerge(existing,incoming);
+ assert.deepEqual(review.kept,{places:['Roof'],equipment:['Camera'],notes:[],diary:[]});
+ assert.deepEqual(review.merged.places,existing.places);assert.deepEqual(review.merged.equipment,existing.equipment);
+});
+test('capacity checks count every incoming version and refuse before writing instead of dropping a sibling',()=>{
+ const cases=[
+  [{...empty(),places:Array.from({length:99},(_,i)=>({...site,name:`Existing ${i}`,latitude:0,longitude:-170+i}))},{...empty(),places:[site,{...site,name:'Roof'}]},/100 saved sites/],
+  [{...empty(),equipment:Array.from({length:99},(_,i)=>({...camera,name:`Existing ${i}`}))},{...empty(),equipment:[camera,{...camera,focal:800}]},/100 saved equipment/]
+ ];
+ for(const [existing,incoming,message] of cases){
+  const current=storage(existing),before=new Map(current.values),backup=parsePlannerBackup(file(incoming)),set=current.setItem;let writes=0;
+  current.setItem=(key,value)=>{writes++;set(key,value)};
+  assert.throws(()=>restorePlannerBackup(current,backup,readSavedPlan(current)),message);
+  assert.equal(writes,0);assert.deepEqual(current.values,before);
+ }
+});

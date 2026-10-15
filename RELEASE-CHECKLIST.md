@@ -441,3 +441,11 @@ Latest read-only hosted check on 14 October: remote main is `bb1908e8a280a851e3c
 - Final Node 22 verification and all Node 24.19 tests pass at 620 tests. Both comparison handoffs preserve unknown time-zone metadata instead of persisting their UTC display fallback; known/provider zone and exact-window checks passed locally.
 - Current worker release is `44cbf21afeafd36d33d440e1b6d44ea6defe22af497d711d4017abbba776228d`, reproduced exactly from 91 inputs. All 335 scanned literal relative JS/CSS references resolve; offline/recovery bytes, manifest and 192/512/512 PNG checks pass. Packaging stages 113 client files without bindings. This supersedes the earlier 618-test package fingerprint.
 - No agent push/deploy occurred. The last hosted result covers the preceding 607-test batch; the new local 620-test source still requires GitHub/Cloudflare validation after the user's batch push and the documented phone acceptance checks.
+
+
+### Backup version-preservation follow-up — 15 October 2026
+
+- All 624 tests pass on Node 22 and Node 24.19, with types, lint, production build and Cloudflare packaging dry-run passing. Four new regressions reproduced legacy record loss, false sibling conflicts and capacity undercounting before the fix.
+- Compact import retains both incoming site aliases and setup versions, current site/time and picker focus. Reimport adds nothing without false conflicts. Both desktop equipment versions load correctly; 99-site capacity refusal focuses the error and retains the existing list. A received and validated backup preserves the complete records and Unicode note. Evidence and the fixture-adapter correction are in DEVELOPMENT-NOTES.md.
+- Current worker release is `4124ad3c9a0ef5fbabd3fe1ca6372324eddb0804cfe6125a15bb467677467151`, exactly reconstructed from 91 inputs; all 335 scanned literal relative asset references resolve. Offline/recovery resources, manifest and PNG signatures/dimensions pass. Packaging stages 113 client files, without bindings. This supersedes the preceding 620-test fingerprint.
+- Hosted CI still needs the user's batch push; the last checked Run #11 covers 607 tests. Physical phone sensors/install/keyboard/file receipt and hosted Cloudflare acceptance remain pending. The agent has not pushed or deployed.

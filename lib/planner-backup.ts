@@ -1,7 +1,7 @@
 import {diaryKey,diaryLimit,normalizeDiary,mergeDiary,type Observation} from './observing-diary';
 import {deepSkyListKey,validDeepSkyList} from './deep-sky-list';
 import {type Place,skyTargetLimit} from './sky';
-import {validPlace} from './planner-state';
+import {validPlace,samePlaceCoordinates} from './planner-state';
 import {type Equipment,validEquipment} from './photography';
 import {savedPlacesLimit,equipmentProfilesLimit} from './saved-collections';
 
@@ -49,8 +49,10 @@ export function readSavedPlan(storage:StorageAccess):SavedPlan{return readSavedP
 export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:now.toISOString(),data:readSavedPlan(storage)},null,2))}
 export function mergeSavedPlans(existing:SavedPlan,incoming:SavedPlan):SavedPlan{
  existing=plan(existing);incoming=plan(incoming);
- const places=[...existing.places];for(const p of incoming.places)if(!places.some(site=>Math.abs(site.latitude-p.latitude)<.0001&&Math.abs(site.longitude-p.longitude)<.0001))places.push(p);
- const equipment=[...existing.equipment];for(const e of incoming.equipment)if(!equipment.some(setup=>setup.name.trim()===e.name.trim()))equipment.push(e);
+ // Existing-device groups win conflicts. Within a new incoming group, retain
+ // every valid legacy alias/setup version rather than silently keeping its first.
+ const places=[...existing.places,...incoming.places.filter(p=>!existing.places.some(site=>samePlaceCoordinates(site,p)))];
+ const equipment=[...existing.equipment,...incoming.equipment.filter(e=>!existing.equipment.some(setup=>setup.name.trim()===e.name.trim()))];
  const targets=[...new Set([...existing.targets,...incoming.targets])],notes={...incoming.notes,...existing.notes},knownDiary=new Set((existing.diary||[]).map(entry=>entry.id));
  const capacity=(size:number,limit:number,label:string)=>{if(size>limit)throw Error(`The combined plan would exceed ${limit} saved ${label}. Free space or choose a smaller backup. Nothing has been imported.`)};
  capacity(places.length,savedPlacesLimit,'sites');capacity(equipment.length,equipmentProfilesLimit,'equipment setups');capacity(targets.length,skyTargetLimit,'bright-sky targets');capacity(Object.keys(notes).length,100,'target notes');capacity(knownDiary.size+(incoming.diary||[]).filter(entry=>!knownDiary.has(entry.id)).length,diaryLimit,'observations');
@@ -64,9 +66,17 @@ export function previewPlannerMerge(existing:SavedPlan,incoming:SavedPlan){
   added:{diary:(merged.diary||[]).length-(existing.diary||[]).length,deepTargets:(merged.deepTargets||[]).length-(existing.deepTargets||[]).length,places:merged.places.length-existing.places.length,targets:merged.targets.length-existing.targets.length,notes:Object.keys(merged.notes).length-Object.keys(existing.notes).length,equipment:merged.equipment.length-existing.equipment.length},
   kept:{
    diary:(incoming.diary||[]).flatMap(entry=>{const saved=(existing.diary||[]).find(value=>value.id===entry.id);return saved&&different(saved,entry)?[entry.target+' · '+entry.observedAt]:[]}),
-   places:incoming.places.flatMap(site=>{const saved=existing.places.find(p=>Math.abs(site.latitude-p.latitude)<.0001&&Math.abs(site.longitude-p.longitude)<.0001);return saved&&different(saved,site)?[saved.name]:[]}),
+   places:incoming.places.flatMap(site=>{
+    const matches=existing.places.filter(p=>samePlaceCoordinates(p,site));
+    if(matches.some(saved=>!different(saved,site)))return [];
+    const saved=matches.find(p=>p.name===site.name)??matches[0];return saved?[saved.name]:[];
+   }),
    notes:Object.keys(incoming.notes).filter(key=>Object.hasOwn(existing.notes,key)&&existing.notes[key]!==incoming.notes[key]),
-   equipment:incoming.equipment.flatMap(setup=>{const saved=existing.equipment.find(e=>setup.name.trim()===e.name.trim());return saved&&different(saved,setup)?[saved.name]:[]})
+   equipment:incoming.equipment.flatMap(setup=>{
+    const matches=existing.equipment.filter(e=>setup.name.trim()===e.name.trim());
+    if(matches.some(saved=>!different(saved,setup)))return [];
+    const saved=matches.find(e=>e.name===setup.name)??matches[0];return saved?[saved.name]:[];
+   })
   }
  };
 }
