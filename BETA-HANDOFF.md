@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **642 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 642 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **643 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 643 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 642-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 643-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Portable Cloudflare packaging:** paths must still resolve to the copied entry/assets inside the isolated package. Paths that only re-enter the original build by folder name are refused before Wrangler; rejection cleans the temporary snapshot and preserves the original. All 643 tests and the actual packaging dry-run pass.
 
 - **Print-plan clock identity:** unknown site zones now label the fallback Time (UTC) and explicitly say the zone is unavailable. Real UTC sites retain Time at site. Bright/deep-sky preview and received-file checks preserve the exact millisecond UTC instant; all 642 tests and build/package checks pass.
 

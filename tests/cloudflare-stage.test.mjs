@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {mkdtemp,mkdir,writeFile,readFile,access,rm,symlink} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,access,rm,symlink,readdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
@@ -49,4 +49,16 @@ test('packaging-check entry rejects configuration and publish overrides before i
  for(const args of [['check','--dry-run=false'],['check','--no-dry-run'],['check','--env','production'],['check','--outdir'],['check','--config','other.json'],['deploy','--config=other.json'],['unknown']]){
   const result=spawnSync(process.execPath,['scripts/run-cloudflare.mjs',...args],{cwd:new URL('../',import.meta.url),encoding:'utf8'});assert.notEqual(result.status,0);assert(!result.stdout.includes('Prepared isolated'));
  }
+});
+
+test('paths that re-enter the original build by folder name cannot silently break an isolated package',async()=>{
+ const f=await fixture();let stage;
+ try{
+  for(const config of [{main:'index.js',assets:{directory:'../../dist/client'}},{main:'../../dist/server/index.js',assets:{directory:'../client'}}]){
+   await f.put('server/wrangler.json',JSON.stringify(config));
+   await assert.rejects(async()=>{stage=await stageCloudflareBuild(f.build,f.root)},/portable relative paths/);
+   assert.deepEqual(JSON.parse(await readFile(join(f.build,'server/wrangler.json'),'utf8')),config,'validation must not rewrite the original build');
+   assert.deepEqual(await readdir(f.root),['dist'],'a refused package must not leave a temporary snapshot');
+  }
+ }finally{await stage?.cleanup();await f.cleanup()}
 });

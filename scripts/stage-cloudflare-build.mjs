@@ -21,6 +21,9 @@ export async function stageCloudflareBuild(source,temporaryParent=tmpdir()){
  await filesIn(build);
  const root=await mkdtemp(join(temporaryParent,'nightjar-cloudflare-'));
  try{
+  // A path can leave the build and re-enter by its original folder name.
+  // It resolved above, but cannot survive relocation into this snapshot.
+  if(resolve(root,'server',config.main)!==resolve(root,'server',relative(server,main))||resolve(root,'server',config.assets.directory)!==join(root,'client'))throw Error('The generated Cloudflare configuration must keep portable relative paths inside the isolated build. Rebuild before packaging.');
   await cp(build,root,{recursive:true});
   const files=await filesIn(root),content=new Map();
   const textFiles=files.filter(file=>/\.(?:js|mjs|json|css|html|map)$/.test(file));
