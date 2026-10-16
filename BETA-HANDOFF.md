@@ -5,8 +5,8 @@ Nightjar remains a beta. Local checks do not establish physical-phone camera ali
 ## Current release evidence — 16 October 2026
 
 - **662 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. The preceding reviewed batch has compact and desktop production-browser evidence; the new local fixes have automated/source validation only because no browser is exposed in this session.
-- The compiled worker release is `958db371720ed8723ebd5b7716121b00d56579d081531b98c1bf699695d842d0`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
-- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. The subsequent aurora, full-hour crossing and twilight-consistency fixes are local and are not covered by Run #15.
+- The compiled worker release is `ff83f8c3a09b7c9e7fa1ef22b8cd705964f1839a8f6f4ce066cef0721ccb8d6d`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
+- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. The subsequent aurora, full-hour crossing, twilight-consistency and unfinished-time retention fixes are local and are not covered by Run #15.
 - No Cloudflare deployment result appears in the checked GitHub statuses/check runs. An empty status list is not evidence of a pending deployment. The final Cloudflare origin still needs verification.
 - You pushed the reviewed batch through GitHub Desktop. The development agent has not pushed or deployed. Temporary review servers, owned browser tabs and disposable test-origin data were cleaned up.
 
@@ -17,6 +17,8 @@ Aurora now labels a coordinate-only site’s fallback clock as UTC, with “site
 Full-hour darkness and Moon-free checks now search for short altitude crossings between the 15-minute samples. Regressions reproduce brief Sun and Moon excursions that the old samples missed; the dark-window planner no longer recommends the affected hour. Apparent contours retain that protection; solar darkness now explicitly uses geometric altitude, matching the milestone and camera definitions.
 
 Twilight classification, scores, first-open timing, target planners, site comparison and report Sun metadata now share the geometric Sun-centre altitude used by the darkness milestones and camera. Regression checks reproduce their earlier disagreement just after dusk and keep apparent Sun/Moon viewing positions unchanged. See the [USNO definitions](https://aa.usno.navy.mil/faq/RST_defs).
+
+The UTC/local entry-zone buttons now stay disabled while a date/time edit is incomplete or awaiting a DST occurrence choice. An associated explanation directs the user to finish or cancel first, preventing a zone-button tap from silently discarding the edit. The small control change has full automated gates but awaits rendered/native interaction checks.
 
 ## Reviewed batch included in your latest push
 
@@ -51,6 +53,7 @@ Detailed reproductions, logs, historical test counts and their limitations are r
 | Delayed loading | On a slow connection, background while a view or offline setup is still loading, then return. Recovery deadlines allow a fresh foreground wait; an unfinished time edit keeps reload disabled and its review action returns to the retained input. |
 | Installation and update | Install from the browser/home-screen flow. A pending install cannot be tapped repeatedly. For a real deployed update, save/copy unfinished text first and confirm the selected site/time survive the explicit update. |
 | Offline return | Open online once and save test plans. Reopen without connectivity: the fallback shows saved device data. Full planner startup, fresh positions and weather offline are not supported promises. Restore connectivity and verify return. |
+| Time entry zone | Clear the observing-time input and try switching UTC/local mode; the buttons stay disabled and the edit remains. With Europe/London local entry, type 25 October 2026 at 01:30 and verify both occurrence choices remain until one is selected or Cancel is chosen. After resolving, zone switching is available again. |
 | Numeric entry | Try a decimal comma such as focal 12,5 and confirm a saved setup shows 12.5 mm. Invalid/unfinished text stays in the draft and disables relevant calculations/exports. Verify the native keyboard permits required signs and separators. |
 | Failed saves | Keep the view open. Direct review actions return to time, coordinates, imaging, diary, target-note or site-name recovery. Retry after storage is usable; verify retained text and original observation metadata. |
 | Files and accessibility | Confirm actual receipt/import/printing of intended files. Test screen-reader labels, focus after review/close, large text, and short landscape screens. Local screenshots and download-prepared messages do not prove these native behaviours. |
