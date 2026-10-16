@@ -2,9 +2,11 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **647 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `6fe3603a6bfb6d0d2cab122e48398ad0fb41a3324a1e9e02155c76597e625343` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer review fixes remain local and needs the next batch push/hosted validation.
+Current evidence, 16 October 2026: **649 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `94978d3fa4faabd149f547625ef6aedef157bb54241e14d23439a80e601c25f4` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer review fixes remain local and needs the next batch push/hosted validation.
 
 ## Verified locally
+
+- Backup export refuses a collection replaced during its read or final-read storage denial before offering a file. Fresh retries retain the newer site and exact notes; failed backup/raw-recovery downloads clear prior success feedback. Received files and compact/desktop feedback pass. This is guarded verification, not an atomic multi-key snapshot guarantee.
 
 - A saved red-light preference is applied from the document head before the loading screen. Held-hydration compact/desktop checks pass on, off and denied-storage startup; hydration and toggling stay free of application warnings/errors. Device brightness and native browser/app surfaces remain outside this display filter.
 

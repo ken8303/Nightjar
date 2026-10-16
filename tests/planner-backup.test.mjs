@@ -21,6 +21,24 @@ test('export/import round trip preserves Unicode, multiline notes and Bortle rat
  assert.deepEqual(restorePlannerBackup(destination,parsePlannerBackup(JSON.stringify(backup))),{...data,deepTargets:[],diary:[]});
  assert.deepEqual(readSavedPlan(destination),{...data,deepTargets:[],diary:[]});
 });
+test('backup export refuses a saved collection replaced during its read and succeeds on a fresh retry',()=>{
+ const replacements=[[site],['Vega'],{Vega:'New peer text 星空\nSecond line'},[camera],['M31'],[{id:'peer-observation',target:'M31',observedAt:'2026-10-16T20:00:37.125Z',place:site,outcome:'seen',equipment:'',notes:'Peer diary'}]];
+ for(let index=0;index<keys.length;index++){
+  const current=storage(),get=current.getItem;let injected=false,writes=0;
+  current.setItem=()=>{writes++;assert.fail('export must never write saved plans')};
+  current.getItem=key=>{const value=get(key);if(!injected&&key===keys.at(-1)){injected=true;current.values.set(keys[index],JSON.stringify(replacements[index]))}return value};
+  assert.throws(()=>makePlannerBackup(current),/changed while preparing/i);
+  assert.equal(writes,0);assert.equal(current.values.get(keys[index]),JSON.stringify(replacements[index]));
+  const retry=makePlannerBackup(current);assert.deepEqual(retry.data,readSavedPlan(current));
+  assert.deepEqual(current.values.get(keys[index]),JSON.stringify(replacements[index]));
+ }
+});
+test('backup export refuses unverifiable final storage reads instead of reporting a prepared copy',()=>{
+ const current=storage({places:[site],targets:['Vega'],notes:{Vega:'Keep exact text'},equipment:[camera]}),get=current.getItem,before=new Map(current.values);let reads=0,denied=true;
+ current.getItem=key=>{if(++reads>keys.length&&denied)throw Error('Storage denied after snapshot');return get(key)};
+ assert.throws(()=>makePlannerBackup(current),/could not be checked/i);assert.deepEqual(current.values,before);
+ denied=false;assert.equal(makePlannerBackup(current).data.notes.Vega,'Keep exact text');assert.deepEqual(current.values,before);
+});
 test('merging keeps existing conflicts, adds new records, deduplicates coordinates and targets',()=>{
  const existing={places:[site],targets:['Vega'],notes:{Vega:'Keep my note'},equipment:[camera]};
  const incoming={places:[{...site,name:'Renamed',latitude:51.00001},{...site,name:'Second',latitude:52}],targets:['Vega','Saturn'],notes:{Vega:'Imported note',Saturn:'New note'},equipment:[{...camera,focal:800},{...camera,name:'Second camera'}]};

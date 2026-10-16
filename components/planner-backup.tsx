@@ -25,6 +25,7 @@ export default function PlannerBackupPanel({onRestore}:{onRestore:(data:SavedPla
  function cancelRead(){const owner=document.activeElement;generation.current++;setBusy(false);setPreview(null);setError('');setStatus('Backup reading cancelled. Choose a file to try again.');deferFocusAndScroll(()=>fileInput.current,{owner})}
  function download(){
   feedbackOwner.current=document.activeElement;
+  setStatus('');
   try{
    const backup=makePlannerBackup(localStorage);
    downloadFile(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),`nightjar-backup-${backup.exportedAt.slice(0,10)}.json`);
@@ -33,6 +34,7 @@ export default function PlannerBackupPanel({onRestore}:{onRestore:(data:SavedPla
  }
  function downloadRecovery(){
   feedbackOwner.current=document.activeElement;
+  setStatus('');
   try{const recovery=makePlannerRecovery({getItem:key=>localStorage.getItem(key)},{getItem:key=>sessionStorage.getItem(key)});downloadFile(new Blob([recovery.text],{type:'application/json'}),`nightjar-raw-recovery-${recovery.exportedAt.slice(0,10)}.json`);setStatus(`Raw recovery copy prepared. ${recovery.unreadable.length?`${recovery.unreadable.length} unreadable storage ${recovery.unreadable.length===1?'entry is':'entries are'} listed in the file; those values are not included. `:''}Keep this file for manual recovery. It cannot be imported as a plan backup.`);setError('');}
   catch(error){setError(error instanceof Error?error.message:'A recovery copy could not be prepared. Existing storage has not been changed.');}
  }

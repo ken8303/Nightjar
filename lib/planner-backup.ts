@@ -46,7 +46,16 @@ function readSavedPlanSnapshot(storage:StorageAccess){
  }catch{throw Error('Saved plans could not be read. Your existing data has not been changed.')}
 }
 export function readSavedPlan(storage:StorageAccess):SavedPlan{return readSavedPlanSnapshot(storage).data}
-export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:now.toISOString(),data:readSavedPlan(storage)},null,2))}
+export function makePlannerBackup(storage:StorageAccess,now=new Date()):PlannerBackup{
+ const snapshot=readSavedPlanSnapshot(storage);
+ // A peer can replace an earlier collection while the remaining keys are read.
+ // Refuse that mixed snapshot before offering a file; localStorage is not atomic.
+ let unchanged:boolean;
+ try{unchanged=keys.every((key,index)=>storage.getItem(key)===snapshot.raw[index])}
+ catch{throw Error('Saved plans could not be checked before preparing the backup. Restore browser storage access and try again. Your stored plans were not changed by this export.')}
+ if(!unchanged)throw Error('Saved plans changed while preparing the backup. No file was prepared. Download the backup again to copy the current saved plans.');
+ return parsePlannerBackup(JSON.stringify({format:'nightjar-backup',version:4,exportedAt:now.toISOString(),data:snapshot.data},null,2));
+}
 export function mergeSavedPlans(existing:SavedPlan,incoming:SavedPlan):SavedPlan{
  existing=plan(existing);incoming=plan(incoming);
  // Existing-device groups win conflicts. Within a new incoming group, retain
