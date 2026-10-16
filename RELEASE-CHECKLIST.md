@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **637 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `1c71838e9a69875c701da8e5687a48ae2b645023fae9fde44addc11bab0bdbbd` matches 93 build/recovery inputs; 343 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 16 October 2026: **640 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `1c71838e9a69875c701da8e5687a48ae2b645023fae9fde44addc11bab0bdbbd` matches 93 build/recovery inputs; 343 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -525,3 +525,5 @@ Final source also passes all 629 tests on Node 24.19.0. Owned test origins/tabs/
 - Diary conflict review focuses its heading on open and retained copies after either version choice. No-conflict review focuses retry guidance; a stale reviewed choice stays focused and refuses replacement. Denied writes retain text and explicit Retry. Native reader/keyboard acceptance remains pending.
 
 - Concurrent Aurora requests in one Worker instance share their provider fetch and receive independent JSON responses. Cache expiry, shared rejection, invalid/HTTP/unreadable bodies and later retry have regression coverage. Simultaneous compiled local-Worker HTTP calls returned valid live NOAA data; deployed multi-instance behavior remains outside that evidence.
+
+- Weather API boundary coverage now verifies invalid coordinates without provider contact, distinct valid coordinates, successful cache headers, malformed/failed provider responses and successful retry. All 640 tests pass on Node 22/24 and lint passes; production source and the preceding fully verified build are unchanged by this coverage-only batch.
