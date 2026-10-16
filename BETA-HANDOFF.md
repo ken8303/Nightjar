@@ -6,6 +6,8 @@ A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` 
 
 ## Recent changes and evidence
 
+- **Diary version review:** opening a conflict review focuses its heading; completing either version choice focuses the retained copies. A no-conflict review focuses retry guidance. Stale reviewed versions still refuse replacement and retain choice focus. Compact/desktop checks cover denied writes and explicit recovery.
+
 - **Diary retry focus:** recovered form reads/saves focus their recovery message; recovered saved-diary reads focus the observation heading. Still-blocked retries retain their controls. A recovered read revealing conflicting text focuses guidance and keeps the local form intact. Compact/desktop checks pass.
 
 - **Note retry focus:** successful explicit retries return to the selected note, managed editor or note selector. Failed retries retain the recovery button; a review with no conflicts focuses the target-list heading when no object is selected. Automatic typing saves are unchanged. Compact/desktop checks pass.

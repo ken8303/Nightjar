@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **634 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `4de4c62cbc33547f5f8a60239d2f82cbbba1080f051144e47bfb3c420391de45` matches 93 build/recovery inputs; 343 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 16 October 2026: **634 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `13f22991e3efb6a5b1303e994f7401c5a570bb269c6e05b1d75a402ec69ec0da` matches 93 build/recovery inputs; 343 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -521,3 +521,5 @@ Final source also passes all 629 tests on Node 24.19.0. Owned test origins/tabs/
 - Explicit target-note Retry returns keyboard focus to the relevant retained editor/selector after its recovery button disappears. Failed retries retain the button; no-conflict review with no selected object focuses the saved-target heading. Compact/desktop checks and existing deferred-focus guards pass.
 
 - Successful explicit diary form-read/save retries focus recovery feedback; saved-diary read retries focus the observation heading. A newly readable but conflicting form keeps local text and focuses conflict guidance. Still-blocked attempts and typing retain focus. Physical reader/keyboard acceptance remains pending.
+
+- Diary conflict review focuses its heading on open and retained copies after either version choice. No-conflict review focuses retry guidance; a stale reviewed choice stays focused and refuses replacement. Denied writes retain text and explicit Retry. Native reader/keyboard acceptance remains pending.
