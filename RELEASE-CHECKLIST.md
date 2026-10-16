@@ -2,9 +2,11 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **650 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `c04ad960a288dfca5434cb7038ffd5b2b9ba359e96998da85b302dde827251f1` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer review fixes remain local and needs the next batch push/hosted validation.
+Current evidence, 16 October 2026: **651 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `6118ca14b11d6e6234e305b58d9228d6f0b4aa946d4b7aa5eca69696bf6ddf34` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer review fixes remain local and needs the next batch push/hosted validation.
 
 ## Verified locally
+
+- All eight solar-system references decode from their current public sources; featured M13 also decodes despite its TIFF-backed filename. Planet/Moon camera thumbnails use smaller NASA sources: seven request a 200-pixel long side, Saturn’s listed thumbnail decodes at 640 × 309. Main images stay unchanged. Real Moon labels pass ordinary/fullscreen manual-camera checks without hardware access.
 
 - Main survey photos and enlarged viewers request bounded 800 × 800 cutouts while retaining direct full-survey links; camera thumbnails stay 200 × 200. Actual M33 decode changed from 3564 × 3571 to 800 × 800 in the phone panel and enlarged view. Retry, zoom/close focus, mode switching and unchanged featured M31 NASA imagery pass. This is decoded-pixel evidence, not a timing/RAM benchmark.
 

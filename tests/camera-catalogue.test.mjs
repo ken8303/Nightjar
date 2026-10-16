@@ -82,3 +82,16 @@ test('survey camera thumbnails request a bounded red-band image with the same ca
   assert.equal(full.hostname,'archive.stsci.edu');assert.equal(full.searchParams.get('e'),'J2000');assert(photo.credit.includes('CDS'));
  }
 });
+
+test('solar-system camera thumbnails retain reference identity without using the large main images',()=>{
+ for(const name of ['Moon','Mercury','Venus','Mars','Jupiter','Uranus','Neptune']){
+  const photo=cameraCataloguePhoto(name);assert(photo.thumbnailSrc,`${name} needs a smaller camera image`);
+  const full=new URL(photo.src),thumb=new URL(photo.thumbnailSrc);
+  assert.equal(thumb.origin+thumb.pathname,full.origin+full.pathname);
+  assert.equal(full.searchParams.get('w'),'800');assert.equal(full.searchParams.get('h'),'800');
+  assert.equal(thumb.searchParams.get('w'),'200');assert.equal(thumb.searchParams.get('h'),'200');
+  full.searchParams.delete('w');full.searchParams.delete('h');thumb.searchParams.delete('w');thumb.searchParams.delete('h');assert.equal(thumb.href,full.href);
+  assert(photo.credit.includes('NASA'));assert.equal(new URL(photo.source).hostname,'science.nasa.gov');
+ }
+ const saturn=cameraCataloguePhoto('Saturn');assert.equal(saturn.src,'https://images-assets.nasa.gov/image/PIA11141/PIA11141~large.jpg');assert.equal(saturn.thumbnailSrc,'https://images-assets.nasa.gov/image/PIA11141/PIA11141~thumb.jpg');
+});
