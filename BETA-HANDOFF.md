@@ -1,10 +1,12 @@
 # Nightjar beta handoff
 
-Current local verification passes **634 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 634 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **637 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 637 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 634-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 637-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
+
+- **Concurrent Aurora reads:** callers within the same Worker instance share an in-flight NOAA request, while receiving independent responses. Success keeps the existing five-minute cache; failures clear for retry and invalid feeds remain uncached. All 637 tests pass on Node 22/24; concurrent compiled-Worker requests returned valid live data.
 
 - **Short landscape review:** a 568 × 320 browser tour checked all seven sections, framing zoom/scroll/focus, lunar controls and manual camera fullscreen. Camera controls scroll within 45% of height, leaving 55% for the sky. Planner time and launcher focus remain intact. Native phone sensors, safe areas and keyboards remain pending.
 

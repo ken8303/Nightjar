@@ -159,3 +159,5 @@ A requested PWA update gets a fresh timeout window after returning from backgrou
 If target notes cannot save, Download unsaved notes prepares a manual JSON recovery file from edits held in the current view, including original versions and explicit removals. The copy may contain private text, cannot be imported as a plan backup, and does not mark edits as saved. Keep it before reloading; retry saving after restoring browser storage access.
 
 Successful explicit target-note save retries return focus to the relevant note field or manager selector. Failed retries keep their recovery control, and automatic saves while typing do not move focus. Deferred handoffs leave a newer active editor alone.
+
+Aurora requests within one active Worker instance share an in-flight NOAA fetch and retain the existing five-minute success cache. Failed reads are not cached and later requests can retry. Separate Worker instances keep separate caches; this is not a distributed request limit.
