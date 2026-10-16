@@ -1,4 +1,4 @@
-import {A, Place, bodyPosition, hourBelowAltitude, moonInfo, scoreAt} from './sky';
+import {A, Place, hourBelowAltitude, moonInfo, scoreAt, sunAltitude} from './sky';
 
 import {utcDate} from './utc-date';
 import {validObservingDate} from './observing-time';
@@ -18,7 +18,7 @@ export function sevenNightOutlook(hourly:Hourly,place:Place,from=new Date()):Nig
  const groups=new Map<string,{date:Date;cloud:number|null;score:number|null}[]>();
  for(let i=0;i<hourly.time.length;i++){
   const date=new Date(hourly.time[i]*1000);
-  if(!validObservingDate(date)||+date<+from||bodyPosition(A.Body.Sun,date,place).altitude>=-18)continue;
+  if(!validObservingDate(date)||+date<+from||sunAltitude(date,place)>=-18)continue;
   const key=localNightKey(date,formatter);
   const cloud=hourly.cloud_cover?.[i],valid=typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100;
   const samples=groups.get(key)||[];
@@ -30,7 +30,7 @@ export function sevenNightOutlook(hourly:Hourly,place:Place,from=new Date()):Nig
   const instant=+start;
   if(!fullHours.has(instant)){
    // Include the interval end: a dark hourly sample can still precede dawn.
-   fullHours.set(instant,hourBelowAltitude(A.Body.Sun,start,place,-18));
+   fullHours.set(instant,hourBelowAltitude(A.Body.Sun,start,place,-18,'none'));
   }
   return fullHours.get(instant)!;
  }

@@ -10,7 +10,7 @@ import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {forecastHourIndex} from '@/lib/weather-hours';
 import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
 import {storeSiteForecast,siteForecastState,siteForecastContext,type SiteForecast} from '@/lib/site-forecasts';
-import { A, bodyPosition, moonInfo, Place, scoreAt, timeLabel } from '@/lib/sky';
+import { moonInfo, Place, scoreAt, timeLabel, sunAltitude} from '@/lib/sky';
 
 const key = (p: Place) => `${p.latitude},${p.longitude}`;
 const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
@@ -46,7 +46,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   const score=typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?scoreAt(cloud,at,place):null;
   const {timezone,timezoneKnown,planningPlace}=siteForecastContext(place,result?.data);
   const opportunity=h?bestNightWindow(sevenNightOutlook(h,{...place,timezone},new Date(now))):null;
-  return {id,place,result,...state,h,i,at,score,cloud,timezone,timezoneKnown,planningPlace,opportunity,moon:moonInfo(at,place),sun:bodyPosition(A.Body.Sun,at,place).altitude};
+  return {id,place,result,...state,h,i,at,score,cloud,timezone,timezoneKnown,planningPlace,opportunity,moon:moonInfo(at,place),sun:sunAltitude(at,place)};
  }),[selected,options,results,instant,requestKey,now]);
  const complete=rows.length>1&&rows.every(r=>r.score!==null&&!r.loading&&!r.error&&!r.stale&&!r.clockChanged);
  const best=complete?Math.max(...rows.map(r=>r.score!)):null;

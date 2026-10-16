@@ -25,3 +25,12 @@ test('altitude thresholds reject invalid bounds and handle the apparent zenith w
  assert.equal(hourBelowAltitude(A.Body.Sun,new Date('invalid'),place,-18),false);
  assert.equal(hourBelowAltitude(A.Body.Sun,new Date('9999-12-31T23:00:00.000Z'),place,-18),false);
 });
+
+
+test('apparent Sun contours retain short-crossing protection independently of geometric twilight',()=>{
+ const place={name:'Apparent solar contour',latitude:85.07938514866692,longitude:-2.4},start=new Date('2026-12-21T12:00:00.000Z');
+ for(let minute=0;minute<=60;minute+=15)assert(bodyPosition(A.Body.Sun,new Date(+start+minute*60000),place).altitude<-18);
+ assert(bodyPosition(A.Body.Sun,new Date('2026-12-21T12:07:38.712Z'),place).altitude>-18);
+ assert.equal(hourBelowAltitude(A.Body.Sun,start,place,-18),false);
+ assert.equal(hourBelowAltitude(A.Body.Sun,start,place,-18,'none'),true);
+});

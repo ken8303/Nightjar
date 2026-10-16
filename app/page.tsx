@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { Moon, Compass, MapPin, Telescope, ArrowUpRight, Star, Search, LocateFixed, Bookmark, Cloud, Wind, Droplets, ChevronRight, Aperture, X, Trash2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { A, Place, skyBodies, bodyPosition, moonInfo, timeLabel, observingMilestones } from '@/lib/sky';
+import { Place, skyBodies, bodyPosition, moonInfo, timeLabel, observingMilestones, sunAltitude} from '@/lib/sky';
 import {placeMapSource} from '@/lib/place-map';
 import ViewingMode from '@/components/viewing-mode';
 import SkyChart from '@/components/sky-chart';
@@ -321,7 +321,7 @@ function Planner(){
  const when=date,moon=useMemo(()=>moonInfo(date,place),[date,place]),tz=place.timezone||'UTC';
  const hours=useMemo(()=>weatherHours(forecast?.hourly,date,place),[forecast,date,place]);
  const planning=useMemo(()=>forecastPlanning(hours,date,place),[hours,date,place]),current=planning.current,best=planning.best,score=planning.score;
- const {dark,skyObjects}=useMemo(()=>({dark:bodyPosition(A.Body.Sun,when,place).altitude<-18,skyObjects:skyBodies.map(body=>({body,...bodyPosition(body,when,place)})).filter(p=>p.altitude>0).sort((a,b)=>b.altitude-a.altitude)}),[when,place]);
+ const {dark,skyObjects}=useMemo(()=>({dark:sunAltitude(when,place)<-18,skyObjects:skyBodies.map(body=>({body,...bodyPosition(body,when,place)})).filter(p=>p.altitude>0).sort((a,b)=>b.altitude-a.altitude)}),[when,place]);
 
  const milestones=useMemo(()=>observingMilestones(when,place),[when,place]);
  const shortenedMilestones=!validObservingDate(new Date(+when+48*3600000));

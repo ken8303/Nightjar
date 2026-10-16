@@ -7,7 +7,11 @@ export const lines=[['Dubhe','Merak','Phecda','Megrez','Alioth','Mizar','Alkaid'
 export const skyBodies=[A.Body.Moon,A.Body.Mercury,A.Body.Venus,A.Body.Mars,A.Body.Jupiter,A.Body.Saturn,A.Body.Uranus,A.Body.Neptune] as const;
 export const skyTargetLimit=stars.length+skyBodies.length;
 export function observer(p:Place){return new A.Observer(p.latitude,p.longitude,0)}
-export function bodyPosition(body:A.Body,date:Date,p:Place){const eq=A.Equator(body,date,observer(p),true,true);return A.Horizon(date,observer(p),eq.ra,eq.dec,'normal')}
+type PositionRefraction='normal'|'none';
+export function bodyPosition(body:A.Body,date:Date,p:Place,refraction:PositionRefraction='normal'){const eq=A.Equator(body,date,observer(p),true,true);return A.Horizon(date,observer(p),eq.ra,eq.dec,refraction==='normal'?'normal':undefined)}
+// Twilight thresholds use the geometric centre of the Sun (USNO definitions),
+// independently of apparent object positions used for viewing and projection.
+export function sunAltitude(date:Date,p:Place){return bodyPosition(A.Body.Sun,date,p,'none').altitude}
 function catalogueHorizon(ra:number,dec:number,date:Date,obs:A.Observer,rotation:A.RotationMatrix){
  const vector=A.VectorFromSphere(new A.Spherical(dec,ra*15,1),date);
  const equator=A.EquatorFromVector(A.RotateVector(rotation,vector));
@@ -22,27 +26,27 @@ export function j2000Position(ra:number,dec:number,date:Date,place:Place){
  return catalogueHorizon(ra,dec,date,observer(place),A.Rotation_EQJ_EQD(date));
 }
 export function moonInfo(date:Date,p:Place){const phase=A.MoonPhase(date),illumination=A.Illumination(A.Body.Moon,date).phase_fraction;return {phase,illumination,name:moonPhaseName(phase),altitude:bodyPosition(A.Body.Moon,date,p).altitude}}
-export function scoreAt(cloud:number,date:Date,p:Place){const sun=bodyPosition(A.Body.Sun,date,p).altitude,moon=moonInfo(date,p);if(sun>-6)return 0;return Math.round(Math.max(0,Math.min(100,(100-cloud)*.8+Math.min(1,(-sun-6)/12)*20-(moon.altitude>0?moon.illumination*20:0))))}
-export function hourBelowAltitude(body:A.Body,date:Date,place:Place,altitude:number){
+export function scoreAt(cloud:number,date:Date,p:Place){const sun=sunAltitude(date,p),moon=moonInfo(date,p);if(sun>-6)return 0;return Math.round(Math.max(0,Math.min(100,(100-cloud)*.8+Math.min(1,(-sun-6)/12)*20-(moon.altitude>0?moon.illumination*20:0))))}
+export function hourBelowAltitude(body:A.Body,date:Date,place:Place,altitude:number,refraction:PositionRefraction='normal'){
  if(!Number.isFinite(altitude)||altitude< -90||altitude>90||!validObservingDate(date)||!validObservingDate(new Date(+date+3600000)))return false;
  for(let minutes=0;minutes<=60;minutes+=15){
-  if(bodyPosition(body,new Date(+date+minutes*60000),place).altitude>=altitude)return false;
+  if(bodyPosition(body,new Date(+date+minutes*60000),place,refraction).altitude>=altitude)return false;
  }
  // Samples alone can miss a short rise/set pair near the poles. Search for
- // an ascent through the same apparent-altitude threshold used above; the
- // library search expects an unrefracted angle, so undo that correction first.
+ // an ascent through the same threshold used above. The library search
+ // expects a geometric angle; undo refraction only for an apparent contour.
  // Refraction is slightly negative at the zenith. A threshold above its
  // apparent maximum has no inverse in [-90, 90] and cannot be crossed.
- if(altitude>90+A.Refraction('normal',90))return true;
- const geometric=altitude+A.InverseRefraction('normal',altitude);
+ if(refraction==='normal'&&altitude>90+A.Refraction('normal',90))return true;
+ const geometric=refraction==='normal'?altitude+A.InverseRefraction('normal',altitude):altitude;
  return A.SearchAltitude(body,observer(place),1,date,1/24,geometric)===null;
 }
 export function timeLabel(date:Date,tz?:string){return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:tz||'UTC'}).format(date)}
 export {A};
 export function nextObservingTime(from:Date,p:Place){
  const nextHour=new Date(Math.ceil(+from/3600000)*3600000);
- const sunNow=bodyPosition(A.Body.Sun,from,p).altitude;
- const sunAtHour=bodyPosition(A.Body.Sun,nextHour,p).altitude;
+ const sunNow=sunAltitude(from,p);
+ const sunAtHour=sunAltitude(nextHour,p);
  if(sunAtHour<=-18)return nextHour;
  if(sunNow<=-18)return from;
  const obs=observer(p);
@@ -51,11 +55,11 @@ export function nextObservingTime(from:Date,p:Place){
  if(!crossing)return nextHour;
  const threshold=fullDarkness?-18:-6;
  const rounded=new Date(Math.ceil((+crossing+300000)/3600000)*3600000);
- if(bodyPosition(A.Body.Sun,rounded,p).altitude<=threshold)return rounded;
- // SearchAltitude and the chart use slightly different apparent-altitude models.
+ if(sunAltitude(rounded,p)<=threshold)return rounded;
+ // Keep the rounded shortcut on the same geometric side of the threshold.
  for(let minutes=5;minutes<=60;minutes+=5){
   const candidate=new Date(+crossing+minutes*60000);
-  if(bodyPosition(A.Body.Sun,candidate,p).altitude<=threshold)return candidate;
+  if(sunAltitude(candidate,p)<=threshold)return candidate;
  }
  return nextHour;
 }
@@ -117,7 +121,7 @@ export function milkyWayPlanning(date:Date,place:Place){
  for(let minute=0;minute<=24*60;minute+=15){
   const sampleDate=new Date(+date+minute*60000);
   if(!validObservingDate(sampleDate))break;sampleCount++;
-  if(bodyPosition(A.Body.Sun,sampleDate,place).altitude>-18)continue;
+  if(sunAltitude(sampleDate,place)>-18)continue;
   const position=galacticCentrePosition(sampleDate,place);
   if(position.altitude<10)continue;
   const moon=moonInfo(sampleDate,place);

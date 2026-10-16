@@ -1,4 +1,4 @@
-import {A,observer,type Place} from './sky';
+import {sunAltitude,type Place} from './sky';
 import type {CameraOrientationReading} from './camera-orientation';
 export function cameraCompassContext(reading:Pick<CameraOrientationReading,'absolute'|'northReference'|'compassAccuracy'>|null,quiet=false){
  if(!reading?.absolute||reading.northReference!=='magnetic')return null;
@@ -16,7 +16,6 @@ export function cameraLightPhase(altitude:number){
  return {label:'Astronomical darkness',message:'Clouds, Moon light, light pollution and obstructions still affect visibility.'};
 }
 export function cameraSkyContext(date:Date,place:Place){
- const site=observer(place),eq=A.Equator(A.Body.Sun,date,site,true,true);
- const altitude=A.Horizon(date,site,eq.ra,eq.dec).altitude;
+ const altitude=sunAltitude(date,place);
  return {...cameraLightPhase(altitude),altitude};
 }

@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {sevenNightOutlook,bestNightWindow}=await vite.ssrLoadModule('/lib/night-outlook.ts');
-const {hourBelowAltitude,bodyPosition,A}=await vite.ssrLoadModule('/lib/sky.ts');
+const {hourBelowAltitude,bodyPosition,A,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'Window policy QA',latitude:51.5,longitude:0,timezone:'UTC'},from=new Date('2026-10-09T19:30Z');
 const hourly=(times,cloud)=>({time:times.map(value=>Date.parse(value)/1000),cloud_cover:cloud});
 test('a supported final-year sample cannot recommend an hour ending outside the calendar',()=>{
@@ -34,12 +34,12 @@ test('gaps, missing coverage and already-started hours do not invent a complete 
 });
 
 test('a brief polar twilight crossing between quarter-hour samples cannot be recommended as a full dark hour',()=>{
- const site={name:'Brief polar twilight',latitude:85.07938514866692,longitude:-2.4,timezone:'UTC'},start=new Date('2026-12-21T12:00:00.000Z');
+ const site={name:'Brief polar twilight',latitude:84.56007072450302,longitude:-2.4,timezone:'UTC'},start=new Date('2026-12-21T12:00:00.000Z');
  // All five old samples are below the threshold, while the actual short
  // excursion lasts about 6.6 minutes and peaks between the first two.
- for(let minute=0;minute<=60;minute+=15)assert(bodyPosition(A.Body.Sun,new Date(+start+minute*60000),site).altitude<-18);
- assert(bodyPosition(A.Body.Sun,new Date('2026-12-21T12:07:38.712Z'),site).altitude>-18);
- assert.equal(hourBelowAltitude(A.Body.Sun,start,site,-18),false);
+ for(let minute=0;minute<=60;minute+=15)assert(sunAltitude(new Date(+start+minute*60000),site)<-18);
+ assert(sunAltitude(new Date('2026-12-21T12:07:38.834Z'),site)>-18);
+ assert.equal(hourBelowAltitude(A.Body.Sun,start,site,-18,'none'),false);
  const nights=sevenNightOutlook({time:[+start/1000],cloud_cover:[0]},site,start);
  assert.equal(nights.length,1);assert.equal(nights[0].best,null);
 });

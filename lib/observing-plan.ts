@@ -1,4 +1,4 @@
-import {A,bodyPosition,moonInfo,skyTargetLimit,type Place} from './sky';
+import {moonInfo,skyTargetLimit,type Place,sunAltitude} from './sky';
 import {validPlace} from './planner-state';
 import {validObservingDate} from './observing-time';
 import {type Equipment,validEquipment} from './photography';
@@ -22,7 +22,7 @@ export function printableObservingPlan(input:Plan):string{
  if(!Number.isSafeInteger(targets.length+(input.targetsOmitted??0)))throw Error('The target coverage is invalid.');
  const zone=place.timezone||'UTC',notesNotice=notesCoverageNotice(Boolean(input.notesUnavailable),Boolean(input.notesUnsaved));
  const local=new Intl.DateTimeFormat('en-GB',{timeZone:zone,weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'shortOffset',...(date.getUTCFullYear()<=1?{era:'short' as const}:{})}).format(date);
- const moon=moonInfo(date,place),sun=bodyPosition(A.Body.Sun,date,place).altitude;
+ const moon=moonInfo(date,place),sun=sunAltitude(date,place);
  const night=sun<-18?'Astronomical darkness':sun<=-6?'Twilight':'Daylight / civil twilight';
  const sorted=[...targets].sort((a,b)=>b.altitude-a.altitude);
  const articles=sorted.map((target,index)=>{

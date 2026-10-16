@@ -50,7 +50,7 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
   if(!((local.day===firstDay&&local.hour>=12)||(local.day===lastDay&&local.hour<12)))continue;
   const end=localDateHour(new Date(+date+3600000),dayFormatter);
   if(!((end.day===firstDay&&end.hour>=12)||(end.day===lastDay&&(end.hour<12||end.hour===12&&end.minute===0))))continue;
-  if(!hourBelowAltitude(A.Body.Sun,date,place,-18))continue;
+  if(!hourBelowAltitude(A.Body.Sun,date,place,-18,'none'))continue;
   dark.push({date,moonBelow:hourBelowAltitude(A.Body.Moon,date,place,0)});
  }
  const moonFree=dark.filter(sample=>sample.moonBelow);

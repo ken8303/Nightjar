@@ -51,6 +51,8 @@ npm run dev
 
 Weather and place search are fetched server-side from Open-Meteo; no API key is configured. Review provider terms and capacity before commercial use. Saved places are browser-local and are not account-synced. Location coordinates are sent to the weather provider and map provider when those views are used.
 
+Twilight classes, solar terms in the planning score, darkness windows and first-open timing use the geometric Sun centre, consistent with the darkness milestones and [USNO twilight definitions](https://aa.usno.navy.mil/faq/RST_defs). Object viewing positions still use normal atmospheric refraction; Moon-free hours use the apparent Moon centre relative to the ideal horizon.
+
 The planning score is a transparent heuristic, not astronomical seeing or transparency. There is no terrain horizon correction. The star catalogue is a small bright-star selection with approximate J2000 source coordinates transformed to the observing date; this is not a navigation instrument. Meteor peaks are typical annual dates, not year-specific forecasts. The annual calendar links to IMO for detailed current bulletins.
 
 Not implemented: light pollution data, multi-model comparison, aurora alerts (the short-term outlook is included), automatic camera-lens calibration, full deep-sky catalogue, sky-photo recognition, full-sky framing overlays, cloud accounts and push notifications.

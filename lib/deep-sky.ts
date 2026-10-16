@@ -3,7 +3,7 @@ import {validObservingDate} from './observing-time';
 import {constellationName} from './constellations';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
-import {A,j2000Position,j2000Projector,bodyPosition,type Place} from '@/lib/sky';
+import {j2000Position,j2000Projector,type Place,sunAltitude} from '@/lib/sky';
 export const messierCatalogue=catalogue;
 export type DeepSkyObject=(typeof catalogue)[number];
 import {deepSkyName,deepSkyNames} from './deep-sky-names';
@@ -29,7 +29,7 @@ export function deepSkySampleTimes(date:Date){
 }
 export function deepSkyWindow(target:DeepSkyObject,date:Date,place:Place){
  return deepSkySampleTimes(date).map(time=>{
-  return {time,sun:bodyPosition(A.Body.Sun,time,place).altitude,...deepSkyPosition(target,time,place)};
+  return {time,sun:sunAltitude(time,place),...deepSkyPosition(target,time,place)};
  });
 }
 export type DeepSkySample=ReturnType<typeof deepSkyWindow>[number];
@@ -52,7 +52,7 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
 export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
  if(targets.length>109)throw Error('Plan up to 109 deep-sky targets at once.');
  if(!targets.length)return new Map<string,{date:Date;altitude:number;azimuth:number}>();
- const darkTimes=deepSkySampleTimes(date).filter(time=>bodyPosition(A.Body.Sun,time,place).altitude<=-18).map(time=>({time,project:j2000Projector(time,place)}));
+ const darkTimes=deepSkySampleTimes(date).filter(time=>sunAltitude(time,place)<=-18).map(time=>({time,project:j2000Projector(time,place)}));
  const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();
  for(const target of targets){
   let best:{date:Date;altitude:number;azimuth:number}|null=null;
