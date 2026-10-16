@@ -8,10 +8,10 @@ const {makeTargetNoteRecovery,targetNoteRecoveryMaxBytes}=await vite.ssrLoadModu
 const {parsePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 const created=new Date('2026-10-16T20:00:37.125Z');
 test('note recovery preserves precise unsaved additions, replacements and removals without mutating their sources',()=>{
- const base={Vega:'Original\n星空',Sirius:null,Polaris:'Remove this',Unrelated:'Exclude me'},edits={Vega:'\n New 星空\n',Sirius:'New note',Polaris:''},before=structuredClone({base,edits});
+ const base={Vega:'Original\n星空',Sirius:null,Polaris:'Remove this',Empty:'',Unrelated:'Exclude me'},edits={Vega:'\n New 星空\n',Sirius:'New note',Polaris:'',Empty:''},before=structuredClone({base,edits});
  const copy=makeTargetNoteRecovery(base,edits,created),parsed=JSON.parse(copy.text);
- assert.equal(copy.notes,3);assert.equal(parsed.format,'nightjar-target-note-recovery');assert.equal(parsed.exportedAt,created.toISOString());
- assert.deepEqual(parsed.data,{base:{Vega:base.Vega,Sirius:null,Polaris:base.Polaris},edits});assert.deepEqual({base,edits},before);
+ assert.equal(copy.notes,4);assert.equal(parsed.format,'nightjar-target-note-recovery');assert.equal(parsed.exportedAt,created.toISOString());
+ assert.deepEqual(parsed.data,{base:{Vega:base.Vega,Sirius:null,Polaris:base.Polaris,Empty:''},edits});assert.deepEqual({base,edits},before);
  assert.match(parsed.notice,/Empty edit text means removal/);assert.match(parsed.notice,/cannot be imported/);assert.throws(()=>parsePlannerBackup(copy.text),/not a supported/);
 });
 test('a full set of escaped Unicode edits and original versions fits the recovery envelope without truncation',()=>{

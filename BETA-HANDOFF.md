@@ -6,6 +6,8 @@ A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` 
 
 ## Recent changes and evidence
 
+- **Empty legacy notes:** note management can remove empty saved entries that still occupy capacity. Compact browser reproduction changed 100 entries to 99, then saved a new note; its received backup retained all 99 unrelated notes. Text-bearing note Undo still restores exact text and focus.
+
 - **Unsaved note recovery:** failed target-note saves offer Download unsaved notes. Received compact/desktop files retain exact whitespace, Unicode, original versions and explicit removals. The file is for manual recovery and cannot be imported as a plan backup. Download does not clear pending edits; successful save retry does.
 
 - **PWA update return:** background/history suspension pauses the update deadline and gives a fresh wait on return. Canceled callbacks cannot report a false failure. Genuine timeout recovery, retry, unfinished-edit protection and exact site/millisecond-time preservation pass in compact/desktop controlled browser checks. Native installed-PWA timing remains pending.
