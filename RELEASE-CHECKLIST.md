@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **634 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `a687b74410ddf69224478ac14f9741a5ec4fa6103b425adcc5a58d8ee7ee9a6c` matches 93 build/recovery inputs; 342 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 16 October 2026: **634 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `4de4c62cbc33547f5f8a60239d2f82cbbba1080f051144e47bfb3c420391de45` matches 93 build/recovery inputs; 343 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -519,3 +519,5 @@ Final source also passes all 629 tests on Node 24.19.0. Owned test origins/tabs/
 - Empty saved target notes now have a usable explicit Remove action, freeing their slot and focusing the note selector. Nonempty text still has normal Undo. A real received backup confirmed all 99 unrelated notes plus the replacement note; offered local-worker reload retained context and notes.
 
 - Explicit target-note Retry returns keyboard focus to the relevant retained editor/selector after its recovery button disappears. Failed retries retain the button; no-conflict review with no selected object focuses the saved-target heading. Compact/desktop checks and existing deferred-focus guards pass.
+
+- Successful explicit diary form-read/save retries focus recovery feedback; saved-diary read retries focus the observation heading. A newly readable but conflicting form keeps local text and focuses conflict guidance. Still-blocked attempts and typing retain focus. Physical reader/keyboard acceptance remains pending.
