@@ -4,13 +4,17 @@ Nightjar remains a beta. Local checks do not establish physical-phone camera ali
 
 ## Current release evidence — 16 October 2026
 
-- **651 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. Offline-setup retry focus also passes compact and desktop production-browser checks.
-- The compiled worker release is `6118ca14b11d6e6234e305b58d9228d6f0b4aa946d4b7aa5eca69696bf6ddf34`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
-- Read-only GitHub checks confirm your push at `eb4fc3c` with successful [Run #14](https://github.com/ken8303/Nightjar/actions/runs/38872054685), covering the preceding 643-test batch. The new review fixes remain local and are not covered by that hosted run.
+- **651 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. The preceding reviewed batch has compact and desktop production-browser evidence; the new aurora wording has automated/source validation only because no browser is exposed in this session.
+- The compiled worker release is `857b26d1a61e37663bd1eddb45861dbc333fde8a107376e339bc20db18bb8604`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
+- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. The subsequent aurora wording fix is local and is not covered by Run #15.
 - No Cloudflare deployment result appears in the checked GitHub statuses/check runs. An empty status list is not evidence of a pending deployment. The final Cloudflare origin still needs verification.
-- The new review changes remain local for your next GitHub Desktop push. The development agent has not pushed or deployed. Temporary review servers, owned browser tabs and disposable test-origin data were cleaned up.
+- You pushed the reviewed batch through GitHub Desktop. The development agent has not pushed or deployed. Temporary review servers, owned browser tabs and disposable test-origin data were cleaned up.
 
-## Current local batch since your last push
+## New local change after your push
+
+Aurora now labels a coordinate-only site’s fallback clock as UTC, with “site time zone unavailable,” instead of calling it local forecast time. Known zones, including explicitly known UTC, retain the site-local label. Types, lint, 651 tests on both supported verification runtimes, build and Cloudflare dry-run pass. Fresh rendered/mobile validation is pending because this session exposes no browser.
+
+## Reviewed batch included in your latest push
 
 | Commit | Change and verified behaviour |
 | --- | --- |
@@ -26,7 +30,7 @@ Compact and desktop browser checks used controlled fixtures where needed. Camera
 
 Detailed reproductions, logs, historical test counts and their limitations are retained in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). The full gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); feature scope and known limitations are in [README.md](./README.md).
 
-## After your batch push
+## Hosted and phone follow-up
 
 1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
 2. Check the Cloudflare build and final HTTPS origin. Confirm the planner, weather, manifest, service worker and offline fallback there. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration.
@@ -47,4 +51,4 @@ Detailed reproductions, logs, historical test counts and their limitations are r
 | Failed saves | Keep the view open. Direct review actions return to time, coordinates, imaging, diary, target-note or site-name recovery. Retry after storage is usable; verify retained text and original observation metadata. |
 | Files and accessibility | Confirm actual receipt/import/printing of intended files. Test screen-reader labels, focus after review/close, large text, and short landscape screens. Local screenshots and download-prepared messages do not prove these native behaviours. |
 
-Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and hosted GitHub/Cloudflare results for the new local batch remain unverified. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).
+Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and the final Cloudflare deployment remain unverified. GitHub validation for the reviewed batch passed. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).

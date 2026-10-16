@@ -2508,3 +2508,14 @@ The handoff’s large historical feature summary mixed already-pushed work with 
 ## Diary/report contract review — 16 October 2026
 
 Reviewed diary CSV/HTML, UTC/local formatters, date filters, report-equipment coverage and preview-frame closure against their existing regression cases in the passing 651-test suite. CSV keeps the exact observed UTC instant and numeric coordinates; quoted multiline/Unicode text and formula-like text prefixes are covered. Unknown site zones leave CSV local-time/zone fields empty and identify the UTC fallback in HTML; genuinely known UTC remains distinct. Reports retain original observation metadata, escape saved text and contain no remote resources. Equipment read failures and display-limit omissions have separate truthful notices, with invalid coverage rejected. Preview Escape accepts only the current frame source/message and leaves the downloaded report unchanged. No additional confirmed runtime defect or source change resulted; physical file/printing/reader acceptance remains pending. No redundant test/build run, push or deployment.
+
+
+## Post-push aurora clock-label review — 16 October 2026
+
+Fresh read-only GitHub API evidence confirms successful Run #15 at exact pushed commit 601cb3a0752abaee660446376fc424569e608f38. Updated current handoff/checklist statements that still described Run #14 and an unpushed batch. Historic evidence remains unchanged.
+
+Confirmed a source-level wording defect in the aurora panel: timeLabel deliberately falls back to UTC when the selected site has no timezone, but the Sun-altitude sentence called that value “local forecast time.” The sentence now explicitly says “UTC forecast time (site time zone unavailable)” for coordinate-only/unknown-zone sites. Known zones, including explicitly known UTC, keep “site local forecast time.” No time conversion, data, calculation, fetching or storage behaviour changed. This small text correction does not add a test that merely mirrors the conditional.
+
+Fresh Node 22.16.0 full verify passes types, lint, all 651 tests, production build and the actual Cloudflare packaging dry-run (114 staged asset files, no bindings). Node 24.19.0 also passes all 651 tests. Temporary logs: /tmp/nightjar-aurora-zone-verify.log and /tmp/nightjar-aurora-zone-node24.log. Worker release 857b26d1a61e37663bd1eddb45861dbc333fde8a107376e339bc20db18bb8604 reconstructs from 92 emitted/recovery inputs after the known .vite ignore append normalization; all 339 scanned relative references resolve and offline/recovery bytes match source.
+
+Browser plugin unavailable; CUA reports no available browsers and could not open the disposable local preview. No fresh rendered/screenshot/mobile QA is claimed for this wording fix. The attempted preview was stopped; no permissions or hardware were requested. Physical-phone/PWA and final Cloudflare-origin acceptance remain pending. No agent push or deployment.

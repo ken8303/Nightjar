@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **651 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `6118ca14b11d6e6234e305b58d9228d6f0b4aa946d4b7aa5eca69696bf6ddf34` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer review fixes remain local and needs the next batch push/hosted validation.
+Current evidence, 16 October 2026: **651 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `857b26d1a61e37663bd1eddb45861dbc333fde8a107376e339bc20db18bb8604` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483) for your 651-test push at `601cb3a`. The subsequent local aurora clock-label fix passes the same automated gates but needs rendered validation; no browser is exposed in this session. Final Cloudflare-origin and physical-phone acceptance remain unverified.
 
 ## Verified locally
 
