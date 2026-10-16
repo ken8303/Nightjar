@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 15 October 2026: **629 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `b05392886ae0eef04459504188a080447386563c76000f5600f7c791813985a5` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 16 October 2026: **631 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `39c4802f5fefb458377d01febae4083cd58ecbed24a6f398d538d6e4ecb6774c` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -504,3 +504,10 @@ Hosted evidence refresh, 15 October: read-only git ls-remote and GitHub API chec
 - Release `b05392886ae0eef04459504188a080447386563c76000f5600f7c791813985a5` reproduces from 93 inputs; all 341 scanned references resolve and 115 client files package without bindings. Recovery resources, manifest and icons pass. No agent push/deploy; phone hardware acceptance remains pending.
 
 Final source also passes all 629 tests on Node 24.19.0. Owned test origins/tabs/servers and viewport overrides are cleaned up; details are in development notes. The current release fingerprint above is unchanged by these documentation-only additions.
+
+
+## PWA update foreground deadlines, 16 October
+
+- All 631 tests pass under Node 22.16.0 and Node 24.19.0; types, lint, production build and Cloudflare packaging dry-run pass. Two new regressions fail before the fix, covering visibility and pagehide suspension plus fresh return/one-shot recovery.
+- Compact/desktop controlled browser checks cancel the active update deadline on suspension, reject a manually fired canceled callback, and start one fresh deadline after return. Genuine expiry still offers recovery, and explicit retry/simulated activation performs a real reload preserving site and UTC 2026-10-16T20:00:37.125Z. Unfinished time edits block Update with no deadline; cancelling restores the original instant. Native worker/installed-app suspension is not established by this fixture.
+- Release `39c4802f5fefb458377d01febae4083cd58ecbed24a6f398d538d6e4ecb6774c` matches 93 emitted/recovery inputs, with 341 scanned relative references resolving and 115 client files packaged without bindings. Manifest/icons/recovery resources pass. Owned fixture data/tabs/servers and viewport override cleaned. No push or deployment.

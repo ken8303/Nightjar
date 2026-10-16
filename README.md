@@ -153,3 +153,5 @@ Long loading/error guidance in the expanded 3D dialog scrolls within its panel o
 Sky-section shortcuts explicitly focus their link while waiting for a deferred section, so pointer activation that leaves focus elsewhere does not silently drop the jump. Moving focus to another control before the section loads still cancels the earlier jump.
 
 For the next physical-phone and hosted-release checks, see [BETA-HANDOFF.md](./BETA-HANDOFF.md).
+
+A requested PWA update gets a fresh timeout window after returning from background or page suspension. If it genuinely times out, the recovery actions remain available; unfinished edits still block reloading. Native installed-app suspension and update timing need phone acceptance.

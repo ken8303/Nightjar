@@ -87,3 +87,23 @@ test('time tokens validate bounded canonical instants and report unavailable per
  const writes=[];assert.equal(preservePlannerTime({getItem:()=>'{bad'},{getItem:()=>'{bad',setItem:()=>writes.push('write')}),false);assert.deepEqual(writes,[]);
  assert.equal(preservePlannerTime({getItem:()=>expected},{getItem:()=>null,setItem:()=>{throw Error('denied')}}),false);
 });
+
+test('background suspension pauses the update deadline and foreground return gets a fresh wait',async()=>{
+ const f=fixture(),page=new EventTarget(),visibility=new EventTarget();let hidden=false;
+ f.options.foreground={page,visibility,hidden:()=>hidden};
+ const dispose=applyPwaUpdate(f.worker,f.controller,f.options);
+ hidden=true;visibility.dispatchEvent(new Event('visibilitychange'));await pause();
+ assert.deepEqual(f.events,['preserve',{type:'SKIP_WAITING'}]);
+ hidden=false;visibility.dispatchEvent(new Event('visibilitychange'));
+ f.controller.dispatchEvent(new Event('controllerchange'));await pause();
+ assert.equal(f.events.at(-1),'reload');assert.equal(f.events.filter(event=>typeof event==='object'&&event.failure).length,0);
+ dispose();
+});
+test('history suspension pauses update timeout even without a visibility change, then resumes recovery once',async()=>{
+ const f=fixture(),page=new EventTarget(),visibility=new EventTarget();f.options.foreground={page,visibility,hidden:()=>false};
+ applyPwaUpdate(f.worker,f.controller,f.options);page.dispatchEvent(new Event('pagehide'));await pause();
+ assert.deepEqual(f.events,['preserve',{type:'SKIP_WAITING'}]);
+ page.dispatchEvent(new Event('pageshow'));await pause();
+ assert.match(f.events.at(-1).failure,/did not finish/);
+ const count=f.events.length;page.dispatchEvent(new Event('pageshow'));f.controller.dispatchEvent(new Event('controllerchange'));await pause();assert.equal(f.events.length,count);
+});
