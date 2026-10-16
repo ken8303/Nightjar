@@ -1,14 +1,16 @@
 # Nightjar beta handoff
 
-Current local verification passes **640 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 640 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
+Current local verification passes **642 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 642 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 640-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 642-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
 
+- **Print-plan clock identity:** unknown site zones now label the fallback Time (UTC) and explicitly say the zone is unavailable. Real UTC sites retain Time at site. Bright/deep-sky preview and received-file checks preserve the exact millisecond UTC instant; all 642 tests and build/package checks pass.
+
 - **Weather route coverage:** invalid coordinates make no provider request; successful requests preserve location/data/cache policy; HTTP, decoding, invalid samples and network errors return public retry guidance and remain uncached. All 640 tests pass on Node 22/24. This test-only batch leaves the verified production build unchanged.
 
-- **Concurrent Aurora reads:** callers within the same Worker instance share an in-flight NOAA request, while receiving independent responses. Success keeps the existing five-minute cache; failures clear for retry and invalid feeds remain uncached. All 640 tests pass on Node 22/24; concurrent compiled-Worker requests returned valid live data.
+- **Concurrent Aurora reads:** callers within the same Worker instance share an in-flight NOAA request, while receiving independent responses. Success keeps the existing five-minute cache; failures clear for retry and invalid feeds remain uncached. All 637 tests pass on Node 22/24; concurrent compiled-Worker requests returned valid live data.
 
 - **Short landscape review:** a 568 × 320 browser tour checked all seven sections, framing zoom/scroll/focus, lunar controls and manual camera fullscreen. Camera controls scroll within 45% of height, leaving 55% for the sky. Planner time and launcher focus remain intact. Native phone sensors, safe areas and keyboards remain pending.
 

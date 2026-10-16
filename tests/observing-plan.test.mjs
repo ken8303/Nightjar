@@ -78,3 +78,16 @@ test('observing checklists reject finite dates outside the supported UTC years b
   assert.throws(()=>printableObservingPlan({...input(),date:new Date(instant)}),/observing plan contains invalid data/);
  }
 });
+
+test('an unknown site zone labels the print-plan fallback as UTC rather than time at the site',()=>{
+ const plan={...input(),date:new Date('2026-10-16T20:00:37.125Z'),place:{...input().place,timezone:undefined}},before=structuredClone(plan);
+ const html=printableObservingPlan(plan);
+ assert(html.includes('<strong>TIME (UTC)</strong>'));assert(!html.includes('<strong>TIME AT SITE</strong>'));assert(html.includes('site time zone unavailable'));assert(html.includes('2026-10-16 20:00:37.125 UTC'));assert.deepEqual(plan,before);
+});
+test('real UTC and other known site zones keep their local-time identity in print plans',()=>{
+ const plan={...input(),date:new Date('2026-10-16T20:00:37.125Z')};
+ for(const [timezone,clock] of [['UTC','20:00:37'],['Europe/London','21:00:37']]){
+  const html=printableObservingPlan({...plan,place:{...plan.place,timezone}});
+  assert(html.includes('<strong>TIME AT SITE</strong>'));assert(!html.includes('site time zone unavailable'));assert(html.includes(clock));assert(html.includes(` · ${timezone}</span>`));assert(html.includes('2026-10-16 20:00:37.125 UTC'));
+ }
+});
