@@ -5,8 +5,8 @@ Nightjar remains a beta. Local checks do not establish physical-phone camera ali
 ## Current release evidence — 16 October 2026
 
 - **662 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. The preceding reviewed batch has compact and desktop production-browser evidence; the new local fixes have automated/source validation only because no browser is exposed in this session.
-- The compiled worker release is `ff83f8c3a09b7c9e7fa1ef22b8cd705964f1839a8f6f4ce066cef0721ccb8d6d`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
-- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. The subsequent aurora, full-hour crossing, twilight-consistency and unfinished-time retention fixes are local and are not covered by Run #15.
+- The compiled worker release is `1f2c718e26c893b27e51a7611ab5c38d08e84199fbe1b8b4c0556ae11bb8ef24`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 340 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
+- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. All subsequent local changes remain outside Run #15’s hosted coverage.
 - No Cloudflare deployment result appears in the checked GitHub statuses/check runs. An empty status list is not evidence of a pending deployment. The final Cloudflare origin still needs verification.
 - You pushed the reviewed batch through GitHub Desktop. The development agent has not pushed or deployed. Temporary review servers, owned browser tabs and disposable test-origin data were cleaned up.
 
@@ -19,6 +19,8 @@ Full-hour darkness and Moon-free checks now search for short altitude crossings 
 Twilight classification, scores, first-open timing, target planners, site comparison and report Sun metadata now share the geometric Sun-centre altitude used by the darkness milestones and camera. Regression checks reproduce their earlier disagreement just after dusk and keep apparent Sun/Moon viewing positions unchanged. See the [USNO definitions](https://aa.usno.navy.mil/faq/RST_defs).
 
 The UTC/local entry-zone buttons now stay disabled while a date/time edit is incomplete or awaiting a DST occurrence choice. An associated explanation directs the user to finish or cancel first, preventing a zone-button tap from silently discarding the edit. The small control change has full automated gates but awaits rendered/native interaction checks.
+
+Calendar-download feedback now follows the actual recommended windows and exported conditions, so refreshed or expired windows cannot leave an old success notice attached to new data. Its success message identifies the full window. Milky Way labels reuse the shared era-aware formatter for supported local BC dates. Source/calculation probes pass; rendered acceptance remains pending.
 
 ## Reviewed batch included in your latest push
 

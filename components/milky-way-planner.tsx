@@ -3,13 +3,14 @@
 import {useMemo} from 'react';
 import {Compass, Moon, ArrowUpRight} from 'lucide-react';
 import {Place, milkyWayPlanning, timeLabel} from '@/lib/sky';
+import {deepSkyTimestampFormatter as planningTimestampFormatter} from '@/lib/deep-sky-time';
 
 const compassDirection=(degrees:number)=>['N','NE','E','SE','S','SW','W','NW'][Math.round(degrees/45)%8];
 
 export default function MilkyWayPlanner({date,place,onDate}:{date:Date;place:Place;onDate:(date:Date)=>void}){
  const plan=useMemo(()=>milkyWayPlanning(date,place),[date,place]);
  const timezone=place.timezone||'UTC',shortened=plan.sampleCount<97;
- const stamp=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:timezone,timeZoneName:'shortOffset'});
+ const stamp=planningTimestampFormatter(date,timezone);
  const moonFree=plan.best&&plan.best.moonAltitude<0;
  return <section className="panel milky-way-planner" aria-labelledby="milky-way-title">
   <div className="section-label"><span>MILKY WAY PLANNER</span><Compass size={18}/></div>

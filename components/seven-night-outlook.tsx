@@ -14,7 +14,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
  const now=usePlanningClock();
  const nights=useMemo(()=>hourly?.time?.length?sevenNightOutlook(hourly,place,new Date(now)):[],[hourly,place,now]);
  const [downloadResult,setDownloadResult]=useState<{context:string;text:string}|null>(null);
- const downloadContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone]);
+ const downloadContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone,nights.map(night=>[night.key,night.best])]);
  const downloadStatus=downloadResult?.context===downloadContext?downloadResult.text:'';
  const setDownloadStatus=(text:string)=>setDownloadResult({context:downloadContext,text});
  const timezone=place.timezone||'UTC';
@@ -26,7 +26,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
    const best=night.best;
    const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone:place.timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination});
    downloadFile(new Blob([data],{type:'text/calendar;charset=utf-8'}),`nightjar-${night.key}.ics`);
-   setDownloadStatus(`${dateLabel(night.key)} calendar file prepared for download. Check that it arrived before opening it in your calendar app.`);
+   setDownloadStatus(`Calendar file prepared for ${windowLabel(best.date,best.hours)}. Check that it arrived before opening it in your calendar app.`);
   }catch{setDownloadStatus('The calendar file could not be created. Please try again.')}
  }
  return <section className="panel seven-night-outlook" aria-labelledby="seven-night-title">
