@@ -1,5 +1,5 @@
 import {stars} from '@/lib/sky';
-export type ObjectPhoto={src:string;thumbnailSrc?:string;alt:string;caption:string;credit:string;source:string;survey?:boolean;title?:string};
+export type ObjectPhoto={src:string;previewSrc?:string;thumbnailSrc?:string;alt:string;caption:string;credit:string;source:string;survey?:boolean;title?:string};
 const nasa=(path:string)=>`https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/${path}?fit=clip&w=800&h=800`;
 const planets:Record<string,ObjectPhoto>={
  Moon:{src:nasa('pia00/pia00405/PIA00405.jpg'),alt:'Earth’s Moon photographed by Galileo',caption:'Galileo, 1992 · enhanced-colour reference image; does not match the selected lunar phase.',credit:'NASA/JPL/USGS',source:'https://science.nasa.gov/photojournal/earths-moon/'},
@@ -22,5 +22,6 @@ export function skySurveyPhoto(name:string,ra:number,dec:number,field=15):Object
  // Survey GIFs can decode to millions of pixels even in a 36px camera label.
  // HiPS2FITS uses degrees for both RA and field; the full reference stays intact.
  const thumbnail=new URLSearchParams({hips:'CDS/P/DSS2/red',width:'200',height:'200',projection:'TAN',coordsys:'icrs',ra:String(ra*15),dec:String(dec),fov:String(field/60),format:'jpg'});
- return{src:`https://archive.stsci.edu/cgi-bin/dss_search?${params}`,thumbnailSrc:`https://alasky.cds.unistra.fr/hips-image-services/hips2fits?${thumbnail}`,alt:`Photographic sky-survey field centred on the catalogue position of ${name}`,caption:`Archival red-band photographic field, ${field} × ${field} arcminutes. Bright stars may saturate; this is a sky field, not a resolved stellar surface or a live view.`,credit:'Digitized Sky Survey / STScI · survey plates: Caltech, AAO, UK SERC/PPARC; digitisation: AURA; camera thumbnails: CDS HiPS2FITS',source:'https://archive.stsci.edu/dss/copyright.html',survey:true};
+ const preview=new URLSearchParams(thumbnail);preview.set('width','800');preview.set('height','800');
+ return{src:`https://archive.stsci.edu/cgi-bin/dss_search?${params}`,previewSrc:`https://alasky.cds.unistra.fr/hips-image-services/hips2fits?${preview}`,thumbnailSrc:`https://alasky.cds.unistra.fr/hips-image-services/hips2fits?${thumbnail}`,alt:`Photographic sky-survey field centred on the catalogue position of ${name}`,caption:`Archival red-band photographic field, ${field} × ${field} arcminutes. Bright stars may saturate; this is a sky field, not a resolved stellar surface or a live view.`,credit:'Digitized Sky Survey / STScI · survey plates: Caltech, AAO, UK SERC/PPARC; digitisation: AURA; preview cutouts: CDS HiPS2FITS',source:'https://archive.stsci.edu/dss/copyright.html',survey:true};
 }

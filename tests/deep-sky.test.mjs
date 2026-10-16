@@ -143,3 +143,20 @@ test('full Messier designations and smart apostrophes match the same catalogue a
  assert.deepEqual(findDeepSky('Messier 31','',{constellation:'Cyg'}),[]);
  assert.deepEqual(messierCatalogue,before);
 });
+
+test('survey display previews bound decoded pixels while preserving fields, centres and original images',async()=>{
+ const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts'),{objectPhoto}=await vite.ssrLoadModule('/lib/object-photos.ts');
+ const before=structuredClone(messierCatalogue),photos=[objectPhoto('Vega'),...messierCatalogue.map(target=>deepSkyPhoto(target,'survey'))];
+ for(const photo of photos){
+  assert(photo.previewSrc,'survey references need a bounded display preview');
+  const full=new URL(photo.src),preview=new URL(photo.previewSrc),thumbnail=new URL(photo.thumbnailSrc);
+  assert.equal(full.hostname,'archive.stsci.edu');assert.equal(full.searchParams.get('e'),'J2000');
+  assert.equal(preview.origin+preview.pathname,'https://alasky.cds.unistra.fr/hips-image-services/hips2fits');
+  assert.equal(preview.searchParams.get('width'),'800');assert.equal(preview.searchParams.get('height'),'800');assert.equal(preview.searchParams.get('format'),'jpg');
+  assert.equal(Number(preview.searchParams.get('fov')),Number(full.searchParams.get('h'))/60);
+  for(const key of ['ra','dec','fov','hips','projection','coordsys','format'])assert.equal(preview.searchParams.get(key),thumbnail.searchParams.get(key));
+  assert.equal(thumbnail.searchParams.get('width'),'200');assert.equal(thumbnail.searchParams.get('height'),'200');
+ }
+ for(const id of ['M13','M31'])assert.equal(deepSkyPhoto(messierCatalogue.find(target=>target.id===id)).previewSrc,undefined,'featured NASA references keep their existing image');
+ assert.deepEqual(messierCatalogue,before);
+});
