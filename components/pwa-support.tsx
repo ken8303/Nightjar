@@ -7,6 +7,7 @@ import PendingEditRecovery from '@/components/pending-edit-recovery';
 import {applyPwaUpdate} from '@/lib/pwa-update';
 import {watchPwaUpdateChecks} from '@/lib/pwa-update-check';
 import {watchPwaRegistration} from '@/lib/pwa-registration';
+import {deferFocusAndScroll} from '@/lib/deferred-focus';
 
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 export default function PwaSupport() {
@@ -20,6 +21,8 @@ export default function PwaSupport() {
   const [offline, setOffline] = useState(false);
   const [message, setMessage] = useState('');
   const [setupRevision,setSetupRevision]=useState(0),[setupStarting,setSetupStarting]=useState(false),[setupIssue,setSetupIssue]=useState(''),[setupMessage,setSetupMessage]=useState('');
+  const setupButton=useRef<HTMLButtonElement>(null),setupResult=useRef<HTMLParagraphElement>(null);
+  const setupOwner=useRef<Element|null>(null);
   const [updateWorker,setUpdateWorker]=useState<ServiceWorker|null>(null);
   const [updating,setUpdating]=useState(false);
   const pendingUpdate=useRef<(()=>void)|null>(null);
@@ -56,8 +59,13 @@ export default function PwaSupport() {
     let active=true;
     const cleanups:(()=>void)[]=[];
     let stopTimeout=()=>{};
-    const ready=()=>{if(!active)return;stopTimeout();setSetupStarting(false);setSetupIssue('');setSetupMessage(setupRevision?'Offline fallback setup completed for this browser.':'')};
-    const failed=(text='Offline setup could not finish. Reconnect and retry; the planner stays available in this view.')=>{if(!active)return;stopTimeout();setSetupStarting(false);setSetupMessage('');setSetupIssue(text)};
+    const returnSetupFocus=(success:boolean)=>{
+      // Only the explicit retry owns this handoff; repeated worker signals do not.
+      const owner=setupOwner.current;setupOwner.current=null;
+      if(owner)deferFocusAndScroll(()=>success||setupButton.current?.disabled?setupResult.current:setupButton.current,{owner});
+    };
+    const ready=()=>{if(!active)return;stopTimeout();setSetupStarting(false);setSetupIssue('');setSetupMessage(setupRevision?'Offline fallback setup completed for this browser.':'');returnSetupFocus(true)};
+    const failed=(text='Offline setup could not finish. Reconnect and retry; the planner stays available in this view.')=>{if(!active)return;stopTimeout();setSetupStarting(false);setSetupMessage('');setSetupIssue(text);returnSetupFocus(false)};
     stopTimeout=watchForegroundDelay(()=>failed('Offline setup is taking longer than expected. Reconnect and retry; keep this view open.'),window,document,{hidden:()=>document.hidden,delay:20000});
     navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'}).then(registration=>{
       if(!active)return;
@@ -92,8 +100,8 @@ export default function PwaSupport() {
     {pendingText&&<p className="muted">Reload is paused for unfinished edits: {pendingText}. Resolve or copy them before reloading.</p>}<PendingEditRecovery/>{updateWorker&&<div className="pwa-update" role="status"><p>A new Nightjar version is ready. Your saved places, targets and equipment stay on this device.</p><p>Save unfinished edits before updating. If saving fails, keep this view open and use its recovery tools first. Unsaved text can be lost on reload.</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{updating?'Updating Nightjar…':'Update and reload'}</button></div>}
     {updateError&&<div className="pwa-update"><p role="status">{updateError}</p><button type="button" className="button" disabled={offline||Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setUpdateError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button></div>}
     {!installed && <details open><summary>Take Nightjar with you · Install app</summary><p>Add Nightjar to your home screen for a standalone view.</p>{prompt && <button ref={installButton} type="button" className="button primary" disabled={installing} onClick={install}>{installing?'Waiting for browser installation…':'Install Nightjar'}</button>}<p>On iPhone or iPad, open this site in Safari, choose Share, then Add to Home Screen. On Android or desktop, look for Install app or Add to Home screen in your browser menu.</p><p className="muted">An internet connection is needed for live conditions and to reopen the full planner. Previously opened tab files may remain available during a connection drop; the offline page can show plans saved on this device while you reconnect. Installation availability depends on your browser.</p></details>}
-    {(setupIssue||setupStarting&&setupRevision>0)&&<div className="pwa-setup-recovery"><p role="status">{setupStarting?'Preparing offline fallback…':setupIssue}</p><button type="button" className="button" disabled={setupStarting||offline||updating} onClick={()=>{if(setupStarting||offline||updating)return;setSetupStarting(true);setSetupIssue('');setSetupMessage('');setSetupRevision(value=>value+1)}}>{setupStarting?'Preparing offline fallback…':'Retry offline setup'}</button></div>}
-    {setupMessage&&<p role="status">{setupMessage}</p>}
+    {(setupIssue||setupStarting&&setupRevision>0)&&<div className="pwa-setup-recovery"><p ref={setupResult} role="status" tabIndex={-1}>{setupStarting?'Preparing offline fallback…':setupIssue}</p><button ref={setupButton} type="button" className="button" disabled={setupStarting||offline||updating} onClick={()=>{if(setupStarting||offline||updating)return;setupOwner.current=document.activeElement;setSetupStarting(true);setSetupIssue('');setSetupMessage('');setSetupRevision(value=>value+1)}}>{setupStarting?'Preparing offline fallback…':'Retry offline setup'}</button></div>}
+    {setupMessage&&<p ref={setupResult} role="status" tabIndex={-1}>{setupMessage}</p>}
     {message && <p role="status">{message}</p>}
   </aside>;
 }
