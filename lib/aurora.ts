@@ -26,7 +26,10 @@ export function nearestAurora(cells:[number,number,number][],lat:number,lon:numb
  const longitude=((lon%360)+360)%360;let best:[number,number,number]|null=null,distance=Infinity;
  // Haversine angular distance accounts for converging longitude lines at poles.
  for(const cell of cells){const cellCos=Math.abs(cell[1])===90?0:Math.cos(cell[1]*rad),delta=cell[0]-longitude,d=Math.sin((cell[1]*rad-latitude)/2)**2+cos*cellCos*Math.sin(delta*rad/2)**2;if(d<distance){best=cell;distance=d}}
- return best;
+ // The provider normally supplies a one-degree global grid. An incomplete
+ // valid feed must not borrow an estimate from a distant region. Two degrees
+ // is a coverage guard, not a claim about model accuracy or visibility.
+ return distance<=Math.sin(2*rad/2)**2?best:null;
 }
 export function auroraTimingIssue(feed:AuroraFeed,now:number):'invalid'|'future'|'old'|null{
  const observed=Date.parse(feed.observedAt),forecast=Date.parse(feed.forecastAt),fetched=Date.parse(feed.fetchedAt);

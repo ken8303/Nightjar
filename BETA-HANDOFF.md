@@ -4,15 +4,15 @@ Nightjar remains a beta. Local checks do not establish physical-phone camera ali
 
 ## Current release evidence — 16 October 2026
 
-- **651 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. The preceding reviewed batch has compact and desktop production-browser evidence; the new aurora wording has automated/source validation only because no browser is exposed in this session.
-- The compiled worker release is `857b26d1a61e37663bd1eddb45861dbc333fde8a107376e339bc20db18bb8604`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
-- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. The subsequent aurora wording fix is local and is not covered by Run #15.
+- **653 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. The preceding reviewed batch has compact and desktop production-browser evidence; the new aurora fixes have automated/source validation only because no browser is exposed in this session.
+- The compiled worker release is `b76e28ece3d181b414b572dd263fddbbd19eee5e2a5e5c641a0147618a5efebe`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 339 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
+- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. The subsequent aurora fixes are local and are not covered by Run #15.
 - No Cloudflare deployment result appears in the checked GitHub statuses/check runs. An empty status list is not evidence of a pending deployment. The final Cloudflare origin still needs verification.
 - You pushed the reviewed batch through GitHub Desktop. The development agent has not pushed or deployed. Temporary review servers, owned browser tabs and disposable test-origin data were cleaned up.
 
-## New local change after your push
+## New local changes after your push
 
-Aurora now labels a coordinate-only site’s fallback clock as UTC, with “site time zone unavailable,” instead of calling it local forecast time. Known zones, including explicitly known UTC, retain the site-local label. Types, lint, 651 tests on both supported verification runtimes, build and Cloudflare dry-run pass. Fresh rendered/mobile validation is pending because this session exposes no browser.
+Aurora now labels a coordinate-only site’s fallback clock as UTC, with “site time zone unavailable,” instead of calling it local forecast time. Known zones, including explicitly known UTC, retain the site-local label. Aurora also refuses a local estimate when an incomplete model grid has no cell within 2° of the site, and explains the missing coverage. This is a coverage guard, not a model-accuracy measurement. Types, lint, 653 tests on both verification runtimes, build and Cloudflare dry-run pass. Fresh rendered/mobile validation is pending because this session exposes no browser.
 
 ## Reviewed batch included in your latest push
 

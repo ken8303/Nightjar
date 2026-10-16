@@ -63,7 +63,7 @@ Not implemented: light pollution data, multi-model comparison, aurora alerts (th
 - https://skyandtelescope.org/astronomy-resources/light-pollution-and-astronomy-the-bortle-dark-sky-scale/
 - https://www.imo.net/resources/calendar/
 
-Aurora: https://www.spaceweather.gov/products/aurora-30-minute-forecast. The polar grid is sampled for display; the local estimate uses the nearest full-resolution cell. Aurora is always the latest feed, independent of the planner date.
+Aurora: https://www.spaceweather.gov/products/aurora-30-minute-forecast. The polar grid is sampled for display; the local estimate uses the nearest full-resolution cell within 2° of the site. If an incomplete feed has no nearby cell, the estimate stays unavailable with refresh guidance. This proximity guard checks coverage, not model accuracy. Aurora is always the latest feed, independent of the planner date.
 
 Mosaic centres use a tangent-plane projection around the supplied equatorial target. The supplied coordinate epoch is preserved; no precession, mount control, exact spherical overlap or per-panel camera-angle correction is provided. Fields are limited to 10 degrees and target declination to ±75 degrees.
 

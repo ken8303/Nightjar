@@ -39,3 +39,16 @@ test('nearest aurora cells use angular distance at high latitudes, across the da
  const pole=[[0,90,30],[180,90,90],[0,89,50]];assert.equal(nearestAurora(pole,90,180),pole[0]);assert.equal(nearestAurora([],80,0),null);
  for(const [lat,lon] of [[NaN,0],[91,0],[-91,0],[0,Infinity]])assert.equal(nearestAurora(north,lat,lon),null);
 });
+
+test('a valid but geographically incomplete aurora feed cannot assign a distant cell to the site',()=>{
+ const partial=validateAuroraFeed(parseAurora({...raw,coordinates:Array.from({length:100},(_,i)=>[i,60,80])},now));
+ assert.equal(nearestAurora(partial.cells,51.5072,-0.1276),null,'a northern-only grid must not become an overhead estimate for London');
+ assert.equal(nearestAurora(partial.cells,-60,20),null,'missing southern coverage must not borrow a northern estimate');
+ assert.deepEqual(nearestAurora(partial.cells,60,20),[20,60,80]);
+ const localZero=[[0,0,0]];assert.equal(nearestAurora(localZero,1.99,0),localZero[0]);assert.equal(nearestAurora(localZero,2.01,0),null);
+});
+test('normal one-degree aurora grids cover fractional sites, the date line and both poles',()=>{
+ const grid=[];
+ for(let lat=-90;lat<=90;lat++)for(let lon=0;lon<360;lon++)grid.push([lon,lat,Math.abs(lat)]);
+ for(const [lat,lon] of [[0.5,0.5],[51.5072,-0.1276],[-33.9,151.2],[65.5,179.9],[-65.5,-179.9],[89.99,71.9],[-89.99,-71.9],[90,180],[-90,-180]])assert(nearestAurora(grid,lat,lon),`normal coverage for ${lat},${lon}`);
+});
