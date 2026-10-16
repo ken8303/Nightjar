@@ -6,6 +6,8 @@ A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` 
 
 ## Recent changes and evidence
 
+- **Note retry focus:** successful explicit retries return to the selected note, managed editor or note selector. Failed retries retain the recovery button; a review with no conflicts focuses the target-list heading when no object is selected. Automatic typing saves are unchanged. Compact/desktop checks pass.
+
 - **Empty legacy notes:** note management can remove empty saved entries that still occupy capacity. Compact browser reproduction changed 100 entries to 99, then saved a new note; its received backup retained all 99 unrelated notes. Text-bearing note Undo still restores exact text and focus.
 
 - **Unsaved note recovery:** failed target-note saves offer Download unsaved notes. Received compact/desktop files retain exact whitespace, Unicode, original versions and explicit removals. The file is for manual recovery and cannot be imported as a plan backup. Download does not clear pending edits; successful save retry does.

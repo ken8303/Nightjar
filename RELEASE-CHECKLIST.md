@@ -2,7 +2,7 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **634 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `7fc3f1e137df86614419a766501e309fa98efd17258afc3c43fb048fb626eca0` matches 93 build/recovery inputs; 341 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
+Current evidence, 16 October 2026: **634 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `a687b74410ddf69224478ac14f9741a5ec4fa6103b425adcc5a58d8ee7ee9a6c` matches 93 build/recovery inputs; 342 scanned literal asset references resolve and 115 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. The latest checked hosted Run #13 covers the preceding 624-test push at 7d3ee06; the new local batch still needs the user's GitHub Desktop push and hosted validation.
 
 ## Verified locally
 
@@ -517,3 +517,5 @@ Final source also passes all 629 tests on Node 24.19.0. Owned test origins/tabs/
 - Unsaved target-note recovery downloads in-memory additions, replacements and removals with their original versions, without reading/writing storage. Compact and desktop actual downloads retained exact text; retry after restored storage access cleared recovery controls. Physical mobile file acceptance remains pending.
 
 - Empty saved target notes now have a usable explicit Remove action, freeing their slot and focusing the note selector. Nonempty text still has normal Undo. A real received backup confirmed all 99 unrelated notes plus the replacement note; offered local-worker reload retained context and notes.
+
+- Explicit target-note Retry returns keyboard focus to the relevant retained editor/selector after its recovery button disappears. Failed retries retain the button; no-conflict review with no selected object focuses the saved-target heading. Compact/desktop checks and existing deferred-focus guards pass.

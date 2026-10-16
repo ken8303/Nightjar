@@ -157,3 +157,5 @@ For the next physical-phone and hosted-release checks, see [BETA-HANDOFF.md](./B
 A requested PWA update gets a fresh timeout window after returning from background or page suspension. If it genuinely times out, the recovery actions remain available; unfinished edits still block reloading. Native installed-app suspension and update timing need phone acceptance.
 
 If target notes cannot save, Download unsaved notes prepares a manual JSON recovery file from edits held in the current view, including original versions and explicit removals. The copy may contain private text, cannot be imported as a plan backup, and does not mark edits as saved. Keep it before reloading; retry saving after restoring browser storage access.
+
+Successful explicit target-note save retries return focus to the relevant note field or manager selector. Failed retries keep their recovery control, and automatic saves while typing do not move focus. Deferred handoffs leave a newer active editor alone.
