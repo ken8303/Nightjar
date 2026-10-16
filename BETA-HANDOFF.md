@@ -2,7 +2,7 @@
 
 Current local verification passes **643 tests**, TypeScript, lint, production build and Cloudflare packaging dry-run. All 643 tests also pass under Node 24.19. Detailed reproductions are in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). New verified changes are kept local for your next batch push; the development agent has not pushed or deployed.
 
-A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 643-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
+A read-only GitHub check on 16 October reconfirmed remote main at `7d3ee06` and successful [Run #13](https://github.com/ken8303/Nightjar/actions/runs/38739481752). This covers the preceding 624-test release; the current 643-test additions remain local. It supersedes the earlier bb1908e/Run #11 snapshot below. The same commit also has a cancelled validation run; Run #13 is the successful run. No Cloudflare deployment result is attached in its checked statuses/check runs. GitHub success does not establish a successful Cloudflare deployment or physical-phone acceptance.
 
 ## Recent changes and evidence
 

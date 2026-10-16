@@ -60,5 +60,11 @@ test('paths that re-enter the original build by folder name cannot silently brea
    assert.deepEqual(JSON.parse(await readFile(join(f.build,'server/wrangler.json'),'utf8')),config,'validation must not rewrite the original build');
    assert.deepEqual(await readdir(f.root),['dist'],'a refused package must not leave a temporary snapshot');
   }
+  const portable={main:'../server/index.js',assets:{directory:'./../client/.'}};
+  await f.put('server/wrangler.json',JSON.stringify(portable));stage=await stageCloudflareBuild(f.build,f.root);
+  const config=JSON.parse(await readFile(stage.config,'utf8'));
+  assert.deepEqual(config,portable);assert.equal(await readFile(join(stage.root,'server',config.main),'utf8'),'export default {};');await access(join(stage.root,'server',config.assets.directory));
+  assert.deepEqual(JSON.parse(await readFile(join(f.build,'server/wrangler.json'),'utf8')),portable);
+  await stage.cleanup();assert.deepEqual(await readdir(f.root),['dist']);
  }finally{await stage?.cleanup();await f.cleanup()}
 });
