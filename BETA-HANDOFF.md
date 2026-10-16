@@ -6,6 +6,8 @@ A fresh read-only GitHub check on 15 October confirmed remote main at `7d3ee06` 
 
 ## Recent changes and evidence
 
+- **Short landscape review:** a 568 × 320 browser tour checked all seven sections, framing zoom/scroll/focus, lunar controls and manual camera fullscreen. Camera controls scroll within 45% of height, leaving 55% for the sky. Planner time and launcher focus remain intact. Native phone sensors, safe areas and keyboards remain pending.
+
 - **Diary version review:** opening a conflict review focuses its heading; completing either version choice focuses the retained copies. A no-conflict review focuses retry guidance. Stale reviewed versions still refuse replacement and retain choice focus. Compact/desktop checks cover denied writes and explicit recovery.
 
 - **Diary retry focus:** recovered form reads/saves focus their recovery message; recovered saved-diary reads focus the observation heading. Still-blocked retries retain their controls. A recovered read revealing conflicting text focuses guidance and keeps the local form intact. Compact/desktop checks pass.
