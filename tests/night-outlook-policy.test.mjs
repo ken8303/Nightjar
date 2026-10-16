@@ -32,3 +32,14 @@ test('gaps, missing coverage and already-started hours do not invent a complete 
  const later=sevenNightOutlook(data,place,new Date('2026-10-09T20:30Z'))[0];assert.equal(later.best.hours,1);assert.equal(later.best.date.toISOString(),'2026-10-09T23:00:00.000Z');assert.equal(later.forecastHours,1);
  assert.equal(bestNightWindow(sevenNightOutlook(hourly(['2026-10-09T20:00Z'],[null]),place,from)),null);
 });
+
+test('a brief polar twilight crossing between quarter-hour samples cannot be recommended as a full dark hour',()=>{
+ const site={name:'Brief polar twilight',latitude:85.07938514866692,longitude:-2.4,timezone:'UTC'},start=new Date('2026-12-21T12:00:00.000Z');
+ // All five old samples are below the threshold, while the actual short
+ // excursion lasts about 6.6 minutes and peaks between the first two.
+ for(let minute=0;minute<=60;minute+=15)assert(bodyPosition(A.Body.Sun,new Date(+start+minute*60000),site).altitude<-18);
+ assert(bodyPosition(A.Body.Sun,new Date('2026-12-21T12:07:38.712Z'),site).altitude>-18);
+ assert.equal(hourBelowAltitude(A.Body.Sun,start,site,-18),false);
+ const nights=sevenNightOutlook({time:[+start/1000],cloud_cover:[0]},site,start);
+ assert.equal(nights.length,1);assert.equal(nights[0].best,null);
+});

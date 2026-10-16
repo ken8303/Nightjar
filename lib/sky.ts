@@ -24,11 +24,18 @@ export function j2000Position(ra:number,dec:number,date:Date,place:Place){
 export function moonInfo(date:Date,p:Place){const phase=A.MoonPhase(date),illumination=A.Illumination(A.Body.Moon,date).phase_fraction;return {phase,illumination,name:moonPhaseName(phase),altitude:bodyPosition(A.Body.Moon,date,p).altitude}}
 export function scoreAt(cloud:number,date:Date,p:Place){const sun=bodyPosition(A.Body.Sun,date,p).altitude,moon=moonInfo(date,p);if(sun>-6)return 0;return Math.round(Math.max(0,Math.min(100,(100-cloud)*.8+Math.min(1,(-sun-6)/12)*20-(moon.altitude>0?moon.illumination*20:0))))}
 export function hourBelowAltitude(body:A.Body,date:Date,place:Place,altitude:number){
- if(!validObservingDate(date)||!validObservingDate(new Date(+date+3600000)))return false;
+ if(!Number.isFinite(altitude)||altitude< -90||altitude>90||!validObservingDate(date)||!validObservingDate(new Date(+date+3600000)))return false;
  for(let minutes=0;minutes<=60;minutes+=15){
   if(bodyPosition(body,new Date(+date+minutes*60000),place).altitude>=altitude)return false;
  }
- return true;
+ // Samples alone can miss a short rise/set pair near the poles. Search for
+ // an ascent through the same apparent-altitude threshold used above; the
+ // library search expects an unrefracted angle, so undo that correction first.
+ // Refraction is slightly negative at the zenith. A threshold above its
+ // apparent maximum has no inverse in [-90, 90] and cannot be crossed.
+ if(altitude>90+A.Refraction('normal',90))return true;
+ const geometric=altitude+A.InverseRefraction('normal',altitude);
+ return A.SearchAltitude(body,observer(place),1,date,1/24,geometric)===null;
 }
 export function timeLabel(date:Date,tz?:string){return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:tz||'UTC'}).format(date)}
 export {A};
