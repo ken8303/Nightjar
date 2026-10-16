@@ -6,6 +6,8 @@ Current evidence, 16 October 2026: **649 tests pass on Node 22.16.0 and Node 24.
 
 ## Verified locally
 
+- Synthetic camera geolocation callbacks after Keep displayed site, a newer request, suspension or close leave the intended site alone. Reopening uses the planner site. A live-site photo/details handoff waits for an unfinished time edit, preserves it through Keep editing, then applies the live context only after a later unblocked action. Compact integration passed without starting real hardware.
+
 - Backup export refuses a collection replaced during its read or final-read storage denial before offering a file. Fresh retries retain the newer site and exact notes; failed backup/raw-recovery downloads clear prior success feedback. Received files and compact/desktop feedback pass. This is guarded verification, not an atomic multi-key snapshot guarantee.
 
 - A saved red-light preference is applied from the document head before the loading screen. Held-hydration compact/desktop checks pass on, off and denied-storage startup; hydration and toggling stay free of application warnings/errors. Device brightness and native browser/app surfaces remain outside this display filter.
