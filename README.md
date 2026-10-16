@@ -5,7 +5,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 ## Included in this beta
 
 - Live hourly Open-Meteo weather, an explained planning score, and a best-hour recommendation.
-- Mobile Explore navigation uses a sticky section bar, with anchor clearance and keyboard focus return. Red-light guidance and save errors appear above observing controls; preference changes synchronize across planner tabs.
+- Mobile Explore navigation uses a sticky section bar, with anchor clearance and keyboard focus return. Red-light guidance and save errors appear above observing controls; preference changes synchronize across planner tabs. A saved red-light setting applies to the loading screen before the interactive planner starts; unavailable preference storage does not block startup.
 - Low/middle/high cloud cover, near-surface visibility, dew point and temperature margin for the selected forecast hour. Dew guidance is a heuristic; visibility is not astronomical seeing or transparency.
 - Location search with validated unique results, distinct unavailable/empty feedback and a direct clear action, mobile decimal coordinate entry with N/S and E/W controls, optional browser geolocation, an OpenStreetMap view, and device-local saved places. Unreadable selected-site data is preserved with an explicit fallback and Retry guidance. Rename a selected site with a readable name; saved sites retain their coordinates, time zone and sky rating. Unreadable saved-place collections show Retry guidance and keep their stored data and last readable sites.
 - Optional, user-entered Bortle class (1–9) for observing sites, shown in saved places, comparisons and the offline plan. It is separate from the weather score and is not a light-pollution map measurement.

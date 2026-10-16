@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./professional.css";
 import PwaSupport from "@/components/pwa-support";
+import {viewingModeBootstrap} from "@/lib/viewing-mode";
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0b1115" };
 
@@ -26,7 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head><script id="nightjar-viewing-mode" dangerouslySetInnerHTML={{__html:viewingModeBootstrap}}/></head>
       <body className="antialiased"><a className="skip-link" href="#main-content">Skip to planner</a>{children}<PwaSupport /></body>
     </html>
   );
