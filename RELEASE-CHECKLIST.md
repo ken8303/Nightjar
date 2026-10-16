@@ -185,7 +185,7 @@ Diary cards, controls and report/CSV local times now include offsets and precise
 
 Local integrated PWA verification passed two waiting-worker updates, retaining millisecond observing time, favourite/note and unfinished diary site/time/Unicode text. A subsequent rebuilt CSS update verified wrapped diary actions at 320/390 pixels, including snapshot and clear/undo behavior. Panel-bound checks supplement document-overflow checks because a clipped internal control can leave document width unchanged. Installed-phone and production-origin update checks below remain required.
 
-1. Check the **Validate Nightjar** action for the newly pushed commit. A read-only check on 13 October confirmed [Run #10](https://github.com/ken8303/Nightjar/actions/runs/38409015730) passed at remote main 8d44d72, covering the preceding 592-test batch. The newer local release checks, dated deep-sky views, camera/PWA focus recovery and enlarged framing viewer pass 607 tests and verification, but still need their own hosted result after your next push. Read the verification summary and step log; download the log artifact when available.
+1. Check the **Validate Nightjar** action for the exact commit you just pushed. Compare its SHA with GitHub Desktop and read the workflow summary and validation step log; download the validation-log artifact when available. The current local checks and latest checked hosted run are listed at the top of this file. Earlier successful runs below cover only their recorded commits and do not validate newer local changes.
 2. Set the Workers Builds build command to `npm run verify`, with the existing deploy command `npm run deploy`. The GitHub check alone does not gate an independently configured Cloudflare build.
 3. Confirm the production home page, weather/place/aurora API responses, manifest, service worker and `/offline` page on the final HTTPS origin.
 4. Import a backup on that final origin if needed. Browser data is separate between localhost, the prior hosted site and Cloudflare.
@@ -392,18 +392,20 @@ Completion percentages previously reported were estimates. Release acceptance is
 - [x] Review site name returns to the retained editable field after a denied save. Compact browser QA preserved Unicode text, original site and 20:30 UTC; retry saved the new name with unchanged coordinates/country/time zone and cleared protection. All six current pending-edit labels now have direct review actions.
 
 
-## Final local package evidence — 13 October
+## Historical local package evidence — 13 October
 
-- Current source has 596 passing tests on Node 22 and Node 24.19, with typecheck/lint and production build/Cloudflare packaging passing. The final CSS-only framing height-fit adjustment was followed by successful build/packaging and rendered verification.
+The dated snapshots below describe the source and remote state checked at that time. They are retained for traceability; use the evidence at the top of this file for the current local release. Physical-phone and final-origin gates remain separate.
+
+- That source snapshot had 596 passing tests on Node 22 and Node 24.19, with typecheck/lint and production build/Cloudflare packaging passing. The final CSS-only framing height-fit adjustment was followed by successful build/packaging and rendered verification.
 - The final 90-input client-bundle reconstruction matches worker release `671014f3f94a1e6957871a60136ee0940c257cb695df6319474ac8b4e8719c63`. It includes the original emitted .assetsignore bytes and excludes post-build unreferenced copies; the earlier captured bundle established that distinction. Removing the generated stamp restores the exact public worker source. Built offline HTML and recovery module match source byte-for-byte.
 - All 332 literal relative JavaScript/CSS asset references scanned in current generated client chunks resolve to files. This is static artifact validation, not a promise about every runtime request or the final hosted origin.
 - Manifest display is standalone with root start/scope; declared 192/512/512 PNG icons have valid signatures and matching dimensions. Native masking/install appearance still needs phone acceptance.
-- Remote main remains 8d44d72 with successful Run #10 at the last read-only check. New local commits have not been pushed or deployed by the agent. Confirm their own CI and Cloudflare results after the next batch push.
+- The read-only check at that time found remote main at 8d44d72 with successful Run #10. New local commits have not been pushed or deployed by the agent. Confirm their own CI and Cloudflare results after the next batch push.
 
 
-## Final local release evidence — 14 October 2026
+## Historical local release evidence — 14 October 2026
 
-- Current source passes all 607 tests on Node 22 and Node 24.19. Typecheck, lint, production build and Cloudflare packaging dry-run pass. Known experimental-glob, chunk-size and module-classification build notices remain.
+- That source snapshot passed all 607 tests on Node 22 and Node 24.19. Typecheck, lint, production build and Cloudflare packaging dry-run pass. Known experimental-glob, chunk-size and module-classification build notices remain.
 - The generated worker release is `0a617585d1df9ef32e1a1cb0e4cadac3dbdfc29fcfe1565244b7723636feefca`. Reconstructing all 90 emitted/recovery inputs reproduces its complete contents exactly. Offline HTML and recovery-module output match their source bytes.
 - All 332 scanned literal relative JavaScript/CSS references in those emitted inputs resolve. This is a filesystem check, not a guarantee about deployed/dynamic requests. Manifest id/start/scope remain `/`, display is standalone, and PNG signatures/dimensions match the three declared 192/512/512 icons. Native appearance and installation remain device gates.
 - Worker installation caches only the offline page and recovery module. Static cache handling is restricted to immutable app paths under `/_next/static/`; manifest/icon requests bypass it. Public manifest/icon bytes are therefore not omitted cached resources in the worker release fingerprint.
@@ -419,7 +421,7 @@ Completion percentages previously reported were estimates. Release acceptance is
 - This supersedes the preceding local package fingerprint for the current source. Hosted CI, Cloudflare deployment and physical-phone acceptance of this batch remain pending the user's push/testing. No agent push or deployment occurred.
 
 
-### Latest local release evidence — 14 October 2026
+### Historical local release evidence — 14 October 2026
 
 - Full Node 22 verify passes 615 tests, types, lint, build and packaging; all 615 tests also pass under Node 24.19.
 - Worker release `a994dd49fc2d9b840d605e4d31cbf0490ae9b35ea7106ae0bb532a3325e853af` matches complete 91-input reconstruction. All335 scanned literal relative JS/CSS references resolve. Offline/recovery bytes match source; manifest/icon checks pass. Dry-run stages 113 client files without bindings.
