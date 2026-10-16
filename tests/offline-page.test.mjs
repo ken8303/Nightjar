@@ -147,6 +147,21 @@ test('offline paired views and return tokens retain this tab while keeping a new
  const missing=load({'nightjar-place':peer},false,{sessionOverrides:{'nightjar-recovery-context-v1':raw,'nightjar-recovery-time-v1':JSON.stringify(time)}});missing.elements.get('retry').listeners.get('click')();assert(!missing.session.has('nightjar-recovery-context-v1'));assert(!missing.session.has('nightjar-recovery-time-v1'));
 });
 
+test('offline paired site aliases at the same coordinates retain their separate names and sky ratings',()=>{
+ const own={name:'Dark garden',latitude:51.5,longitude:0,timezone:'Europe/London',bortle:3},peer={...own,name:'Street entrance',bortle:7},time='2026-10-16T20:00:37.125Z',context=JSON.stringify({version:1,time,place:own});
+ for(const saved of [[peer],[own,peer],[]]){
+  const page=load({'nightjar-place':peer,'nightjar-places':saved,'nightjar-observing-time':time},false,{sessionOverrides:{'nightjar-current-context-v1':context}}),before=new Map(page.raw);
+  const rows=page.elements.get('places').children.map(row=>row.textContent);
+  assert.equal(rows.length,2,'both named site snapshots must remain visible without duplicating an existing named site');
+  assert(rows.some(row=>row.includes('Dark garden')&&row.includes('Bortle 3')));
+  assert(rows.some(row=>row.includes('Street entrance')&&row.includes('Bortle 7')));
+  assert(page.elements.get('session').textContent.includes('Dark garden'));
+  page.elements.get('retry').listeners.get('click')();
+  assert.deepEqual(JSON.parse(page.session.get('nightjar-recovery-context-v1')),{version:1,time,place:own});
+  assert.deepEqual(page.raw,before);
+ }
+});
+
 test('offline snapshots disclose relevant changes from another local-storage view without rewriting saved data',()=>{
  const page=load({'nightjar-targets-v1':['Vega']}),before=Array.from(page.raw);
  assert.equal(page.elements.get('snapshot-warning').hidden,true);

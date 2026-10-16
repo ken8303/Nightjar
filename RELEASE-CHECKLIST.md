@@ -2,9 +2,11 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-Current evidence, 16 October 2026: **643 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `2ca90e84a81484154ed1aa3d26d9c95326484e198929bed88a331b8427897e8c` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer offline-setup focus fix remains local and needs the next batch push/hosted validation.
+Current evidence, 16 October 2026: **644 tests pass on Node 22.16.0 and Node 24.19.0**, along with types, lint, production build and Cloudflare packaging dry-run. Release `42a222faf037ad2d8ff762c32e9c3edfe479684b2d037aeb3be7a422a3a5e63f` matches 92 emitted/recovery inputs after accounting for the build tool’s later `.vite` ignore-line append; 339 scanned literal asset references resolve and 114 client files are packaged. See [BETA-HANDOFF.md](./BETA-HANDOFF.md) for the current changes and phone acceptance steps. Read-only GitHub checks confirm successful Run #14 for your 643-test push at eb4fc3c; the newer offline-setup focus and offline-site alias fixes remain local and needs the next batch push/hosted validation.
 
 ## Verified locally
+
+- Offline paired-site snapshots retain separate names and ratings at identical coordinates, without duplicating an already-present named site. Compact/desktop rendering, received raw recovery and online return preserve the selected alias and exact UTC instant.
 
 - Offline-setup Retry focuses the success message, returns to Retry on failure, and focuses error guidance if Retry is disabled while offline. Delayed completion, repeated worker signals and synthetic background completion do not claim another editor’s focus. Production checks passed at 320 × 740 and 1024 × 900; native PWA/browser lifecycle remains pending.
 
