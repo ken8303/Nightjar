@@ -6,6 +6,7 @@ import {ArrowUpRight, Download, Moon, Star} from 'lucide-react';
 import {meteorCalendar} from '@/lib/calendar';
 import {meteorCloudSummary, meteorConditions, meteorEvents, upcomingMeteorOccurrences} from '@/lib/meteor-planning';
 import {Place} from '@/lib/sky';
+import {deepSkyTimestampFormatter as planningTimestampFormatter} from '@/lib/deep-sky-time';
 
 type Hourly={time:number[];cloud_cover:(number|null)[]};
 export default function MeteorPlanner({date,place,hourly,onExplore,onNotice}:{date:Date;place:Place;hourly?:Hourly;onExplore:(date:Date)=>void;onNotice:(message:string)=>void}){
@@ -14,7 +15,7 @@ export default function MeteorPlanner({date,place,hourly,onExplore,onNotice}:{da
  })),[date,place,hourly]);
  const omitted=meteorEvents.length-plans.length;
  const timezone=place.timezone||'UTC';
- const format=(value:Date)=>new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:timezone}).format(value);
+ const format=planningTimestampFormatter(date,timezone).format;
  function download(name:string,year:number,month:number,day:number){
   try{
    downloadFile(new Blob([meteorCalendar(name,year,month,day)],{type:'text/calendar;charset=utf-8'}),`${name.toLowerCase().replaceAll(' ','-')}-${year}.ics`);
