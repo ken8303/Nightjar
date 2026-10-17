@@ -5,7 +5,8 @@ Nightjar remains a beta. Desktop Safari and automated checks do not establish ph
 ## Current release evidence — 17 October 2026
 
 - **662 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass on the final source. Packaging stages 114 asset files without bindings.
-- Worker release `1ff6da7b65bee2aedf9b49961ff6350ce10784b15cde909df0e079d3bef51b32` reconstructs from 92 emitted/recovery inputs after the build tool’s later `.vite` ignore-line append. All 340 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass.
+- Worker release `1ff6da7b65bee2aedf9b49961ff6350ce10784b15cde909df0e079d3bef51b32` reconstructs from 92 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 340 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass.
+- The final build-folder audit found late numbered generated copies. The existing packaging guard omitted 83 identical, unreferenced copies in its isolated snapshot; the source/build folder was preserved. The isolated release/asset checks and repeated packaging dry-run pass.
 - Your push at `63b0f6e` passed [GitHub Run #16](https://github.com/ken8303/Nightjar/actions/runs/38965552284). The final mobile input-label fix and this evidence update remain local for your next batch push. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
