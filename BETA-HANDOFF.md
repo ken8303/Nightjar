@@ -1,48 +1,46 @@
 # Nightjar beta handoff
 
-Nightjar remains a beta. Local checks do not establish physical-phone camera alignment, native file handling or installed-PWA reliability.
+Nightjar remains a beta. Desktop Safari and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
-## Current release evidence — 16 October 2026
+## Current release evidence — 17 October 2026
 
-- **662 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass. The preceding reviewed batch has compact and desktop production-browser evidence; the new local fixes have automated/source validation only because no browser is exposed in this session.
-- The compiled worker release is `1f2c718e26c893b27e51a7611ab5c38d08e84199fbe1b8b4c0556ae11bb8ef24`. It reconstructs from 92 emitted/recovery inputs (accounting for the build tool’s later `.vite` ignore-line append); all 340 scanned literal relative asset references resolve. Packaging stages 114 client files without bindings. Manifest/icon dimensions and offline/recovery bytes pass their checks.
-- Read-only GitHub checks confirm your push at `601cb3a` with successful [Run #15](https://github.com/ken8303/Nightjar/actions/runs/38924082483), covering the reviewed batch below. All subsequent local changes remain outside Run #15’s hosted coverage.
-- No Cloudflare deployment result appears in the checked GitHub statuses/check runs. An empty status list is not evidence of a pending deployment. The final Cloudflare origin still needs verification.
-- You pushed the reviewed batch through GitHub Desktop. The development agent has not pushed or deployed. Temporary review servers, owned browser tabs and disposable test-origin data were cleaned up.
+- **662 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass on the final source. Packaging stages 114 asset files without bindings.
+- Worker release `1ff6da7b65bee2aedf9b49961ff6350ce10784b15cde909df0e079d3bef51b32` reconstructs from 92 emitted/recovery inputs after the build tool’s later `.vite` ignore-line append. All 340 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass.
+- Your push at `63b0f6e` passed [GitHub Run #16](https://github.com/ken8303/Nightjar/actions/runs/38965552284). The final mobile input-label fix and this evidence update remain local for your next batch push. The development agent has not pushed or deployed.
+- The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
-## New local changes after your push
+## Final local fix
 
-Aurora now labels a coordinate-only site’s fallback clock as UTC, with “site time zone unavailable,” instead of calling it local forecast time. Known zones, including explicitly known UTC, retain the site-local label. Aurora also refuses a local estimate when an incomplete model grid has no cell within 2° of the site, and explains the missing coverage. This is a coverage guard, not a model-accuracy measurement. Types, lint, 662 tests on both verification runtimes, build and Cloudflare dry-run pass. Fresh rendered/mobile validation is pending because this session exposes no browser.
+The observing-time input now has an explicit accessible name. At narrow widths, CSS hides its visible label; native Safari previously exposed an unnamed date/time area. Safari now exposes “Observing time” at 320 × 800 and 380 × 800. The date calculations and native control remain unchanged.
 
-Full-hour darkness and Moon-free checks now search for short altitude crossings between the 15-minute samples. Regressions reproduce brief Sun and Moon excursions that the old samples missed; the dark-window planner no longer recommends the affected hour. Apparent contours retain that protection; solar darkness now explicitly uses geometric altitude, matching the milestone and camera definitions.
+## Reviewed changes included in your latest push
 
-Twilight classification, scores, first-open timing, target planners, site comparison and report Sun metadata now share the geometric Sun-centre altitude used by the darkness milestones and camera. Regression checks reproduce their earlier disagreement just after dusk and keep apparent Sun/Moon viewing positions unchanged. See the [USNO definitions](https://aa.usno.navy.mil/faq/RST_defs).
-
-The UTC/local entry-zone buttons now stay disabled while a date/time edit is incomplete or awaiting a DST occurrence choice. An associated explanation directs the user to finish or cancel first, preventing a zone-button tap from silently discarding the edit. The small control change has full automated gates but awaits rendered/native interaction checks.
-
-Calendar-download feedback now follows the actual recommended windows and exported conditions, so refreshed or expired windows cannot leave an old success notice attached to new data. Its success message identifies the full window. Milky Way labels reuse the shared era-aware formatter for supported local BC dates. Source/calculation probes pass; rendered acceptance remains pending.
-
-## Reviewed batch included in your latest push
-
-| Commit | Change and verified behaviour |
+| Commit | Change |
 | --- | --- |
-| `f1a94ae` | Offline-setup retry focuses success or usable retry/error guidance. Delayed results leave a newer editor alone. |
-| `c0e009b` | Offline snapshots keep named site aliases and their separate ratings at identical coordinates. Recovery and online return keep the selected context. |
-| `0fe3af5` | Saved red-light mode applies before the loading screen. Off and denied-storage startup remain usable; hydration stays clean. |
-| `c88e34d` | Backup export refuses changed/unverifiable source reads before offering a file. Failed backup/recovery downloads clear obsolete success feedback. This is guarded verification, not an atomic storage snapshot. |
-| `505aa54` | Recorded controlled camera-location cancellation, suspension, close/reopen and unfinished-time handoff acceptance. No runtime change. |
-| `4d19a91` | Survey photo panels and enlarged viewers use 800 × 800 previews with a direct original-survey link. Actual M33 decoding fell from 3564 × 3571 to 800 × 800; retry/zoom/close and featured NASA photos pass. |
-| `5356d20` | Smaller NASA camera thumbnails: seven planet/Moon references request a 200-pixel long side; Saturn’s listed thumbnail decodes at 640 × 309. Main reference images are unchanged. |
+| `c4b2f6f` | Aurora identifies the UTC fallback when the site’s time zone is unknown. |
+| `f348300` | Missing nearby aurora coverage stays unavailable instead of borrowing a distant cell. The 2° limit checks coverage, not model accuracy. |
+| `e08c40c` | Full-hour Sun/Moon checks catch brief altitude crossings between samples. |
+| `1db9d45` | Twilight planning shares the geometric Sun-centre convention used by milestones and camera lighting; apparent object-viewing positions are preserved. See [USNO definitions](https://aa.usno.navy.mil/faq/RST_defs). |
+| `ff6828b` | UTC/local zone buttons cannot silently discard an unfinished time edit or unresolved repeated-hour choice. |
+| `63b0f6e` | Calendar feedback follows the exported forecast window and conditions; Milky Way dates reuse the era-aware formatter. |
 
-Compact and desktop browser checks used controlled fixtures where needed. Camera positions remain predictions, not image recognition. Image dimensions establish decoded-pixel reduction, not a timing, RAM or battery benchmark. Existing feature scope and limitations remain in [README.md](./README.md).
+Earlier batches and detailed reproductions remain in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Feature scope and limitations are in [README.md](./README.md).
 
-Detailed reproductions, logs, historical test counts and their limitations are retained in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). The full gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); feature scope and known limitations are in [README.md](./README.md).
+## Native Safari acceptance — 16 October 2026
 
-## Hosted and phone follow-up
+Browser automation was unavailable, but CUA native Safari worked in a separate private window. A disposable local frame served the compiled app at exact 320 × 800 and 380 × 800 viewports, with controlled weather/aurora responses. Desktop Safari was also checked.
 
-1. Check the GitHub validation workflow result for the pushed commit. Read its verification summary and step log; download the validation-log artifact when available. Local passing checks do not establish a hosted CI result.
-2. Check the Cloudflare build and final HTTPS origin. Confirm the planner, weather, manifest, service worker and offline fallback there. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration.
-3. Use test entries for the checks below. Verify any backup/recovery file is actually received before clearing text or leaving a failed-save view.
+| Flow | Verified result |
+| --- | --- |
+| Page and layout | Correct Nightjar page, meaningful content and no visible framework overlay. Document/body widths were 303 px in the 320 px frame and 363 px in the 380 px frame, accounting for the native scrollbar; no horizontal overflow. Screenshots were emitted in the conversation. |
+| Time entry | Empty and London repeated-hour edits survive zone-button taps. Both DST occurrences remain available; choosing the later occurrence selects `2026-10-25T01:30:00.000Z`. Cancel restores the controls. |
+| PWA update | An unfinished edit disables Update and reload. After Cancel and explicit update, London QA and `2026-10-25T00:30:17.125Z` are restored exactly. This was a browser-tab update, not installed-PWA lifecycle testing. |
+| Calendar feedback | Safari reports a completed 654-byte calendar download. The app names the full exported window. Changing fixture coverage moves the recommended window and removes the old confirmation. The file’s configured download location and calendar import were not inspected. |
+| Aurora | Unknown-zone metadata says UTC. A nearby fixture cell shows 33%; missing regional coverage shows an unavailable estimate and explanation; restoring coverage recovers 33%. |
+
+Console logs were not inspected through native Safari. The remaining Milky Way era case has calculation/source evidence; it was not rendered in this Safari pass. Physical phone sensors, native mobile keyboards/readers/files, installed-PWA behavior and final Cloudflare-origin acceptance remain pending.
+
+The fixture confirmed clearing local/session test data and requested worker/cache cleanup through its controls. The private QA window was closed, leaving the original Safari window. Local download settings still showed Ask. Review servers are stopped. No camera, motion, geolocation or wake-lock permission was requested.
 
 ## Phone acceptance checks
 
