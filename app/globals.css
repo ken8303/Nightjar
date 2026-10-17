@@ -155,3 +155,6 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .tab-loading.view-load-delayed{display:block;text-align:left;min-height:0;overflow-wrap:anywhere}.view-load-delayed .button{max-width:100%;white-space:normal;margin:0 8px 8px 0}
 
 .text-button.location-search-clear{min-height:44px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+/* The brand returns through guarded planner navigation. */
+.top button.brand{padding:0;border:0;background:none;color:inherit;text-align:left}

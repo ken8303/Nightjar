@@ -4,15 +4,19 @@ Nightjar remains a beta. Desktop Safari and automated checks do not establish ph
 
 ## Current release evidence — 17 October 2026
 
-- **662 tests pass on Node 22.16.0 and Node 24.19.0.** TypeScript, lint, production build and Cloudflare packaging dry-run pass on the final source. Packaging stages 114 asset files without bindings.
-- Worker release `1ff6da7b65bee2aedf9b49961ff6350ce10784b15cde909df0e079d3bef51b32` reconstructs from 92 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 340 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass.
-- The final build-folder audit found late numbered generated copies. The existing packaging guard omitted 83 identical, unreferenced copies in its isolated snapshot; the source/build folder was preserved. The isolated release/asset checks and repeated packaging dry-run pass.
-- Your push at `63b0f6e` passed [GitHub Run #16](https://github.com/ken8303/Nightjar/actions/runs/38965552284). The final mobile input-label fix and this evidence update remain local for your next batch push. The development agent has not pushed or deployed.
+- **662 tests pass on Node 24.19.0 on the current source.** Node 22.16.0 passed the full 662-test suite for the preceding meteor-label batch and all 12 focused navigation/pending-edit tests for the final home-control change. TypeScript, lint, production build and Cloudflare packaging dry-run pass on Node 22 for the final source. Packaging stages 103 asset files without bindings.
+- Worker release `d8909894feeb89de56137cc82510e3e8302e2f333e41cb0b26b650f3f67412be` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 311 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. This snapshot needed no generated-copy omissions.
+- Your push at `63b0f6e` passed [GitHub Run #16](https://github.com/ken8303/Nightjar/actions/runs/38965552284). Subsequent mobile input naming, meteor labels, home navigation and evidence updates remain local for your next batch push. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
-## Final local fix
+## Current local fixes
 
 The observing-time input now has an explicit accessible name. At narrow widths, CSS hides its visible label; native Safari previously exposed an unnamed date/time area. Safari now exposes “Observing time” at 320 × 800 and 380 × 800. The date calculations and native control remain unchanged.
+
+Meteor windows now include dates, years and UTC offsets. The supported Dublin Orionids example spanning the October 1995 clock change displays its eight-hour window as 21:00 GMT+1 → 04:00 GMT/GMT+0. Browser checks at 320/380 px confirm wrapping without horizontal overflow, and Explore window selects its expected time.
+
+The brand now uses the app’s guarded navigation to return to Tonight. The former framework home link both failed on click and emitted a prefetch setup error when the page had a query string. Verified desktop return, retention of the selected mobile Dublin site/time, and the unfinished site-name warning with Keep editing preserving text. No new console errors appeared in this tested flow after the fix; this is scoped browser evidence, not an exhaustive console audit. Removing the unused routing imports reduces packaged client assets from 114 to 103.
+
 
 ## Reviewed changes included in your latest push
 
