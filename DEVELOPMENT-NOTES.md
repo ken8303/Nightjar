@@ -2835,3 +2835,11 @@ Reviewed the existing target-removal flow against compiled release 492959970b24d
 Reloading and reopening the atlas confirms one saved Vega target and exact note-string equality, including whitespace. Removing it again without Undo, then reloading and selecting Vega, confirms zero saved targets while the same exact note remains editable. This verifies the UI's promise that favourite removal keeps personal notes. No diary record was created, so this pass does not independently establish diary retention. Warning/error logs are empty.
 
 Initial search inspection ran before lazy target controls were present; a later loaded-state observation supplied their labels. No code change was needed. The fixture confirmed clearing its QA storage, workers and caches; its tab was closed and both Worker and proxy stopped. The 670-test suite and prior full runtime verification remain applicable without a repeated build. No push or deployment.
+
+## Current local batch audit — 18 October 2026
+
+The latest review verified saved-target removal/Undo and exact personal-note retention across reload, without confirming another runtime defect.
+
+Final isolated asset reconstruction still matches 492959970b24d079e17668b82afdd2934208b94203025c9d2506d1216f1bd0e5, with 81 emitted/recovery inputs, all 312 literal relative references resolving, 95 client files, valid manifest/icon dimensions and matching recovery bytes; zero copies omitted in this audit snapshot. Runtime/dependency/build/workflow paths have no changes after c9f1fb2. The later test-only extension passed the full 670-test Node 22.16.0 suite and lint; the earlier complete verification still supplies TypeScript/build/dry-run evidence for the identical runtime.
+
+Read-only remote inspection still reports main at c025022df21597bcdd9dd35f8d06ebd80c2bdf4a. No push or deployment occurred. A loopback check confirms no owned review server remains listening on 5695 or 5697–5713, and all owned browser QA tabs were closed. Documentation links in the current handoff/checklist/feature-status/source brief resolve locally. This audit does not close the physical-phone, installed-PWA, downloaded-file or final hosted-origin gates.
