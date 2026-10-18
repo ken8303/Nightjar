@@ -279,7 +279,16 @@ function Planner(){
   try{localStorage.setItem('nightjar-places',JSON.stringify(next));savedRef.current=next;setSaved(next);setSavedReadError(false);setNotice(message);return true}catch{setNotice('This browser could not save your places. The saved list stays unchanged.');return false}
  }
  function renameSite(name:string){readLatestSavedPlaces();const next=renameObservingSite(localStorage,place,name);savedRef.current=next.places;placeRef.current=next.place;setSaved(next.places);setSavedReadError(false);setPlace(next.place);setPlaceReadError(false);setNotice(`${next.place.name} saved as the site name.`)}
- function savePlace(){try{const next=upsertSavedPlace(readLatestSavedPlaces(),place);if(persistSavedPlaces(next,'Place saved on this device.'))setSavedShown(Math.max(savedListPageSize,next.length))}catch(error){setNotice(error instanceof Error&&error.name!=='QuotaExceededError'?error.message:'This place could not be saved.')}}
+ function savePlace(){
+  try{
+   const latest=readLatestSavedPlaces();
+   // Save adds a location. Renaming and sky-rating changes have their own
+   // guarded actions; a stale Save must not overwrite another tab's metadata.
+   if(latest.some(item=>same(item,place))){savedRef.current=latest;setSaved(latest);setSavedReadError(false);setNotice('This location is already saved. Its latest saved settings were kept. Choose it from Saved places to review them.');return}
+   const next=upsertSavedPlace(latest,place);
+   if(persistSavedPlaces(next,'Place saved on this device.'))setSavedShown(Math.max(savedListPageSize,next.length));
+  }catch(error){setNotice(error instanceof Error&&error.name!=='QuotaExceededError'?error.message:'This place could not be saved.')}
+ }
  function removePlace(index:number){
   const item=savedRef.current[index];if(!item)return;
   let latest:Place[]|undefined;
