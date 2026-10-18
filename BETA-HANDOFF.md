@@ -2,6 +2,8 @@
 
 Nightjar remains a beta. Desktop Safari and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
+Reference-feature coverage and the remaining implementation backlog are tracked separately in [FEATURE-STATUS.md](./FEATURE-STATUS.md). This handoff records release evidence rather than a full-parity completion percentage.
+
 ## Current release evidence — 18 October 2026
 
 - **5 dated-label/zoom tests pass for the expanded-chart header update**, with TypeScript, lint, production build and Cloudflare dry-run passing on Node 24.19.0. The preceding full 662-test run covers site-Save protection at `00c2782`. Packaging stages 103 asset files without bindings.

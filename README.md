@@ -35,6 +35,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Local release verification and GitHub checks; deployment preparation is documented in [CLOUDFLARE.md](./CLOUDFLARE.md).
 
 For current release gates and phone checks, see [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md).
+For reference-feature coverage, missing capabilities and acceptance criteria, see [FEATURE-STATUS.md](./FEATURE-STATUS.md).
 
 ## Run locally
 
