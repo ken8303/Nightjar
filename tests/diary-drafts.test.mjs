@@ -33,6 +33,16 @@ test('draft schema rejects duplicates, changed edit metadata and unbounded text'
 
 test('completed drafts cannot become duplicate observations after a failed cleanup write',()=>{const state={drafts:[entry],edit:null};assert.equal(discardCompletedDrafts(state,[entry]).drafts.length,0);assert.equal(discardCompletedDrafts(state,[{...entry,notes:'Changed elsewhere'}]).drafts.length,1);assert.equal(state.drafts.length,1)});
 
+test('a saved changed edit is not resurrected after its draft cleanup failed, while unfinished and newer versions remain recoverable',()=>{
+ const original={...entry,id:'saved-edit'},draft={...original,notes:'Successfully updated notes 星空',outcome:'imaged'},other={...entry,id:'pending-other',target:'M45'};
+ const state={drafts:[other],edit:{original,draft}},before=structuredClone(state);
+ assert.deepEqual(discardCompletedDrafts(state,[draft]),{drafts:[other],edit:null});
+ for(const saved of [[],[original],[{...draft,notes:'Newer peer text'}],[{...draft,place:{...draft.place,name:'Newer peer site'}}]])assert.deepEqual(discardCompletedDrafts(state,saved),state);
+ const unchanged={drafts:[],edit:{original,draft:structuredClone(original)}};
+ assert.deepEqual(discardCompletedDrafts(unchanged,[original]),unchanged,'an explicitly opened but unchanged edit still resumes');
+ assert.deepEqual(state,before);
+});
+
 
 test('draft edits preserve newer unrelated forms and apply explicit deletion without mutating source snapshots',()=>{
  const other={...entry,id:'draft-M45',target:'M45',notes:'Other tab'},base={drafts:[entry],edit:null},desired={drafts:[{...entry,notes:'My new text'}],edit:null},latest={drafts:[entry,other],edit:null};

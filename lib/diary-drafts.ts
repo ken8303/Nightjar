@@ -93,7 +93,14 @@ export function mergeDiaryDraftChanges(base:DiaryDraftState,desired:DiaryDraftSt
 }
 export function saveDiaryDrafts(state:DiaryDraftState,storage?:Pick<Storage,'setItem'>){try{const text=JSON.stringify({version:1,...normalizeDiaryDrafts({version:1,...state})});if(text.length>diaryDraftMaxStoredChars)return false;(storage??localStorage).setItem(diaryDraftKey,text);return true}catch{return false}}
 
-export function discardCompletedDrafts(state:DiaryDraftState,saved:Observation[]):DiaryDraftState{return {...state,drafts:state.drafts.filter(draft=>!saved.some(entry=>entry.id===draft.id&&sameObservation(entry,draft)))}}
+export function discardCompletedDrafts(state:DiaryDraftState,saved:Observation[]):DiaryDraftState{
+ const edit=state.edit;
+ // Saving the observation can succeed before clearing its stored edit fails.
+ // Retire only an exact saved result; retain a newer peer version's old draft,
+ // and keep explicitly opened, unchanged edits available to resume.
+ const completedEdit=edit&&!sameObservation(edit.original,edit.draft)&&saved.some(entry=>entry.id===edit.draft.id&&sameObservation(entry,edit.draft));
+ return {...state,drafts:state.drafts.filter(draft=>!saved.some(entry=>entry.id===draft.id&&sameObservation(entry,draft))),edit:completedEdit?null:edit};
+}
 
 // Removed forms contain no remaining view-only text. In particular a failed
 // cleanup after saving an observation must not prevent leaving the explorer.
