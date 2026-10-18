@@ -16,6 +16,21 @@ test('metadata never leaks between different sites and missing saved fields can 
  assert.deepEqual(resolveObservingPlace({...saved,name:'Selected',timezone:undefined},[{...saved,timezone:undefined}],saved),{...saved,name:'Selected'});
  assert(samePlaceCoordinates(saved,{...saved,latitude:saved.latitude+.00001}));assert(!samePlaceCoordinates(saved,{...saved,latitude:saved.latitude+.001}));
 });
+test('opposite longitude signs at the date line retain the existing coordinate tolerance',()=>{
+ const east={...saved,latitude:-17.75,longitude:180},west={...east,longitude:-180};
+ assert(samePlaceCoordinates(east,west));assert(samePlaceCoordinates(west,east));
+ assert(samePlaceCoordinates({...east,longitude:179.99999},{...west,longitude:-179.99999}));
+ assert(!samePlaceCoordinates(east,{...west,longitude:-179.999}));
+ assert(!samePlaceCoordinates(east,{...west,latitude:east.latitude+.001}));
+ assert(!samePlaceCoordinates(east,{...west,longitude:0}));
+});
+test('date-line coordinate selection recovers known metadata without changing the entered longitude or borrowing ambiguous aliases',()=>{
+ const east={name:'Dateline QA',latitude:-17.75,longitude:180,timezone:'Pacific/Fiji',country:'QA country',bortle:3},west={name:'Coordinates',latitude:-17.75,longitude:-180};
+ assert.deepEqual(resolveObservingPlace(west,[east]),{...west,timezone:east.timezone,country:east.country,bortle:3});
+ const other={...west,name:'Second alias',timezone:'UTC',country:'Other QA country',bortle:7};
+ const ambiguous=resolveObservingPlace(west,[east,other],east);assert.equal(ambiguous.bortle,undefined);assert.equal(ambiguous.timezone,undefined);
+ assert.deepEqual(resolveObservingPlace({...west,name:other.name},[east,other],east),other);
+});
 test('invalid selected coordinates or time zones cannot replace valid observing context',()=>{
  for(const patch of [{latitude:91},{longitude:Infinity},{timezone:'Not/AZone'},{name:''}])assert.throws(()=>resolveObservingPlace({...saved,...patch},[saved]),/Invalid observing place/);
 });

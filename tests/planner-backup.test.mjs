@@ -11,6 +11,13 @@ const site={name:'Dark field',latitude:51,longitude:-1,timezone:'Europe/London',
 const camera={name:'Camera',width:36,height:24,focal:400,pixel:3.76};
 const file=data=>JSON.stringify({format:'nightjar-backup',version:1,exportedAt:'2026-10-02T00:00:00Z',data});
 const keys=['nightjar-places','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-equipment','nightjar-deep-targets-v1','nightjar-observing-diary-v1'];
+test('backup merging preserves an existing date-line site when the file uses the opposite longitude representation',()=>{
+ const east={...site,name:'Saved dateline site',latitude:-17.75,longitude:180},west={...east,name:'Incoming dateline site',longitude:-180,bortle:8};
+ const existing={...empty(),places:[east]},incoming={...empty(),places:[west]},before=structuredClone([existing,incoming]);
+ const merged=mergeSavedPlans(existing,incoming);assert.deepEqual(merged.places,[east]);
+ const preview=previewPlannerMerge(existing,incoming);assert.equal(preview.added.places,0);assert.deepEqual(preview.kept.places,[east.name]);
+ assert.deepEqual([existing,incoming],before);
+});
 function storage(data=empty()){
  const values=new Map(keys.map((key,i)=>[key,JSON.stringify([data.places,data.targets,data.notes,data.equipment,data.deepTargets||[],data.diary||[]][i])]));
  return {values,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};

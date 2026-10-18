@@ -51,7 +51,12 @@ export function readPlannerSetup(now=new Date()){
  return {place,saved,savedReadError,placeReadError:site.error,date:recovery||nextObservingTime(now,place)};
 }
 
-export function samePlaceCoordinates(a:Place,b:Place){return Math.abs(a.latitude-b.latitude)<.0001&&Math.abs(a.longitude-b.longitude)<.0001}
+export function samePlaceCoordinates(a:Place,b:Place){
+ const longitudeGap=Math.abs(a.longitude-b.longitude);
+ // Valid longitudes meet at +180/-180. Keep the same coordinate tolerance
+ // across that seam so saved metadata and identities do not split there.
+ return Math.abs(a.latitude-b.latitude)<.0001&&(longitudeGap<.0001||Math.abs(longitudeGap-360)<.0001);
+}
 export function resolveObservingPlace(candidate:Place,saved:Place[],current?:Place):Place{
  if(!validPlace(candidate))throw Error('Invalid observing place.');
  const matches=saved.filter(site=>samePlaceCoordinates(site,candidate));

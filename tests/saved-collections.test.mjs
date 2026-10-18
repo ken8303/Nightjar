@@ -7,6 +7,11 @@ const {upsertSavedPlace,upsertEquipmentProfile,readSavedPlaces,removeSavedPlace,
 const {makePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 const places=Array.from({length:100},(_,i)=>({name:`Site ${i}`,latitude:0,longitude:i,bortle:4}));
 const equipment=Array.from({length:100},(_,i)=>({name:`Setup ${i}`,width:36,height:24,focal:400,pixel:3.76}));
+test('saving or undoing at the date line does not add the opposite longitude representation as another site',()=>{
+ const east={name:'East representation',latitude:-17.75,longitude:180,bortle:3},west={...east,name:'West representation',longitude:-180},before=structuredClone(east);
+ const saved=upsertSavedPlace([east],west);assert.equal(saved.length,1);assert.equal(saved[0].name,west.name);assert.equal(saved[0].longitude,-180);
+ assert.deepEqual(restoreSavedPlace([west],east,0),[west]);assert.deepEqual(east,before);
+});
 test('full collections permit replacement but reject additions without mutating saved records',()=>{
  const placeSnapshot=structuredClone(places),equipmentSnapshot=structuredClone(equipment);
  const renamed=upsertSavedPlace(places,{name:'Renamed zero',latitude:0,longitude:.00001});assert.equal(renamed.length,100);assert.equal(renamed[0].name,'Renamed zero');assert.equal(renamed[0].bortle,4);
