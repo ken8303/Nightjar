@@ -20,9 +20,9 @@ test('corrupt, oversized, future-version and malformed drafts recover without wr
   const result=readPhotographyDraft({getItem:()=>raw});assert.equal(result.status,'invalid');assert.deepEqual(result.draft,defaultPhotographyDraft());
  }
 });
-test('blocked storage retains an explicit visit-only status and never reports a successful save',()=>{
+test('blocked storage distinguishes an unavailable read from an unsaved visit edit',()=>{
  const storage={getItem:()=>{throw Error('blocked')},setItem:()=>{throw Error('blocked')}};
- assert.equal(readPhotographyDraft(storage).status,'visit');assert.equal(savePhotographyDraft(defaultPhotographyDraft(),storage),false);
+ assert.equal(readPhotographyDraft(storage).status,'unavailable');assert.equal(savePhotographyDraft(defaultPhotographyDraft(),storage),false);
  assert.equal(savePhotographyDraft({...defaultPhotographyDraft(),width:'bad'},storage),false);
  const copy=defaultPhotographyDraft();copy.width='12';assert.equal(defaultPhotographyDraft().width,'36');
 });
