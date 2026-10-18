@@ -7,13 +7,14 @@ import SkyLayerControls,{type SkyLayerSettings} from '@/components/sky-layer-con
 import {skyTargets,type Place} from '@/lib/sky';
 import {viewerZoomKey} from '@/lib/viewer-zoom';
 import {deferFocusAndScroll} from '@/lib/deferred-focus';
+import {deepSkyTimestampFormatter as planningTimestampFormatter} from '@/lib/deep-sky-time';
 
 type Props={place:Place;date:Date;selected:string;onSelect:(name:string)=>void}&SkyLayerSettings;
 export default function ExpandedSkyAtlas(props:Props){
  const [open,setOpen]=useState(false),[zoom,setZoom]=useState(1);
  const viewingDetails=useRef(false),detailsOwner=useRef<HTMLButtonElement|null>(null);
  const target=useMemo(()=>props.selected?skyTargets(props.date,props.place).find(item=>item.name===props.selected):undefined,[props.date,props.place,props.selected]);
- const localTime=new Intl.DateTimeFormat('en-GB',{timeZone:props.place.timezone||'UTC',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'shortOffset'}).format(props.date);
+ const localTime=planningTimestampFormatter(props.date,props.place.timezone||'UTC').format(props.date);
  return <Dialog.Root open={open} onOpenChange={value=>{setOpen(value);if(value)setZoom(1)}}>
   <Dialog.Trigger className="text-button atlas-expand-trigger"><Maximize2 size={16}/>Expand 2D chart</Dialog.Trigger>
   <Dialog.Portal><Dialog.Overlay className="expanded-atlas-overlay"/><Dialog.Content className="expanded-atlas-dialog expanded-2d-dialog" onCloseAutoFocus={event=>{
