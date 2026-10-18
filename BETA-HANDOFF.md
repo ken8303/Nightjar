@@ -11,6 +11,8 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 - Your latest push at `c025022df21597bcdd9dd35f8d06ebd80c2bdf4a` passed [GitHub validation](https://github.com/ken8303/Nightjar/actions/runs/39018687628). The exact-head validate job passed locked dependency installation and the complete TypeScript → lint → tests → build → Cloudflare dry-run command. This includes the input naming, meteor labels, guarded home navigation and mobile camera/photo acceptance. Later local work includes short-screen manual preview, stale site-Save protection, dated expanded-chart labels and evidence updates. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
+The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
+
 ## Latest verified fixes
 
 The next GitHub Desktop batch includes these runtime changes; accompanying commits record scope and acceptance evidence. They remain local until you push.
