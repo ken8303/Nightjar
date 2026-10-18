@@ -1,9 +1,18 @@
 'use client';
 import {useId,useMemo,type MouseEvent} from 'react';
 import {type Place,lines,skyTargets,galacticCentrePosition} from '@/lib/sky';
-import type {SkyImagingFrame} from '@/lib/sky-framing';
+import {aboveHorizonFrameSegments,type FramePosition,type SkyImagingFrame} from '@/lib/sky-framing';
 import {layoutSkyLabels,nearestSkyPoint} from '@/lib/sky-labels';
 
+// Clip in sky directions first: projecting a segment near the nadir can
+// otherwise join opposite azimuths through the visible overhead chart.
+function imagingFramePath(points:FramePosition[]){
+ return aboveHorizonFrameSegments(points).map(segment=>segment.map(([east,up,north],index)=>{
+  const horizontal=Math.hypot(east,north),radius=Math.atan2(horizontal,up)/(Math.PI/2)*166;
+  const x=horizontal?220-radius*east/horizontal:220,y=horizontal?195+radius*north/horizontal:195;
+  return (index?'L':'M')+x.toFixed(3)+' '+y.toFixed(3);
+ }).join(' ')).join(' ');
+}
 export default function SkyChart({place,date,large=false,selected="",showLines=true,showLabels=true,showMilkyWay=false,imagingFrame,onSelect}:{place:Place;date:Date;large?:boolean;selected?:string;showLines?:boolean;showLabels?:boolean;showMilkyWay?:boolean;imagingFrame?:SkyImagingFrame;onSelect?:(name:string)=>void}){
  const points=useMemo(()=>skyTargets(date,place).filter(target=>target.altitude>0).map(target=>{
   const radius=(90-target.altitude)/90*166,angle=target.azimuth*Math.PI/180;
@@ -38,7 +47,7 @@ export default function SkyChart({place,date,large=false,selected="",showLines=t
    const a=points.find(point=>point.name===line[i]),b=points.find(point=>point.name===name);
    return a&&b?<line key={`${k}-${i}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#578798" strokeOpacity=".6"/>:null;
   }))}
-  {imagingFrame&&<g className="sky-imaging-frame" role="img" aria-label={'Imaging grid for '+imagingFrame.target+', '+imagingFrame.cols+' by '+imagingFrame.rows+' panels, north in J2000, clipped at the ideal horizon'} pointerEvents="none"><defs><clipPath id={gradientId+'-frame'}><circle cx="220" cy="195" r="166"/></clipPath></defs><g clipPath={'url(#'+gradientId+'-frame)'}>{imagingFrame.panels.map(panel=><path key={panel.number} d={panel.outline.map((point,index)=>{const radius=(90-point.altitude)/90*166,angle=point.azimuth*Math.PI/180;return (index?'L':'M')+(220-radius*Math.sin(angle)).toFixed(3)+' '+(195-radius*Math.cos(angle)).toFixed(3)}).join(' ')+' Z'} fill="none" stroke="#83d8e7" strokeWidth="1.25" vectorEffect="non-scaling-stroke"/>)}{imagingFrame.centre.altitude>0&&(()=>{const radius=(90-imagingFrame.centre.altitude)/90*166,angle=imagingFrame.centre.azimuth*Math.PI/180,x=220-radius*Math.sin(angle),y=195-radius*Math.cos(angle);return <g><circle cx={x} cy={y} r="3" fill="#83d8e7"/><text x={x+7} y={y-7} fill="#83d8e7" fontSize="10">Imaging grid · {imagingFrame.target}</text></g>})()}</g></g>}
+  {imagingFrame&&<g className="sky-imaging-frame" role="img" aria-label={'Imaging grid for '+imagingFrame.target+', '+imagingFrame.cols+' by '+imagingFrame.rows+' panels, north in J2000, clipped at the ideal horizon'} pointerEvents="none"><defs><clipPath id={gradientId+'-frame'}><circle cx="220" cy="195" r="166"/></clipPath></defs><g clipPath={'url(#'+gradientId+'-frame)'}>{imagingFrame.panels.map(panel=><path key={panel.number} d={imagingFramePath(panel.outline)} fill="none" stroke="#83d8e7" strokeWidth="1.25" vectorEffect="non-scaling-stroke"/>)}{imagingFrame.centre.altitude>0&&(()=>{const radius=(90-imagingFrame.centre.altitude)/90*166,angle=imagingFrame.centre.azimuth*Math.PI/180,x=220-radius*Math.sin(angle),y=195-radius*Math.cos(angle);return <g><circle cx={x} cy={y} r="3" fill="#83d8e7"/><text x={x+7} y={y-7} fill="#83d8e7" fontSize="10">Imaging grid · {imagingFrame.target}</text></g>})()}</g></g>}
   {points.map(point=><g key={point.name} data-sky-name={point.name} className={interactive?'sky-object':''} role={interactive?'button':undefined} tabIndex={interactive?0:undefined} aria-label={interactive?`Select ${point.name} on sky chart, ${point.altitude.toFixed(1)}° altitude`:undefined} aria-pressed={interactive?selected===point.name:undefined} onClick={interactive?event=>{if(event.detail===0){event.stopPropagation();onSelect?.(point.name)}}:undefined} onKeyDown={interactive?event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect?.(point.name)}}:undefined}>
    {interactive&&<circle className="sky-hit" cx={point.x} cy={point.y} r="22" fill="transparent"/>}
    {selected===point.name&&<circle cx={point.x} cy={point.y} r="10" fill="none" stroke="#d4ee91" strokeWidth="2"/>}

@@ -28,3 +28,22 @@ test('a failed storage read cannot draw fallback equipment as a known draft, whi
  const edited={...initial.draft,name:'Explicit visit setup',focal:'500'};assert.equal(savePhotographyDraft(edited,storage),false);
  const visit=render({imagingDraft:edited,imagingDraftStatus:'visit'});assert.match(visit,/aria-label="Imaging grid for M31,/);assert.match(visit,/could not be saved/);assert.equal(writes,1);
 });
+
+test('a fully below-horizon grid near the nadir cannot draw a false line through the visible 2D sky',()=>{
+ const markup=render({imagingDraft:{...props.imagingDraft,ra:'8.3',dec:'-51.5',catalogueId:''}});
+ assert.match(markup,/At or below/);
+ const paths=[...markup.matchAll(/<path\b[^>]*\bd="([^"]*)"[^>]*stroke="#83d8e7"/g)].map(match=>match[1]);
+ assert(paths.every(path=>path===''),'below-horizon panel edges must be removed before the azimuthal projection');
+});
+
+test('a horizon-straddling 2D mosaic retains visible edges with every endpoint inside the horizon',()=>{
+ const markup=render({imagingDraft:{...props.imagingDraft,ra:'3',dec:'0',catalogueId:''}});
+ const paths=[...markup.matchAll(/<path\b[^>]*\bd="([^"]*)"[^>]*stroke="#83d8e7"/g)].map(match=>match[1]).filter(Boolean);
+ assert(paths.length>0,'the visible portion must remain drawn');
+ let horizonPoints=0;
+ for(const path of paths){
+  const coordinates=path.match(/-?\d+(?:\.\d+)?/g).map(Number);assert.equal(coordinates.length%2,0);
+  for(let index=0;index<coordinates.length;index+=2){const radius=Math.hypot(coordinates[index]-220,coordinates[index+1]-195);assert(radius<=166.001,'no projected segment endpoint may lie below the horizon');if(Math.abs(radius-166)<.001)horizonPoints++;}
+ }
+ assert(horizonPoints>0,'crossing edges must reach the horizon');
+});
