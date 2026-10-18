@@ -43,6 +43,8 @@ Earlier batches and detailed reproductions remain in [DEVELOPMENT-NOTES.md](./DE
 
 Controlled weather failures pass at 390 × 844: an unsuccessful same-site refresh keeps the previous forecast with an explicit warning; a failed new-site request shows unavailable values rather than the old site's weather. Retry loads the new site's conditions and time zone without changing the selected UTC instant. This is HTTP-failure/retry evidence, not device-offline or installed-PWA testing.
 
+Synthetic absolute orientation events also pass in a 390 × 844 camera-off preview: a north/east/south/west/north sequence updates the displayed bearing and projected names. A quiet north pose retains Polaris with last-orientation feedback. Invalid data and a screen-orientation invalidation remove the old labels; a fresh valid pose restores them. Fullscreen fits the iframe width, and reopening the viewer leaves motion off. These events were supplied by visible controls in an isolated local fixture, with no camera/video stream or real sensor calibration; physical-phone acceptance remains pending.
+
 ## Native Safari acceptance — 16 October 2026
 
 Browser automation was unavailable, but CUA native Safari worked in a separate private window. A disposable local frame served the compiled app at exact 320 × 800 and 380 × 800 viewports, with controlled weather/aurora responses. Desktop Safari was also checked.
