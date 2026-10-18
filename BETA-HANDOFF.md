@@ -37,6 +37,10 @@ The brand now uses the app’s guarded navigation to return to Tonight. The form
 
 Earlier batches and detailed reproductions remain in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md). Feature scope and limitations are in [README.md](./README.md).
 
+## Additional browser acceptance — 18 October 2026
+
+Controlled weather failures pass at 390 × 844: an unsuccessful same-site refresh keeps the previous forecast with an explicit warning; a failed new-site request shows unavailable values rather than the old site's weather. Retry loads the new site's conditions and time zone without changing the selected UTC instant. This is HTTP-failure/retry evidence, not device-offline or installed-PWA testing.
+
 ## Native Safari acceptance — 16 October 2026
 
 Browser automation was unavailable, but CUA native Safari worked in a separate private window. A disposable local frame served the compiled app at exact 320 × 800 and 380 × 800 viewports, with controlled weather/aurora responses. Desktop Safari was also checked.
