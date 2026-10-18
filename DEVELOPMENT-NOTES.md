@@ -2847,3 +2847,7 @@ Read-only remote inspection still reports main at c025022df21597bcdd9dd35f8d06eb
 ## Phone result reporting template — 18 October 2026
 
 Added PHONE-TEST-REPORT.md and linked it from the handoff's existing phone checks. The template ties actual results to a deployed commit, HTTPS URL, device/OS/browser and observing context. It covers the user's camera motion/flicker/fullscreen concerns and the outstanding installed-PWA, native-file and input/accessibility gates, with every status explicitly Not run. It distinguishes calculated labels from pixel recognition and actual file receipt from prepared-download feedback. No phone result or deployment is inferred. Documentation-only; the verified runtime and test evidence are unchanged.
+
+## Hosted versus local evidence wording — 18 October 2026
+
+Tightened the beta handoff's closing paragraph to identify c025022 as the last pushed commit with passing hosted validation. Later local commits still need an exact-head GitHub run after the user's push. Also made the earlier camera/photo scope explicitly a mobile-sized browser view, avoiding a physical-device acceptance implication. No runtime, test, build or deployment changes.
