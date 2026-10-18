@@ -45,6 +45,8 @@ Controlled weather failures pass at 390 × 844: an unsuccessful same-site refres
 
 Synthetic absolute orientation events also pass in a 390 × 844 camera-off preview: a north/east/south/west/north sequence updates the displayed bearing and projected names. A quiet north pose retains Polaris with last-orientation feedback. Invalid data and a screen-orientation invalidation remove the old labels; a fresh valid pose restores them. Fullscreen fits the iframe width, and reopening the viewer leaves motion off. These events were supplied by visible controls in an isolated local fixture, with no camera/video stream or real sensor calibration; physical-phone acceptance remains pending.
 
+Import review also passes at 390 × 844. A synthetic peer save after file selection causes the first Import action to refresh the review rather than write a stale merge. A second confirmation imports the incoming records. Reloading confirms both the peer's Polaris note and incoming Vega note are saved, while London and the selected 19:00 UTC observing time remain unchanged. Download backup reports a prepared file, but the browser download observer timed out; downloaded-file bytes were not verified in this pass.
+
 ## Native Safari acceptance — 16 October 2026
 
 Browser automation was unavailable, but CUA native Safari worked in a separate private window. A disposable local frame served the compiled app at exact 320 × 800 and 380 × 800 viewports, with controlled weather/aurora responses. Desktop Safari was also checked.
