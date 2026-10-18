@@ -2955,3 +2955,8 @@ Separately, workflow commit 640de95 replaces ubuntu-latest with ubuntu-24.04. Fr
 ## Final handoff consistency review — 18 October 2026
 
 Clarified the beta handoff's historical synchronized-branch sentence: 24b479a is the last hosted-verified baseline, while the current local batches remain unpushed. Added an explicit Not run phone-report row for current-draft 2D/3D framing, expanded views, rotation/site/time preservation, ideal-horizon clipping and compact rendering. The native offline-return row now also asks whether imaging fields survive. No device result is inferred and no runtime/build inputs changed; the verified fa6948e artifact remains current.
+
+
+## Satellite implementation preparation — 18 October 2026
+
+Added SATELLITE-TRACKING.md and linked it from the existing backlog. Fresh primary-source research records modern GP/OMM JSON, the provider's two-hour acquisition cadence and non-200 stop policy, and satellite.js as a candidate whose develop metadata is not a verified released dependency. One ISS JSON request was inaccessible through the research tool, with no status/feed bytes; no retries or alternate client were attempted. The brief scopes ISS geometric positions/passes, epoch/time/frame validation, shared acquisition rather than per-visitor requests, mobile cancellation and independent position/pass acceptance. No library installation, provider endpoint, runtime binding or implemented satellite claim. This documentation does not alter the verified fa6948e artifact.
