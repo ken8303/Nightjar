@@ -13,6 +13,8 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
 
+All seven loaded main sections also fit a 320 × 568 browser frame without horizontal page overflow. Compact navigation places focus on the chosen section heading and returns it to Explore after Escape. This is responsive desktop-browser evidence; phone and assistive-technology acceptance remain separate.
+
 ## Latest verified fixes
 
 The next GitHub Desktop batch includes these runtime changes; accompanying commits record scope and acceptance evidence. They remain local until you push.

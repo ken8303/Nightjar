@@ -2811,3 +2811,13 @@ At 390 × 844, Use M31 best time selects the Andromeda target and changes the UT
 Clearing both comparison selections shows Select at least one saved object; reselecting M31 restores its timeline. Ordinary page reload returns to Tonight and the next observing time, as readPlannerSetup currently specifies; it is not the paired-context recovery reload path and no retained-time claim is made. Opening Sky atlas after reload confirms both saved targets remain. An attempted saved-list lookup on Tonight timed out before the view was reopened. No calendar file was downloaded during this pass. Warning/error logs are empty.
 
 No new defect was confirmed in this flow. Fixture cleanup confirmed clearing QA storage, workers and caches; the owned tab was closed and Worker/proxy stopped. No runtime change, repeated build, device permission request, push or deployment.
+
+## Compact section and navigation acceptance — 18 October 2026
+
+Reviewed all seven main sections using the current compiled release 492959970b24d079e17668b82afdd2934208b94203025c9d2506d1216f1bd0e5 in a 320 × 568 iframe on the owned 5713 proxy, backed by an isolated Worker on 5712. Tonight, Sky atlas, Moon, My places, Aurora, Sky calendar and Photo tools each have document client/scroll widths 305/305 after their actual sections load. Initial Moon/calendar/tools observations showed lazy-loading skeletons; later observations verified meaningful phase, meteor and imaging content before treating the layout checks as passed. The atlas was revisited after its modules loaded, and Tonight was revisited with live weather present.
+
+A basic visible-button naming check found no unnamed action buttons. Its initial My places result flagged the icon-only comparison checkbox; DOM labels confirm compare-0 is associated with London and its coordinates, so that was a heuristic false positive rather than a missing accessible name. This is a focused naming check, not a complete accessibility audit or assistive-technology acceptance.
+
+After choosing Sky atlas in the compact menu, its page heading holds focus. Escape from the open navigation returns focus to Open planner navigation. Emitted screenshots document the compact header/controls, with the outer QA page visible; they are not physical-phone captures. Inspected warning/error logs are empty. No new defect was confirmed.
+
+The fixture confirmed clearing its QA storage, workers and caches. Closed its tab and stopped the proxy/isolated Worker. No runtime change, repeat build, native permission request, push or deployment.
