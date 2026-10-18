@@ -8,7 +8,9 @@ Use CelesTrak GP JSON with OMM field names, initially one allowlisted object: IS
 
 The [usage policy](https://celestrak.org/usage-policy.php) says GP updates occur every two hours, requests should retrieve only needed data once per update, and automated clients must stop on non-200 responses for human investigation. A single read-only attempt at the documented ISS JSON endpoint was inaccessible through the research tool; no HTTP status or feed bytes were returned. No retries or alternate-client requests were made. Live endpoint acceptance remains pending.
 
-[satellite.js](https://github.com/shashwatak/satellite-js) is an MIT-licensed candidate with OMM ingestion, SGP4 propagation and coordinate transforms. Its README demonstrates json2satrec, propagate, eciToEcf and ecfToLookAngles, and requires handling a null propagation result. The reviewed [develop package metadata](https://raw.githubusercontent.com/shashwatak/satellite-js/develop/package.json) identifies 7.1.0 and ESM exports; this does not establish a published npm release or compatible locked build. Select and verify a released version before installing. Do not copy the README's old sample orbit into a live feature.
+[satellite.js](https://github.com/shashwatak/satellite-js) is an MIT-licensed candidate with OMM ingestion, SGP4 propagation and coordinate transforms. Its README demonstrates json2satrec, propagate, eciToEcf and ecfToLookAngles, and requires handling a null propagation result. The reviewed [develop package metadata](https://raw.githubusercontent.com/shashwatak/satellite-js/develop/package.json) identifies 7.1.0 and ESM exports. A separate read-only npm view against the [official registry metadata](https://registry.npmjs.org/satellite.js/latest) confirms published version 7.1.0 with MIT licensing. No engine requirement was returned, so Node 22/Vinext/Cloudflare compatibility remains unverified. Evaluate that exact release in a locked build before integration. Do not copy the README's old sample orbit into a live feature.
+
+The registry-declared 7.1.0 integrity is `sha512-U6nRml9Nb7dV9LJPiMNPyna7U7ry+1nXYkOeCEG7K/YbojQQLHHmcjPisp03VNY+HLcbQHqbt7t4t1vQMaKCLQ==`. This records metadata only: no tarball was downloaded, installed or independently hashed.
 
 ## Proposed first slice
 
@@ -32,7 +34,7 @@ Propagate only the selected object and bounded pass interval. Run pass searches 
 
 ## Acceptance before implementation is called complete
 
-- Verify actual OMM response bytes, permitted serving/attribution, a released library and clean Node 22/Cloudflare builds.
+- Verify actual OMM response bytes, permitted serving/attribution, a compatible locked library integration and clean Node 22/Cloudflare builds.
 - Compare frozen independent reference vectors/look angles, including epoch offsets, radians/degrees, date-line sites and polar observers. Include six-digit identities, fractional epochs, decay and invalid fields.
 - Compare rise/peak/set against independent pass references; refine crossings and handle grazing/no-pass intervals. Establish the epoch validity policy with evidence.
 - Exercise concurrent acquisition, expired cache, future clock, upstream non-200 latch, timeout and cancellation without repeated provider requests.

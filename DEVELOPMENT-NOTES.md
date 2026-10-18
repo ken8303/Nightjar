@@ -2965,3 +2965,8 @@ Added SATELLITE-TRACKING.md and linked it from the existing backlog. Fresh prima
 ## Shared horizon helper comment — 18 October 2026
 
 Final source review corrected an outdated sky-framing comment that described clipping as dome-only. Both viewers now clip in sky directions first; the 2D circular clip additionally protects its rim and centre marker. This comment-only correction preserves the implemented nadir fix and changes no runtime behavior. Existing fa6948e verification/artifact evidence remains applicable; no redundant build or tests were run.
+
+
+## Published satellite-library metadata — 18 October 2026
+
+Resolved the planning brief's unknown published-version item. The web reader could not access the official npm metadata URL; a single read-only npm view using pinned Node 22 against registry.npmjs.org returned satellite.js 7.1.0, MIT licensing and registry integrity, without an engines field. Recorded that exact metadata and kept runtime/build compatibility pending. No tarball, dependency installation or app integration occurred. This did not retry the inaccessible CelesTrak orbital feed. The runtime verification remains unchanged.
