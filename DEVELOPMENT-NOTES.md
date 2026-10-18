@@ -2970,3 +2970,8 @@ Final source review corrected an outdated sky-framing comment that described cli
 ## Published satellite-library metadata — 18 October 2026
 
 Resolved the planning brief's unknown published-version item. The web reader could not access the official npm metadata URL; a single read-only npm view using pinned Node 22 against registry.npmjs.org returned satellite.js 7.1.0, MIT licensing and registry integrity, without an engines field. Recorded that exact metadata and kept runtime/build compatibility pending. No tarball, dependency installation or app integration occurred. This did not retry the inaccessible CelesTrak orbital feed. The runtime verification remains unchanged.
+
+
+## Isolated Node 22 satellite-library smoke check — 18 October 2026
+
+Downloaded satellite.js 7.1.0 using npm pack with scripts disabled into an owned temporary directory. SHA-512 matches the registry integrity recorded in the brief. A first extraction containment check rejected macOS's /var → /private/var spelling difference; canonicalizing the root and candidates fixed that test harness check, with no links accepted. Node 22.16.0 imports json2satrec, propagate, gstime, eciToEcf and ecfToLookAngles. Propagating the README's frozen OMM at its sample epoch yields finite positions/look angles and positive range. This does not verify independent accuracy, live ISS data, Vinext/browser/Cloudflare integration or the full feature. No app dependency/lockfile or runtime source changed. Removed the owned extraction/archive directory after the check.
