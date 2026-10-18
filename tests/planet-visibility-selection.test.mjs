@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {test,after} from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {createServer} from './vite-test-server.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},esbuild:{jsx:'automatic'},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
+after(()=>vite.close());
+const {default:PlanetVisibility}=await vite.ssrLoadModule('/components/planet-visibility.tsx');
+const place={name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London'};
+const render=(selected,instant='2026-10-18T19:00:00.000Z')=>renderToStaticMarkup(createElement(PlanetVisibility,{date:new Date(instant),place,selected,onSelect:()=>{},onDate:()=>{}}));
+const pressed=html=>[...html.matchAll(/<button\b[^>]*>/g)].map(match=>match[0]).filter(button=>/aria-pressed="true"/.test(button)).map(button=>button.match(/aria-label="([^"]*)"/)?.[1]);
+test('visibility selection requires both object and exact observing instant',()=>{
+ assert.deepEqual(pressed(render('')),[],'a time alone must not select every object');
+ const saturn=pressed(render('Saturn'));
+ assert.equal(saturn.length,1,'only the Saturn table cell should be selected while the mobile picker shows Uranus');
+ assert(saturn[0].startsWith('View Saturn at 18 Oct 2026, 20:00 GMT+1,'));
+ const uranus=pressed(render('Uranus'));
+ assert.equal(uranus.length,2,'the desktop and mobile representations may select the same object/time');
+ assert(uranus.every(label=>label.startsWith('View Uranus at 18 Oct 2026, 20:00 GMT+1,')));
+ assert.deepEqual(pressed(render('Vega')),[],'a selected atlas star must not select a planet cell');
+ assert.deepEqual(pressed(render('Saturn','2026-10-18T19:00:00.001Z')),[],'a nearby instant is not the sampled hour');
+});
