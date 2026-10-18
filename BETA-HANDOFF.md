@@ -6,12 +6,24 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 18 October 2026
 
-- **All 663 tests pass including the completed-diary-edit recovery fix on pinned Node 22.16.0**, together with TypeScript, lint, production build and Cloudflare dry-run through the complete `npm run verify` command. This local macOS run uses the existing installed dependencies; it is not a fresh Linux/GitHub installation. Earlier scoped checks also passed on Node 24.19.0. Packaging stages 103 asset files without bindings.
+- **All 663 tests pass for runtime source through `ea2f7b3` on pinned Node 22.16.0**, together with TypeScript, lint, production build and Cloudflare dry-run through the complete `npm run verify` command. This local macOS run uses the existing installed dependencies; it is not a fresh Linux/GitHub installation. Earlier scoped checks also passed on Node 24.19.0. Packaging stages 103 asset files without bindings.
 - Worker release `688c325a1b04ffeae108578ca14df5bbdf9e93ada29c31a5b62e99800846baff` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 312 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. No generated copies needed omission in this audit snapshot; the build folder was preserved.
 - Your latest push at `c025022df21597bcdd9dd35f8d06ebd80c2bdf4a` passed [GitHub validation](https://github.com/ken8303/Nightjar/actions/runs/39018687628). The exact-head validate job passed locked dependency installation and the complete TypeScript → lint → tests → build → Cloudflare dry-run command. This includes the input naming, meteor labels, guarded home navigation and mobile camera/photo acceptance. Later local work includes short-screen manual preview, stale site-Save protection, dated expanded-chart labels and evidence updates. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 ## Latest verified fixes
+
+The next GitHub Desktop batch includes these runtime changes; accompanying commits record scope and acceptance evidence. They remain local until you push.
+
+| Commit | Runtime change | Verification scope |
+| --- | --- | --- |
+| `fb578c9` | Keep manual camera labels visible on short landscape screens. | Camera-off layout at 640 × 320 and 800 × 360, fullscreen/portrait checks; physical video pending. |
+| `00c2782` | Prevent an already-saved site's stale Save action from overwriting peer settings. | Two-tab rename/draft preservation, reload persistence and adding a separate site. |
+| `20128b0` | Include the year/era in expanded 2D chart labels. | Modern and local-BC browser cases, exact UTC metadata and Escape focus return. |
+| `4ff2af6` | Preserve the aurora provider snapshot's expiry in HTTP cache headers. | Header boundary regression and isolated compiled-Worker requests. |
+| `ea2f7b3` | Stop restoring an already-completed diary edit after failed draft cleanup. | Before/after mobile-frame reproduction and retention of genuine peer conflicts. |
+
+The final full local validation includes all five changes. After pushing, check the new exact-head GitHub run; the older green `c025022` run does not cover this batch. Deployment and physical-device acceptance remain separate gates.
 
 Reopening the diary no longer restores an already-saved changed edit as unfinished when its draft-cleanup write failed. An edit is cleared from the recovered view only when its changed draft exactly matches the saved observation. Drafts differing from newer peer data and explicitly opened unchanged edits stay recoverable. A 390 × 844 before/after browser check confirms removal of the false save conflict and retention of genuine peer conflicts. No saved diary or stored draft is rewritten by this recovery filter.
 
