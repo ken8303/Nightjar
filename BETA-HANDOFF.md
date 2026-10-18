@@ -6,12 +6,14 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 18 October 2026
 
-- **5 dated-label/zoom tests pass for the expanded-chart header update**, with TypeScript, lint, production build and Cloudflare dry-run passing on Node 24.19.0. The preceding full 662-test run covers site-Save protection at `00c2782`. Packaging stages 103 asset files without bindings.
-- Worker release `69f2379854cf4a67ecfab901bcaf6d193759f8ecb31611b7215abe38b4afa234` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 312 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The packaging guard omitted 24 identical, unreferenced generated copies from this isolated snapshot; the build folder was preserved.
+- **15 aurora tests pass for the cache-lifetime fix**, with TypeScript, lint, production build and Cloudflare dry-run passing on Node 24.19.0. Earlier checks passed 5 dated-label/zoom tests for the expanded-chart header; the preceding full 662-test run covers site-Save protection at `00c2782`. Packaging stages 103 asset files without bindings.
+- Worker release `05174aaa8fae202f4b4f7b0367532d22033d210b0015e2087b6a112b78cc3be8` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 312 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. No generated copies needed omission in this audit snapshot; the build folder was preserved.
 - Your latest push at `c025022df21597bcdd9dd35f8d06ebd80c2bdf4a` passed [GitHub validation](https://github.com/ken8303/Nightjar/actions/runs/39018687628). The exact-head validate job passed locked dependency installation and the complete TypeScript → lint → tests → build → Cloudflare dry-run command. This includes the input naming, meteor labels, guarded home navigation and mobile camera/photo acceptance. Later local work includes short-screen manual preview, stale site-Save protection, dated expanded-chart labels and evidence updates. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 ## Latest verified fixes
+
+Aurora responses now give HTTP caches only the remaining lifetime of the server's five-minute provider snapshot. Previously a request near expiry advertised another full five minutes. Regression checks cover middle-of-life, the last millisecond and the refresh boundary, including shared-request and failure recovery. The isolated compiled Worker returned the same NOAA snapshot with max-age decreasing from 299 to 288 seconds. This is local HTTP evidence; final hosted-origin caching remains a deployment acceptance check.
 
 The expanded 2D chart identifies the year and, where needed, BC/AD using the shared planning formatter. Mobile browser checks show both 18 Oct 2026 and the supported UTC-year-1 case that falls on 31 Dec 1 BC in New York. The exact UTC instant remains in the chart metadata; Escape returns focus to Expand 2D chart.
 

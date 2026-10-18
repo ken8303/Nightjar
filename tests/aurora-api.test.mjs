@@ -12,8 +12,11 @@ test('concurrent aurora requests share one provider read, independent responses 
  t.mock.method(globalThis,'fetch',async(url,options)=>{calls++;assert.equal(url,'https://services.swpc.noaa.gov/json/ovation_aurora_latest.json');assert(options.signal instanceof AbortSignal);await gate.promise;return Response.json(raw)});
  const first=GET(),second=GET();gate.release();const responses=await Promise.all([first,second]);
  assert.equal(calls,1);assert.notEqual(responses[0],responses[1]);for(const response of responses){assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'public, max-age=300');assert.equal((await response.json()).forecastAt,'2026-10-16T21:00:00.000Z')}
- clock=299999;await GET();assert.equal(calls,1);
- clock=300000;raw=provider('2026-10-16T21:30:00Z');assert.equal((await(await GET()).json()).forecastAt,'2026-10-16T21:30:00.000Z');assert.equal(calls,2);
+ // A late cache hit must not grant a browser another full five minutes with
+ // an old provider snapshot. Fractional seconds round down, not past expiry.
+ clock=120001;const middle=await GET();assert.equal(middle.headers.get('cache-control'),'public, max-age=179');assert.equal(calls,1);
+ clock=299999;const last=await GET();assert.equal(last.headers.get('cache-control'),'public, max-age=0');assert.equal((await last.json()).forecastAt,'2026-10-16T21:00:00.000Z');assert.equal(calls,1);
+ clock=300000;raw=provider('2026-10-16T21:30:00Z');const refreshed=await GET();assert.equal(refreshed.headers.get('cache-control'),'public, max-age=300');assert.equal((await refreshed.json()).forecastAt,'2026-10-16T21:30:00.000Z');assert.equal(calls,2);
 });
 test('a shared provider rejection gives each caller recovery guidance and a later request can retry',async t=>{
  const GET=await route(t),gate=deferred();let calls=0,fail=true;
