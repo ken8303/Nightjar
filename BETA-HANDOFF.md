@@ -2,14 +2,14 @@
 
 Nightjar remains a beta. Desktop Safari and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
-## Current release evidence — 17 October 2026
+## Current release evidence — 18 October 2026
 
 - **662 tests pass on Node 24.19.0 on the current source.** Node 22.16.0 passed the full 662-test suite for the preceding meteor-label batch and all 12 focused navigation/pending-edit tests for the final home-control change. TypeScript, lint, production build and Cloudflare packaging dry-run pass on Node 22 for the final source. Packaging stages 103 asset files without bindings.
 - Worker release `d8909894feeb89de56137cc82510e3e8302e2f333e41cb0b26b650f3f67412be` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 311 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. This snapshot needed no generated-copy omissions.
-- Your push at `63b0f6e` passed [GitHub Run #16](https://github.com/ken8303/Nightjar/actions/runs/38965552284). Subsequent mobile input naming, meteor labels, home navigation and evidence updates remain local for your next batch push. The development agent has not pushed or deployed.
+- Your latest push at `c025022df21597bcdd9dd35f8d06ebd80c2bdf4a` passed [GitHub validation](https://github.com/ken8303/Nightjar/actions/runs/39018687628). The exact-head validate job passed locked dependency installation and the complete TypeScript → lint → tests → build → Cloudflare dry-run command. This includes the input naming, meteor labels, guarded home navigation and mobile camera/photo acceptance. Only this later handoff update remains local. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
-## Current local fixes
+## Latest verified fixes
 
 The observing-time input now has an explicit accessible name. At narrow widths, CSS hides its visible label; native Safari previously exposed an unnamed date/time area. Safari now exposes “Observing time” at 320 × 800 and 380 × 800. The date calculations and native control remain unchanged.
 
@@ -18,7 +18,7 @@ Meteor windows now include dates, years and UTC offsets. The supported Dublin Or
 The brand now uses the app’s guarded navigation to return to Tonight. The former framework home link both failed on click and emitted a prefetch setup error when the page had a query string. Verified desktop return, retention of the selected mobile Dublin site/time, and the unfinished site-name warning with Keep editing preserving text. No new console errors appeared in this tested flow after the fix; this is scoped browser evidence, not an exhaustive console audit. Removing the unused routing imports reduces packaged client assets from 114 to 103.
 
 
-## Reviewed changes included in your latest push
+## Earlier reviewed changes also included in your push
 
 | Commit | Change |
 | --- | --- |
