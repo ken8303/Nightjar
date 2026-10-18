@@ -1,6 +1,6 @@
 # Light-pollution layer implementation brief
 
-Research checked 18 October 2026. No new map layer is shipped by this document. Existing personal Bortle ratings remain observations supplied by the user.
+Research checked 18 October 2026. No new map layer is shipped by this document. My places now offers an attributed external atlas link, without transferring the selected coordinates or implementing a native layer. Existing personal Bortle ratings remain observations supplied by the user.
 
 ## Data choice
 
