@@ -2821,3 +2821,9 @@ A basic visible-button naming check found no unnamed action buttons. Its initial
 After choosing Sky atlas in the compact menu, its page heading holds focus. Escape from the open navigation returns focus to Open planner navigation. Emitted screenshots document the compact header/controls, with the outer QA page visible; they are not physical-phone captures. Inspected warning/error logs are empty. No new defect was confirmed.
 
 The fixture confirmed clearing its QA storage, workers and caches. Closed its tab and stopped the proxy/isolated Worker. No runtime change, repeat build, native permission request, push or deployment.
+
+## Repeated-hour visibility selection regression — 18 October 2026
+
+Extended the actual component-rendering regression to both UTC occurrences of London's repeated 01:00 on 25 October 2026. With Saturn selected, 00:00 UTC selects only the GMT+1 occurrence, while 01:00 UTC selects only the zero-offset occurrence, across desktop/mobile representations. The test accepts ICU's GMT or GMT+0 spelling for zero offset; the first draft incorrectly assumed only GMT on Node 24, which was a test expectation mismatch rather than an app defect.
+
+Both component tests pass on bundled Node 24.19.0. The entire 670-test suite also passes on pinned Node 22.16.0, with no failures/cancellations/skips (/tmp/nightjar-visibility-dst-tests.log), and lint passes there (/tmp/nightjar-visibility-dst-lint.log). Runtime source is unchanged from c9f1fb2; its earlier complete npm run verify (669 tests, TypeScript, lint, build and Cloudflare dry-run) and release 492959970b24d079e17668b82afdd2934208b94203025c9d2506d1216f1bd0e5 remain applicable. No additional build was needed for this test-only extension. No push or deployment.

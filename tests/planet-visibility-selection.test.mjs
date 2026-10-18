@@ -22,3 +22,13 @@ test('visibility selection requires both object and exact observing instant',()=
  assert.deepEqual(pressed(render('Vega')),[],'a selected atlas star must not select a planet cell');
  assert.deepEqual(pressed(render('Saturn','2026-10-18T19:00:00.001Z')),[],'a nearby instant is not the sampled hour');
 });
+test('selection distinguishes both occurrences of the repeated local clock-change hour',()=>{
+ const first=pressed(render('Saturn','2026-10-25T00:00:00.000Z'));
+ const second=pressed(render('Saturn','2026-10-25T01:00:00.000Z'));
+ assert(first.length>0&&second.length>0);
+ assert(first.every(label=>label.startsWith('View Saturn at 25 Oct 2026, 01:00 GMT+1,')));
+ // ICU releases render the zero offset as GMT or GMT+0.
+ for(const label of second)assert.match(label,/^View Saturn at 25 Oct 2026, 01:00 GMT(?:\+0)?,/);
+ assert.equal(new Set(first).size,1,'only one UTC occurrence may be selected across representations');
+ assert.equal(new Set(second).size,1);
+});
