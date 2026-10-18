@@ -9,10 +9,9 @@ import {usePlanningClock} from '@/hooks/use-planning-clock';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {forecastHourIndex} from '@/lib/weather-hours';
 import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
-import {storeSiteForecast,siteForecastState,siteForecastContext,type SiteForecast} from '@/lib/site-forecasts';
+import {storeSiteForecast,siteForecastState,siteForecastContext,siteForecastKey as key,type SiteForecast} from '@/lib/site-forecasts';
 import { moonInfo, Place, scoreAt, timeLabel, sunAltitude} from '@/lib/sky';
 
-const key = (p: Place) => `${p.latitude},${p.longitude}`;
 const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
 
 export default function PlaceComparison({ places, current, date, onChoose, onPlan }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date)=>void }) {

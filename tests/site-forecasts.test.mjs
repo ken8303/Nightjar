@@ -4,8 +4,16 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {storeSiteForecast,siteForecastState,siteForecastContext}=await vite.ssrLoadModule('/lib/site-forecasts.ts');
+const {storeSiteForecast,siteForecastState,siteForecastContext,siteForecastKey}=await vite.ssrLoadModule('/lib/site-forecasts.ts');
 const data={timezone:'Europe/London',hourly:{time:[1791403200],cloud_cover:[20]}};
+test('forecast selection and cache identity share exact date-line endpoints without rounding distinct nearby coordinates',()=>{
+ const east={name:'East notation',latitude:-17.75,longitude:180},west={...east,name:'West notation',longitude:-180},before=structuredClone([east,west]);
+ assert.equal(siteForecastKey(east),siteForecastKey(west));
+ assert.equal(new Set([east,west].map(siteForecastKey)).size,1);
+ const cached={[siteForecastKey(east)]:{data,requestKey:'ready'}};assert.equal(cached[siteForecastKey(west)].data,data);
+ for(const point of [{...east,latitude:-17.75001},{...east,longitude:179.99999},{...east,longitude:0}])assert.notEqual(siteForecastKey(east),siteForecastKey(point));
+ assert.deepEqual([east,west],before);
+});
 test('failed site refresh preserves the exact successful forecast and timestamp, then retry replaces both',()=>{
  const previous={a:{data,requestKey:'a:0',fetchedAt:1000}},before=structuredClone(previous);
  const failed=storeSiteForecast(previous,'a',{requestKey:'a:1',error:'Unavailable'},['a']);
