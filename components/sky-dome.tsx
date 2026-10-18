@@ -88,7 +88,7 @@ export default function SkyDome(props:SkyAtlasProps){
    const tap=createSkyTapSelection((x,y)=>{const rect=canvas.getBoundingClientRect(),name=nearestProjectedTarget(projected,x-rect.left,y-rect.top);if(name)latest.current.props.onSelect(name)});
    const pointerDown=(event:PointerEvent)=>tap.down(event),pointerMove=(event:PointerEvent)=>tap.move(event),pointerUp=(event:PointerEvent)=>tap.up(event),cancel=(event:PointerEvent)=>tap.cancel(event);
    const key=(event:KeyboardEvent)=>handleSkyDomeKey(event,actions.current);
-   const lost=(event:Event)=>{event.preventDefault();cleanup();setFailed(true);setStatus('3D rendering stopped. Use the 2D chart or retry 3D.')};
+   const lost=(event:Event)=>{event.preventDefault();if(el.contains(document.activeElement))retryFocus.current=true;cleanup();setFailed(true);setStatus('3D rendering stopped. Use the 2D chart or retry 3D.')};
    // Handle release before OrbitControls releases pointer capture.
    canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointermove',pointerMove);canvas.addEventListener('pointerup',pointerUp,true);canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);canvas.addEventListener('keydown',key);canvas.addEventListener('webglcontextlost',lost);
    disposers.push(()=>{canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointermove',pointerMove);canvas.removeEventListener('pointerup',pointerUp,true);canvas.removeEventListener('pointercancel',cancel);canvas.removeEventListener('lostpointercapture',cancel);canvas.removeEventListener('keydown',key);canvas.removeEventListener('webglcontextlost',lost)});
