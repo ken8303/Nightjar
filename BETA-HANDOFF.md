@@ -49,6 +49,8 @@ Synthetic absolute orientation events also pass in a 390 × 844 camera-off previ
 
 Import review also passes at 390 × 844. A synthetic peer save after file selection causes the first Import action to refresh the review rather than write a stale merge. A second confirmation imports the incoming records. Reloading confirms both the peer's Polaris note and incoming Vega note are saved, while London and the selected 19:00 UTC observing time remain unchanged. Download backup reports a prepared file, but the browser download observer timed out; downloaded-file bytes were not verified in this pass.
 
+The actual production service worker also passes a controlled HTTP 503 navigation check in a 390 × 844 browser frame. Its cached fallback shows the saved site, Vega and its Unicode/multiline note, an additional Sirius note, M31 and equipment. Restoring the server and choosing Try again online returns to the same site and exact `2026-10-18T19:00:17.125Z` instant. The recovery page fits without horizontal overflow and the inspected browser log is clean. This tests a server failure while the browser is online; it does not establish disconnected-device or installed-PWA lifecycle behavior.
+
 ## Native Safari acceptance — 16 October 2026
 
 Browser automation was unavailable, but CUA native Safari worked in a separate private window. A disposable local frame served the compiled app at exact 320 × 800 and 380 × 800 viewports, with controlled weather/aurora responses. Desktop Safari was also checked.
