@@ -6,9 +6,9 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 18 October 2026
 
-- **All 670 tests pass on pinned Node 22.16.0**, including a component regression for both occurrences of the UK clock-change hour; lint also passes. Runtime source through `c9f1fb2` passed the complete `npm run verify` command (then 669 tests), including TypeScript, lint, production build and Cloudflare dry-run. The additional test does not change runtime source or build output. This local macOS run uses the existing installed dependencies; it is not a fresh Linux/GitHub installation. Earlier scoped checks also passed on Node 24.19.0. Packaging stages 103 asset files without bindings.
-- Worker release `492959970b24d079e17668b82afdd2934208b94203025c9d2506d1216f1bd0e5` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool’s later `.vite` ignore-line append. All 312 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. No generated copies needed omission in this audit snapshot; the build folder was preserved.
-- Your latest push at `c025022df21597bcdd9dd35f8d06ebd80c2bdf4a` passed [GitHub validation](https://github.com/ken8303/Nightjar/actions/runs/39018687628). The exact-head validate job passed locked dependency installation and the complete TypeScript → lint → tests → build → Cloudflare dry-run command. This includes input naming, meteor labels, guarded home navigation and camera/photo checks in a mobile-sized browser view. Later local work includes short-screen manual preview, stale site-Save protection, dated expanded-chart labels and evidence updates. The development agent has not pushed or deployed.
+- **Your pushed commit `24b479ae4a921cb25eb84b1abbd684a3e51128d7` passed all 670 tests and the complete verification command on GitHub's Linux runner with Node 22.16.0.** The exact-head [GitHub run](https://github.com/ken8303/Nightjar/actions/runs/39140549845) passed locked dependency installation, TypeScript, lint, tests, production build and Cloudflare packaging dry-run. Its log reports no failed/cancelled/skipped tests, 103 packaged asset files and no bindings. This supersedes the older `c025022` hosted validation for the runtime fixes below.
+- The separate local macOS Worker release `492959970b24d079e17668b82afdd2934208b94203025c9d2506d1216f1bd0e5` reconstructs from 81 emitted/recovery inputs in the isolated packaging snapshot after the build tool's later `.vite` ignore-line append. All 312 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. No generated copies needed omission in that audit snapshot; the build folder was preserved. This local digest is not a claim that the hosted build has identical bytes.
+- The local branch was clean and synchronized with your push at `24b479a` when this evidence was recorded. The development agent has not pushed or deployed. Later commits need their own exact-head hosted checks.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
@@ -17,7 +17,7 @@ All seven loaded main sections also fit a 320 × 568 browser frame without horiz
 
 ## Latest verified fixes
 
-The next GitHub Desktop batch includes these runtime changes; accompanying commits record scope and acceptance evidence. They remain local until you push.
+Your push at `24b479a` includes these runtime changes and their scope/acceptance records.
 
 | Commit | Runtime change | Verification scope |
 | --- | --- | --- |
@@ -31,7 +31,7 @@ The next GitHub Desktop batch includes these runtime changes; accompanying commi
 | `dd7b70a` | Separate zoom controls and captions in short landscape viewers. | Photo/framing views at 800 × 300, 800 × 360 and 390 × 844; zoom, Reset, caption/source access and close-focus return. |
 | `c9f1fb2` | Select only the chosen object and hour in When to look. | Component rendering regression plus desktop/mobile checks for Saturn, Uranus and browsing without changing the selection. |
 
-The final full local validation includes all runtime changes listed above. After pushing, check the new exact-head GitHub run; the older green `c025022` run does not cover this batch. Deployment and physical-device acceptance remain separate gates.
+The successful exact-head GitHub run for `24b479a` includes all runtime changes listed above. Deployment and physical-device acceptance remain separate gates.
 
 When to look now highlights the chosen object and sampled hour together. Previously selecting Saturn highlighted every planet at that hour and exposed all those cells as pressed. Desktop and mobile checks confirm a single visible selected cell; browsing another planet does not falsely select it. The regression also covers an unselected atlas, a selected star and a time just off the hourly sample.
 
@@ -115,4 +115,4 @@ Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record the actual deployed
 | Failed saves | Keep the view open. Direct review actions return to time, coordinates, imaging, diary, target-note or site-name recovery. Retry after storage is usable; verify retained text and original observation metadata. |
 | Files and accessibility | Confirm actual receipt/import/printing of intended files. Test screen-reader labels, focus after review/close, large text, and short landscape screens. Local screenshots and download-prepared messages do not prove these native behaviours. |
 
-Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and the final Cloudflare deployment remain unverified. GitHub validation passed for the last pushed commit `c025022`; later local commits still need their own exact-head run after your next push. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).
+Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and the final Cloudflare deployment remain unverified. GitHub validation passed for your pushed commit `24b479a`; any later local commits need their own exact-head run after the next push. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).

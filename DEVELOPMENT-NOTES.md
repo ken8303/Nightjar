@@ -2851,3 +2851,11 @@ Added PHONE-TEST-REPORT.md and linked it from the handoff's existing phone check
 ## Hosted versus local evidence wording — 18 October 2026
 
 Tightened the beta handoff's closing paragraph to identify c025022 as the last pushed commit with passing hosted validation. Later local commits still need an exact-head GitHub run after the user's push. Also made the earlier camera/photo scope explicitly a mobile-sized browser view, avoiding a physical-device acceptance implication. No runtime, test, build or deployment changes.
+
+## Hosted verification of the pushed release — 18 October 2026
+
+Fresh local/remote inspection identifies 24b479ae4a921cb25eb84b1abbd684a3e51128d7 as both HEAD and GitHub main, with a clean worktree before this documentation update. This is the user's push. GitHub run 39140549845 and validate job 117713917691 completed successfully for that exact SHA. The decoded job log confirms Node 22.16.0/npm 10.9.2, locked npm ci, the complete npm run verify command, all 670 tests passing with zero failed/cancelled/skipped, the production build, and a Cloudflare dry-run staging 103 assets without bindings. Verification summary and log-retention steps also passed.
+
+Updated the current handoff/checklist and runtime-fix table wording: these fixes are now in the pushed, hosted-verified commit rather than a pending local batch. The prior local artifact hash remains explicitly local; no hosted-byte equivalence or final Cloudflare deployment is inferred. Earlier /tmp fixtures, downloaded runtime and local logs are no longer present after the session gap; repository sources and hosted logs supply current evidence. No reinstall or repeated local build was necessary for this documentation update.
+
+A final browser inventory also revealed an older owned QA tab on 127.0.0.1:5693 despite earlier tab-cleanup claims. Its origin matches the documented isolated test session, the server is stopped, and the offline page has empty saved collections. Closed the tab without deleting origin storage; a subsequent IAB inventory is empty. No user browser tab was closed, and no new hardware permission, push or deployment occurred.
