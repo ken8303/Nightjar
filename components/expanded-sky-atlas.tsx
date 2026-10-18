@@ -4,12 +4,13 @@ import {Dialog} from 'radix-ui';
 import {Maximize2,Minus,Plus,RotateCcw,X} from 'lucide-react';
 import SkyChart from '@/components/sky-chart';
 import SkyLayerControls,{type SkyLayerSettings} from '@/components/sky-layer-controls';
-import {skyTargets,type Place} from '@/lib/sky';
+import type {SkyAtlasProps} from '@/components/sky-atlas-viewer';
+import {skyTargets} from '@/lib/sky';
 import {viewerZoomKey} from '@/lib/viewer-zoom';
 import {deferFocusAndScroll} from '@/lib/deferred-focus';
 import {deepSkyTimestampFormatter as planningTimestampFormatter} from '@/lib/deep-sky-time';
 
-type Props={place:Place;date:Date;selected:string;onSelect:(name:string)=>void}&SkyLayerSettings;
+type Props=SkyAtlasProps&SkyLayerSettings;
 export default function ExpandedSkyAtlas(props:Props){
  const [open,setOpen]=useState(false),[zoom,setZoom]=useState(1);
  const viewingDetails=useRef(false),detailsOwner=useRef<HTMLButtonElement|null>(null);

@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {test,after} from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {createServer} from './vite-test-server.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},esbuild:{jsx:'automatic'},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
+const {default:SkyAtlasViewer}=await vite.ssrLoadModule('/components/sky-atlas-viewer.tsx');
+const {defaultPhotographyDraft}=await vite.ssrLoadModule('/lib/photography-draft.ts');
+const noop=()=>{};
+const props={place:{name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London'},date:new Date('2026-10-18T19:00:00Z'),selected:'Vega',onSelect:noop,showLines:true,showLabels:true,showMilkyWay:false,onLinesChange:noop,onLabelsChange:noop,onCoreChange:noop,view:'2d',onViewChange:noop,viewStorageError:false,cameraOpen:false,onCameraOpenChange:noop,onCameraLauncherChange:noop,onCameraPlan:noop,cameraReturnFocus:{current:null},showImaging:true,onShowImagingChange:noop,imagingDraft:defaultPhotographyDraft(),imagingDraftStatus:'restored',onEditImaging:noop};
+const render=patch=>renderToStaticMarkup(createElement(SkyAtlasViewer,{...props,...patch}));
+test('the atlas draws only an enabled valid draft and refuses corrupt fallback defaults',()=>{
+ const before=structuredClone(props.imagingDraft),valid=render({});
+ assert.match(valid,/aria-label="Imaging grid for M31,/);assert.match(valid,/5\.15°/);assert.match(valid,/Vega/);
+ assert(!render({showImaging:false}).includes('aria-label="Imaging grid for'));
+ const corrupt=render({imagingDraftStatus:'invalid'});assert(!corrupt.includes('aria-label="Imaging grid for'));assert.match(corrupt,/stored imaging draft is invalid/);assert.match(corrupt,/review the defaults/);assert(!corrupt.includes('Your current fields stay available'));
+ const unfinished=render({imagingDraft:{...props.imagingDraft,ra:'-'}});assert(!unfinished.includes('aria-label="Imaging grid for'));assert.match(unfinished,/Imaging grid unavailable/);assert.match(unfinished,/Your current fields stay available/);
+ assert.deepEqual(props.imagingDraft,before);
+});
