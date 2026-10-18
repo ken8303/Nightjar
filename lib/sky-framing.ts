@@ -31,8 +31,8 @@ export function skyImagingFrame(draft:PhotographyDraft,date:Date,place:Place):Sk
  const frame=imagingFrameEquatorial(draft),project=j2000Projector(date,place);
  return {...frame,centre:project(frame.centre.ra,frame.centre.dec),panels:frame.panels.map(panel=>({...panel,centre:project(panel.centre.ra,panel.centre.dec),outline:panel.outline.map(point=>project(point.ra,point.dec))}))};
 }
-// Clip sampled dome edges at the ideal horizon, including crossing edges.
-// The 2D chart uses its own circular horizon clip after map projection.
+// Clip sampled edges in sky directions before either viewer projects them.
+// The 2D chart also keeps a circular clip for its rim and centre marker.
 export function aboveHorizonFrameSegments(points:FramePosition[]){
  const vector=(point:FramePosition)=>{const a=point.altitude*Math.PI/180,z=point.azimuth*Math.PI/180;return [Math.cos(a)*Math.sin(z),Math.sin(a),-Math.cos(a)*Math.cos(z)] as [number,number,number]};
  const segments:[number,number,number][][]=[];

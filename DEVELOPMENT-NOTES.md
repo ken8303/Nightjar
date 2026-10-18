@@ -2960,3 +2960,8 @@ Clarified the beta handoff's historical synchronized-branch sentence: 24b479a is
 ## Satellite implementation preparation — 18 October 2026
 
 Added SATELLITE-TRACKING.md and linked it from the existing backlog. Fresh primary-source research records modern GP/OMM JSON, the provider's two-hour acquisition cadence and non-200 stop policy, and satellite.js as a candidate whose develop metadata is not a verified released dependency. One ISS JSON request was inaccessible through the research tool, with no status/feed bytes; no retries or alternate client were attempted. The brief scopes ISS geometric positions/passes, epoch/time/frame validation, shared acquisition rather than per-visitor requests, mobile cancellation and independent position/pass acceptance. No library installation, provider endpoint, runtime binding or implemented satellite claim. This documentation does not alter the verified fa6948e artifact.
+
+
+## Shared horizon helper comment — 18 October 2026
+
+Final source review corrected an outdated sky-framing comment that described clipping as dome-only. Both viewers now clip in sky directions first; the 2D circular clip additionally protects its rim and centre marker. This comment-only correction preserves the implemented nadir fix and changes no runtime behavior. Existing fa6948e verification/artifact evidence remains applicable; no redundant build or tests were run.
