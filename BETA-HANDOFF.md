@@ -99,6 +99,8 @@ The fixture confirmed clearing local/session test data and requested worker/cach
 
 ## Phone acceptance checks
 
+Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record the actual deployed commit, device/browser and results. Its initial Not run statuses are placeholders, not acceptance evidence.
+
 | Flow | Expected result |
 | --- | --- |
 | Camera discovery | In Safari or Chrome on HTTPS, choose the correct observing site and intentionally start camera/motion. Turning the phone moves predicted labels; stopped/paused video hides live labels. Check a known bright object and alignment. These are predicted positions, not image recognition. |
