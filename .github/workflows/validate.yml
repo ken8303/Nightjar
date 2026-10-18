@@ -15,7 +15,8 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # Keep the verified OS while ubuntu-latest migrates to Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       WRANGLER_SEND_METRICS: 'false'
