@@ -254,3 +254,4 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .lunar-libration{margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--line)}.lunar-libration dl{display:grid;gap:.65rem}.lunar-libration dl>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.4rem 1rem}.lunar-libration dt{color:var(--text-secondary);font-size:.85rem}.lunar-libration dd{margin:0;font-weight:600}
 
 .globe-controls [aria-pressed="true"]{color:var(--accent-soft);border-color:#8fa76a;background:#24362c}
+@media(max-height:500px){.moon-globe:not(.moon-globe-unavailable){height:55svh;min-height:160px;max-height:280px}}

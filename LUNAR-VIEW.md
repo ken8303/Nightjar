@@ -21,3 +21,10 @@ All 8760 UTC-hour samples of 2026 were compared locally against the installed li
 Six frozen NASA samples across the year are regression references, with tolerances of 0.005° longitude, 0.03° latitude, 60 km and 0.4 arcseconds. Additional tests cover unsupported dates, finite results at planner boundaries, east/north axis signs, unit-length view/lighting vectors, phase-angle preservation and centred/north-up orthographic projection. The whole NASA dataset is not bundled or fetched during app use. There is no new runtime library, service, permission or Cloudflare binding.
 
 Physical phone rendering, native touch/zoom, assistive technology and the final hosted origin still require acceptance. Existing NASA surface-map attribution remains visible in the Moon explorer.
+
+
+## Rendered acceptance and short screens
+
+Local compiled-browser checks cover Jan 1 and July 1 reference dates, time following, zoom, free rotation, landmark centring, Home, fully-lit mode, native context loss, failed/slow texture and retry. The final rebuilt Earth-facing globe recovers its mode and focuses its active control. Numeric facts remain usable while surface rendering is unavailable. These CUA checks use the bundled texture and visible disposable failure controls, not a physical phone.
+
+At 800×360 the interaction surface was measured at 400 px tall, taller than the viewport. A CSS-only follow-up uses 55svh, bounded to 160–280 px, on screens no taller than 500 px. The fully unavailable text fallback retains its automatic height. Final measurements are 198 px at 800×360, 320 px at 320×568 and 440 px at 1100×800. All three have no horizontal document overflow. Pointer dragging switches to free exploration; restoring Earth-facing then rotating through sizes preserves its mode and selected UTC instant. This improves room around the interaction surface, without claiming physical touch or screen-reader acceptance.
