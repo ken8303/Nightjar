@@ -8,7 +8,9 @@ export type OrbitElements={OBJECT_NAME:string;OBJECT_ID:string;EPOCH:string;NORA
 // source epoch text; Date/SGP4 ingestion resolves it to millisecond precision.
 export function parseOrbitalEpoch(value:unknown){
  if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,9})?Z?$/.test(value))return null;
- const date=new Date(value.endsWith('Z')?value:value+'Z');
+ const parts=/^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d{1,9}))?Z?$/.exec(value)!;
+ const canonical=`${parts[1]}.${(parts[2]??'').padEnd(3,'0').slice(0,3)}Z`;
+ const date=new Date(canonical);
  return Number.isFinite(+date)&&date.getUTCFullYear()>=1957&&date.getUTCFullYear()<=9999&&date.toISOString().slice(0,19)===value.slice(0,19)?date:null;
 }
 function number(value:unknown){

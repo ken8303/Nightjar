@@ -92,3 +92,10 @@ test('an incomplete body respects the deadline and halts instead of publishing p
  const cache=new Cache(storage,async()=>new Response(new ReadableStream({cancel(){cancelled=true}})),()=>time,10);
  assert.equal((await cache.read()).status,503);assert.equal(cancelled,true);assert.equal(storage.data.get(key).halted,true);
 });
+
+
+test('source microseconds never depend on extended-precision browser Date parsing',()=>{
+ const NativeDate=globalThis.Date;
+ class MillisecondDate extends NativeDate{constructor(...args){if(typeof args[0]==='string'&&/\.\d{4,}/.test(args[0]))throw Error('Extended fractional Date parsing unavailable');super(...args)}}
+ try{globalThis.Date=MillisecondDate;const instant=epoch(raw.EPOCH);assert.equal(instant.toISOString(),'2026-10-19T04:14:45.011Z');assert(satelliteState(elements,instant));assert.equal(elements.EPOCH,raw.EPOCH)}finally{globalThis.Date=NativeDate}
+});

@@ -14,7 +14,7 @@ export function satelliteState(elements:OrbitElements,date:Date){
  const epoch=parseOrbitalEpoch(elements.EPOCH);
  if(!epoch||!Number.isFinite(+date)||Math.abs(+date-+epoch)>satelliteEpochWindowMs)return null;
  try{
-  const record=json2satrec(elements),state=propagate(record,date);
+  const record=json2satrec({...elements,EPOCH:epoch.toISOString()}),state=propagate(record,date);
   if(!state||record.error!==0||![state.position.x,state.position.y,state.position.z,state.velocity.x,state.velocity.y,state.velocity.z].every(Number.isFinite))return null;
   return state;
  }catch{return null}
