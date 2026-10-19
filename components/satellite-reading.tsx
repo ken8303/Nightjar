@@ -3,6 +3,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {parseSatelliteFeed,type SatelliteFeed} from '@/lib/satellite-elements';
 import {satelliteDataIssue,satelliteHorizontal} from '@/lib/satellite-position';
 import type {Place} from '@/lib/sky';
+import SatellitePasses from './satellite-passes';
 
 type State={status:'idle'|'loading'|'error'|'ready';feed:SatelliteFeed|null;error:string};
 export default function SatelliteReading({date,place}:{date:Date;place:Place}){
@@ -32,7 +33,8 @@ export default function SatelliteReading({date,place}:{date:Date;place:Place}){
     <p className="footnote">Orbital epoch: {parseOrbitalEpochLabel(state.feed.elements.EPOCH)}. Source retrieved: {state.feed.fetchedAt.replace('T',' ').replace('.000Z',' UTC').replace('Z',' UTC')}. Refresh {state.feed.refreshPaused?'is paused for server investigation':`is eligible after ${state.feed.nextRefreshAt.replace('T',' ').replace('.000Z',' UTC').replace('Z',' UTC')}`}.</p>
    </>}
   </div>
-  <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility: sunlight, twilight, weather, terrain and ISS manoeuvres are not modelled here. Current elements are limited to a three-day epoch window. This is a selected-time reading, with no live animation or pass prediction yet.</p>
+  {state.feed&&!issue&&position&&<SatellitePasses key={`${state.feed.fetchedAt}:${JSON.stringify(state.feed.elements)}:${+date}:${place.latitude}:${place.longitude}`} elements={state.feed.elements} start={+date} latitude={place.latitude} longitude={place.longitude}/>}
+  <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility: sunlight, twilight, weather, terrain and ISS manoeuvres are not modelled here. Current elements are limited to a three-day epoch window. Directions follow the selected instant; live animation is not enabled.</p>
  </div>;
 }
 function parseOrbitalEpochLabel(value:string){return value.replace('T',' ').replace(/Z?$/,' UTC')}

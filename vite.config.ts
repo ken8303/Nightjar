@@ -57,6 +57,7 @@ export default defineConfig(async () => {
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
     optimizeDeps: { exclude: ["satellite.js"] },
+    worker: { plugins: () => [satelliteJavaScriptOnly()] },
     plugins: [
       satelliteJavaScriptOnly(),
       vinext(),

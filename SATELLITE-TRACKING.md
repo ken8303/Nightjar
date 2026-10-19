@@ -1,6 +1,6 @@
 # ISS directions and shared orbital cache
 
-Implemented locally, 19 October 2026: Sky atlas has an optional ISS direction panel for the selected site and UTC instant. It shows geometric altitude, compass bearing and range. This is the first native satellite slice; pass predictions, sunlight/shadow visibility, atlas/camera labels, live animation, other objects and notifications remain absent.
+Implemented locally, 19 October 2026: Sky atlas has an optional ISS direction panel for the selected site and UTC instant. It shows geometric altitude, compass bearing and range, plus an explicit background search for horizon passes over the next 24 hours. Sunlight/shadow visibility, atlas/camera labels, live animation, other objects and notifications remain absent.
 
 ## Source evidence and numerical scope
 
@@ -32,6 +32,18 @@ The source Worker entry is now `worker.ts`, delegating ordinary app routes to Vi
 
 Hosted binding/migration acceptance, physical phones and real-sky comparisons remain pending. A local dry-run and mock-source compiled test do not establish production availability.
 
+## Geometric pass search
+
+After loading valid directions, **Find next 24 hours of ISS passes** launches a dedicated Web Worker, with no new orbital request and no site/time in a network URL. The search ends at the earlier of selected time + 24 hours or epoch + three days. A shortened window is explicitly labelled. An instant exactly at the upper epoch limit has no remaining search interval and receives guidance. Freshness/epoch failures remove the search and its results; changed site, instant or orbital snapshot retires the old calculator. Close/unmount, explicit cancellation, worker load/message failure and a 15-second deadline terminate the browser worker. Prior results for the same context survive cancellation/failure; changed context never retains them.
+
+A reusable SGP4 record samples geometric elevation every 30 seconds. Local maxima are refined even when their surrounding samples are below the horizon, retaining grazing passes between samples. Golden-section peak refinement and bisection crossing refinement stop within 100 milliseconds of numerical interval width. That is solver resolution, not real-sky timing accuracy. The search is bounded to 12000 evaluations; a failed propagation makes the whole search unavailable rather than silently reporting an empty sky. Passes remain chronological, with UTC rise/highest/set and bearings. Already-up and still-up boundary states describe clipped events rather than inventing a rise/set. All observers remain at sea level without refraction.
+
+Eight regression cases cover analytic rise/peak/set, a six-second grazing event between negative grid samples, no-pass, clipped boundaries, continuous-arc deduplication, failed propagation/calculation limits, epoch bounds, poles/date-line equivalence and reused-versus-fresh records. A separate exhaustive one-second search agrees with refined ISS timings within 1.1 seconds and peak elevation within 0.01° at London and Sydney test coordinates. Both searches share the previously reference-checked propagator: this checks the search method, not an independent SGP4 engine or measured current ISS accuracy.
+
+The Vite worker import emits a separate calculator asset; both main/worker builds retain the pinned JavaScript-only library gate. Browser QA caught and corrected a build-time file URL produced by the framework with the initial import.meta.url form. The compiled CI check now rejects that file-URL failure, verifies the exact worker bytes are served as JavaScript and executes them through a Node worker message bridge against a frozen fixture. Native browser creation/cancellation still has separate rendered acceptance.
+
+Local compiled-browser replay acceptance covers six chronological London passes without another feed request, cancellation/focus, worker load failure and retry, deadline guidance, changed-time retirement, unsupported dates, a shortened epoch-limited window and an already-underway pass. Portrait 320×568, landscape 800×360 and desktop 1100×800 fit without horizontal overflow. Browser plugin is unavailable; CUA IAB was used. Provider responses are local fixtures; no additional live GP request, push or deployment was made. Physical phones, independent observed pass comparisons and final-origin/PWA acceptance remain pending.
+
 ## Next satellite scope
 
-Add a bounded, cancellable pass search off the render thread, with refined horizon/peak crossings and independent pass references. Preserve the selected-time and epoch guards, and use the existing unfinished-edit guard for any time shortcut. Only add a visible-pass label after validating sunlight/shadow and twilight. Validate atlas geometry before adding satellite markers/camera labels; current bright-star camera discovery is not satellite tracking evidence.
+Validate sunlight/shadow and twilight before adding a visible-pass label. Preserve the selected-time and epoch guards, and use the existing unfinished-edit guard for any future time shortcut. Validate atlas geometry before adding satellite markers/camera labels; current bright-star camera discovery is not satellite tracking evidence.
