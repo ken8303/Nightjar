@@ -52,7 +52,7 @@ import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
 import DeferredView from '@/components/deferred-view';
 import LightPollutionReference from '@/components/light-pollution-reference';
-import {readPhotographyDraft,savePhotographyDraft,type PhotographyDraft} from '@/lib/photography-draft';
+import {readPhotographyDraft,savePhotographyDraftPatch,type PhotographyDraft} from '@/lib/photography-draft';
 const AuroraPanel=lazy(()=>import('@/components/aurora-panel'));
 const MeteorPlanner=lazy(()=>import('@/components/meteor-planner'));
 const MoonExplorer=lazy(()=>import('@/components/moon-explorer'));
@@ -85,12 +85,13 @@ function Planner(){
  const [planRevision,setPlanRevision]=useState(0);
  const [imagingState,setImagingState]=useState(readPhotographyDraft);
  const reportImagingPending=usePendingEditReporter('tools',imagingDraftEditLabel,true);
- const imagingDraft=useRef(imagingState.draft);
+ const imagingDraft=useRef(imagingState.draft),pendingImagingPatch=useRef<Partial<PhotographyDraft>>({});
  const [focusImaging,setFocusImaging]=useState(false);
  const changeImagingDraft=useCallback((patch:Partial<PhotographyDraft>)=>{
-  const next={...imagingDraft.current,...patch};imagingDraft.current=next;
-  const saved=savePhotographyDraft(next);reportImagingPending(!saved);
-  setImagingState({draft:next,status:saved?'restored':'visit'});
+  pendingImagingPatch.current={...pendingImagingPatch.current,...patch};
+  const {draft:next,saved}=savePhotographyDraftPatch(imagingDraft.current,pendingImagingPatch.current);imagingDraft.current=next;
+  if(saved)pendingImagingPatch.current={};reportImagingPending(!saved);
+  setImagingState({draft:next,status:saved?'restored':'visit'});return saved?'restored' as const:'visit' as const;
  },[reportImagingPending]);
  const retryImagingDraftRead=useCallback(()=>{
   if(imagingState.status!=='unavailable')return imagingState.status;

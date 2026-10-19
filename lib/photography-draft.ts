@@ -31,6 +31,17 @@ export function savePhotographyDraft(draft:PhotographyDraft,storage?:Pick<Storag
  const parsed=parsePhotographyDraft({version:1,draft});if(!parsed)return false;
  try{(storage??localStorage).setItem(key,JSON.stringify({version:1,draft:parsed}));return true}catch{return false}
 }
+// Apply only explicit edits to the latest readable draft. A stale mounted
+// view must not restore unrelated equipment or coordinates from its snapshot.
+export function savePhotographyDraftPatch(local:PhotographyDraft,patch:Partial<PhotographyDraft>,storage?:Pick<Storage,'getItem'|'setItem'>){
+ const desired={...local,...patch},latest=readPhotographyDraft(storage);
+ if(latest.status==='unavailable')return {draft:desired,saved:false};
+ const draft={...(latest.status==='restored'?latest.draft:local),...patch};
+ if(!savePhotographyDraft(draft,storage))return {draft,saved:false};
+ const confirmed=readPhotographyDraft(storage);
+ const saved=confirmed.status==='restored'&&(Object.keys(defaults) as (keyof PhotographyDraft)[]).every(field=>confirmed.draft[field]===draft[field]);
+ return {draft,saved};
+}
 export function makePhotographyDraftRecovery(draft:PhotographyDraft,created=new Date()){
  const parsed=parsePhotographyDraft({version:1,draft});
  if(!parsed)throw Error('The imaging draft could not be prepared. Keep this view open and copy its fields.');
