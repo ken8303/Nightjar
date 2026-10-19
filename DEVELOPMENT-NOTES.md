@@ -3125,3 +3125,8 @@ CUA browser QA caught a real production-only URL problem: the initial import.met
 Browser plugin unavailable; local CUA IAB replay at London/2026-10-19T12:00 gives six passes with no additional GP request. First peak is 1.3 degrees at 2026-10-20T02:08:49 UTC; later peaks include 62.6/85.7 degrees. Already-up, shortened epoch window, unsupported date, cancellation/focus, timeout, failed worker/retry, changed-time retirement and close/reopen checks pass. Portrait 320x568, landscape 800x360 and desktop 1100x800 fit horizontally. Feed traffic is a local replay; no further live CelesTrak acquisition was made. Native sensors, physical phones, installed-PWA lifecycle, independent observed pass accuracy and hosted binding/migration acceptance remain pending.
 
 Full npm run verify on Node 22.16.0 passes 730 tests, zero failed/cancelled/skipped, TypeScript, lint, production build, the extended compiled cache/pass-worker checks and Cloudflare dry-run (121 assets, SATELLITE_FEED). Release bcce048511534031b2b61c79d43e94887c12de78193e70f1fb1826dfadac6d96 reconstructs from 94 inputs; all 350 relative references resolve, 111 client files, no duplicate omissions, manifest/icons/recovery bytes pass. No push or deployment.
+
+
+## 19 October 2026 — photo development deferred by user
+
+The user asked to stop photo work and finish other areas first. Photo recognition and further photo-feature expansion are deferred; existing reference images, thumbnails and Photo tools are retained. Confirmed regressions may still be fixed. Updated the active inventory/handoff to prioritise bugs, mobile/PWA reliability, camera discovery and other sky features, keeping physical-device/final-origin acceptance separate. Documentation-only priority change; no runtime or test changes.

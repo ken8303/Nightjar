@@ -4,6 +4,8 @@ Nightjar remains a beta. Desktop Safari and automated checks do not establish ph
 
 Reference-feature coverage and the remaining implementation backlog are tracked separately in [FEATURE-STATUS.md](./FEATURE-STATUS.md). This handoff records release evidence rather than a full-parity completion percentage.
 
+Current user priority (19 October 2026): photo recognition and further photo-feature development are paused while the other work is completed. Existing photo tools/images stay available. Focus on confirmed bugs, mobile/PWA reliability, camera discovery and remaining sky features; physical-device and final-origin checks remain explicit release gates.
+
 ## Current release evidence — 19 October 2026
 
 - **The local ISS-direction/pass-search, lunar-libration, map/site-selection and numeric-brightness features, equipment row identity, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, pass all 730 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 121 assets with the SATELLITE_FEED Durable Object binding. It still needs an exact-head hosted run after the next push.
