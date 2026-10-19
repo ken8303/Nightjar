@@ -47,7 +47,7 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose}:{la
    const moved=()=>{if(!disposed&&instance){setMoving(false);const point=instance.getCenter();setCentre({latitude:point.lat,longitude:point.lng,zoom:instance.getZoom()})}};
    instance.on('moveend zoomend',moved);
    instance.on('movestart zoomstart',()=>{if(!disposed){setMoving(true);setSelectionError('')}});
-   resize=new ResizeObserver(()=>{if(container.clientWidth&&container.clientHeight)instance?.invalidateSize({pan:false})});resize.observe(container);
+   resize=new ResizeObserver(()=>{if(container.clientWidth&&container.clientHeight)instance?.invalidateSize({pan:true,animate:false})});resize.observe(container);
    setReady(true);
   }).catch(()=>{if(!disposed){resize?.disconnect();trackers.forEach(tracker=>tracker.dispose());instance?.remove();instance=null;map.current=null;overlay.current=null;setError('The map could not start. Reconnect and try loading it again.')}});
   return()=>{disposed=true;stopDelay();resize?.disconnect();trackers.forEach(tracker=>tracker.dispose());instance?.remove();map.current=null;overlay.current=null};
