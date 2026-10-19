@@ -68,3 +68,15 @@ export function upsertEquipmentProfile(current:Equipment[],equipment:Equipment):
  if(next.length>equipmentProfilesLimit&&next.length>current.length)throw Error(`You can save up to ${equipmentProfilesLimit} equipment setups. Remove a saved setup before adding another.`);
  return next;
 }
+
+// Row identity follows the profile, not its array position. Include dimensions
+// because legacy collections can repeat names; distinguish exact duplicates
+// without introducing persisted IDs or changing backup compatibility.
+export function equipmentProfileRowKeys(profiles:readonly Equipment[]){
+ const occurrences=new Map<string,number>();
+ return profiles.map(profile=>{
+  const signature=JSON.stringify([profile.name,profile.width,profile.height,profile.focal,profile.pixel]);
+  const occurrence=occurrences.get(signature)??0;occurrences.set(signature,occurrence+1);
+  return `${signature}:${occurrence}`;
+ });
+}

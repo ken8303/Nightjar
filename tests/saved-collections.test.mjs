@@ -124,3 +124,22 @@ test('equipment Undo recognises trimmed legacy names and preserves a newer peer 
  }
  assert.deepEqual(restoreEquipmentProfile([equipment[1]],removed,0),[removed,equipment[1]],'an absent identity still restores its exact legacy name');
 });
+
+
+test('equipment row identities follow unchanged records through removal and reordering',async()=>{
+ const {equipmentProfileRowKeys:keys}=await vite.ssrLoadModule('/lib/saved-collections.ts');
+ const items=equipment.slice(0,3),before=structuredClone(items),original=keys(items);
+ assert.deepEqual(keys(items.slice(1)),original.slice(1));
+ assert.deepEqual(keys([items[2],items[0],items[1]]),[original[2],original[0],original[1]]);
+ const changed={...items[1],focal:1200};assert.notEqual(keys([changed])[0],original[1]);
+ assert.deepEqual(items,before);
+});
+test('legacy same-name and exact-duplicate equipment rows have distinct keys without delimiter collisions',async()=>{
+ const {equipmentProfileRowKeys:keys}=await vite.ssrLoadModule('/lib/saved-collections.ts');
+ const original={...equipment[0],name:'Legacy: \"scope\"'},changed={...original,focal:800};
+ const identities=keys([original,changed,{...original}]);
+ assert.equal(new Set(identities).size,3);
+ assert.equal(keys([changed])[0],identities[1]);
+ for(const field of ['name','width','height','focal','pixel']){const value={...original,[field]:field==='name'?'Another scope':original[field]+1};assert.notEqual(keys([value])[0],identities[0])}
+ assert.deepEqual(keys([]),[]);
+});

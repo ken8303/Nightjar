@@ -6,11 +6,11 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 19 October 2026
 
-- **The local lunar-libration, map/site-selection and numeric-brightness features, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, pass all 706 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 117 assets without bindings. It still needs an exact-head hosted run after the next push.
+- **The local lunar-libration, map/site-selection and numeric-brightness features, equipment row identity, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, pass all 708 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 117 assets without bindings. It still needs an exact-head hosted run after the next push.
 - **Your pushed commit `b2552602ee809d40b39469071fb724cb8f3bd630` passed all 680 tests and the complete verification command on GitHub's Ubuntu 24.04 runner with Node 22.16.0.** Its [exact-head run](https://github.com/ken8303/Nightjar/actions/runs/39166796103) passed locked dependency installation, TypeScript, lint, tests, build and Cloudflare dry-run, with zero failed/cancelled/skipped tests, 105 packaged assets and no bindings. This includes the atlas-framing feature, 3D recovery fixes and explicit Ubuntu runner pin; it supersedes the older `24b479a` hosted baseline.
-- The lunar logic batch `4575f88` passed full verification; the subsequent CSS-only short-screen sizing change passed a fresh build, packaging dry-run and compiled-browser checks without repeating unchanged logic tests.
-- The new local macOS Worker release `dce609f69f7a6289f65460c5fba73d83d6a458106b8178b4dbd167503dc42003` reconstructs from 91 emitted/recovery inputs. All 344 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 107 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
-- `b255260` is the current remote/hosted-verified baseline. Today's map layer, numeric readings and imaging-save fix are newer and remain local. The development agent has not pushed or deployed.
+- The latest full verification includes lunar libration, short-screen sizing and the equipment row-identity fix.
+- The new local macOS Worker release `b6f9fcb40a57e69ee1eb2e7b4d9c5f241e0aefeb7ca9096f8171d815a456c1c2` reconstructs from 91 emitted/recovery inputs. All 344 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 107 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
+- `b255260` is the last inspected remote/hosted-verified baseline. Today's lunar/map features and saved-data fixes are newer and remain local. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
@@ -45,6 +45,12 @@ Local browser checks cover a saved-equipment change and 45° rotation, preserved
 Saving an imaging draft reads its latest stored values and applies only fields edited in this view. A stale Setup name edit no longer restores an older focal length or unrelated target/grid fields. Failed saves retain all pending edits; Retry reads the latest stored data again. Successful read/save retries focus Setup name, while a failed retry retains its button. Browser checks cover an unfinished RA, Unicode setup text, a newer focal length/rotation, and the resulting atlas grid at compact/landscape sizes.
 
 Edits to the same field still use the latest explicit save. Browser storage does not provide an atomic transaction across tabs; this is field-level merging and verification, not conflict-free collaboration.
+
+## New local fix: equipment rows keep their identity
+
+Equipment rows now use content identity with duplicate-occurrence keys rather than array positions. A peer removal/reorder keeps keyboard focus on the same unchanged setup. If that setup’s dimensions change, the old row retires and existing list focus recovery moves to a safe control/count message. Legacy same-name profiles retain distinct dimensions; no saved-record IDs, migration or backup changes were introduced.
+
+Before the fix, focus on Remove setup 02 silently changed to Remove setup 03 after a peer removed row 01; pressing Enter removed 03. The compiled fix keeps focus on 02 and removes 02, retaining 03. Same-count replacement moves focus to Showing all 3 saved setups; reordering and same-name legacy cases retain the intended row. Ordinary Undo returns focus to Saved equipment. Physical assistive-technology acceptance remains pending.
 
 ## New local fix: list updates retain useful focus
 
