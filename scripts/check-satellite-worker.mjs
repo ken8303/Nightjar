@@ -47,6 +47,9 @@ async function checkPassWorker(){
   assert.equal(result.result.passes[0].lighting.sunlight,'earth-shadow');
   assert.equal(result.result.passes[2].lighting.sunlight,'sunlit');
   assert(result.result.passes[2].lighting.sunAltitude< -6);
+  assert.deepEqual(result.result.passes[0].viewing,[]);
+  assert.equal(result.result.passes[2].viewing.length,1);
+  assert(result.result.passes[2].viewing[0].end-result.result.passes[2].viewing[0].start>=10000);
  }finally{await worker.terminate()}
 }
 try{

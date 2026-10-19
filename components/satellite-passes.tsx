@@ -3,6 +3,8 @@ import {useEffect,useRef,useState} from 'react';
 import type {OrbitElements} from '@/lib/satellite-elements';
 import type {SatellitePassResult} from '@/lib/satellite-passes';
 import PassWorker from '@/lib/satellite-pass.worker?worker';
+import {satelliteViewingAltitude,satelliteViewingSunAltitude,satelliteViewingMinimumMs} from '@/lib/satellite-viewing-rules';
+import {satellitePassSummary} from '@/lib/satellite-pass-summary';
 
 const utc=(time:number)=>new Date(time).toISOString().replace('T',' ').replace(/\.\d{3}Z$/,' UTC');
 type State={loading:boolean;result:SatellitePassResult|null;message:string};
@@ -22,7 +24,7 @@ export default function SatellitePasses({elements,start,latitude,longitude,onDat
    worker.onmessage=({data}:{data:{result?:SatellitePassResult;error?:string}})=>{
     if(active.current?.worker!==worker)return;
     if(!data.result){fail(data.error||'Pass calculations are unavailable.');return}
-    stop();setState({loading:false,result:data.result,message:`${data.result.passes.length} geometric ${data.result.passes.length===1?'pass':'passes'} found in this search window.`});
+    stop();setState({loading:false,result:data.result,message:satellitePassSummary(data.result)});
    };
    worker.onerror=event=>{event.preventDefault();fail('The background pass calculator could not load. Reconnect and try again; selected-time directions remain available.')};
    worker.onmessageerror=()=>fail('The background calculator returned an unreadable result. Try again.');
@@ -35,13 +37,15 @@ export default function SatellitePasses({elements,start,latitude,longitude,onDat
   <p role="status" aria-atomic="true">{state.loading?'Calculating horizon crossings in the background…':state.message}</p>
   {state.result&&<>
    <p className="footnote">Window: {utc(state.result.start)} to {utc(state.result.end)}.{state.result.epochLimited?' This search stops at the supported three-day orbital limit.':''}</p>
+   <p className="footnote">Window criteria: above {satelliteViewingAltitude}°, fully sunlit, Sun below {satelliteViewingSunAltitude}°, lasting at least {satelliteViewingMinimumMs/1000} seconds. Weather and object brightness are not included.</p>
    {state.result.passes.length===0?<p>No geometric horizon pass was found for this site in this window. This says nothing about other dates or sites.</p>:<ol className="satellite-pass-list">{state.result.passes.map(pass=><li key={pass.peak}>
     <div className="satellite-pass-heading"><strong>{pass.maximumAltitude.toFixed(1)}° highest altitude</strong><span>{pass.alreadyUp?'Already above horizon at start':'Horizon rise'} · {utc(pass.rise)}</span></div>
     <dl><div><dt>{pass.alreadyUp?'Bearing at start':'Rise bearing'}</dt><dd>{pass.riseAzimuth.toFixed(1)}°</dd></div><div><dt>Highest in window</dt><dd>{utc(pass.peak)} · {pass.peakAzimuth.toFixed(1)}° bearing</dd></div><div><dt>{pass.continues?'Still above horizon at end':'Horizon set'}</dt><dd>{utc(pass.set)} · {pass.setAzimuth.toFixed(1)}° bearing</dd></div></dl>
     {pass.lighting?<dl className="satellite-pass-lighting"><div><dt>ISS lighting at highest point</dt><dd>{pass.lighting.sunlight==='sunlit'?'Sunlit':pass.lighting.sunlight==='earth-shadow'?'In Earth’s shadow':`Partly shadowed · ${Math.round(pass.lighting.shadow*100)}% of Sun obscured`}</dd></div><div><dt>Sun centre at highest point</dt><dd>{pass.lighting.sunAltitude.toFixed(1)}° altitude</dd></div></dl>:<p className="footnote">Lighting at the highest point is unavailable. The horizon times above remain geometric.</p>}
+    <div className={`satellite-viewing-windows${pass.viewing?.length?' has-window':''}`}><strong>Sunlit windows above {satelliteViewingAltitude}° · Sun below {satelliteViewingSunAltitude}°</strong>{pass.viewing===null?<p>Window calculation unavailable. Horizon times and available peak facts remain usable.</p>:pass.viewing.length?<ul>{pass.viewing.map(window=><li key={window.start}>{utc(window.start)} – {utc(window.end)}{window.startsAtBoundary?' · begins at search boundary':''}{window.endsAtBoundary?' · ends at search boundary':''}</li>)}</ul>:<p>No window meeting these criteria in this pass.</p>}</div>
     <button type="button" className="button satellite-peak-time" aria-label={`Set observing time to ISS peak at ${utc(pass.peak)}`} onClick={()=>onDate(new Date(pass.peak))}>Set observing time to this peak</button>
    </li>)}</ol>}
-   <p className="footnote">Lighting is estimated only at the highest point, using a spherical Earth shadow and an approximate Sun position. ISS may enter or leave shadow elsewhere in the pass. A Sun centre below −6° is beyond civil twilight; weather, brightness and local obstructions still affect visibility. These are not complete visible-pass predictions. Source uncertainty and manoeuvres can shift actual times.</p>
+   <p className="footnote">Modelled windows require ISS above {satelliteViewingAltitude}°, its whole solar disc clear of Earth’s shadow and the Sun centre below {satelliteViewingSunAltitude}°. Only overlaps lasting at least {satelliteViewingMinimumMs/1000} seconds are shown. The model uses a spherical Earth shadow and an approximate Sun position. Weather, brightness, obstructions, source uncertainty and manoeuvres still affect whether and when you can see ISS.</p>
    <p className="footnote">Models: <a href="https://shashwatak.github.io/satellite-js/docs/sun-and-shadow" target="_blank" rel="noreferrer">satellite.js Sun and shadow<span className="sr-only"> (opens in a new tab)</span></a> · <a href="https://aa.usno.navy.mil/faq/RST_defs" target="_blank" rel="noreferrer">USNO twilight definitions<span className="sr-only"> (opens in a new tab)</span></a>.</p>
   </>}
  </section>;

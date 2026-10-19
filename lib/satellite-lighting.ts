@@ -3,7 +3,7 @@ import {satelliteState} from './satellite-position';
 import type {OrbitElements} from './satellite-elements';
 
 type Vector={x:number;y:number;z:number};
-export type SatelliteLighting={shadow:number;sunlight:'sunlit'|'partial-shadow'|'earth-shadow';sunAltitude:number};
+export type SatelliteLighting={shadow:number;sunlight:'sunlit'|'partial-shadow'|'earth-shadow';sunAltitude:number;sunClearance:number};
 const auKm=149597870.69098932;
 export function orbitalShadow(sun:Vector,position:Vector){
  if(![sun.x,sun.y,sun.z,position.x,position.y,position.z].every(Number.isFinite)||Math.hypot(sun.x,sun.y,sun.z)<.9||Math.hypot(sun.x,sun.y,sun.z)>1.1||Math.hypot(position.x,position.y,position.z)<=6378.135)return null;
@@ -21,6 +21,11 @@ export function satelliteLighting(elements:OrbitElements,date:Date,latitude:numb
   const sun=sunPos(jday(date)).rsun,shadow=orbitalShadow(sun,state.position);if(!shadow)return null;
   const fixed=eciToEcf({x:sun.x*auKm,y:sun.y*auKm,z:sun.z*auKm},gstime(date));
   const sunAltitude=ecfToLookAngles({latitude:latitude*Math.PI/180,longitude:(longitude===180?-180:longitude)*Math.PI/180,height:0},fixed).elevation*180/Math.PI;
-  return Number.isFinite(sunAltitude)?{...shadow,sunAltitude}:null;
+  const radius=Math.hypot(state.position.x,state.position.y,state.position.z),solarRadius=Math.hypot(sun.x,sun.y,sun.z);
+  const cosine=-(sun.x*state.position.x+sun.y*state.position.y+sun.z*state.position.z)/(radius*solarRadius);
+  // Signed separation of the apparent discs. Positive means the whole solar
+  // disc clears Earth in the same spherical model used by shadowFraction.
+  const sunClearance=Math.acos(Math.max(-1,Math.min(1,cosine)))-Math.asin(6378.135/radius)-Math.asin(695700/(solarRadius*auKm));
+  return [sunAltitude,sunClearance].every(Number.isFinite)?{...shadow,sunAltitude,sunClearance}:null;
  }catch{return null}
 }

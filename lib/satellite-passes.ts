@@ -1,9 +1,12 @@
 import {parseOrbitalEpoch,satelliteEpochWindowMs,type OrbitElements} from './satellite-elements';
 import {createSatelliteObserver} from './satellite-position';
 import {satelliteLighting,type SatelliteLighting} from './satellite-lighting';
+import {satelliteViewingAltitude,satelliteViewingSunAltitude,satelliteViewingMinimumMs} from './satellite-viewing-rules';
 
 export type SatellitePass={rise:number;peak:number;set:number;maximumAltitude:number;riseAzimuth:number;peakAzimuth:number;setAzimuth:number;alreadyUp:boolean;continues:boolean};
-export type SatellitePassResult={start:number;end:number;epochLimited:boolean;passes:(SatellitePass&{lighting:SatelliteLighting|null})[]};
+type TimeWindow={start:number;end:number};
+export type SatelliteViewingWindow=TimeWindow&{startsAtBoundary:boolean;endsAtBoundary:boolean};
+export type SatellitePassResult={start:number;end:number;epochLimited:boolean;passes:(SatellitePass&{lighting:SatelliteLighting|null;viewing:SatelliteViewingWindow[]|null})[]};
 type Direction={altitude:number;azimuth:number};
 const day=86400000,step=30000,tolerance=100;
 
@@ -61,11 +64,50 @@ export function searchHorizonPasses(read:(time:number)=>Direction|null,start:num
  return passes;
 }
 
+export function intersectTimeWindows(groups:TimeWindow[][],minimumMs=satelliteViewingMinimumMs):TimeWindow[]{
+ if(!Number.isFinite(minimumMs)||minimumMs<0)throw Error('Invalid window duration.');
+ for(const group of groups)for(const window of group)if(!Number.isFinite(window.start)||!Number.isFinite(window.end)||window.end<=window.start)throw Error('Invalid interval.');
+ let result=(groups[0]??[]).map(window=>({...window}));
+ for(const group of groups.slice(1))result=result.flatMap(left=>group.flatMap(right=>{const start=Math.max(left.start,right.start),end=Math.min(left.end,right.end);return end>start?[{start,end}]:[]}));
+ return result.filter(window=>window.end-window.start>=minimumMs).sort((a,b)=>a.start-b.start);
+}
+
+type Conditions={altitude:number;sunAltitude:number;sunClearance:number};
+// Search each smooth criterion separately, retaining grazing extrema, then
+// intersect the refined intervals. A boolean sample grid can miss their brief
+// overlap entirely. Failure is distinct from a successful search with no window.
+export function modelledViewingWindows(read:(time:number)=>Conditions|null,start:number,end:number):TimeWindow[]|null{
+ try{
+  const criteria=[(point:Conditions)=>point.altitude-satelliteViewingAltitude,(point:Conditions)=>satelliteViewingSunAltitude-point.sunAltitude,(point:Conditions)=>point.sunClearance];
+  const groups=[];
+  for(const criterion of criteria){
+   const windows=searchHorizonPasses(time=>{const point=read(time);return point?{altitude:criterion(point),azimuth:0}:null},start,end).map(pass=>({start:pass.rise,end:pass.set}));
+   if(!windows.length)return [];
+   groups.push(windows);
+  }
+  return intersectTimeWindows(groups);
+ }catch{return null}
+}
+
 export function findSatellitePasses(elements:OrbitElements,start:number,latitude:number,longitude:number):SatellitePassResult{
  const epoch=parseOrbitalEpoch(elements.EPOCH);
  if(elements.NORAD_CAT_ID!==25544||!epoch||!Number.isFinite(start)||Math.abs(start-+epoch)>satelliteEpochWindowMs)throw Error('Choose an ISS observing time within three days of the orbital epoch.');
  const end=Math.min(start+day,+epoch+satelliteEpochWindowMs),read=createSatelliteObserver(elements,latitude,longitude);
  if(!read)throw Error('Choose a valid observing site.');
  if(end<=start)throw Error('No supported search time remains after this instant. Choose an earlier observing time.');
- return {start,end,epochLimited:end<start+day,passes:searchHorizonPasses(read,start,end).map(pass=>({...pass,lighting:satelliteLighting(elements,new Date(pass.peak),latitude,longitude)}))};
+ let remaining=6000;
+ const passes=searchHorizonPasses(read,start,end).map(pass=>{
+  const lighting=satelliteLighting(elements,new Date(pass.peak),latitude,longitude),cache=new Map<number,Conditions|null>();
+  const conditions=(time:number)=>{
+   if(cache.has(time))return cache.get(time)!;
+   if(--remaining<0)throw Error('The viewing-window calculation limit was reached.');
+   const direction=read(time),light=satelliteLighting(elements,new Date(time),latitude,longitude);
+   const point=direction&&light?{altitude:direction.altitude,sunAltitude:light.sunAltitude,sunClearance:light.sunClearance}:null;
+   cache.set(time,point);return point;
+  };
+  const windows=pass.maximumAltitude<=satelliteViewingAltitude?[]:modelledViewingWindows(conditions,pass.rise,pass.set);
+  const viewing=windows?.map(window=>({...window,startsAtBoundary:pass.alreadyUp&&window.start===start,endsAtBoundary:pass.continues&&window.end===end}))??null;
+  return {...pass,lighting,viewing};
+ });
+ return {start,end,epochLimited:end<start+day,passes};
 }
