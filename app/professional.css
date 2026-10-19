@@ -248,3 +248,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .places-layout{align-items:start}
 .saved-list-controls.saved-list-condensed{padding:0;border:0;margin:0}.saved-list-recovery:focus{position:static;width:auto;height:auto;margin:12px 0 0;padding:8px;overflow:visible;clip:auto;clip-path:none;white-space:normal;outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
 @media(max-height:500px){.light-pollution-map-canvas{height:55svh;min-height:160px;max-height:280px}}
+
+.light-pollution-reading{margin-block:1rem;padding:1rem;border:1px solid var(--line);border-radius:12px}.light-pollution-reading .button{margin:0 .5rem .5rem 0}.light-pollution-values{display:flex;flex-wrap:wrap;gap:1rem 2rem;margin-block:1rem}.light-pollution-values dt{font-size:.8rem;color:var(--text-secondary)}.light-pollution-values dd{margin:0;font-weight:600;overflow-wrap:anywhere}

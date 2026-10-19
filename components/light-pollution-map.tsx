@@ -6,6 +6,8 @@ import 'leaflet/dist/leaflet.css';
 import {lightPollutionAtlas,mapTileHealth,createMapTileTracker,mapCentreSite} from '@/lib/light-pollution';
 import type {Place} from '@/lib/sky';
 import {deferFocusAndScroll} from '@/lib/deferred-focus';
+import LightPollutionReading from './light-pollution-sample';
+import {lightPollutionCell} from '@/lib/light-pollution-sample';
 import {watchForegroundDelay} from '@/lib/foreground-delay';
 
 type Health=ReturnType<typeof mapTileHealth>;
@@ -54,6 +56,7 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose}:{la
  },[latitude,longitude,attempt]);
  useEffect(()=>{overlay.current?.setOpacity(opacity/100)},[opacity,ready,attempt]);
  const retry=(owner:Element)=>{setMoving(false);setSelectionError('');setCentre({latitude,longitude,zoom:7});setError('');setReady(false);setSlow(false);setBaseHealth(emptyHealth());setModelHealth(emptyHealth());setAttempt(value=>value+1);deferFocusAndScroll(()=>host.current,{owner})};
+ const cell=lightPollutionCell(centre.latitude,centre.longitude);
  const candidate=mapCentreSite(centre.latitude,centre.longitude);
  const chooseCentre=()=>{const point=map.current?.getCenter(),site=point?mapCentreSite(point.lat,point.lng):null;if(!site){setSelectionError('The map centre is outside valid coordinates. Return to the selected site and try again.');return}setSelectionError('');onChoose(site)};
  const outside=centre.latitude<lightPollutionAtlas.south||centre.latitude>=lightPollutionAtlas.north||Math.abs(centre.longitude)>180;
@@ -71,6 +74,7 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose}:{la
   <label className="light-pollution-opacity" htmlFor={opacityId}>Model opacity: {opacity}%<input id={opacityId} type="range" min="0" max="100" step="10" value={opacity} onChange={event=>setOpacity(Number(event.target.value))}/></label>
   <p className="footnote">Map centre {centre.latitude.toFixed(3)}°, {centre.longitude.toFixed(3)}° · zoom {centre.zoom}. {opacity===0?'Model hidden; only the street map is visible.':opacity===100?'Model at full opacity; use the legend for the colour scale.':'Colours are blended with the base map; use the legend for the original scale.'}</p>
   <div className="light-pollution-pick"><button type="button" className="button primary" disabled={!ready||moving||!candidate} onClick={chooseCentre}>Use map centre</button><p className="footnote">Sets the crosshair’s coordinates as your observing site. Your observing time stays unchanged; you can rename or save the site above.</p>{selectionError&&<p role="status" className="error">{selectionError}</p>}</div>
+  {cell&&<LightPollutionReading key={`${attempt}:${cell.key}`} cell={cell} disabled={!ready||moving}/> }
   <div id={status} role="status" className="light-pollution-map-status">
    {error?<p className="error">{error}</p>:<>
     {outside&&<p>Map centre is outside model coverage. Shaded polar areas and uncoloured gaps are not darkness estimates.</p>}
