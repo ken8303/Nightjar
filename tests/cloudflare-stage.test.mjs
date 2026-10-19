@@ -68,3 +68,25 @@ test('paths that re-enter the original build by folder name cannot silently brea
   await stage.cleanup();assert.deepEqual(await readdir(f.root),['dist']);
  }finally{await stage?.cleanup();await f.cleanup()}
 });
+
+
+test('hashed generated PNG copies are omitted only when identical and unreferenced',async()=>{
+ const f=await fixture();let stage;
+ const bytes=Buffer.from([137,80,78,71,0,255,11,32]);
+ try{
+  for(const stem of ['unused','referenced','encoded','changed']){
+   await f.put(`client/_next/static/media/${stem}.abcdefgh.png`,bytes);
+   await f.put(`client/_next/static/media/${stem}.abcdefgh 2.png`,stem==='changed'?Buffer.from([0,1,2]):bytes);
+  }
+  await f.put('client/_next/static/media/orphan.abcdefgh 2.png',bytes);
+  await f.put('client/_next/static/media/holiday 2.png',bytes);
+  await f.put('client/_next/static/css/app.abcdefgh.css',"a{background:url('../media/referenced.abcdefgh 2.png')}b{background:url('../media/encoded.abcdefgh%202.png')}");
+  stage=await stageCloudflareBuild(f.build,f.root);
+  assert.deepEqual(stage.removedCopies,['client/_next/static/media/unused.abcdefgh 2.png']);
+  await access(join(f.build,'client/_next/static/media/unused.abcdefgh 2.png'));
+  await assert.rejects(access(join(stage.root,'client/_next/static/media/unused.abcdefgh 2.png')));
+  for(const stem of ['referenced','encoded','changed','orphan'])await access(join(stage.root,`client/_next/static/media/${stem}.abcdefgh 2.png`));
+  await access(join(stage.root,'client/_next/static/media/holiday 2.png'));
+  assert((await readFile(join(stage.root,'client/_next/static/media/unused.abcdefgh.png'))).equals(bytes));
+ }finally{await stage?.cleanup();await f.cleanup()}
+});

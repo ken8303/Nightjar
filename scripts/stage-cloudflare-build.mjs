@@ -8,7 +8,7 @@ async function filesIn(root){
  await visit(root);return files;
 }
 // A separate snapshot keeps local generated-output copies out of deployment.
-// Only identical, unreferenced numbered copies of hashed generated code qualify.
+// Only identical, unreferenced numbered copies of hashed generated code or PNG assets qualify.
 export async function stageCloudflareBuild(source,temporaryParent=tmpdir()){
  const build=resolve(source);
  let config;
@@ -32,10 +32,12 @@ export async function stageCloudflareBuild(source,temporaryParent=tmpdir()){
   const removedCopies=[];
   for(const file of files){
    const name=relative(root,file).split(sep).join('/');
-   if(!/^(?:client\/_next\/static\/(?:chunks|css)\/|server\/)/.test(name))continue;
-   if(!/[-.][A-Za-z0-9_-]{8,} (?:[2-9]|[1-9]\d+)\.(?:js|mjs|css)$/.test(name))continue;
-   const original=file.replace(/ (?:[2-9]|[1-9]\d+)(?=\.(?:js|mjs|css)$)/,'');
-   const originalContent=content.get(original);if(!originalContent||!originalContent.equals(content.get(file)))continue;
+   const code=/^(?:client\/_next\/static\/(?:chunks|css)\/|server\/)/.test(name)&&/[-.][A-Za-z0-9_-]{8,} (?:[2-9]|[1-9]\d+)\.(?:js|mjs|css)$/.test(name);
+   const image=/^client\/_next\/static\/media\/[^/]*[-.][A-Za-z0-9_-]{8,} (?:[2-9]|[1-9]\d+)\.png$/.test(name);
+   if(!code&&!image)continue;
+   const original=file.replace(/ (?:[2-9]|[1-9]\d+)(?=\.(?:js|mjs|css|png)$)/,'');
+   const originalContent=content.get(original)??(image?await readFile(original).catch(()=>null):null);
+   if(!originalContent||!originalContent.equals(content.get(file)??await readFile(file)))continue;
    const basename=file.slice(file.lastIndexOf(sep)+1);
    if(texts.some(text=>text.includes(basename)||text.includes(encodeURI(basename))))continue;
    await rm(file);removedCopies.push(name);

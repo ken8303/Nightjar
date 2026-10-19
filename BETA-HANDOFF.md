@@ -6,9 +6,9 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 19 October 2026
 
-- **The new local light-pollution layer, including imaging-draft fix `9d108d8`, passes all 691 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 116 assets without bindings. It still needs an exact-head hosted run after the next push.
+- **The local map/site-selection features, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, passes all 692 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 116 assets without bindings. It still needs an exact-head hosted run after the next push.
 - **Your pushed commit `b2552602ee809d40b39469071fb724cb8f3bd630` passed all 680 tests and the complete verification command on GitHub's Ubuntu 24.04 runner with Node 22.16.0.** Its [exact-head run](https://github.com/ken8303/Nightjar/actions/runs/39166796103) passed locked dependency installation, TypeScript, lint, tests, build and Cloudflare dry-run, with zero failed/cancelled/skipped tests, 105 packaged assets and no bindings. This includes the atlas-framing feature, 3D recovery fixes and explicit Ubuntu runner pin; it supersedes the older `24b479a` hosted baseline.
-- The new local macOS Worker release `4f3edcde0319f93ebf38d0071c97fc2310ab1e3b58b1787de09e867a6a78c2ea` reconstructs from 90 emitted/recovery inputs. All 329 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 106 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
+- The new local macOS Worker release `7339178ab312c45cf13ca5c4db58aafdd45c4f360a28687a38b1c62e1f869255` reconstructs from 90 emitted/recovery inputs. All 330 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 106 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
 - `b255260` is the current remote/hosted-verified baseline. Today's map layer and imaging-save fix are newer and remain local. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
@@ -35,6 +35,12 @@ Local browser checks cover a saved-equipment change and 45° rotation, preserved
 Saving an imaging draft reads its latest stored values and applies only fields edited in this view. A stale Setup name edit no longer restores an older focal length or unrelated target/grid fields. Failed saves retain all pending edits; Retry reads the latest stored data again. Successful read/save retries focus Setup name, while a failed retry retains its button. Browser checks cover an unfinished RA, Unicode setup text, a newer focal length/rotation, and the resulting atlas grid at compact/landscape sizes.
 
 Edits to the same field still use the latest explicit save. Browser storage does not provide an atomic transaction across tabs; this is field-level merging and verification, not conflict-free collaboration.
+
+## New local fix: list updates retain useful focus
+
+When another view reduces a saved list and removes the focused pagination button, focus moves to a remaining pagination control or a visible count message. It stays with an unrelated editor or a separately focused document. Compiled-browser checks cover full/partial control removal, empty lists, regular pagination, a retained name draft and compact/landscape layouts. This does not establish generic recovery for every removed list row or physical screen-reader acceptance.
+
+The packaging snapshot also omits identical, unreferenced numbered PNG copies in the generated media directory, with binary regression coverage. Referenced/different/orphaned files and ordinary public photos stay included; the original build output is untouched. This resolved an observed local release-audit mismatch caused by extra generated image copies.
 
 ## Earlier verified fixes
 
