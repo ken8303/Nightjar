@@ -57,3 +57,10 @@ export function createMapTileTracker<T>(report:(health:ReturnType<typeof mapTile
   dispose(){active=false;tiles.clear()},
  };
 }
+
+// Picking a map position creates coordinates, not a place-name lookup, sky
+// rating or copied metadata from the previously selected site.
+export function mapCentreSite(latitude:number,longitude:number){
+ if(!Number.isFinite(latitude)||Math.abs(latitude)>90||!Number.isFinite(longitude)||Math.abs(longitude)>180)return null;
+ return {name:`${latitude.toFixed(3)}°, ${longitude.toFixed(3)}°`,latitude,longitude};
+}

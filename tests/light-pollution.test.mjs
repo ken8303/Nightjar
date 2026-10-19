@@ -42,3 +42,14 @@ test('tile lifecycles reject late callbacks and keep a loaded error placeholder 
  tracker.start('visible');tracker.settle('visible','loaded');assert.deepEqual(latest,{loading:0,loaded:1,failed:0});
  tracker.dispose();tracker.start('retired');tracker.settle('retired','failed');tracker.forget('visible');assert.deepEqual(latest,{loading:0,loaded:1,failed:0});
 });
+
+test('map site selection retains precise coordinates and has no inherited rating or place metadata',async()=>{
+ const {mapCentreSite}=await vite.ssrLoadModule('/lib/light-pollution.ts');
+ const {resolveObservingPlace,validPlace}=await vite.ssrLoadModule('/lib/planner-state.ts');
+ const point=mapCentreSite(51.5085123456,.75323456789);
+ assert.deepEqual(point,{name:'51.509°, 0.753°',latitude:51.5085123456,longitude:.75323456789});assert.equal(validPlace(point),true);
+ const current={name:'Old rated site',latitude:51.5085,longitude:-.1257,bortle:7,country:'Old country',timezone:'Europe/London'};
+ const next=resolveObservingPlace(point,[],current);assert.equal(next.bortle,undefined);assert.equal(next.country,undefined);assert.notEqual(next.name,current.name);
+ for(const longitude of [-180,180])assert.equal(mapCentreSite(-65,longitude).longitude,longitude);
+ for(const [lat,lon] of [[NaN,0],[0,Infinity],[91,0],[0,181]])assert.equal(mapCentreSite(lat,lon),null);
+});
