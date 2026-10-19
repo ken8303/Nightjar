@@ -6,15 +6,21 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 19 October 2026
 
-- **New local imaging-draft merge and retry-focus fix `9d108d8` passes all 685 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 105 assets without bindings. It still needs an exact-head hosted run after the next push.
+- **The new local light-pollution layer, including imaging-draft fix `9d108d8`, passes all 690 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 116 assets without bindings. It still needs an exact-head hosted run after the next push.
 - **Your pushed commit `b2552602ee809d40b39469071fb724cb8f3bd630` passed all 680 tests and the complete verification command on GitHub's Ubuntu 24.04 runner with Node 22.16.0.** Its [exact-head run](https://github.com/ken8303/Nightjar/actions/runs/39166796103) passed locked dependency installation, TypeScript, lint, tests, build and Cloudflare dry-run, with zero failed/cancelled/skipped tests, 105 packaged assets and no bindings. This includes the atlas-framing feature, 3D recovery fixes and explicit Ubuntu runner pin; it supersedes the older `24b479a` hosted baseline.
-- The new local macOS Worker release `6ba7c88ddab3dbf6184b6dfecc66b4d976d7584460ab2979158657ac5fd19409` reconstructs from 83 emitted/recovery inputs. All 322 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 97 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
-- `b255260` is the current remote/hosted-verified baseline. Today's imaging-save fix is newer and remains local. The development agent has not pushed or deployed.
+- The new local macOS Worker release `c4293440ed5955e6938eccdca3002a6cfb060f33d8503aeaaa603db19dc6638e` reconstructs from 90 emitted/recovery inputs. All 329 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 106 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
+- `b255260` is the current remote/hosted-verified baseline. Today's map layer and imaging-save fix are newer and remain local. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
 
 All seven loaded main sections also fit a 320 × 568 browser frame without horizontal page overflow. Compact navigation places focus on the chosen section heading and returns it to Explore after Escape. This is responsive desktop-browser evidence; phone and assistive-technology acceptance remain separate.
+
+## New local feature: light-pollution map
+
+In **My places → Explore a darker site**, load the optional 2025 map, then pan/zoom or adjust its opacity. The outlined marker represents the selected site; map exploration does not select a new site or change the observing time. The ratio-zone legend, model year, natural reference and provider attribution stay separate from personal Bortle ratings and weather scores.
+
+The model is annual artificial zenith brightness, not a measurement or live forecast. Missing tiles have a labelled hatch pattern and explicit retry guidance; a successfully loaded placeholder remains unavailable. Polar coverage and the date line have explicit handling. Source links remain available without loading the map. The feature uses online tiles, with no offline map download or numeric point sampler. See [LIGHT-POLLUTION-DATA.md](./LIGHT-POLLUTION-DATA.md) for provenance and scope. Local compiled-browser checks cover 320 px portrait, short landscape, the expanded legend, keyboard exploration, unchanged site/time, partial/complete/slow tile failure and retry, close focus, rename retention and coverage/date-line edges. The tile-failure/pan checks use synthetic local images; live provider responses and palette were checked separately. Physical touch, installed-PWA and final-origin acceptance remain pending.
 
 ## Equipment framing on the atlas
 
