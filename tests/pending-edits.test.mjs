@@ -58,3 +58,11 @@ test('context-sensitive retained edits guard site changes from every section wit
  assert.equal(updates,4);assert.equal(store.contextSnapshot('sky'),'notes');
  store.change(time,null);assert.equal(store.snapshot(),'imaging draft, notes');
 });
+
+test('time replacement can detect retained edit owners without blocking unrelated sections',()=>{
+ const store=createPendingEdits(),first=Symbol(),second=Symbol(),other=Symbol();
+ store.change(other,{section:'sky',label:'notes'});assert.equal(store.hasSection('observing-time'),false);
+ store.change(first,{section:'observing-time',label:'observing-time changes',retainedAcrossSections:true,contextSensitive:true});store.change(second,{section:'observing-time',label:'observing-time changes',retainedAcrossSections:true,contextSensitive:true});
+ assert.equal(store.snapshot('observing-time'),'');assert.equal(store.hasSection('observing-time'),true);
+ store.change(first,null);assert.equal(store.hasSection('observing-time'),true);store.change(second,null);assert.equal(store.hasSection('observing-time'),false);assert.equal(store.hasSection('sky'),true);
+});

@@ -8,7 +8,7 @@ export function createPendingEdits(){
   if(value)owners.set(owner,value);else owners.delete(owner);
   for(const listener of listeners)listener();
  }
- return {snapshot,contextSnapshot,change,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener)}}};
+ return {snapshot,contextSnapshot,hasSection:(section:string)=>[...owners.values()].some(owner=>owner.section===section),change,subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener)}}};
 }
 export function preventPendingEditUnload(event:Pick<BeforeUnloadEvent,'preventDefault'|'returnValue'>,pending:string){if(!pending)return;event.preventDefault();event.returnValue='true'}
 export function watchPendingEditUnload(events:Pick<EventTarget,'addEventListener'|'removeEventListener'>,store:ReturnType<typeof createPendingEdits>){

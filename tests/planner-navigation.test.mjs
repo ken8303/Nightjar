@@ -38,3 +38,15 @@ test('a later imaging request supersedes an earlier target and section navigatio
  h.navigation.request(first,true,h.apply);h.navigation.request(second,true,h.apply);h.navigation.continue(h.apply);assert.deepEqual(h.applied,[second]);
  h.navigation.request(first,true,h.apply);h.navigation.request({kind:'section',section:'moon'},false,h.apply);assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.at(-1).section,'moon');
 });
+
+test('time shortcuts snapshot their instant and destination without applying before continuation',()=>{
+ const h=harness(),date=new Date('2026-10-20T05:20:52.474Z');
+ h.navigation.request({kind:'time',section:'sky',date},true,h.apply);date.setUTCFullYear(2030);assert.equal(h.applied.length,0);assert.equal(h.pending.at(-1).date.toISOString(),'2026-10-20T05:20:52.474Z');
+ h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,0);
+ h.navigation.request({kind:'time',section:'moon',date:new Date('2026-10-21T01:02:03.004Z')},true,h.apply);assert(h.navigation.continue(h.apply));assert.equal(h.applied.at(-1).date.toISOString(),'2026-10-21T01:02:03.004Z');assert.equal(h.applied.at(-1).section,'moon');
+});
+test('a replacement time shortcut and a direct time entry retire an older queued instant',()=>{
+ const h=harness(),first={kind:'time',section:'sky',date:new Date('2026-10-20T00:00Z')},second={kind:'time',section:'events',date:new Date('2026-10-21T00:00Z')};
+ h.navigation.request(first,true,h.apply);h.navigation.request(second,true,h.apply);h.navigation.continue(h.apply);assert.deepEqual(h.applied,[second]);
+ h.navigation.request(first,true,h.apply);h.navigation.request(second,false,h.apply);assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,2);
+});
