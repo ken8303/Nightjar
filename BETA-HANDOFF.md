@@ -4,20 +4,19 @@ Nightjar remains a beta. Desktop Safari and automated checks do not establish ph
 
 Reference-feature coverage and the remaining implementation backlog are tracked separately in [FEATURE-STATUS.md](./FEATURE-STATUS.md). This handoff records release evidence rather than a full-parity completion percentage.
 
-## Current release evidence — 18 October 2026
+## Current release evidence — 19 October 2026
 
-- **New local framing, 3D recovery and site-reference changes through `fa6948e` pass all 680 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 105 assets without bindings. It is later than the hosted-verified push below; the feature needs its own exact-head GitHub run after your next push.
-- **Your pushed commit `24b479ae4a921cb25eb84b1abbd684a3e51128d7` passed all 670 tests and the complete verification command on GitHub's Linux runner with Node 22.16.0.** The exact-head [GitHub run](https://github.com/ken8303/Nightjar/actions/runs/39140549845) passed locked dependency installation, TypeScript, lint, tests, production build and Cloudflare packaging dry-run. Its log reports no failed/cancelled/skipped tests, 103 packaged asset files and no bindings. This supersedes the older `c025022` hosted validation for the runtime fixes below.
-- The new local macOS Worker release `79a87a08bc0afd998c366fb92507661f925f11c48958afc7a81e6f18991bbf08` reconstructs from 83 emitted/recovery inputs. All 322 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 97 client files and contains no duplicate copies requiring omission by the existing staging guards. This local digest is not a hosted-byte equivalence claim.
-- Your push at `24b479a` is the hosted-verified baseline. The newer local commits above have not been pushed or deployed by the development agent and need their own exact-head hosted checks after your next batch push.
-- Local workflow commit `640de95` pins validation to `ubuntu-24.04`, matching the OS in the last passing hosted run, before GitHub’s announced `ubuntu-latest` migration. Its YAML parses locally; the pinned workflow still needs its own exact-head hosted run after your push.
+- **New local imaging-draft merge and retry-focus fix `9d108d8` passes all 685 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 105 assets without bindings. It still needs an exact-head hosted run after the next push.
+- **Your pushed commit `b2552602ee809d40b39469071fb724cb8f3bd630` passed all 680 tests and the complete verification command on GitHub's Ubuntu 24.04 runner with Node 22.16.0.** Its [exact-head run](https://github.com/ken8303/Nightjar/actions/runs/39166796103) passed locked dependency installation, TypeScript, lint, tests, build and Cloudflare dry-run, with zero failed/cancelled/skipped tests, 105 packaged assets and no bindings. This includes the atlas-framing feature, 3D recovery fixes and explicit Ubuntu runner pin; it supersedes the older `24b479a` hosted baseline.
+- The new local macOS Worker release `6ba7c88ddab3dbf6184b6dfecc66b4d976d7584460ab2979158657ac5fd19409` reconstructs from 83 emitted/recovery inputs. All 322 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 97 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
+- `b255260` is the current remote/hosted-verified baseline. Today's imaging-save fix is newer and remains local. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
 
 All seven loaded main sections also fit a 320 × 568 browser frame without horizontal page overflow. Compact navigation places focus on the chosen section heading and returns it to Explore after Escape. This is responsive desktop-browser evidence; phone and assistive-technology acceptance remain separate.
 
-## New local feature: equipment framing on the atlas
+## Equipment framing on the atlas
 
 In Sky atlas, choose **Imaging grid: on** to overlay the current Photo tools camera/mosaic draft on either the 2D chart or 3D dome, including expanded views. **Edit in Photo tools** opens the same draft; loading a saved setup updates the overlay when you return. The toggle stays selected across planner sections for this visit. **Centre imaging grid** moves the 3D view to its target while keeping the selected atlas object.
 
@@ -25,9 +24,15 @@ The grid shares Photo tools validation and its J2000 tangent plane. Rotation is 
 
 Local browser checks cover a saved-equipment change and 45° rotation, preserved Vega/site/time, a time change, 320/390 px portrait, expanded 2D/3D views, short landscape scrolling and Escape focus return. A horizon-straddling grid shows only its above-horizon portion; its below-horizon centre cannot be centred. Physical-phone rendering/performance and final hosted-origin acceptance remain pending.
 
-## Latest verified fixes
+## New local fix: imaging edits from more than one view
 
-Your push at `24b479a` includes these runtime changes and their scope/acceptance records.
+Saving an imaging draft reads its latest stored values and applies only fields edited in this view. A stale Setup name edit no longer restores an older focal length or unrelated target/grid fields. Failed saves retain all pending edits; Retry reads the latest stored data again. Successful read/save retries focus Setup name, while a failed retry retains its button. Browser checks cover an unfinished RA, Unicode setup text, a newer focal length/rotation, and the resulting atlas grid at compact/landscape sizes.
+
+Edits to the same field still use the latest explicit save. Browser storage does not provide an atomic transaction across tabs; this is field-level merging and verification, not conflict-free collaboration.
+
+## Earlier verified fixes
+
+The earlier push at `24b479a` included these runtime changes and their scope/acceptance records.
 
 | Commit | Runtime change | Verification scope |
 | --- | --- | --- |
@@ -41,7 +46,7 @@ Your push at `24b479a` includes these runtime changes and their scope/acceptance
 | `dd7b70a` | Separate zoom controls and captions in short landscape viewers. | Photo/framing views at 800 × 300, 800 × 360 and 390 × 844; zoom, Reset, caption/source access and close-focus return. |
 | `c9f1fb2` | Select only the chosen object and hour in When to look. | Component rendering regression plus desktop/mobile checks for Saturn, Uranus and browsing without changing the selection. |
 
-The successful exact-head GitHub run for `24b479a` includes all runtime changes listed above. Deployment and physical-device acceptance remain separate gates.
+The successful exact-head GitHub run for `b255260` includes all runtime changes listed above. Deployment and physical-device acceptance remain separate gates.
 
 When to look now highlights the chosen object and sampled hour together. Previously selecting Saturn highlighted every planet at that hour and exposed all those cells as pressed. Desktop and mobile checks confirm a single visible selected cell; browsing another planet does not falsely select it. The regression also covers an unselected atlas, a selected star and a time just off the hourly sample.
 
@@ -125,4 +130,4 @@ Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record the actual deployed
 | Failed saves | Keep the view open. Direct review actions return to time, coordinates, imaging, diary, target-note or site-name recovery. Retry after storage is usable; verify retained text and original observation metadata. |
 | Files and accessibility | Confirm actual receipt/import/printing of intended files. Test screen-reader labels, focus after review/close, large text, and short landscape screens. Local screenshots and download-prepared messages do not prove these native behaviours. |
 
-Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and the final Cloudflare deployment remain unverified. GitHub validation passed for your pushed commit `24b479a`; any later local commits need their own exact-head run after the next push. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).
+Physical iPhone/Android sensors, installed-PWA lifecycle, native keyboards/readers/files and the final Cloudflare deployment remain unverified. GitHub validation passed for your pushed commit `b255260`; any later local commits need their own exact-head run after the next push. Detailed evidence and release gates are in [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md); development history is in [DEVELOPMENT-NOTES.md](./DEVELOPMENT-NOTES.md).
