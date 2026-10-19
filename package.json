@@ -19,7 +19,8 @@
     "test:offline": "node --test tests/offline-page.test.mjs",
     "test:plan": "node --test tests/observing-plan.test.mjs",
     "test": "node --test tests/*.test.mjs",
-    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run deploy:check"
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:satellite-worker && npm run deploy:check",
+    "test:satellite-worker": "node scripts/check-satellite-worker.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -45,6 +46,7 @@
     "react-hook-form": "^7.85.0",
     "react-resizable-panels": "^4.12.2",
     "recharts": "^3.8.0",
+    "satellite.js": "7.1.0",
     "sonner": "^2.0.8",
     "tailwind-merge": "3.6.0",
     "three": "^0.186.1",

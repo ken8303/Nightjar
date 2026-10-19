@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import {nightjarRelease} from "./build/nightjar-release";
+import {satelliteJavaScriptOnly} from "./build/satellite-javascript";
 import { sites } from "./build/sites-vite-plugin";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -15,7 +16,7 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
-  main: "vinext/server/fetch-handler",
+  main: "worker.ts",
   d1_databases: d1
     ? [
         {
@@ -55,7 +56,9 @@ export default defineConfig(async () => {
       ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
       ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
+    optimizeDeps: { exclude: ["satellite.js"] },
     plugins: [
+      satelliteJavaScriptOnly(),
       vinext(),
       nightjarRelease(),
       sites({ mockAuth: !managedLinux }),

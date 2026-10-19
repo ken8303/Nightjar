@@ -25,7 +25,7 @@ npm ci
 npm run verify
 ```
 
-`verify` runs type checking, lint, automated tests, production build and `deploy:check` in sequence; any failed step stops it. Use it as the Workers Builds build command to validate before Cloudflare executes the deploy command. The repository GitHub Actions workflow runs the same validation on main pushes, pull requests and manual runs. GitHub validation by itself does not block an independently configured Cloudflare build; the Workers Builds build command must be `npm run verify` for that pipeline to run these checks.
+`verify` runs type checking, lint, automated tests, production build, the isolated compiled satellite-Worker check and `deploy:check` in sequence; any failed step stops it. Use it as the Workers Builds build command to validate before Cloudflare executes the deploy command. The repository GitHub Actions workflow runs the same validation on main pushes, pull requests and manual runs. GitHub validation by itself does not block an independently configured Cloudflare build; the Workers Builds build command must be `npm run verify` for that pipeline to run these checks.
 
 `deploy:check` packages without publishing. `npm run deploy` publishes an already built version and requires Cloudflare credentials; Workers Builds provides deployment authentication. Do not commit API tokens or local `.dev.vars` files.
 
@@ -46,3 +46,14 @@ The compatibility date is pinned to `2026-05-15`, supported by the locked Wrangl
 `npm run build` stamps `dist/client/sw.js` with a deterministic release fingerprint. Client bundle changes, worker changes and offline-page changes produce new worker bytes without changing `/sw.js`. Deploy that generated file with the other generated assets; do not replace it with `public/sw.js`. Existing clients can then receive the app's Update and reload prompt. After deploying a subsequent release, verify that prompt and saved-plan preservation in the installed PWA on the final origin.
 
 The generated client assets also include `/planner-recovery.mjs`, a small shared module used by the offline recovery download. Serve it with a JavaScript content type. The service worker validates/caches it together with `/offline`, and its changes contribute to the release fingerprint. Confirm this asset on the final origin, then verify recovery preparation from the installed offline fallback; uploading only a subset of generated assets can prevent the new fallback from installing.
+
+
+## ISS service binding
+
+Nightjar now uses the custom source entry `worker.ts`, which delegates ordinary routes to Vinext and exports `SatelliteCoordinator`. Keep the entry in both `wrangler.jsonc` and Vite's local binding configuration; the generated deploy entry remains `dist/server/index.js`. Replacing the source entry with the framework default would remove the satellite endpoint/class.
+
+The committed configuration adds one SQLite-backed Durable Object binding, `SATELLITE_FEED`, with initial migration tag `v1-satellite-feed`. Wrangler's pinned version uses the `migrations` / `new_sqlite_classes` form. The first deployment provisions this namespace through the normal Worker deployment; it does not require manually creating a D1/R2 database. Keep the existing migration history and the single object identity stable on later deployments. Check your Cloudflare account's Durable Objects availability/quotas using its [official platform documentation](https://developers.cloudflare.com/durable-objects/) before hosted acceptance. No cloud resource was provisioned by the development agent.
+
+The dry-run should now report `env.SATELLITE_FEED (SatelliteCoordinator)`, rather than no bindings. `npm run verify` includes `npm run test:satellite-worker`: an isolated compiled-Worker/SQLite persistence check with source traffic replaced by fixtures. It checks concurrency, restart, the HTTP-error pause, invalid queries and ordinary app/offline routes without contacting CelesTrak. This does not verify a deployed namespace or migrate production state.
+
+After the user's next batch push/deployment, confirm the binding and migration succeeded, then open Sky atlas → Load ISS directions once on the final origin. Check source/epoch timestamps, unchanged selected site/time and explicit unavailable feedback. Coordinate acceptance checks so they do not create extra installations/source downloads. Refresh from different observers must use the same named cache. An HTTP-error pause requires human investigation; do not bypass it by repeatedly redeploying, changing object names or resetting migration tags. The recovery contract and remaining limitations are in [SATELLITE-TRACKING.md](./SATELLITE-TRACKING.md).

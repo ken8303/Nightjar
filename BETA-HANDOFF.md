@@ -6,16 +6,24 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 ## Current release evidence — 19 October 2026
 
-- **The local lunar-libration, map/site-selection and numeric-brightness features, equipment row identity, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, pass all 708 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 117 assets without bindings. It still needs an exact-head hosted run after the next push.
+- **The local ISS-direction, lunar-libration, map/site-selection and numeric-brightness features, equipment row identity, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, pass all 721 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 120 assets with the SATELLITE_FEED Durable Object binding. It still needs an exact-head hosted run after the next push.
 - **Your pushed commit `b2552602ee809d40b39469071fb724cb8f3bd630` passed all 680 tests and the complete verification command on GitHub's Ubuntu 24.04 runner with Node 22.16.0.** Its [exact-head run](https://github.com/ken8303/Nightjar/actions/runs/39166796103) passed locked dependency installation, TypeScript, lint, tests, build and Cloudflare dry-run, with zero failed/cancelled/skipped tests, 105 packaged assets and no bindings. This includes the atlas-framing feature, 3D recovery fixes and explicit Ubuntu runner pin; it supersedes the older `24b479a` hosted baseline.
-- The latest full verification includes lunar libration, short-screen sizing and the equipment row-identity fix.
-- The new local macOS Worker release `b6f9fcb40a57e69ee1eb2e7b4d9c5f241e0aefeb7ca9096f8171d815a456c1c2` reconstructs from 91 emitted/recovery inputs. All 344 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 107 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
+- The latest full verification includes ISS directions/shared acquisition, lunar libration, short-screen sizing and the equipment row-identity fix. It also runs the compiled Worker persistence/concurrency check with fixture-only source traffic.
+- The new local macOS Worker release `5efea366c841c37c2d283ff8230517edb39c998f2b8bd70e015a479a8c0746cd` reconstructs from 93 emitted/recovery inputs. All 350 scanned literal relative asset references resolve; manifest/icon dimensions and offline/recovery source bytes pass. The isolated snapshot contains 110 client files and no duplicate copies requiring omission. This local digest is not a hosted-byte equivalence claim.
 - `b255260` is the last inspected remote/hosted-verified baseline. Today's lunar/map features and saved-data fixes are newer and remain local. The development agent has not pushed or deployed.
 - The final Cloudflare HTTPS origin remains unverified. Follow [CLOUDFLARE.md](./CLOUDFLARE.md) for build configuration and deployed-origin acceptance.
 
 The existing generated-document preview also passed a focused browser review: saved M31 content and exact site/time metadata, temporary checklist reset, Escape from inside the sandboxed frame, Close preview focus return, and no horizontal overflow at 390 × 844. Header/actions fit at 800 × 300 while the document scrolls independently. This does not establish downloaded file bytes or native print/PDF acceptance.
 
 All seven loaded main sections also fit a 320 × 568 browser frame without horizontal page overflow. Compact navigation places focus on the chosen section heading and returns it to Explore after Escape. This is responsive desktop-browser evidence; phone and assistive-technology acceptance remain separate.
+
+## New local feature: ISS directions
+
+Sky atlas → **Load ISS directions** shows geometric altitude/bearing/range at the selected site/time. Opening the panel opts into a shared orbital-data request; coordinates/time stay in the browser. Data is bounded by epoch/retrieval age with separate stale/device-clock guidance. Changing the selected time recomputes locally. Cancel, close, retry and timeout retain useful focus/data and retire obsolete responses. This first slice has no pass predictions, sunlight/shadow visibility, live animation or atlas/camera markers.
+
+The source Worker now exports a SQLite-backed `SatelliteCoordinator` and requires the committed `SATELLITE_FEED` binding/initial migration. All observers of this deployment share one two-hour acquisition fence; non-200 source responses halt automatic refresh for investigation. End-user Retry cannot reset it. The ordinary app/offline routes and compiled persistence checks pass locally, but hosted namespace/migration acceptance is pending. Review [SATELLITE-TRACKING.md](./SATELLITE-TRACKING.md) and [CLOUDFLARE.md](./CLOUDFLARE.md) before the next batch push. No resource was provisioned or deployed by the agent.
+
+Numerical checks use published Vallado vectors and independent observer transforms. Browser QA uses local response replays, covering opt-in, date changes without another request, stale/future/wrong identity, service failure, cancellation, timeout, close/reopen and 320/800/1100 px containment. Physical phone and empirical sky-position acceptance remain pending.
 
 ## New local feature: lunar libration
 

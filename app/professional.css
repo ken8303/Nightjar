@@ -255,3 +255,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 
 .globe-controls [aria-pressed="true"]{color:var(--accent-soft);border-color:#8fa76a;background:#24362c}
 @media(max-height:500px){.moon-globe:not(.moon-globe-unavailable){height:55svh;min-height:160px;max-height:280px}}
+
+.satellite-tracker{margin-bottom:16px}.satellite-reading{margin-top:1rem}.satellite-facts{display:flex;flex-wrap:wrap;gap:1rem 2rem}.satellite-facts dt{font-size:.85rem;color:var(--text-secondary)}.satellite-facts dd{margin:0;font-size:1.2rem;font-weight:600}.satellite-reading p{overflow-wrap:anywhere}

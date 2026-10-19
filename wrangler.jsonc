@@ -1,8 +1,10 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "nightjar",
-  "main": "vinext/server/fetch-handler",
+  "main": "worker.ts",
   "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  "durable_objects": { "bindings": [{ "name": "SATELLITE_FEED", "class_name": "SatelliteCoordinator" }] },
+  "migrations": [{ "tag": "v1-satellite-feed", "new_sqlite_classes": ["SatelliteCoordinator"] }]
 }
