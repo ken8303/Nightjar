@@ -235,3 +235,27 @@ test('a cancelled relative callback cannot flush or detach a newer absolute pose
  assert.equal(h.result.reads,2);assert.equal(h.result.reading,current);assert.equal(h.result.absolute,1);
  h.advance(70);assert.equal(h.result.reads,3);assert.equal(h.result.reading.absolute,true);assert(h.result.reading.basis.forward[1]<-.99);h.dispose();
 });
+
+test('a silent absolute stream yields to fresh relative motion after four seconds and recovers immediately',()=>{
+ const h=harness();h.read({alpha:0},'deviceorientationabsolute');const held=h.result.reading;
+ h.setTime(3999);h.read({alpha:90});assert.equal(h.result.reading,held);assert.equal(h.result.relative,0);
+ h.advance(1);assert.equal(h.result.quiet,true);h.read({alpha:90});
+ assert.equal(h.result.reading.absolute,false);assert.equal(h.result.relative,1);assert.equal(h.result.quiet,false);assert(h.result.reading.basis.forward[0]<-.99);
+ h.setTime(4080);h.read({alpha:180});assert(h.result.reading.basis.forward[1]<-.99);assert.equal(h.result.relative,1);
+ h.setTime(4090);h.read({alpha:270},'deviceorientationabsolute');assert.equal(h.result.reading.absolute,true);assert.equal(h.result.absolute,2);assert(h.result.reading.basis.forward[0]>.99);
+ h.setTime(4100);h.read({alpha:0});assert(h.result.reading.basis.forward[0]>.99);h.dispose();
+});
+test('late invalid relative events retain a quiet compass pose, while fallback retires queued absolute work',()=>{
+ const h=harness();h.read({alpha:0},'deviceorientationabsolute');const initial=h.result.reading;
+ h.setTime(20);h.read({alpha:90},'deviceorientationabsolute');const queued=h.history.at(-1);
+ h.setTime(4020);h.read({alpha:null});assert.equal(h.result.reading,initial);assert.equal(h.result.relative,0);
+ h.read({alpha:180});assert.equal(h.result.reading.absolute,false);assert.equal(h.result.relative,1);const fallback=h.result.reading;
+ queued.callback();assert.equal(h.result.reading,fallback);assert(h.result.reading.basis.forward[1]<-.99);h.dispose();h.read({alpha:270});assert.equal(h.result.reading,fallback);
+});
+
+test('a fresh relative fallback after rotation uses the current screen axes and requires new alignment',()=>{
+ const h=harness();h.read({alpha:270},'deviceorientationabsolute');h.rotate(90);assert.equal(h.result.reading,null);
+ h.setTime(3999);h.read({alpha:0});assert.equal(h.result.reading,null);
+ h.setTime(4000);h.read({alpha:0});assert.equal(h.result.reading.absolute,false);assert.equal(h.result.relative,1);
+ assert(h.result.reading.basis.right[2]<-.99);assert(h.result.reading.basis.up[0]>.99);h.dispose();
+});

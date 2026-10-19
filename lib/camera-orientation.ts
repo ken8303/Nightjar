@@ -22,11 +22,15 @@ export function watchCameraOrientation(events:Events,screenEvents:Events|null,ca
   // Safari can temporarily omit compass fields while still delivering gyro
   // poses on its primary stream. Keep treating those as compass dropouts.
   const safari=typeof event.webkitCompassHeading==='number'||(safariStream&&event.type==='deviceorientation');
-  // Some browsers emit both streams. Once absolute data is preferred, a
-  // secondary relative event must not clear its pose or refresh its quiet timer.
-  if(absolutePreferred&&!safari&&!event.absolute&&event.type!=='deviceorientationabsolute')return;
+  // Prefer a recent absolute stream without letting secondary events refresh
+  // its clock. If it stops while the gyro keeps moving, use a fresh relative
+  // pose after the quiet threshold; its source transition clears north-based
+  // calibration before delivery. Invalid secondary data never erases a pose.
+  const secondary=absolutePreferred&&!safari&&!event.absolute&&event.type!=='deviceorientationabsolute';
+  if(secondary&&now()-lastReading<4000)return;
   const compass=safari&&Number.isFinite(event.webkitCompassHeading)&&event.webkitCompassHeading!>=0&&event.webkitCompassHeading!<360&&Number.isFinite(event.webkitCompassAccuracy)&&event.webkitCompassAccuracy!>=0;
   const relative=deviceCameraBasis(event.alpha,event.beta,event.gamma,options.angle());
+  if(secondary){if(!relative)return;absolutePreferred=false}
   if(!relative){clearPending();compassOffset=null;verticalCompass=false;available=false;lastRender=-Infinity;setQuiet(false);callbacks.onUnavailable(safari?'compass':'invalid');return}
   const time=now();
   // Heading becomes unstable as the device top edge approaches vertical.
