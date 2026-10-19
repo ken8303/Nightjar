@@ -1,8 +1,9 @@
 import {parseOrbitalEpoch,satelliteEpochWindowMs,type OrbitElements} from './satellite-elements';
 import {createSatelliteObserver} from './satellite-position';
+import {satelliteLighting,type SatelliteLighting} from './satellite-lighting';
 
 export type SatellitePass={rise:number;peak:number;set:number;maximumAltitude:number;riseAzimuth:number;peakAzimuth:number;setAzimuth:number;alreadyUp:boolean;continues:boolean};
-export type SatellitePassResult={start:number;end:number;epochLimited:boolean;passes:SatellitePass[]};
+export type SatellitePassResult={start:number;end:number;epochLimited:boolean;passes:(SatellitePass&{lighting:SatelliteLighting|null})[]};
 type Direction={altitude:number;azimuth:number};
 const day=86400000,step=30000,tolerance=100;
 
@@ -66,5 +67,5 @@ export function findSatellitePasses(elements:OrbitElements,start:number,latitude
  const end=Math.min(start+day,+epoch+satelliteEpochWindowMs),read=createSatelliteObserver(elements,latitude,longitude);
  if(!read)throw Error('Choose a valid observing site.');
  if(end<=start)throw Error('No supported search time remains after this instant. Choose an earlier observing time.');
- return {start,end,epochLimited:end<start+day,passes:searchHorizonPasses(read,start,end)};
+ return {start,end,epochLimited:end<start+day,passes:searchHorizonPasses(read,start,end).map(pass=>({...pass,lighting:satelliteLighting(elements,new Date(pass.peak),latitude,longitude)}))};
 }

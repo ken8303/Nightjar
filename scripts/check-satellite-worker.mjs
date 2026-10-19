@@ -44,6 +44,9 @@ async function checkPassWorker(){
   });
   assert(!result.error);assert.equal(result.result.passes.length,6);assert.equal(result.result.end-result.result.start,86400000);
   assert(Math.abs(result.result.passes[0].maximumAltitude-1.26606)<.001);
+  assert.equal(result.result.passes[0].lighting.sunlight,'earth-shadow');
+  assert.equal(result.result.passes[2].lighting.sunlight,'sunlit');
+  assert(result.result.passes[2].lighting.sunAltitude< -6);
  }finally{await worker.terminate()}
 }
 try{

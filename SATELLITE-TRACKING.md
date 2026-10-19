@@ -1,6 +1,6 @@
 # ISS directions and shared orbital cache
 
-Implemented locally, 19 October 2026: Sky atlas has an optional ISS direction panel for the selected site and UTC instant. It shows geometric altitude, compass bearing and range, plus an explicit background search for horizon passes over the next 24 hours. Sunlight/shadow visibility, atlas/camera labels, live animation, other objects and notifications remain absent.
+Implemented locally, 19 October 2026: Sky atlas has an optional ISS direction panel for the selected site and UTC instant. It shows geometric altitude, compass bearing and range, plus an explicit background search for horizon passes over the next 24 hours. Pass cards also estimate sunlight/shadow and Sun altitude at their highest point. Complete visible-pass windows, atlas/camera labels, live animation, other objects and notifications remain absent.
 
 ## Source evidence and numerical scope
 
@@ -12,7 +12,7 @@ Independent reference: the [Vallado/Crawford/Hujsak/Kelso AIAA 2006-6753 verific
 
 Epoch parsing treats an omitted designator as UTC, validates calendar fields and preserves source fractional text while explicitly constructing a standard three-digit-millisecond UTC value for Date and SGP4 ingestion. It does not rely on browser-specific parsing of the source’s longer fractions. The application accepts only NORAD 25544; the generic parser retains up to nine digits for format validation. Unsupported frames/theories/versions, nonfinite/out-of-range elements and decayed/null propagation are unavailable. TEME vectors never enter the J2000 catalogue projector. The observer is explicitly at sea level, without refraction.
 
-Current directions require a source epoch within three days of now, selected time within three days of that epoch, and source retrieval no older than six hours. A retrieval timestamp more than five minutes ahead of the device gets distinct clock guidance. These are conservative product limits, not accuracy guarantees. Freshness is rechecked each visible minute and on return from suspension. Geometric altitude is separate from naked-eye visibility; manoeuvres, sunlight/shadow, twilight, weather and obstructions are not modelled.
+Current directions require a source epoch within three days of now, selected time within three days of that epoch, and source retrieval no older than six hours. A retrieval timestamp more than five minutes ahead of the device gets distinct clock guidance. These are conservative product limits, not accuracy guarantees. Freshness is rechecked each visible minute and on return from suspension. Geometric altitude is separate from naked-eye visibility. Pass cards estimate lighting only at their highest point; manoeuvres, full-pass shadow/twilight transitions, weather, brightness and obstructions are not modelled.
 
 ## Shared acquisition and failure handling
 
@@ -44,6 +44,18 @@ The Vite worker import emits a separate calculator asset; both main/worker build
 
 Local compiled-browser replay acceptance covers six chronological London passes without another feed request, cancellation/focus, worker load failure and retry, deadline guidance, changed-time retirement, unsupported dates, a shortened epoch-limited window and an already-underway pass. Portrait 320×568, landscape 800×360 and desktop 1100×800 fit without horizontal overflow. Browser plugin is unavailable; CUA IAB was used. Provider responses are local fixtures; no additional live GP request, push or deployment was made. Physical phones, independent observed pass comparisons and final-origin/PWA acceptance remain pending.
 
+## Lighting at the highest point
+
+Each computed pass carries an optional lighting sample at its highest point in the window: sunlit, partial shadow or Earth shadow, plus the geometric Sun-centre altitude at the sea-level site. A failed/unsupported sample leaves geometric pass times intact with explicit unavailable feedback. It does not turn missing lighting into a sunlit/visible classification, filter away geometric passes or model the whole pass. Shadow/lighting has no separate source request or persisted user data.
+
+The pinned library's [Sun and shadow documentation](https://shashwatak.github.io/satellite-js/docs/sun-and-shadow) pairs sunPos(jday).rsun in AU with propagate's ECI position in km. Its low-precision solar model is documented for 1950–2050; the adapter refuses lighting outside that interval. The Earth-shadow model uses a 6378.135 km sphere and apparent-disc overlap; atmospheric attenuation, detailed Earth shape and ISS brightness/orientation are excluded. Solar topocentric altitude uses the same ECI-to-fixed transform and sea-level observer with no refraction, separately from the J2000 catalogue projector. Nonfinite/inside-Earth/unit-inconsistent vectors or invalid shadow fractions return unavailable.
+
+The [USNO twilight definitions](https://aa.usno.navy.mil/faq/RST_defs) use geometric Sun-centre depression of 6/12/18 degrees. The UI explains the civil limit without equating a dark site and sunlit satellite to guaranteed visibility. It does not claim exact shadow entry/exit times or a continuous viewing interval.
+
+Four new regression cases cover sun-side/umbra/partial shadow against independent 192x384 apparent-disc area quadrature, invalid geometry/date/site limits, 80 Sun-altitude comparisons with Astronomy Engine and real-fixture pass lighting. Largest Sun-altitude difference is 0.005587 degrees across the selected dates/sites including poles and the longitude seam, below the 0.02-degree test bound. The quadrature checks the documented approximate disc model, not an independent atmospheric/real-sky eclipse simulation. The compiled pass-worker check also asserts shadowed and sunlit-twilight fixtures.
+
+CUA local replay confirms the first two London peaks are shadowed at Sun altitude -39.5/-26.6 degrees, the third is sunlit at -11.9 degrees, and later sunlit peaks include daylight. Partial shadow and unavailable lighting use explicit synthetic worker fixtures; unavailable lighting preserves horizon times. Selected-time changes recompute locally, with no additional GP request. Desktop/320 portrait/800 landscape containment and console health pass. Physical phones, installed-PWA and observed-sky accuracy remain pending.
+
 ## Next satellite scope
 
-Validate sunlight/shadow and twilight before adding a visible-pass label. Preserve the selected-time and epoch guards, and use the existing unfinished-edit guard for any future time shortcut. Validate atlas geometry before adding satellite markers/camera labels; current bright-star camera discovery is not satellite tracking evidence.
+Validate full-pass sunlight/shadow and twilight intervals before adding a visible-pass label. Preserve the selected-time and epoch guards, and use the existing unfinished-edit guard for any future time shortcut. Validate atlas geometry before adding satellite markers/camera labels; current bright-star camera discovery is not satellite tracking evidence.

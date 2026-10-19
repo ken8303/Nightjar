@@ -34,7 +34,7 @@ export default function SatelliteReading({date,place}:{date:Date;place:Place}){
    </>}
   </div>
   {state.feed&&!issue&&position&&<SatellitePasses key={`${state.feed.fetchedAt}:${JSON.stringify(state.feed.elements)}:${+date}:${place.latitude}:${place.longitude}`} elements={state.feed.elements} start={+date} latitude={place.latitude} longitude={place.longitude}/>}
-  <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility: sunlight, twilight, weather, terrain and ISS manoeuvres are not modelled here. Current elements are limited to a three-day epoch window. Directions follow the selected instant; live animation is not enabled.</p>
+  <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility. Pass cards estimate sunlight and Sun altitude at their highest point; weather, terrain, ISS brightness and manoeuvres remain unmodelled. Current elements are limited to a three-day epoch window. Directions follow the selected instant; live animation is not enabled.</p>
  </div>;
 }
 function parseOrbitalEpochLabel(value:string){return value.replace('T',' ').replace(/Z?$/,' UTC')}
