@@ -6,7 +6,7 @@ import type {Place} from '@/lib/sky';
 import SatellitePasses from './satellite-passes';
 
 type State={status:'idle'|'loading'|'error'|'ready';feed:SatelliteFeed|null;error:string};
-export default function SatelliteReading({date,place}:{date:Date;place:Place}){
+export default function SatelliteReading({date,place,onDate}:{date:Date;place:Place;onDate:(date:Date)=>void}){
  const request=useRef<AbortController|null>(null);
  const [now,setNow]=useState(()=>Date.now());
  useEffect(()=>{const sync=()=>{if(!document.hidden)setNow(Date.now())};const timer=setInterval(sync,60000);document.addEventListener('visibilitychange',sync);window.addEventListener('pageshow',sync);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',sync);window.removeEventListener('pageshow',sync)}},[]);
@@ -33,7 +33,7 @@ export default function SatelliteReading({date,place}:{date:Date;place:Place}){
     <p className="footnote">Orbital epoch: {parseOrbitalEpochLabel(state.feed.elements.EPOCH)}. Source retrieved: {state.feed.fetchedAt.replace('T',' ').replace('.000Z',' UTC').replace('Z',' UTC')}. Refresh {state.feed.refreshPaused?'is paused for server investigation':`is eligible after ${state.feed.nextRefreshAt.replace('T',' ').replace('.000Z',' UTC').replace('Z',' UTC')}`}.</p>
    </>}
   </div>
-  {state.feed&&!issue&&position&&<SatellitePasses key={`${state.feed.fetchedAt}:${JSON.stringify(state.feed.elements)}:${+date}:${place.latitude}:${place.longitude}`} elements={state.feed.elements} start={+date} latitude={place.latitude} longitude={place.longitude}/>}
+  {state.feed&&!issue&&position&&<SatellitePasses key={`${state.feed.fetchedAt}:${JSON.stringify(state.feed.elements)}:${+date}:${place.latitude}:${place.longitude}`} elements={state.feed.elements} start={+date} latitude={place.latitude} longitude={place.longitude} onDate={onDate}/>}
   <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility. Pass cards estimate sunlight and Sun altitude at their highest point; weather, terrain, ISS brightness and manoeuvres remain unmodelled. Current elements are limited to a three-day epoch window. Directions follow the selected instant; live animation is not enabled.</p>
  </div>;
 }

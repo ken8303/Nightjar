@@ -6,7 +6,7 @@ import PassWorker from '@/lib/satellite-pass.worker?worker';
 
 const utc=(time:number)=>new Date(time).toISOString().replace('T',' ').replace(/\.\d{3}Z$/,' UTC');
 type State={loading:boolean;result:SatellitePassResult|null;message:string};
-export default function SatellitePasses({elements,start,latitude,longitude}:{elements:OrbitElements;start:number;latitude:number;longitude:number}){
+export default function SatellitePasses({elements,start,latitude,longitude,onDate}:{elements:OrbitElements;start:number;latitude:number;longitude:number;onDate:(date:Date)=>void}){
  const active=useRef<{worker:Worker;timer:ReturnType<typeof setTimeout>}|null>(null);
  const [state,setState]=useState<State>({loading:false,result:null,message:''});
  const stop=()=>{const current=active.current;if(current){clearTimeout(current.timer);current.worker.terminate();active.current=null}};
@@ -39,6 +39,7 @@ export default function SatellitePasses({elements,start,latitude,longitude}:{ele
     <div className="satellite-pass-heading"><strong>{pass.maximumAltitude.toFixed(1)}° highest altitude</strong><span>{pass.alreadyUp?'Already above horizon at start':'Horizon rise'} · {utc(pass.rise)}</span></div>
     <dl><div><dt>{pass.alreadyUp?'Bearing at start':'Rise bearing'}</dt><dd>{pass.riseAzimuth.toFixed(1)}°</dd></div><div><dt>Highest in window</dt><dd>{utc(pass.peak)} · {pass.peakAzimuth.toFixed(1)}° bearing</dd></div><div><dt>{pass.continues?'Still above horizon at end':'Horizon set'}</dt><dd>{utc(pass.set)} · {pass.setAzimuth.toFixed(1)}° bearing</dd></div></dl>
     {pass.lighting?<dl className="satellite-pass-lighting"><div><dt>ISS lighting at highest point</dt><dd>{pass.lighting.sunlight==='sunlit'?'Sunlit':pass.lighting.sunlight==='earth-shadow'?'In Earth’s shadow':`Partly shadowed · ${Math.round(pass.lighting.shadow*100)}% of Sun obscured`}</dd></div><div><dt>Sun centre at highest point</dt><dd>{pass.lighting.sunAltitude.toFixed(1)}° altitude</dd></div></dl>:<p className="footnote">Lighting at the highest point is unavailable. The horizon times above remain geometric.</p>}
+    <button type="button" className="button satellite-peak-time" aria-label={`Set observing time to ISS peak at ${utc(pass.peak)}`} onClick={()=>onDate(new Date(pass.peak))}>Set observing time to this peak</button>
    </li>)}</ol>}
    <p className="footnote">Lighting is estimated only at the highest point, using a spherical Earth shadow and an approximate Sun position. ISS may enter or leave shadow elsewhere in the pass. A Sun centre below −6° is beyond civil twilight; weather, brightness and local obstructions still affect visibility. These are not complete visible-pass predictions. Source uncertainty and manoeuvres can shift actual times.</p>
    <p className="footnote">Models: <a href="https://shashwatak.github.io/satellite-js/docs/sun-and-shadow" target="_blank" rel="noreferrer">satellite.js Sun and shadow<span className="sr-only"> (opens in a new tab)</span></a> · <a href="https://aa.usno.navy.mil/faq/RST_defs" target="_blank" rel="noreferrer">USNO twilight definitions<span className="sr-only"> (opens in a new tab)</span></a>.</p>

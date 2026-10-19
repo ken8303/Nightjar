@@ -44,6 +44,12 @@ The Vite worker import emits a separate calculator asset; both main/worker build
 
 Local compiled-browser replay acceptance covers six chronological London passes without another feed request, cancellation/focus, worker load failure and retry, deadline guidance, changed-time retirement, unsupported dates, a shortened epoch-limited window and an already-underway pass. Portrait 320×568, landscape 800×360 and desktop 1100×800 fit without horizontal overflow. Browser plugin is unavailable; CUA IAB was used. Provider responses are local fixtures; no additional live GP request, push or deployment was made. Physical phones, independent observed pass comparisons and final-origin/PWA acceptance remain pending.
 
+## Peak-time shortcut
+
+Each pass offers **Set observing time to this peak**. It sends the computed instant through the shared time-shortcut guard, preserving milliseconds rather than reconstructing a minute/second label. An unfinished blank/ambiguous entry remains until Keep editing or explicit Use selected time. A successful unblocked action defers focus to the stable planner heading; changed time retires the pass list/worker and recalculates directions locally from the same orbital feed. No site, catalogue selection or orbital request is changed. The action sets planner time, not a satellite chart selection.
+
+Compiled-browser replay verifies blocked/cancelled/continued actions, exact 2026-10-20T02:08:49.618Z and 05:20:52.474Z instants, heading/field focus and 62.6-degree peak directions. One feed request covers all these changes. The card action wraps to 201x70 px inside a 235 px card at a 320 px viewport; compact/landscape/desktop remain horizontally contained. Physical phone/PWA acceptance remains pending.
+
 ## Lighting at the highest point
 
 Each computed pass carries an optional lighting sample at its highest point in the window: sunlit, partial shadow or Earth shadow, plus the geometric Sun-centre altitude at the sea-level site. A failed/unsupported sample leaves geometric pass times intact with explicit unavailable feedback. It does not turn missing lighting into a sunlit/visible classification, filter away geometric passes or model the whole pass. Shadow/lighting has no separate source request or persisted user data.
