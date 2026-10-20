@@ -4,9 +4,10 @@ import {parseSatelliteFeed,type SatelliteFeed} from '@/lib/satellite-elements';
 import {satelliteDataIssue,satelliteHorizontal} from '@/lib/satellite-position';
 import type {Place} from '@/lib/sky';
 import SatellitePasses from './satellite-passes';
+import type {SatelliteWeather} from '@/lib/satellite-weather';
 
 type State={status:'idle'|'loading'|'error'|'ready';feed:SatelliteFeed|null;error:string};
-export default function SatelliteReading({date,place,onDate}:{date:Date;place:Place;onDate:(date:Date)=>void}){
+export default function SatelliteReading({date,place,onDate,weather,onRefreshWeather}:{date:Date;place:Place;onDate:(date:Date)=>void;weather:SatelliteWeather;onRefreshWeather:()=>void}){
  const request=useRef<AbortController|null>(null);
  const [now,setNow]=useState(()=>Date.now());
  useEffect(()=>{const sync=()=>{if(!document.hidden)setNow(Date.now())};const timer=setInterval(sync,60000);document.addEventListener('visibilitychange',sync);window.addEventListener('pageshow',sync);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',sync);window.removeEventListener('pageshow',sync)}},[]);
@@ -33,8 +34,10 @@ export default function SatelliteReading({date,place,onDate}:{date:Date;place:Pl
     <p className="footnote">Orbital epoch: {parseOrbitalEpochLabel(state.feed.elements.EPOCH)}. Source retrieved: {state.feed.fetchedAt.replace('T',' ').replace('.000Z',' UTC').replace('Z',' UTC')}. Refresh {state.feed.refreshPaused?'is paused for server investigation':`is eligible after ${state.feed.nextRefreshAt.replace('T',' ').replace('.000Z',' UTC').replace('Z',' UTC')}`}.</p>
    </>}
   </div>
-  {state.feed&&!issue&&position&&<SatellitePasses key={`${state.feed.fetchedAt}:${JSON.stringify(state.feed.elements)}:${+date}:${place.latitude}:${place.longitude}`} feed={state.feed} start={+date} place={place} onDate={onDate}/>}
-  <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility. Pass cards estimate sunlight and Sun altitude at their highest point; weather, terrain, ISS brightness and manoeuvres remain unmodelled. Current elements are limited to a three-day epoch window. Directions follow the selected instant; live animation is not enabled.</p>
+  {state.feed&&!issue&&position&&<SatellitePasses key={`${state.feed.fetchedAt}:${JSON.stringify(state.feed.elements)}:${+date}:${place.latitude}:${place.longitude}`} feed={state.feed} start={+date} place={place} onDate={onDate} weather={weather} now={now}/>}
+  <button type="button" className="button" disabled={weather.loading} onClick={onRefreshWeather}>{weather.loading?'Refreshing planner weather…':'Refresh weather'}</button>
+  <p className="footnote">Hourly cloud context uses the planner’s Open-Meteo forecast for this site. It describes whole forecast hours, with no minute-by-minute interpolation. Weather does not filter the orbital windows, and cloud context is not included in calendar files.</p>
+  <p className="footnote">Directions use your selected site and UTC instant, with a sea-level observer and no refraction. Above the horizon does not establish visibility. Pass cards estimate sunlight and Sun altitude at their highest point; terrain, ISS brightness and manoeuvres remain unmodelled. Hourly cloud context is shown separately for qualifying windows. Current elements are limited to a three-day epoch window. Directions follow the selected instant; live animation is not enabled.</p>
  </div>;
 }
 function parseOrbitalEpochLabel(value:string){return value.replace('T',' ').replace(/Z?$/,' UTC')}
