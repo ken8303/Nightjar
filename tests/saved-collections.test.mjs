@@ -143,3 +143,23 @@ test('legacy same-name and exact-duplicate equipment rows have distinct keys wit
  for(const field of ['name','width','height','focal','pixel']){const value={...original,[field]:field==='name'?'Another scope':original[field]+1};assert.notEqual(keys([value])[0],identities[0])}
  assert.deepEqual(keys([]),[]);
 });
+
+
+test('saved-place row identities follow unchanged named aliases through peer removal and reorder',async()=>{
+ const {savedPlaceRowKeys:keys}=await vite.ssrLoadModule('/lib/saved-collections.ts');
+ const garden={name:'Garden',latitude:51.5,longitude:0,bortle:2},roof={...garden,name:'Roof',bortle:4},hill={name:'Hill',latitude:50,longitude:1};
+ const places=[garden,roof,hill],before=structuredClone(places),original=keys(places);
+ assert.equal(new Set(original).size,3);
+ assert.deepEqual(keys([roof,hill]),original.slice(1));
+ assert.deepEqual(keys([hill,garden,roof]),[original[2],original[0],original[1]]);
+ assert.deepEqual(places,before);
+});
+test('saved-place aliases, metadata and exact duplicates never share a rendered row key',async()=>{
+ const {savedPlaceRowKeys:keys}=await vite.ssrLoadModule('/lib/saved-collections.ts');
+ const place={name:'Legacy: "site"',latitude:51.5,longitude:0,country:'GB',timezone:'Europe/London',bortle:2};
+ const variants=[place,{...place},{...place,name:'Roof'},{...place,country:'Other'},{...place,timezone:'UTC'},{...place,bortle:3},{...place,latitude:51.500000001},{...place,longitude:.000000001}];
+ const identities=keys(variants);assert.equal(new Set(identities).size,variants.length);
+ assert.equal(keys([variants[2]])[0],identities[2]);
+ assert.deepEqual(keys([]),[]);
+ assert.equal(keys([{name:'Site',latitude:0,longitude:0}])[0],keys([{name:'Site',latitude:0,longitude:0,country:undefined,timezone:undefined,bortle:undefined}])[0]);
+});

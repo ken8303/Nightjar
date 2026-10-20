@@ -80,3 +80,14 @@ export function equipmentProfileRowKeys(profiles:readonly Equipment[]){
   return `${signature}:${occurrence}`;
  });
 }
+
+// Named aliases and legacy duplicates can share coordinates. Keep unchanged
+// row elements through peer reordering rather than reusing another site's button.
+export function savedPlaceRowKeys(places:readonly Place[]){
+ const occurrences=new Map<string,number>();
+ return places.map(place=>{
+  const signature=JSON.stringify([place.name,place.latitude,place.longitude,place.country??null,place.timezone??null,place.bortle??null]);
+  const occurrence=occurrences.get(signature)??0;occurrences.set(signature,occurrence+1);
+  return `${signature}:${occurrence}`;
+ });
+}
