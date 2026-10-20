@@ -246,7 +246,7 @@ function Planner(){
  }
  function leaveView(){const owner=document.activeElement,imaging=pendingIntent?.kind==='imaging';if(!navigation.continue(applyNavigation)||imaging)return;deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner})}
 
- const {revision,refresh}=useForecastRefresh();
+ const {revision,refresh,recordAttempt}=useForecastRefresh();
  const now=usePlanningClock();
  const siteKey=`${place.latitude},${place.longitude}`;
  const forecastKey=`${siteKey}:${revision}`;
@@ -277,13 +277,14 @@ function Planner(){
  useEffect(()=>{savePlannerTime(date,undefined,undefined,place)},[date,place]);
  useEffect(()=>{
   let stopped=false;const controller=new AbortController(),requestedPlace=placeRef.current;
+  recordAttempt();
   const timeout=setTimeout(()=>controller.abort(),20000);
   fetch(`/api/weather?lat=${place.latitude}&lon=${place.longitude}`,{signal:controller.signal,cache:'no-cache'}).then(async response=>{
    const data=await readForecastResponse(response);
    if(!stopped){setWeather({key:forecastKey,siteKey,data,fetchedAt:Date.now()});if(data.timezone){setPlace(p=>p.latitude===place.latitude&&p.longitude===place.longitude&&p.timezone!==data.timezone?{...p,timezone:data.timezone}:p);try{saveForecastTimezone(localStorage,requestedPlace,data.timezone)}catch{}}}
   }).catch(error=>{if(!stopped)setWeather(old=>({key:forecastKey,siteKey,data:old?.siteKey===siteKey?old.data:undefined,fetchedAt:old?.siteKey===siteKey?old.fetchedAt:undefined,error:forecastFailureMessage(error)}))});
   return()=>{stopped=true;clearTimeout(timeout);controller.abort()};
- },[place.latitude,place.longitude,forecastKey,siteKey]);
+ },[place.latitude,place.longitude,forecastKey,siteKey,recordAttempt]);
 
  function retryObservingSite(){
   const restored=readObservingSite();

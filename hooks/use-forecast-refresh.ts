@@ -7,6 +7,7 @@ import {watchForecastRefresh} from '@/lib/forecast-refresh';
 export function useForecastRefresh(maxAge=15*60*1000){
  const [revision,setRevision]=useState(0);
  const attemptedAt=useRef(0);
+ const recordAttempt=useCallback(()=>{attemptedAt.current=Date.now()},[]);
  const refresh=useCallback(()=>{
   attemptedAt.current=Date.now();
   setRevision(value=>value+1);
@@ -15,5 +16,5 @@ export function useForecastRefresh(maxAge=15*60*1000){
   attemptedAt.current=Date.now();
   return watchForecastRefresh(refresh,window,document,{hidden:()=>document.visibilityState==='hidden',online:()=>navigator.onLine!==false,attemptedAt:()=>attemptedAt.current,now:Date.now,maxAge});
  },[maxAge,refresh]);
- return {revision,refresh};
+ return {revision,refresh,recordAttempt};
 }
