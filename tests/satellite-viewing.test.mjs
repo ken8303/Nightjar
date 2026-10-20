@@ -53,7 +53,13 @@ test('real modelled windows agree with a separate one-second combined-condition 
     if(p.altitude>30&&light.sunAltitude< -6&&light.shadow===0){if(!active){active={start:time,end:time};dense.push(active)}active.end=time}else active=null;
    }
    const retained=dense.filter(window=>window.end-window.start>=10000);assert.equal(pass.viewing.length,retained.length);count+=retained.length;
-   pass.viewing.forEach((window,index)=>{close(window.start,retained[index].start,1100);close(window.end,retained[index].end,1100);assert(window.start>=pass.rise&&window.end<=pass.set);assert(window.end-window.start>=10000)});
+   pass.viewing.forEach((window,index)=>{
+    close(window.start,retained[index].start,1100);close(window.end,retained[index].end,1100);assert(window.start>=pass.rise&&window.end<=pass.set);assert(window.end-window.start>=10000);
+    // The planning shortcut selects this interior instant, not the pass peak:
+    // check its actual model conditions, including a shadow-exit-limited arc.
+    const midpoint=Math.floor(window.start+(window.end-window.start)/2),direction=read(midpoint),light=satelliteLighting(elements,new Date(midpoint),lat,lon);
+    assert(direction.altitude>30);assert(light.sunAltitude< -6);assert.equal(light.shadow,0);
+   });
   }
   assert.equal(count,expectedCount);
   if(lat===45){const window=result.passes.flatMap(pass=>pass.viewing)[0];assert(read(window.start-1000).altitude>30);assert(satelliteLighting(elements,new Date(window.start-1000),lat,lon).shadow>0);assert.equal(satelliteLighting(elements,new Date(window.start+1000),lat,lon).shadow,0)}

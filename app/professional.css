@@ -264,3 +264,4 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .satellite-viewing-windows{margin-top:1rem;padding:.75rem;border-left:2px solid var(--line);background:var(--surface-raised);font-size:.85rem;line-height:1.5}.satellite-viewing-windows strong{display:block}.satellite-viewing-windows p{margin:.5rem 0 0}.satellite-viewing-windows ul{list-style:disc;padding-left:1rem;margin:.5rem 0 0}.satellite-viewing-windows li{overflow-wrap:anywhere;margin-top:.5rem}
 
 .satellite-viewing-windows.has-window{border-left-color:var(--primary)}
+.satellite-window-time{display:block;margin-top:.75rem;white-space:normal;max-width:100%;min-height:44px;text-align:center}
