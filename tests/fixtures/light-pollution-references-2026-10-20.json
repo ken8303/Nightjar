@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-10-20",
+  "providerViewer": "https://djlorenz.github.io/astronomy/lp/overlay/dark.html",
+  "references": [
+    {
+      "label": "Sydney",
+      "latitude": -33.9069,
+      "longitude": 151.0455,
+      "tileX": 67,
+      "tileY": 7,
+      "x": 125,
+      "y": 131,
+      "code": 371,
+      "ratio": 35.52429489984694,
+      "magnitude": 18.093545398378854,
+      "displayRatio": "35.5",
+      "displayMagnitude": "18.09",
+      "zone": "7a",
+      "compressedBytes": 55253,
+      "decodedBytes": 360001,
+      "sha256": "8f968c54329416fbbbe4ac48fb741712d2a5a3d2dd5fae5a5ff3a8aedb5cc44f",
+      "sourceUrl": "https://djlorenz.github.io/astronomy/binary_tiles/2025/binary_tile_67_7.dat.gz"
+    },
+    {
+      "label": "Atacama",
+      "latitude": -24.652,
+      "longitude": -70.2081,
+      "tileX": 22,
+      "tileY": 9,
+      "x": 575,
+      "y": 41,
+      "code": 23,
+      "ratio": 0.014511832837981983,
+      "magnitude": 21.98435720793373,
+      "displayRatio": "0.015",
+      "displayMagnitude": "21.98",
+      "zone": "1a",
+      "compressedBytes": 21555,
+      "decodedBytes": 360001,
+      "sha256": "e3365601ec3d3c4031735458f3d7301113edfaa471cc8131be7812bce73c6b09",
+      "sourceUrl": "https://djlorenz.github.io/astronomy/binary_tiles/2025/binary_tile_22_9.dat.gz"
+    },
+    {
+      "label": "Reykjavik",
+      "latitude": 64.1178,
+      "longitude": -21.7474,
+      "tileX": 32,
+      "tileY": 26,
+      "x": 390,
+      "y": 494,
+      "code": 332,
+      "ratio": 16.591559811148418,
+      "magnitude": 18.886739126862174,
+      "displayRatio": "16.6",
+      "displayMagnitude": "18.89",
+      "zone": "6b",
+      "compressedBytes": 26593,
+      "decodedBytes": 360001,
+      "sha256": "f35403790c0a105de115443da8a656570a58a41c0a7be929cef847229a8b1bce",
+      "sourceUrl": "https://djlorenz.github.io/astronomy/binary_tiles/2025/binary_tile_32_26.dat.gz"
+    }
+  ]
+}

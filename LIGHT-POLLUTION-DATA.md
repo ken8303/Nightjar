@@ -1,6 +1,6 @@
 # Light-pollution layer implementation brief
 
-Research and live source responses checked 19 October 2026. My places now has an optional native visual layer for David Lorenz’s 2025 model, alongside the source atlas link. Loading it explicitly requests the viewed area from the map providers. Personal Bortle ratings remain observations supplied by the user. Explicit numeric point sampling is also implemented locally. Combined weather/aurora layers and offline map downloads are not implemented.
+Research and live source responses checked 19–20 October 2026. My places now has an optional native visual layer for David Lorenz’s 2025 model, alongside the source atlas link. Loading it explicitly requests the viewed area from the map providers. Personal Bortle ratings remain observations supplied by the user. Explicit numeric point sampling is also implemented locally. Combined weather/aurora layers and offline map downloads are not implemented.
 
 ## Data choice
 
@@ -70,3 +70,20 @@ Independent reference: the actual provider popup at 51.4916°, −0.0714° showe
 The Read model brightness action fetches only its one tile, omitting credentials and Referer. The URL identifies a 5° area, without exact point coordinates. Browser HTTP caching remains normal; Nightjar adds no persistent binary store, prefetch or offline tile cache. Native gzip decoding uses `DecompressionStream`, with an actionable source-atlas fallback when unavailable; [WebKit documents support from Safari 16.4](https://webkit.org/blog/13966/webkit-features-in-safari-16-4/). Compressed input is capped at 512 KiB and decompressed input must be exactly 360001 bytes. A 20-second controller covers fetch and decode. Non-success bodies are cancelled. Manual cancellation, changing cells and closing the component abort obsolete requests, and retired completions cannot publish a result.
 
 The same button changes to Cancel while loading, then Read/Retry/Refresh, preserving focus through ordinary completion, failure, retry and cancellation. Results name their sampled coordinates and annual assumptions independently of map colours and planner date. Missing/slow/corrupt data keeps site selection available. Physical Safari/Android, touch, installed-PWA and final-origin checks are still required. Automated compiled-browser map requests use local synthetic PNGs and numeric responses replay a local fixture; they are not broad live-provider geographic acceptance.
+
+
+## Geographic reference extension — 20 October 2026
+
+Three further popups were read through the provider's normal published viewer, using public reference areas. Each actual binary tile was separately downloaded once for this audit, with ordinary TLS validation. A standalone Python decoder reconstructed all 600 rows and columns from signed deltas and used the provider's 1-based nearest-grid formula. Nightjar's production point decoder then read the same local response bytes and agreed with that independent reconstruction and the visible popup. No algorithm change was required.
+
+| Reference area | Popup latitude, longitude | Tile and zero-based cell | Recorded code | Artificial / natural ratio | Total mag/arcsec² | Zone |
+| --- | --- | --- | --- | --- | --- | --- |
+| Sydney | −33.9069°, 151.0455° | 67_7, x125 y131 | 371 | 35.5 | 18.09 | 7a |
+| Atacama | −24.6520°, −70.2081° | 22_9, x575 y41 | 23 | 0.015 | 21.98 | 1a |
+| Reykjavík | 64.1178°, −21.7474° | 32_26, x390 y494 | 332 | 16.6 | 18.89 | 6b |
+
+The four-decimal popup coordinate rounding rectangle (±0.00005° in each axis) remains inside one cell for every recorded reference. This avoids claiming agreement based on rounded coordinates that could address either side of a boundary. The Sydney, Atacama and Reykjavík gzip responses are 55,253, 21,555 and 26,593 bytes; each decompresses to exactly 360,001 bytes. Their source URLs, SHA-256 hashes, precise decoded ratios/magnitudes and displayed values are recorded in `tests/fixtures/light-pollution-references-2026-10-20.json`. No PNG or binary raster, including a partial raster, is committed.
+
+Two offline regressions pin geographic cell addressing/rounding and conversion across the low/bright model values. Conversion tests explicitly use synthetic constant tiles with the independently recorded integer codes; they do not pretend to replay real raster paths. The separate local real-tile audit is `/tmp/nightjar-lp-production-audit.log`; browser screenshots are `/tmp/nightjar-lp-sydney-reference.png`, `/tmp/nightjar-lp-atacama-reference.png` and `/tmp/nightjar-lp-reykjavik-reference.png`. Source data is not fetched by tests.
+
+These checks extend the London reference into both southern longitude signs and higher northern latitude, including a low artificial-brightness value. They validate these published data points and the decoder/addressing behavior, not global model coverage, physical sky brightness, Bortle classification or prediction accuracy. Global/polar/date-line live-source checks and physical-phone/installed-PWA/final-origin acceptance remain unverified. The existing synthetic seam/coverage tests remain separate evidence.

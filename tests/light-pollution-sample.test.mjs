@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
 import {gzipSync} from 'node:zlib';
+import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
@@ -69,4 +70,29 @@ test('timeout bounds a stalled stream and cleans up its reader',async()=>{
 test('unsupported browsers get an actionable fallback without fetching',async()=>{
  const native=globalThis.DecompressionStream;let called=false;
  try{globalThis.DecompressionStream=undefined;await assert.rejects(read(point,{signal:signal(),fetcher:async()=>{called=true;return new Response()}}),/source atlas/);assert.equal(called,false)}finally{globalThis.DecompressionStream=native}
+});
+
+
+const geographicReferences=JSON.parse(await readFile(new URL('./fixtures/light-pollution-references-2026-10-20.json',import.meta.url),'utf8')).references;
+test('southern and high-latitude provider reference points select the independently recorded cells',()=>{
+ for(const ref of geographicReferences){
+  const point=cell(ref.latitude,ref.longitude);
+  assert.deepEqual([point.tileX,point.tileY,point.x,point.y],[ref.tileX,ref.tileY,ref.x,ref.y],ref.label);
+  assert.equal(point.url,ref.sourceUrl);
+  // The provider popup rounds coordinates to four decimals. Every point in
+  // that rounding rectangle must address this cell, avoiding a false reference.
+  for(const lat of [ref.latitude-.00005,ref.latitude+.00005])for(const lon of [ref.longitude-.00005,ref.longitude+.00005])assert.equal(cell(lat,lon).key,point.key,ref.label);
+ }
+});
+test('recorded low and bright model codes reproduce the provider popup units and zones',()=>{
+ for(const ref of geographicReferences){
+  // Synthetic constant tiles test conversion only. Real-tile path decoding
+  // was checked separately; no source raster or partial raster is redistributed.
+  const sample=decode(tile(ref.code),cell(ref.latitude,ref.longitude));
+  assert.ok(Math.abs(sample.ratio-ref.ratio)<1e-10,ref.label);
+  assert.ok(Math.abs(sample.magnitude-ref.magnitude)<1e-12,ref.label);
+  assert.equal(sample.magnitude.toFixed(2),ref.displayMagnitude);
+  assert.equal(sample.ratio.toFixed(sample.ratio<.1?3:1),ref.displayRatio);
+  assert.equal(sample.zone,ref.zone);
+ }
 });
