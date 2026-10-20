@@ -58,3 +58,37 @@ test('refined ISS passes agree with a separate one-second exhaustive search',()=
   refined.forEach((pass,index)=>{const reference=dense[index];close(pass.rise,reference.rise,1100);close(pass.set,reference.set,1100);close(pass.peak,reference.peak,1100);close(pass.maximumAltitude,reference.maximumAltitude,.01)});
  }
 });
+
+test('high-latitude and date-line passes agree with an exhaustive two-second scan',()=>{
+ // Additional observer geometry, including a southern latitude near the edge
+ // of ISS coverage. The scan shares SGP4, but not the production search logic.
+ for(const [lat,lon] of [[60,179.9],[-60,-179.9],[0,180],[67,0]]){
+  const result=find(elements,start,lat,lon),read=createSatelliteObserver(elements,lat,lon),dense=[];let active=null;
+  for(let time=start;time<=result.end;time+=2000){
+   const point=read(time);assert(point);
+   if(point.altitude>0){
+    if(!active){active={rise:time,set:time,peak:time,maximumAltitude:point.altitude};dense.push(active)}
+    active.set=time;
+    if(point.altitude>active.maximumAltitude){active.peak=time;active.maximumAltitude=point.altitude}
+   }else active=null;
+  }
+  assert.equal(result.passes.length,dense.length,`pass count at ${lat}, ${lon}`);
+  result.passes.forEach((pass,index)=>{
+   const reference=dense[index];close(pass.rise,reference.rise,2100);close(pass.set,reference.set,2100);close(pass.peak,reference.peak,2100);close(pass.maximumAltitude,reference.maximumAltitude,.03);
+   assert(pass.rise<=pass.peak&&pass.peak<=pass.set);
+   for(const window of pass.viewing??[])assert(window.start>=pass.rise&&window.end<=pass.set);
+  });
+ }
+ for(const lat of [-90,90])assert.deepEqual(find(elements,start,lat,179.9).passes,[]);
+});
+
+test('a real pass clipped at either boundary keeps the correct in-window maximum',()=>{
+ const read=createSatelliteObserver(elements,51.5,-.1257),full=find(elements,start,51.5,-.1257).passes[2];assert(full);
+ const afterPeak=full.peak+30000,beforePeak=full.peak-30000;
+ const [descending]=scan(read,afterPeak,full.set+60000);
+ assert.equal(descending.alreadyUp,true);assert.equal(descending.continues,false);assert.equal(descending.rise,afterPeak);assert.equal(descending.peak,afterPeak);close(descending.set,full.set,200);
+ const [ascending]=scan(read,full.rise-60000,beforePeak);
+ assert.equal(ascending.alreadyUp,false);assert.equal(ascending.continues,true);assert.equal(ascending.set,beforePeak);assert.equal(ascending.peak,beforePeak);close(ascending.rise,full.rise,200);
+ const [inside]=scan(read,beforePeak,afterPeak);
+ assert.equal(inside.alreadyUp,true);assert.equal(inside.continues,true);assert.equal(inside.rise,beforePeak);assert.equal(inside.set,afterPeak);close(inside.peak,full.peak,200);close(inside.maximumAltitude,full.maximumAltitude,.001);
+});
