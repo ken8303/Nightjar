@@ -1,12 +1,23 @@
 # Nightjar beta handoff
 
-Nightjar remains a beta. Desktop Safari and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
+Nightjar remains a beta. Desktop-browser and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
 Reference-feature coverage and the remaining implementation backlog are tracked separately in [FEATURE-STATUS.md](./FEATURE-STATUS.md). This handoff records release evidence rather than a full-parity completion percentage.
 
 Current user priority (19 October 2026): photo recognition and further photo-feature development are paused while the other work is completed. Existing photo tools/images stay available. Focus on confirmed bugs, mobile/PWA reliability, camera discovery and remaining sky features; physical-device and final-origin checks remain explicit release gates.
 
-## Current release evidence — 19 October 2026
+## Latest local batch — 20 October 2026
+
+- ISS midpoint actions and fixed window calendar files, with feed/clock/epoch checks at export: `0f94540`, `b5ae572`.
+- Main-site and comparison selection requests now reset the foreground weather refresh timer: `dca07a2`, `8e65f02`.
+- Offline saved times identify missing-zone UTC fallback: `8e33bcc`.
+- Camera view shows device-reported horizontal accuracy and the original fix timestamp, without changing the saved planner context: `c723c25`.
+- Four PWA menu shortcuts are declared; cold/warm section URLs follow the edit guard and exact target focus: `1844767`.
+- High-latitude/date-line and clipped ISS pass regression coverage: `50d2b1d`.
+
+All commits above are local. Native phone tracking, installed-PWA update/relaunch/offline behavior, actual calendar receipt/import and native shortcut-menu launch remain device acceptance tasks. The next user batch push still needs its own exact-head CI and final Cloudflare-origin checks; see the phone report and deployment instructions below.
+
+## Current release evidence — 20 October 2026
 
 - **The local ISS-direction/pass-search, lunar-libration, map/site-selection and numeric-brightness features, equipment row identity, saved-list focus recovery and generated-PNG packaging cleanup, including imaging-draft fix `9d108d8`, pass all 767 tests, TypeScript, lint, production build and Cloudflare packaging dry-run on Node 22.16.0.** This macOS run reuses existing dependencies and stages 123 assets with the SATELLITE_FEED Durable Object binding. It still needs an exact-head hosted run after the next push.
 - **Your pushed commit `b2552602ee809d40b39469071fb724cb8f3bd630` passed all 680 tests and the complete verification command on GitHub's Ubuntu 24.04 runner with Node 22.16.0.** Its [exact-head run](https://github.com/ken8303/Nightjar/actions/runs/39166796103) passed locked dependency installation, TypeScript, lint, tests, build and Cloudflare dry-run, with zero failed/cancelled/skipped tests, 105 packaged assets and no bindings. This includes the atlas-framing feature, 3D recovery fixes and explicit Ubuntu runner pin; it supersedes the older `24b479a` hosted baseline.
@@ -202,4 +213,4 @@ An explicitly requested device location now shows its reported horizontal accura
 
 The manifest declares Sky atlas, Deep-sky explorer, When to look and Observing diary shortcuts using existing app icons and same-origin, in-scope URLs. All four actual served URLs cold-open/focus the correct section. A known fragment received while the planner is already open now selects Sky and follows the same deferred focus path. Previously #observing-diary could appear in the address while Tonight stayed selected and the diary was absent.
 
-A link that would leave an unfinished non-retained edit uses the existing navigation guard, identifies the requested section and restores the prior fragment while waiting. Keep editing preserves text/focus; explicit Leave without saving applies only the confirmed link. Retained time drafts survive section jumps. Accepted navigation away from Sky clears its old section fragment so the same link can reopen it later. Unknown fragments do not select another tab. Browser checks cover cold/warm URLs, retained time, queued/cancelled/replaced links, exact site/time preservation and 320/800/1100-pixel containment with no warning/error logs. Native installed menu availability and launch behavior remain Not run in the phone report. Shortcut format reference: [W3C Web Application Manifest](https://www.w3.org/TR/appmanifest/#shortcuts-member).
+A link that would leave an unfinished non-retained edit uses the existing navigation guard, identifies the requested section and restores the prior fragment while waiting. Keep editing preserves text/focus; explicit Leave without saving applies only the confirmed link. Retained time drafts survive section jumps. Accepted navigation away from Sky clears its old section fragment so the same link can reopen it later. Unknown fragments do not select another tab. Browser checks cover cold/warm URLs, retained time, guarded/cancelled/confirmed links, exact site/time preservation and 320/800/1100-pixel containment with no warning/error logs. Native installed menu availability and launch behavior remain Not run in the phone report. Shortcut format reference: [W3C Web Application Manifest](https://www.w3.org/TR/appmanifest/#shortcuts-member).
