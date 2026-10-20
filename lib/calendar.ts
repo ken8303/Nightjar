@@ -4,6 +4,7 @@ import {validMessierId} from './deep-sky-list';
 import {deepSkyName} from './deep-sky-names';
 import type {DeepSkyObject,DeepSkySample} from './deep-sky';
 import type {Place} from './sky';
+import {calendarText,calendarTime,foldCalendarLine} from './calendar-format';
 export function meteorCalendar(name:string,year:number,month:number,day:number){
  const peak=utcDate(year,month,day);
  if(year<1||year>9999||month<0||month>11||peak.getUTCFullYear()!==year||peak.getUTCMonth()!==month||peak.getUTCDate()!==day||!name.trim())throw Error('Invalid meteor calendar date.');
@@ -15,14 +16,6 @@ export function meteorCalendar(name:string,year:number,month:number,day:number){
  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Meteor Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:${safe.toLowerCase().replaceAll(' ','-')}-${year}@nightjar.local`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}`,`DTSTART;VALUE=DATE:${dayString(start)}`,`DTEND;VALUE=DATE:${dayString(end)}`,`SUMMARY:${safe} - typical peak window`,'DESCRIPTION:Typical annual dates only. Check the current IMO calendar for exact timing.','URL:https://www.imo.net/resources/calendar/','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
 
-const calendarText = (value:string) => value.replace(/\\/g,'\\\\').replace(/\r\n|\r|\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');
-const calendarTime = (date:Date) => date.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-// RFC 5545 limits content lines to 75 octets; never split a UTF-8 character.
-function foldCalendarLine(line:string){
- let output='',part='',bytes=0;
- for(const char of line){const size=new TextEncoder().encode(char).length;if(bytes+size>75){output+=part+'\r\n';part=' ';bytes=1}part+=char;bytes+=size}
- return output+part;
-}
 type CalendarCoordinates={latitude?:number;longitude?:number};
 function calendarSite(input:CalendarCoordinates){
  if(input.latitude===undefined&&input.longitude===undefined)return null;
