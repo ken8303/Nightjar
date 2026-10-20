@@ -13,3 +13,15 @@ test('failed or unreadable location responses return a recoverable public error'
  const original=globalThis.fetch;
  try{for(const provider of [async()=>new Response('private upstream error',{status:503}),async()=>new Response('{'),async()=>{throw Error('private network error')}]){globalThis.fetch=provider;const response=await GET(new Request('https://nightjar.test/api/locations?q=London'));assert.equal(response.status,502);assert.deepEqual(await response.json(),{error:'Location search is unavailable. Try your device location or coordinates.'})}}finally{globalThis.fetch=original}
 });
+
+
+test('rejected search bodies are cancelled while cancellation failures leave search retry available',{timeout:2000},async t=>{
+ let rejectBody=true,cleanupFails=false,cancelled=0;
+ t.mock.method(globalThis,'fetch',async()=>rejectBody?new Response(new ReadableStream({cancel(){cancelled++;if(cleanupFails==='pending')return new Promise(()=>{});if(cleanupFails)throw Error('Private cleanup failure')}}),{status:503}):Response.json({results:[]}));
+ for(const fail of [false,true,'pending']){
+  cleanupFails=fail;rejectBody=true;const before=cancelled;
+  const response=await GET(new Request('https://nightjar.test/api/locations?q=London'));
+  assert.equal(response.status,502);assert.equal(cancelled,before+1);assert.deepEqual(await response.json(),{error:'Location search is unavailable. Try your device location or coordinates.'});
+  rejectBody=false;assert.equal((await GET(new Request('https://nightjar.test/api/locations?q=London'))).status,200);
+ }
+});

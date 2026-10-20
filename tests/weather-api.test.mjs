@@ -33,3 +33,17 @@ test('provider HTTP, decoding, sample-validation and network failures give publi
  }
  read=async()=>Response.json(forecast());assert.equal((await GET(request('lat=51.5&lon=0'))).status,200);
 });
+
+
+test('rejected weather bodies are cancelled without letting cleanup failures prevent a fresh retry',{timeout:2000},async t=>{
+ let rejectBody=true,cleanupFails=false,cancelled=0,calls=0;
+ t.mock.method(globalThis,'fetch',async()=>{calls++;return rejectBody?new Response(new ReadableStream({cancel(){cancelled++;if(cleanupFails==='pending')return new Promise(()=>{});if(cleanupFails)throw Error('Private cleanup failure')}}),{status:429}):Response.json(forecast())});
+ for(const fail of [false,true,'pending']){
+  rejectBody=true;cleanupFails=fail;const before=cancelled;
+  const response=await GET(request('lat=51.5&lon=0'));
+  assert.equal(response.status,502);assert.equal(cancelled,before+1);
+  assert.deepEqual(await response.json(),{error:'Weather is temporarily unavailable. Please try again.'});
+  rejectBody=false;assert.equal((await GET(request('lat=51.5&lon=0'))).status,200);
+ }
+ assert.equal(calls,6);
+});

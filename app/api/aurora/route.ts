@@ -4,7 +4,7 @@ let cached:CachedAurora|undefined;
 let loading:Promise<CachedAurora>|undefined;
 async function load(){
  const response=await fetch('https://services.swpc.noaa.gov/json/ovation_aurora_latest.json',{signal:AbortSignal.timeout(15000)});
- if(!response.ok)throw Error();
+ if(!response.ok){void response.body?.cancel().catch(()=>{});throw Error()}
  const data=parseAurora(await response.json());cached={expires:Date.now()+300000,data};return cached;
 }
 function respond(entry:CachedAurora){

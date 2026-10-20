@@ -7,7 +7,7 @@ const loading=new Map<string,Promise<unknown>>();
 const maximumSharedRequests=32;
 async function load(latitude:number,longitude:number){
  const response=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,cloud_cover_low,cloud_cover_mid,cloud_cover_high,dew_point_2m,visibility&timezone=auto&timeformat=unixtime&forecast_days=7`,{signal:AbortSignal.timeout(12000)});
- if(!response.ok)throw Error('Weather provider unavailable');
+ if(!response.ok){void response.body?.cancel().catch(()=>{});throw Error('Weather provider unavailable')}
  const data:unknown=await response.json();
  parseWeatherForecast(data);return data;
 }
