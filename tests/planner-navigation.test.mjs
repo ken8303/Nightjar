@@ -50,3 +50,10 @@ test('a replacement time shortcut and a direct time entry retire an older queued
  h.navigation.request(first,true,h.apply);h.navigation.request(second,true,h.apply);h.navigation.continue(h.apply);assert.deepEqual(h.applied,[second]);
  h.navigation.request(first,true,h.apply);h.navigation.request(second,false,h.apply);assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,2);
 });
+test('a guarded sky link snapshots its destination and supports cancellation and replacement',()=>{
+ const h=harness(),intent={kind:'sky-anchor',section:'sky',anchor:{id:'observing-diary',label:'Observing diary'}};
+ assert.equal(h.navigation.request(intent,true,h.apply),false);intent.anchor.id='sky-chart';intent.anchor.label='Changed later';assert.equal(h.applied.length,0);
+ assert(h.navigation.continue(h.apply));assert.deepEqual(h.applied,[{kind:'sky-anchor',section:'sky',anchor:{id:'observing-diary',label:'Observing diary'}}]);
+ h.navigation.request(intent,true,h.apply);h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,1);
+ h.navigation.request(intent,true,h.apply);h.navigation.request({kind:'section',section:'places'},false,h.apply);assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.at(-1).section,'places');
+});

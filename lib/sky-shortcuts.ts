@@ -4,3 +4,12 @@ export function readSkyShortcutHash(hash:unknown){
  let id:string;try{id=decodeURIComponent(hash.slice(1))}catch{return null}
  const section=skyShortcutSections.find(([key])=>key===id);return section?{id:section[0],label:section[1]}:null;
 }
+// A guarded same-page link may already have changed the fragment. Restore
+// only that page's previous fragment; never accept another route or origin.
+export function previousShortcutURL(oldURL:unknown,currentURL:string){
+ if(typeof oldURL!=='string')return null;
+ try{
+  const previous=new URL(oldURL),current=new URL(currentURL);
+  return previous.origin===current.origin&&previous.pathname===current.pathname&&previous.search===current.search?current.pathname+current.search+previous.hash:null;
+ }catch{return null}
+}

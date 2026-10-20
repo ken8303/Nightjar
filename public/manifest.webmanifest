@@ -1,11 +1,86 @@
 {
-  "id": "/", "name": "Nightjar — Stargazing planner", "short_name": "Nightjar",
-  "description": "Plan your next night under the stars.", "lang": "en",
-  "start_url": "/", "scope": "/", "display": "standalone",
-  "background_color": "#0b1115", "theme_color": "#0b1115",
+  "id": "/",
+  "name": "Nightjar — Stargazing planner",
+  "short_name": "Nightjar",
+  "description": "Plan your next night under the stars.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1115",
+  "theme_color": "#0b1115",
   "icons": [
-    {"src":"/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"/icons/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sky atlas",
+      "short_name": "Sky atlas",
+      "description": "Open the sky chart at your saved site and observing time.",
+      "url": "/#sky-chart",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Deep-sky explorer",
+      "short_name": "Deep sky",
+      "description": "Explore Messier targets and observing windows.",
+      "url": "/#deep-sky-finder",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "When to look",
+      "short_name": "When to look",
+      "description": "Check when planets and the Moon climb above 30 degrees.",
+      "url": "/#visibility-planner",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Observing diary",
+      "short_name": "Diary",
+      "description": "Open your saved observations and diary forms.",
+      "url": "/#observing-diary",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
