@@ -20,6 +20,7 @@ Use a disposable observing note and save/copy important unfinished work before a
 | Check | Status | Actual result / evidence |
 | --- | --- | --- |
 | Camera discovery: deliberately enable camera and motion, point at a known visible bright object, then slowly turn through a full circle. Names should move with the predicted sky directions. | Not run | Record the object, alignment offset and any persistent drift, wrong direction or labels staying fixed on the screen. |
+| Camera location: explicitly request device location, inspect its reported horizontal accuracy/fix time, then restore the planner site. | Not run | Record the reported estimate and source time, whether returning from interruption keeps the original fix time, and whether restoring/closing clears its viewer-only metadata. This does not measure label alignment. |
 | Label stability: hold the phone steady, then move slowly past an object and back. | Not run | Record disappearing/reappearing labels and whether video or motion showed an interruption. |
 | Camera layout: thumbnails, fullscreen, portrait/landscape and returning to Settings. | Not run | Record any clipped label, hidden control or unusable scrolling. |
 | Interruption: background/lock and return; close and reopen the viewer. | Not run | Check that hardware stops and does not silently restart; record explicit restart and recovery behavior. |
