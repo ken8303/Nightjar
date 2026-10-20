@@ -4,6 +4,8 @@ import {watchForecastRefresh} from '@/lib/forecast-refresh';
 
 // Refresh only in the foreground. Resuming and reconnecting share the same
 // throttle so mobile lifecycle events cannot issue duplicate requests.
+// Effects triggered directly by site/selection changes must record their
+// actual request start too; those acquisitions do not increment revision.
 export function useForecastRefresh(maxAge=15*60*1000){
  const [revision,setRevision]=useState(0);
  const attemptedAt=useRef(0);

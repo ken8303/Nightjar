@@ -21,12 +21,13 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
  const selected = useMemo(()=>(selection ?? options.slice(0,4).map(key)).filter(id=>options.some(p=>key(p)===id)),[selection,options]);
  const selectedKey = selected.join('|');
  const [results,setResults] = useState<Record<string,SiteForecast>>({});
- const {revision:retry,refresh}=useForecastRefresh();
+ const {revision:retry,refresh,recordAttempt}=useForecastRefresh();
  const requestKey = `${selectedKey}:${retry}`;
  useEffect(()=>{
   const controller = new AbortController(); let stopped = false;
   const timeout=setTimeout(()=>controller.abort(),20000);
   const active=selectedKey.split('|').filter(Boolean);
+  if(active.length)recordAttempt();
   for(const id of active){
    const [lat,lon] = id.split(',');
    fetch(`/api/weather?lat=${lat}&lon=${lon}`,{signal:controller.signal,cache:'no-cache'}).then(async response=>{
@@ -35,7 +36,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
    }).catch(error=>{if(!stopped)setResults(old=>storeSiteForecast(old,id,{error:forecastFailureMessage(error),requestKey},active));});
   }
   return()=>{stopped=true;clearTimeout(timeout);controller.abort()};
- },[selectedKey,requestKey]);
+ },[selectedKey,requestKey,recordAttempt]);
  const now=usePlanningClock();
  const instant = date.getTime()/1000;
  const rows = useMemo(()=>selected.map(id=>{
