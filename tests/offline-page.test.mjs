@@ -48,6 +48,25 @@ test('retry preserves the selected instant and reconnect only updates the status
  page.navigator.onLine=true;page.listeners.get('online')();assert(page.elements.get('connection').textContent.includes('may be available'));assert.equal(page.session.size,0);
  page.elements.get('retry').listeners.get('click')();assert.equal(page.session.get('nightjar-recovery-time-v1'),JSON.stringify(date));
 });
+test('offline time labels disclose missing or invalid site zones without changing the UTC snapshot',()=>{
+ const time='2026-10-25T00:30:59.987Z';
+ for(const timezone of [undefined,'Invalid/Zone']){
+  const place={name:'Unknown zone site',latitude:51.5,longitude:0,...(timezone===undefined?{}:{timezone})};
+  const page=load({'nightjar-observing-time':time,'nightjar-place':place}),before=structuredClone(page.raw),text=page.elements.get('session').textContent;
+  assert(text.includes('UTC · site time zone unavailable'));assert(text.includes('00:30:59.987 GMT'));assert(text.includes('2026-10-25 00:30:59.987 UTC'));
+  page.elements.get('retry').listeners.get('click')();assert.equal(JSON.parse(page.session.get('nightjar-recovery-time-v1')),time);assert.deepEqual(page.raw,before);
+ }
+});
+test('offline time labels identify genuine saved zones and use the current window context first',()=>{
+ const time='2026-10-25T00:30:59.987Z',site={name:'Saved zone site',latitude:51.5,longitude:0};
+ for(const [timezone,clock] of [['UTC','00:30:59.987 GMT'],['Europe/London','01:30:59.987 GMT+1']]){
+  const page=load({'nightjar-observing-time':time,'nightjar-place':{...site,timezone}}),text=page.elements.get('session').textContent;
+  assert(text.includes(`${timezone} · time at saved site`));assert(text.includes(clock));assert(!text.includes('site time zone unavailable'));
+ }
+ const own={...site,name:'Own UTC window',timezone:'UTC'},shared={...site,name:'Other London window',timezone:'Europe/London'};
+ const paired=load({'nightjar-observing-time':time,'nightjar-place':shared},false,{sessionOverrides:{'nightjar-current-context-v1':JSON.stringify({version:1,time,place:own})}}),text=paired.elements.get('session').textContent;
+ assert(text.includes('Own UTC window'));assert(text.includes('UTC · time at saved site'));assert(!text.includes('Europe/London'));assert(text.includes('00:30:59.987 GMT'));
+});
 test('unavailable storage leaves a warning and usable retry control',()=>{
  const page=load({},true);assert.equal(page.elements.get('storage-warning').hidden,false);assert.equal(page.elements.get('targets-empty').hidden,false);assert.doesNotThrow(()=>page.elements.get('retry').listeners.get('click')());
  const invalid=load({'nightjar-observing-time':'bad date'});invalid.elements.get('retry').listeners.get('click')();assert.equal(invalid.session.size,0);

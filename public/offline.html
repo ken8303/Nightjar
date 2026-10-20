@@ -106,11 +106,12 @@
       if (instant && instant.getUTCFullYear()>=1) {
         const siteName = currentPlace && typeof currentPlace === 'object' ? safeText(currentPlace.name) : '';
         let zone = currentPlace && typeof currentPlace === 'object' ? safeText(currentPlace.timezone) || 'UTC' : 'UTC';
+        let zoneKnown = Boolean(currentPlace && typeof currentPlace === 'object' && safeText(currentPlace.timezone));
         let localTime;
         const options={calendar:'gregory',numberingSystem:'latn',weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',timeZoneName:'shortOffset',...(instant.getUTCMilliseconds()?{fractionalSecondDigits:3}:{}),...(instant.getUTCFullYear()<=1?{era:'short'}:{})};
         try { localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
-        catch { zone = 'UTC'; localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
-        add('session', siteName ? 'At ' + siteName : 'Selected time', localTime, utcTime(selectedTime) + ' · Times are a saved snapshot, not a live forecast.');
+        catch { zoneKnown = false; zone = 'UTC'; localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
+        add('session', siteName ? 'At ' + siteName : 'Selected time', localTime + ' · ' + (zoneKnown ? zone + ' · time at saved site' : 'UTC · site time zone unavailable'), utcTime(selectedTime) + ' · Times are a saved snapshot, not a live forecast.');
       }else if(selectedTime!==null){unavailable.add('nightjar-observing-time');document.getElementById('storage-warning').hidden=false;}
       showEmpty('session','nightjar-observing-time');
 
