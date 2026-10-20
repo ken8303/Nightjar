@@ -19,6 +19,14 @@ The existing generated-document preview also passed a focused browser review: sa
 
 All seven loaded main sections also fit a 320 × 568 browser frame without horizontal page overflow. Compact navigation places focus on the chosen section heading and returns it to Explore after Escape. This is responsive desktop-browser evidence; phone and assistive-technology acceptance remain separate.
 
+## Additional PWA browser evidence — 20 October 2026
+
+The final compiled release’s calculator asset enters `nightjar-static-v1` after an online search. On a disposable origin with immutable asset headers, simulated offline asset/API failures still allow a new selected-time search from the cached calculator and retained valid orbital feed. The service error remains visible; the original retrieval timestamp, observing site and selected instant are kept. The cached path makes no failed asset request. Returning online recovers the service.
+
+A separate fresh origin starts with no cached calculator. Its first simulated-offline search shows reconnect/retry guidance and retains the selected-time directions. The failed script is not stored in Cache Storage. Restoring online and retrying returns six geometric passes and one modelled window using the existing orbital feed; one blocked script request and one successful orbital-data request are recorded by the fixture.
+
+A controlled seven-hour clock shift plus pageshow hides stale directions and retires pass/window results with the six-hour retrieval-age message. Restoring the native fixture clock restores eligible directions but does not resurrect the retired list or automatically request orbital data. These checks use CUA IAB, mocked network/online state, local response replays and separate disposable localhost origins. They do not verify native connectivity switching, installed-PWA launch, physical-phone behavior or final Cloudflare-origin deployment. No runtime change was needed.
+
 ## New local fix: camera heading-source recovery
 
 Recent absolute heading data still wins over secondary relative events. After four seconds without a valid absolute reading, a fresh valid relative pose can resume movement through a source transition that clears north-based calibration first. Names require a new known-object alignment in relative mode. Invalid relative events cannot erase the last good compass pose; a returning absolute event immediately restores compass mode and clears the relative correction. A stationary phone with no new events still retains its explicitly marked last pose.

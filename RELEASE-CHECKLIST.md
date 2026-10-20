@@ -9,6 +9,8 @@ The latest 749-test full verification also includes the background ISS pass sear
 
 ## Verified locally
 
+- Additional PWA/ISS integration, 20 October: warmed calculator caching, simulated offline recalculation from retained valid elements, failed source refresh without restamping, uncached-worker error/retry without caching failed bytes, and seven-hour return freshness/retirement checks pass. Native phone connectivity, installation/relaunch and final hosted-origin behavior remain pending. The runtime release and 749-test evidence are unchanged.
+
 - ISS observing windows explicitly combine above-30-degree altitude, full sunlight and Sun below -6 degrees for at least ten seconds. Refined intersections, grazing overlaps, clipping, failure/no-match distinction and independent one-second scans pass. Replayed London/Sydney, synthetic unavailable windows, peak-time retirement and compact/landscape/desktop rendering pass; brightness/weather and physical-sky accuracy remain outside this check.
 
 - Camera motion recovers from a silent absolute stream using fresh relative poses after four seconds, resetting north-based calibration before labels can resume through explicit alignment. Recent absolute data retains priority; invalid secondary events cannot erase it. Absolute recovery, queued-event/rotation cases and synthetic compact/fullscreen/close-reopen checks pass. Physical sensors remain unverified.
