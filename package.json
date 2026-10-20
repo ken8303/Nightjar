@@ -20,7 +20,8 @@
     "test:plan": "node --test tests/observing-plan.test.mjs",
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:satellite-worker && npm run deploy:check",
-    "test:satellite-worker": "node scripts/check-satellite-worker.mjs"
+    "test:satellite-worker": "node scripts/check-satellite-worker.mjs",
+    "test:release-assets": "node scripts/check-release-assets.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

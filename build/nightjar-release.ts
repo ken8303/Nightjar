@@ -1,15 +1,10 @@
-import {createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import type {Plugin} from 'vite';
 
-export function stampServiceWorker(source:string,files:[string,string|Uint8Array][]){
- const hash=createHash('sha256').update(source);
- for(const [name,content] of [...files].sort(([a],[b])=>a.localeCompare(b))){hash.update(name);hash.update('\0');hash.update(content);hash.update('\0')}
- const release=hash.digest('hex');
- const versioned=source.replace(/const CACHE = '(nightjar-offline-v\d+)';/,(_match,base)=>`const CACHE = '${base}-${release}';`);
- return `// Nightjar release: ${release}\n${versioned}`;
-}
+import {stampServiceWorker} from '../scripts/release-hash.mjs';
+export {stampServiceWorker} from '../scripts/release-hash.mjs';
+
 // Keep the worker URL stable, but change its bytes when the built app changes.
 export function nightjarRelease():Plugin{
  let root='';

@@ -1,6 +1,7 @@
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {stageCloudflareBuild} from './stage-cloudflare-build.mjs';
+import {checkClientRelease} from './release-assets.mjs';
 const [mode,...args]=process.argv.slice(2);
 if(!['check','deploy'].includes(mode))throw Error('Expected check or deploy.');
 if(args.some(arg=>arg==='--config'||arg==='-c'||arg.startsWith('--config=')))throw Error('Use the generated build configuration; configuration overrides are not supported.');
@@ -8,6 +9,8 @@ if(mode==='check'&&args.length&&(args.length!==2||args[0]!=='--outdir'||!args[1]
 const stage=await stageCloudflareBuild(fileURLToPath(new URL('../dist/',import.meta.url)));
 let code=1;
 try{
+ const release=await checkClientRelease(stage.root,fileURLToPath(new URL('../',import.meta.url)));
+ console.log('Verified release assets: '+JSON.stringify(release));
  console.log(`Prepared isolated Cloudflare build; omitted ${stage.removedCopies.length} identical unreferenced generated copies.`);
  const result=spawnSync(process.execPath,['--import',fileURLToPath(new URL('./sites-env.mjs',import.meta.url)),fileURLToPath(new URL('../node_modules/wrangler/bin/wrangler.js',import.meta.url)),'deploy','--config',stage.config,...(mode==='check'?['--dry-run']:[]),...args],{stdio:'inherit'});
  if(result.error)throw result.error;
