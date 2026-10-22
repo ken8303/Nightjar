@@ -88,9 +88,24 @@ try{
   assert.equal((await exact()).split(' UTC')[0],instant.split(' UTC')[0]);
   const accepted=await stored();assert.equal(accepted.saved,original.saved);assert.equal(accepted.notes,original.notes);
   assert.equal(await page.locator('.unsaved-view-warning').count(),0);
+  // A clean device-location selection should reveal Tonight, as choosing a
+  // saved site does, even when the requester was scrolled down in My places.
+  await activate(page.locator('.location-button'));
+  await locate.waitFor();
+  await activate(locate);
+  await page.getByRole('button',{name:'Keep selected site',exact:true}).waitFor();
+  await page.evaluate(()=>window.scrollTo(0,500));
+  await page.evaluate(()=>window.locationRequests.at(-1).success({coords:{latitude:52.2,longitude:.12}}));
+  await page.waitForFunction(()=>{const place=JSON.parse(localStorage.getItem('nightjar-place')||'null');return place?.latitude===52.2&&place?.longitude===.12});
+  await page.waitForFunction(()=>{const rect=document.querySelector('#planner-heading')?.getBoundingClientRect();return rect&&rect.top>=0&&rect.bottom<=innerHeight},null,{timeout:3000});
+  assert.equal(await page.locator('#planner-heading').textContent(),'A night worth looking up.');
+  assert.equal((await exact()).split(' UTC')[0],instant.split(' UTC')[0]);
+  const immediate=await stored();assert.equal(immediate.saved,original.saved);assert.equal(immediate.notes,original.notes);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  if(evidence)await page.screenshot({path:`${evidence}/location-success-${name}.png`});
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);
   assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
-  console.log(`${name}: distinct location failures, retry/cancel, ignored late callbacks and guarded successful fix preserve unfinished edits and saved data PASS`);
+  console.log(`${name}: location failure/retry/cancel, ignored late callbacks, guarded acceptance and immediate Tonight reveal preserve observing time and saved data PASS`);
   await page.close();
  }
 }finally{await browser.close()}

@@ -312,7 +312,10 @@ function Planner(){
   if(choose(nextPlace,{date:nextDate}))deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner});
  }
  useEffect(()=>{
-  const session=createCameraLocation({onPending:setLocating,onSite:site=>choose({...site,name:'My location'}),onError:error=>setSearchError(deviceLocationError(error))});
+  const session=createCameraLocation({onPending:setLocating,onSite:site=>{
+   const owner=document.activeElement;
+   if(choose({...site,name:'My location'}))deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner});
+  },onError:error=>setSearchError(deviceLocationError(error))});
   locationSession.current=session;
   return()=>{session.cancel();locationSession.current=null};
  },[choose]);
