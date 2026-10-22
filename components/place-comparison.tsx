@@ -1,23 +1,29 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, RefreshCw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import SavedListControls,{savedListPageSize} from '@/components/saved-list-controls';
+import ListFocusRecovery from '@/components/list-focus-recovery';
 import {observingWindowLabel} from '@/lib/observing-window-label';
 import {bestNightWindow, sevenNightOutlook} from '@/lib/night-outlook';
 import {usePlanningClock} from '@/hooks/use-planning-clock';
 import {useForecastRefresh} from '@/hooks/use-forecast-refresh';
 import {forecastHourIndex} from '@/lib/weather-hours';
 import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
-import {storeSiteForecast,siteForecastState,siteForecastContext,siteForecastKey as key,type SiteForecast} from '@/lib/site-forecasts';
+import {storeSiteForecast,siteForecastState,siteForecastContext,compareSiteScores,siteForecastKey as key,type SiteForecast} from '@/lib/site-forecasts';
 import { moonInfo, Place, scoreAt, timeLabel, sunAltitude} from '@/lib/sky';
 
 const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
 
-export default function PlaceComparison({ places, current, date, onChoose, onPlan }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date)=>void }) {
+export default function PlaceComparison({ places, current, date, onChoose, onPlan, selection, onSelectionChange:setSelection }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date)=>void;selection:string[]|null;onSelectionChange:(selection:string[])=>void }) {
  const options = useMemo(()=>{const seen=new Set<string>();return [current,...places].filter(place=>{const id=key(place);if(seen.has(id))return false;seen.add(id);return true})},[current,places]);
  const [optionsShown,setOptionsShown]=useState(savedListPageSize);
- const [selection,setSelection] = useState<string[]|null>(null);
+ const heading=useRef<HTMLHeadingElement>(null),picker=useRef<HTMLDivElement>(null);
+ function recoverSiteControl(owner:Element){
+  const id=owner.closest<HTMLElement>('[data-comparison-card]')?.dataset.comparisonCard;
+  const control=Array.from(picker.current?.querySelectorAll<HTMLElement>('[data-comparison-site]')??[]).find(node=>node.dataset.comparisonSite===id);
+  return control&&!control.matches(':disabled')?control:null;
+ }
  const selected = useMemo(()=>(selection ?? options.slice(0,4).map(key)).filter(id=>options.some(p=>key(p)===id)),[selection,options]);
  const selectedKey = selected.join('|');
  const [results,setResults] = useState<Record<string,SiteForecast>>({});
@@ -48,14 +54,28 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   const opportunity=h?bestNightWindow(sevenNightOutlook(h,{...place,timezone},new Date(now))):null;
   return {id,place,result,...state,h,i,at,score,cloud,timezone,timezoneKnown,planningPlace,opportunity,moon:moonInfo(at,place),sun:sunAltitude(at,place)};
  }),[selected,options,results,instant,requestKey,now]);
- const complete=rows.length>1&&rows.every(r=>r.score!==null&&!r.loading&&!r.error&&!r.stale&&!r.clockChanged);
- const best=complete?Math.max(...rows.map(r=>r.score!)):null;
+ const {best,leadingIds}=compareSiteScores(rows);
+ const leaders=rows.filter(row=>leadingIds.includes(row.id));
+ const [planningIssue,setPlanningIssue]=useState<{context:string;text:string}|null>(null);
+ const planningContext=JSON.stringify([requestKey,+date,rows.map(row=>[row.id,row.planningPlace.name,row.planningPlace.timezone,row.result?.fetchedAt,row.score])]);
+ const planningStatus=planningIssue?.context===planningContext?planningIssue.text:'';
+ function chooseFreshLeader(id:string,instant:number){
+  const currentRanking=compareSiteScores(rows.map(row=>({...row,...siteForecastState(row.result,requestKey,instant)})));
+  const leader=rows.find(row=>row.id===id);
+  if(!leader||currentRanking.leadingIds.length!==1||currentRanking.leadingIds[0]!==id){
+   setPlanningIssue({context:planningContext,text:'The comparison forecasts are no longer fresh enough for this recommendation. Your site and observing time were kept. Refresh forecasts before planning the recommended site.'});return;
+  }
+  onChoose(leader.planningPlace);
+ }
+
  return <section className="panel place-comparison" aria-labelledby="comparison-heading">
-  <div className="comparison-heading"><div><h2 id="comparison-heading">Compare your observing sites</h2><p className="muted">Choose up to four places. Every site is evaluated at {new Date(instant*1000).toISOString().slice(0,16).replace('T',' ')} UTC, using the hourly forecast covering that time.</p></div><button className="text-button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}><RefreshCw size={16}/>{rows.some(row=>row.loading)?'Refreshing forecasts…':rows.some(row=>row.error)?'Retry forecasts':'Refresh forecasts'}</button></div>
-  <div id="comparison-site-list" className="comparison-picker">{options.slice(0,optionsShown).map((p,i)=><label key={key(p)} htmlFor={`compare-${i}`}><Checkbox id={`compare-${i}`} checked={selected.includes(key(p))} disabled={!selected.includes(key(p))&&selected.length>=4} onCheckedChange={checked=>setSelection(checked?[...selected,key(p)]:selected.filter(id=>id!==key(p)))}/><span>{p.name}<small>{p.latitude.toFixed(2)}°, {p.longitude.toFixed(2)}°{p.bortle?` · Bortle ${p.bortle}`:''}</small></span></label>)}</div><SavedListControls count={options.length} shown={optionsShown} onChange={setOptionsShown} label="comparison sites" listId="comparison-site-list"/>
+  <div className="comparison-heading"><div><h2 id="comparison-heading" ref={heading} tabIndex={-1}>Compare your observing sites</h2><p className="muted">Choose up to four places. Every site is evaluated at {new Date(instant*1000).toISOString().slice(0,16).replace('T',' ')} UTC, using the hourly forecast covering that time.</p></div><button className="text-button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}><RefreshCw size={16}/>{rows.some(row=>row.loading)?'Refreshing forecasts…':rows.some(row=>row.error)?'Retry forecasts':'Refresh forecasts'}</button></div>
+  <div ref={picker} id="comparison-site-list" className="comparison-picker">{options.slice(0,optionsShown).map((p,i)=><label key={key(p)} htmlFor={`compare-${i}`}><Checkbox data-comparison-site={key(p)} id={`compare-${i}`} checked={selected.includes(key(p))} disabled={!selected.includes(key(p))&&selected.length>=4} onCheckedChange={checked=>setSelection(checked?[...selected,key(p)]:selected.filter(id=>id!==key(p)))}/><span>{p.name}<small>{p.latitude.toFixed(2)}°, {p.longitude.toFixed(2)}°{p.bortle?` · Bortle ${p.bortle}`:''}</small></span></label>)}</div><SavedListControls count={options.length} shown={optionsShown} onChange={setOptionsShown} label="comparison sites" listId="comparison-site-list"/>
   {options.length<2&&<p className="muted">Save another place above to compare conditions before choosing where to go.</p>}
   {!selected.length&&<p className="muted">Select a place to see its forecast.</p>}
-  <div className="comparison-grid">{rows.map(r=><article className="comparison-card" key={r.id}>
+  {!planningStatus&&leaders.length>0&&<div className="comparison-recommendation" role="status"><div><h3>{leaders.length===1?`${leaders[0].place.name} leads this comparison`:`${leaders.length} sites share the highest score`}</h3><p className="muted">{best}/100 at your selected observing time. {leaders.length===1?'All selected sites have fresh forecasts.':`${leaders.map(row=>row.place.name).join(', ')}. Choose a site below; the tied score does not identify a single best location.`}</p></div>{leaders.length===1&&<button type="button" className="button" onClick={()=>chooseFreshLeader(leaders[0].id,Date.now())}>Plan at {leaders[0].place.name}<ArrowUpRight size={16}/></button>}</div>}
+  {planningStatus&&<p id="comparison-planning-status" className="notice" role="status">{planningStatus}</p>}
+  <ListFocusRecovery listId="comparison-card-list" fallback={heading} resolve={recoverSiteControl}><div id="comparison-card-list" className="comparison-grid">{rows.map(r=><article className="comparison-card" data-comparison-card={r.id} key={r.id}>
    <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={`Stop comparing ${r.place.name}`}>Stop comparing this site</button><p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}{!r.timezoneKnown?' · site time zone unavailable':''}</p>
    <p className="comparison-darkness">{r.place.bortle?`Your sky rating: Bortle ${r.place.bortle} / 9`:'Sky darkness: not rated'}</p>
    {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?'Refreshing; previous forecast shown.':'Loading forecast…':r.error?r.result?.data?'Refresh failed; previous forecast shown. Retry forecasts to update it.':r.error:'This forecast was fetched over 30 minutes ago. Refresh before relying on it.'}</p>}
@@ -68,7 +88,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
    </>)}
    {r.opportunity?.best?<div className="comparison-window"><small>BEST UPCOMING DARK WINDOW</small><strong>{r.opportunity.best.score}/100 · {observingWindowLabel(r.opportunity.best.date,r.opportunity.best.hours,r.timezone)}</strong><span>{r.opportunity.best.hours} {r.opportunity.best.hours===1?'hour':'hours'} · {r.opportunity.best.cloud}% cloud · {r.opportunity.forecastHours}/{r.opportunity.darkHours} dark hours scored</span><button className="text-button" onClick={()=>onPlan(r.planningPlace,r.opportunity!.best!.date)}>Plan this window <ArrowUpRight size={16}/></button></div>:r.result?.data?<p className="comparison-no-window">No scored dark window in the remaining forecast.</p>:null}
    <button className="text-button" onClick={()=>onChoose(r.planningPlace)}>Plan here at selected time <ArrowUpRight size={16}/></button>
-  </article>)}</div>
+  </article>)}</div></ListFocusRecovery>
   <p className="footnote">Same-hour scores and best upcoming windows use cloud cover, Sun altitude and moonlight. Each night prefers a complete two-hour window; a single hour is used when no pair is available. The best upcoming window is the highest-scoring of those nightly choices after now, with longer windows winning tied scores. It may be on a different night for each site. User-entered Bortle ratings are separate and are not map measurements. Scores do not measure seeing, transparency or light pollution. Weather: Open-Meteo. Missing data is never scored as clear skies.</p>
  </section>;
 }

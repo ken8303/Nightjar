@@ -26,3 +26,10 @@ export function siteForecastState(result:SiteForecast|undefined,requestKey:strin
  const loading=result?.requestKey!==requestKey;
  return {loading,error:loading?'':result?.error||'',...forecastFreshness(result?.data?result.fetchedAt:undefined,now)};
 }
+
+type ComparableSite={id:string;score:number|null;loading:boolean;error:string;stale:boolean;clockChanged:boolean};
+export function compareSiteScores(sites:readonly ComparableSite[]){
+ const complete=sites.length>1&&sites.every(site=>typeof site.score==='number'&&Number.isFinite(site.score)&&site.score>=0&&site.score<=100&&!site.loading&&!site.error&&!site.stale&&!site.clockChanged);
+ const best=complete?Math.max(...sites.map(site=>site.score!)):null;
+ return {complete,best,leadingIds:best!==null&&best>0?sites.filter(site=>site.score===best).map(site=>site.id):[]};
+}

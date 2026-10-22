@@ -4,8 +4,25 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {storeSiteForecast,siteForecastState,siteForecastContext,siteForecastKey}=await vite.ssrLoadModule('/lib/site-forecasts.ts');
+const {storeSiteForecast,siteForecastState,siteForecastContext,siteForecastKey,compareSiteScores}=await vite.ssrLoadModule('/lib/site-forecasts.ts');
 const data={timezone:'Europe/London',hourly:{time:[1791403200],cloud_cover:[20]}};
+const comparable=(id,score,patch={})=>({id,score,loading:false,error:'',stale:false,clockChanged:false,...patch});
+test('comparison identifies unique and tied leaders only from complete fresh scores',()=>{
+ const sites=[comparable('cloudy',20),comparable('clear',85),comparable('other',70)],before=structuredClone(sites);
+ assert.deepEqual(compareSiteScores(sites),{complete:true,best:85,leadingIds:['clear']});
+ assert.deepEqual(compareSiteScores([comparable('first',85),comparable('second',85)]),{complete:true,best:85,leadingIds:['first','second']});
+ assert.deepEqual(sites,before);
+});
+test('comparison never recommends against missing, pending, failed, old or future-dated peers',()=>{
+ for(const patch of [{score:null},{score:NaN},{score:Infinity},{score:-1},{score:101},{loading:true},{error:'Refresh failed'},{stale:true},{clockChanged:true}]){
+  assert.deepEqual(compareSiteScores([comparable('clear',85),comparable('unready',70,patch)]),{complete:false,best:null,leadingIds:[]});
+ }
+ assert.deepEqual(compareSiteScores([]),{complete:false,best:null,leadingIds:[]});
+ assert.deepEqual(compareSiteScores([comparable('only',85)]),{complete:false,best:null,leadingIds:[]});
+});
+test('known zero scores remain complete without becoming a recommendation',()=>{
+ assert.deepEqual(compareSiteScores([comparable('day-a',0),comparable('day-b',0)]),{complete:true,best:0,leadingIds:[]});
+});
 test('forecast selection and cache identity share exact date-line endpoints without rounding distinct nearby coordinates',()=>{
  const east={name:'East notation',latitude:-17.75,longitude:180},west={...east,name:'West notation',longitude:-180},before=structuredClone([east,west]);
  assert.equal(siteForecastKey(east),siteForecastKey(west));

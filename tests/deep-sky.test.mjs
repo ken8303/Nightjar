@@ -8,6 +8,17 @@ after(()=>vite.close());
 const {messierCatalogue,findDeepSky,deepSkyPosition,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {A,bodyPosition}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'London',latitude:51.508,longitude:-.126,timezone:'Europe/London'};
+test('saved-target scope composes with catalogue filters without changing saved identities',()=>{
+ const saved=['M31','M45','M31'],before=[...saved];
+ assert.deepEqual(findDeepSky('','',{savedIds:saved}).map(target=>target.id).sort(),['M31','M45']);
+ assert.deepEqual(findDeepSky('Andromeda','Galaxy',{savedIds:saved,constellation:'And',maximumMagnitude:6}).map(target=>target.id),['M31']);
+ assert.deepEqual(findDeepSky('M57','',{savedIds:saved}),[]);
+ assert.deepEqual(findDeepSky('','Galaxy',{savedIds:['M45']}),[]);
+ assert.deepEqual(findDeepSky('','',{savedIds:[]}),[]);
+ assert.deepEqual(findDeepSky('','',{savedIds:['M102','not-a-target']}),[]);
+ assert.equal(findDeepSky('','',{savedIds:undefined}).length,109);
+ assert.deepEqual(saved,before);
+});
 test('full constellation names and Unicode identifiers work without losing catalogue codes',async()=>{
  const {constellationName}=await vite.ssrLoadModule('/lib/constellations.ts');
  for(const code of new Set(messierCatalogue.map(t=>t.constellation)))assert(code==='Leo'||constellationName(code)!==code);
