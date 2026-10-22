@@ -50,7 +50,9 @@ try{
    // Fixed Date advances no timers: the visible suggestion really is the old
    // one, rather than a fresh render produced by the planning-clock interval.
    await page.clock.setFixedTime(new Date(initial));
-   await page.goto(base.href,{waitUntil:'networkidle'});
+   // App readiness is the visible suggestion below. Background requests and
+   // service-worker traffic need not become idle before testing that action.
+   await page.goto(base.href,{waitUntil:'domcontentloaded'});
    assert.match(await page.title(),/Nightjar/);
    assert.equal(new URL(page.url()).origin,base.origin);
    const panel=page.locator('.seven-night-outlook'),action=panel.getByRole('button',{name:'Use suggested window',exact:true});
