@@ -1,6 +1,6 @@
 type Site={name:string;latitude:number;longitude:number};
 export type CameraLocationFix={accuracyMetres:number|null;timestamp:number|null};
-type Callbacks={onPending:(pending:boolean)=>void;onSite:(site:Site,fix:CameraLocationFix)=>void;onError:()=>void};
+type Callbacks={onPending:(pending:boolean)=>void;onSite:(site:Site,fix:CameraLocationFix)=>void;onError:(error?:unknown)=>void};
 // Geolocation reports horizontal accuracy in metres and acquisition time in
 // Unix milliseconds. Unknown metadata must not invalidate usable coordinates.
 function locationFix(accuracy:unknown,timestamp:unknown):CameraLocationFix{
@@ -19,13 +19,13 @@ export function createCameraLocation(callbacks:Callbacks){
  function cancel(notify=true){generation++;if(notify)callbacks.onPending(false)}
  function start(acquire:(success:PositionCallback,failure:PositionErrorCallback)=>void){
   const request=++generation;callbacks.onPending(true);
-  const fail=()=>{if(request!==generation)return;generation++;callbacks.onPending(false);callbacks.onError()};
+  const fail=(error?:unknown)=>{if(request!==generation)return;generation++;callbacks.onPending(false);callbacks.onError(error)};
   try{acquire(position=>{
    if(request!==generation)return;
    const {latitude,longitude}=position.coords;
    if(!Number.isFinite(latitude)||Math.abs(latitude)>90||!Number.isFinite(longitude)||Math.abs(longitude)>180){fail();return}
    generation++;callbacks.onPending(false);callbacks.onSite({name:'Current device location',latitude,longitude},locationFix(position.coords.accuracy,position.timestamp));
-  },fail)}catch{fail()}
+  },fail)}catch(error){fail(error)}
  }
  return {start,cancel};
 }

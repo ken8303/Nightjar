@@ -6,6 +6,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
 const {createCameraLocation,cameraLocationFixLabel}=await vite.ssrLoadModule('/lib/camera-location.ts');
+const {deviceLocationError}=await vite.ssrLoadModule('/lib/device-location-error.ts');
 function harness(){
  const state={pending:[],sites:[],fixes:[],errors:0},requests=[];
  const session=createCameraLocation({onPending:value=>state.pending.push(value),onSite:(site,fix)=>{state.sites.push(site);state.fixes.push(fix)},onError:()=>state.errors++});
@@ -61,4 +62,20 @@ test('invalid coordinates, provider failure and synchronous exceptions offer rec
  h.start();h.requests.at(-1).failure({});h.session.start(()=>{throw Error('Unavailable')});
  assert.equal(h.state.errors,6);assert.equal(h.state.sites.length,0);assert.equal(h.state.pending.at(-1),false);
  h.start();h.requests.at(-1).success(h.position(-90,-180));assert.equal(h.state.sites.length,1);
+});
+test('only the active location failure reaches recovery and carries its original reason',()=>{
+ const failures=[],session=createCameraLocation({onPending:()=>{},onSite:()=>{},onError:error=>failures.push(error)}),requests=[];
+ const acquire=(success,failure)=>requests.push({success,failure});
+ session.start(acquire);session.cancel();requests[0].failure({code:1});
+ session.start(acquire);session.start(acquire);requests[1].failure({code:2});
+ const timeout={code:3,message:'Provider detail'};requests[2].failure(timeout);requests[2].failure({code:1});
+ assert.deepEqual(failures,[timeout]);assert.equal(failures[0],timeout);
+ const denied=new Error('Synchronous provider error');session.start(()=>{throw denied});assert.equal(failures[1],denied);
+});
+test('planner location recovery distinguishes standard failure codes without exposing provider text',()=>{
+ for(const [code,expected] of [[1,/permission was denied/],[2,/could not determine/],[3,/timed out/],[99,/could not be accessed/],['1',/could not be accessed/]]){
+  const message=deviceLocationError({code,message:'PRIVATE PROVIDER DETAIL'});
+  assert.match(message,expected);assert.match(message,/selected observing site is unchanged/);assert.match(message,/Search for a town or enter coordinates/);assert(!message.includes('PRIVATE PROVIDER DETAIL'));
+ }
+ for(const error of [undefined,null,'denied',new Error('Provider detail')])assert.match(deviceLocationError(error),/could not be accessed/);
 });

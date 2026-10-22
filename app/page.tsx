@@ -24,6 +24,7 @@ import SkyShortcuts from '@/components/sky-shortcuts';
 import {readSkyShortcutHash,previousShortcutURL} from '@/lib/sky-shortcuts';
 import SkyLayerControls from '@/components/sky-layer-controls';
 import {createCameraLocation} from '@/lib/camera-location';
+import {deviceLocationError} from '@/lib/device-location-error';
 import {savePlannerTime} from '@/lib/reload-planner';
 import {saveForecastTimezone} from '@/lib/place-timezone';
 import {readAtlasView,saveAtlasView,readAtlasLayers,saveAtlasLayers,type AtlasView,type AtlasLayers} from '@/lib/atlas-view';
@@ -311,7 +312,7 @@ function Planner(){
   if(choose(nextPlace,{date:nextDate}))deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner});
  }
  useEffect(()=>{
-  const session=createCameraLocation({onPending:setLocating,onSite:site=>choose({...site,name:'My location'}),onError:()=>setSearchError('Location could not be accessed. Search for a town or enter coordinates.')});
+  const session=createCameraLocation({onPending:setLocating,onSite:site=>choose({...site,name:'My location'}),onError:error=>setSearchError(deviceLocationError(error))});
   locationSession.current=session;
   return()=>{session.cancel();locationSession.current=null};
  },[choose]);
