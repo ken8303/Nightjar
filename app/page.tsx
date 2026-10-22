@@ -378,6 +378,7 @@ function Planner(){
  }
  async function search(e:React.FormEvent){
   e.preventDefault();if(query.trim().length<2){setSearchError('Enter at least two letters.');document.getElementById('location-search')?.focus();return}
+  locationSession.current?.cancel();
   searchController.current?.abort();const controller=new AbortController();searchController.current=controller;
   setSearching(true);setSearchError('');setResults([]);
   try{
@@ -387,7 +388,11 @@ function Planner(){
   finally{if(!controller.signal.aborted)setSearching(false)}
  }
  function cancelSearch(){searchController.current?.abort();searchController.current=null;setSearching(false);setSearchError('Search cancelled. Enter another town or use coordinates.')}
- function locate(){setSearchError('');if(!navigator.geolocation){setSearchError('Device location is unavailable. Search for a town instead.');return}locationSession.current?.start((success,failure)=>navigator.geolocation.getCurrentPosition(success,failure,{timeout:10000}))}
+ function locate(){
+  searchController.current?.abort();searchController.current=null;setSearching(false);setSearchError('');
+  if(!navigator.geolocation){setSearchError('Device location is unavailable. Search for a town instead.');return}
+  locationSession.current?.start((success,failure)=>navigator.geolocation.getCurrentPosition(success,failure,{timeout:10000}));
+ }
  function cancelLocation(){locationSession.current?.cancel();setSearchError('Location request cancelled. Your selected observing site is unchanged.')}
  const when=date,moon=useMemo(()=>moonInfo(date,place),[date,place]),tz=place.timezone||'UTC';
  const hours=useMemo(()=>weatherHours(forecast?.hourly,date,place),[forecast,date,place]);

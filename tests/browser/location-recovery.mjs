@@ -103,9 +103,45 @@ try{
   const immediate=await stored();assert.equal(immediate.saved,original.saved);assert.equal(immediate.notes,original.notes);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   if(evidence)await page.screenshot({path:`${evidence}/location-success-${name}.png`});
+  // The latest explicit lookup owns both the result and feedback. Deliberately
+  // deliver the obsolete provider callbacks after switching lookup methods.
+  await activate(page.locator('.location-button'));await locate.waitFor();
+  const lookupSite=await stored();await time.fill('');
+  let releaseSearch,notifySearch,notifySearchFinished;
+  const searchRequested=new Promise(resolve=>notifySearch=resolve);
+  const heldSearch=new Promise(resolve=>releaseSearch=resolve);
+  const finishedSearch=new Promise(resolve=>notifySearchFinished=resolve);
+  const paris={id:42,name:'Paris fixture',latitude:48.8566,longitude:2.3522,timezone:'Europe/Paris'};
+  await page.context().route('**/api/locations?*',async route=>{
+   if(new URL(route.request().url()).searchParams.get('q')==='Oxford'){
+    notifySearch();await heldSearch;
+    // A cancelled intercepted request may already be gone when released.
+    try{await route.fulfill({json:{results:[paris]}})}catch{}finally{notifySearchFinished()}
+   }else await route.fulfill({json:{results:[paris]}});
+  });
+  await activate(locate);await query.fill('Paris');
+  await activate(page.locator('.search-form').getByRole('button',{name:'Search',exact:true}));
+  const result=page.locator('.search-results button');await result.waitFor();
+  assert.equal(await page.getByRole('button',{name:'Keep selected site',exact:true}).count(),0);
+  await page.evaluate(()=>{const obsolete=window.locationRequests.at(-1);obsolete.failure({code:1});obsolete.success({coords:{latitude:-33,longitude:151}})});
+  assert((await result.textContent()).includes('Paris fixture'));
+  assert.equal(await feedback.count(),0);assert.equal(await page.locator('.unsaved-view-warning').count(),0);
+  assert.deepEqual(await stored(),lookupSite);assert.equal(await time.inputValue(),'');
+  await query.fill('Oxford');
+  await activate(page.locator('.search-form').getByRole('button',{name:'Search',exact:true}));await searchRequested;
+  await activate(locate);await page.getByRole('button',{name:'Keep selected site',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Cancel location search',exact:true}).count(),0);
+  await page.evaluate(()=>window.locationRequests.at(-1).failure({code:3}));
+  await feedback.waitFor();assert((await feedback.textContent()).includes('timed out'));
+  releaseSearch();await finishedSearch;
+  // Let the obsolete response handler settle before checking the new feedback.
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await result.count(),0);assert((await feedback.textContent()).includes('timed out'));
+  assert.equal(await query.inputValue(),'Oxford');assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),lookupSite);
+  if(evidence)await feedback.screenshot({path:`${evidence}/location-lookup-race-${name}.png`});
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);
   assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
-  console.log(`${name}: location failure/retry/cancel, ignored late callbacks, guarded acceptance and immediate Tonight reveal preserve observing time and saved data PASS`);
+  console.log(`${name}: location recovery, guarded acceptance, Tonight reveal and latest-lookup ownership preserve unfinished edits, observing time and saved data PASS`);
   await page.close();
  }
 }finally{await browser.close()}
