@@ -41,3 +41,31 @@ test('calendar notes distinguish missing site time zones from a genuine UTC site
   for(const property of ['DTSTART:','DTEND:'])assert.equal(unknown.split('\r\n').find(line=>line.startsWith(property)),known.split('\r\n').find(line=>line.startsWith(property)));
  }
 });
+
+test('forecast events retain weather provenance without changing event identity or times',()=>{
+ const weather={fetchedAt:+created-60000},input={...forecast,weather},before=structuredClone(input);
+ const raw=observingWindowCalendar(input,created),text=unfold(raw);
+ assert(text.includes('Weather fetched: 2026-10-07T19:59:00.000Z (UTC)'));
+ assert(text.includes('Weather source: Open-Meteo.'));
+ assert(text.includes('saved forecast snapshot\\; it does not update automatically'));
+ assert(!text.includes('WARNING:'));
+ const old=unfold(observingWindowCalendar(forecast,created));
+ for(const property of ['UID:','DTSTART:','DTEND:'])assert.equal(text.split('\r\n').find(line=>line.startsWith(property)),old.split('\r\n').find(line=>line.startsWith(property)));
+ assert.deepEqual(input,before);
+});
+
+test('calendar exports evaluate retained-weather warnings at preparation time',()=>{
+ const make=weather=>unfold(observingWindowCalendar({...forecast,weather},created));
+ const retained=make({fetchedAt:+created-1800000,refreshFailed:true});
+ assert(retained.includes('Weather refresh failed\\; previous forecast shown.'));
+ assert(retained.includes('WARNING: Weather was fetched over 30 minutes ago.'));
+ assert(make({fetchedAt:+created,refreshing:true}).includes('Weather refresh in progress\\; previous forecast shown.'));
+ assert(make({fetchedAt:+created+60001}).includes('ahead of the device clock'));
+ assert(!make({fetchedAt:+created+60000}).includes('ahead of the device clock'),'minute clock snapshot tolerance is preserved');
+ for(const fetchedAt of [undefined,NaN,Infinity,Date.parse('+010000-01-01T00:00Z')]){
+  const text=make({fetchedAt});
+  assert(text.includes('Weather fetch time unavailable\\; its age cannot be confirmed.'));
+  assert(!text.includes('Weather fetched:')&&!text.includes('Invalid Date')&&!text.includes('NaN'));
+ }
+ for(const line of observingWindowCalendar({...forecast,weather:{fetchedAt:+created-1800000,refreshFailed:true}},created).split('\r\n'))assert(new TextEncoder().encode(line).length<=75);
+});

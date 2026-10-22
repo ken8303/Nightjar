@@ -18,10 +18,11 @@ export function deepSkyPositions(targets:DeepSkyObject[],date:Date,place:Place){
  return targets.map(target=>({...target,...project(target.ra,target.dec)}));
 }
 
-export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude}:{constellation?:string;maximumMagnitude?:number}={}){
+export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude,savedIds}:{constellation?:string;maximumMagnitude?:number;savedIds?:readonly string[]}={}){
  const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g,'').replace(/^messier(?=\d)/,'m').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
  const normalized=normalize(query.trim());
- return catalogue.filter(target=>(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation)].some(value=>normalize(value).includes(normalized)));
+ const subset=savedIds===undefined?null:new Set(savedIds);
+ return catalogue.filter(target=>(!subset||subset.has(target.id))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation)].some(value=>normalize(value).includes(normalized)));
 }
 export function deepSkySampleTimes(date:Date){
  if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');

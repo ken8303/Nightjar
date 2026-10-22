@@ -1,6 +1,7 @@
 import {type Place} from './sky';
-export type PlannerNavigationIntent={kind:'section';section:string}|{kind:'sky-anchor';section:'sky';anchor:{id:string;label:string}}|{kind:'time';section:string;date:Date}|{kind:'context';section:string;place:Place;date?:Date;deepTarget?:string;persist?:boolean}|{kind:'imaging';section:'tools';target:{id:string;ra:number;dec:number}};
-const snapshot=(intent:PlannerNavigationIntent):PlannerNavigationIntent=>intent.kind==='section'?{...intent}:intent.kind==='sky-anchor'?{...intent,anchor:{...intent.anchor}}:intent.kind==='time'?{...intent,date:new Date(+intent.date)}:intent.kind==='imaging'?{...intent,target:{...intent.target}}:{...intent,place:{...intent.place},...(intent.date?{date:new Date(+intent.date)}:{})};
+export type PlannerTimeTarget={catalogue:'deep'|'bright';id:string};
+export type PlannerNavigationIntent={kind:'section';section:string}|{kind:'sky-anchor';section:'sky';anchor:{id:string;label:string}}|{kind:'time';section:string;date:Date;target?:PlannerTimeTarget}|{kind:'context';section:string;place:Place;date?:Date;deepTarget?:string;persist?:boolean}|{kind:'imaging';section:'tools';target:{id:string;ra:number;dec:number}};
+const snapshot=(intent:PlannerNavigationIntent):PlannerNavigationIntent=>intent.kind==='section'?{...intent}:intent.kind==='sky-anchor'?{...intent,anchor:{...intent.anchor}}:intent.kind==='time'?{...intent,date:new Date(+intent.date),...(intent.target?{target:{...intent.target}}:{})}:intent.kind==='imaging'?{...intent,target:{...intent.target}}:{...intent,place:{...intent.place},...(intent.date?{date:new Date(+intent.date)}:{})};
 // Only an explicit continuation applies a blocked site/time/catalogue request.
 export function createPlannerNavigation({onPending}:{onPending:(intent:PlannerNavigationIntent|null)=>void}){
  let queued:PlannerNavigationIntent|null=null;

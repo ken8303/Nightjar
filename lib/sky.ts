@@ -43,6 +43,21 @@ export function hourBelowAltitude(body:A.Body,date:Date,place:Place,altitude:num
 }
 export function timeLabel(date:Date,tz?:string){return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:tz||'UTC'}).format(date)}
 export {A};
+export function nextAstronomicalDarkness(from:Date,p:Place):Date|null{
+ if(!validObservingDate(from))return null;
+ if(sunAltitude(from,p)<=-18)return new Date(+from);
+ const end=Math.min(+from+48*3600000,Date.parse('9999-12-31T23:59:59.999Z'));
+ if(end<=+from)return null;
+ const crossing=A.SearchAltitude(A.Body.Sun,observer(p),-1,from,(end-+from)/86400000,-18)?.date;
+ if(!crossing||!validObservingDate(crossing)||+crossing<+from||+crossing>end)return null;
+ // Search results sit on a numerical boundary. Select a genuinely dark
+ // instant so the shortcut cannot immediately show a twilight label.
+ const rounded=new Date(Math.ceil(+crossing/60000)*60000),after=new Date(+crossing+1000);
+ for(const candidate of [rounded,after,crossing]){
+  if(validObservingDate(candidate)&&+candidate<=end&&sunAltitude(candidate,p)<-18)return candidate;
+ }
+ return null;
+}
 export function nextObservingTime(from:Date,p:Place){
  const nextHour=new Date(Math.ceil(+from/3600000)*3600000);
  const sunNow=sunAltitude(from,p);

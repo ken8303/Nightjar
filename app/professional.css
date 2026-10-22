@@ -10,6 +10,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-hei
 .atlas-preview,.full-atlas,.lunar-stage{background:#0e1920}.atlas-preview .sky-chart{height:400px;max-width:580px;margin:10px auto}.sky-chart.large{max-height:650px;max-width:780px}.atlas-footer{margin-top:auto;gap:10px}.atlas-footer .muted,.atlas-footer .text-button{font-size:11px}.sky-chart text{font-family:inherit}.sky-object:focus-visible{outline:none}.sky-object:focus-visible .sky-hit{stroke:#c1df93;stroke-width:1.5;fill:#c1df9310}
 .metrics{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px;border-radius:8px;border-color:var(--line);background:var(--line)}.metric{background:var(--surface);padding:17px 20px;display:grid;grid-template-columns:1fr;gap:4px}.metric>div{font-size:12px;color:var(--text-secondary);gap:9px}.metric>div svg{width:19px;height:19px;stroke-width:1.5}.metric strong{font-size:27px;font-weight:600;letter-spacing:-.6px;margin:0 0 0 28px}.metric small{margin-left:28px;font-size:11px;color:var(--text-tertiary)}
 .seven-night-outlook,.next-panel,.milestones,.atmosphere-panel{margin-top:16px}.seven-night-outlook>p.muted{font-size:12px;margin:12px 0 18px}.night-outlook-grid{gap:12px;grid-template-columns:repeat(4,minmax(0,1fr))}.night-outlook-card{background:#101c23;border-color:var(--line);border-radius:7px}.night-outlook-card.selected{border-color:#a9c888;background:#16261f}.night-outlook-select{position:relative;padding:18px 16px;gap:10px;min-height:218px;justify-content:flex-start}.night-outlook-select .night-date{font-size:14px;font-weight:600;padding-right:62px;min-height:52px;align-items:flex-start}.night-date>svg{display:none}.night-score{position:absolute;right:14px;top:14px;border-radius:50%;width:52px;height:52px;padding:3px;background:conic-gradient(#c1df93 var(--night-score),#2c3d45 0)}.night-score>strong{width:100%;height:100%;border-radius:50%;background:#101c23;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px!important;color:#e9eeef;line-height:1.1;margin:0!important}.night-score small{font-size:8px!important;color:var(--text-tertiary);margin:2px 0 0!important}.night-outlook-select>span:not(.night-score):not(.night-date){font-size:11px;line-height:1.65}.night-outlook-download{min-height:44px;border-top:1px solid var(--line);font-size:12px;padding:10px 16px}.night-outlook-card.unavailable{min-height:263px}.footnote{color:var(--text-tertiary);font-size:11px;line-height:1.7;margin-top:18px}.hourly{margin:18px -4px 12px;gap:5px}.hour{gap:10px;min-width:80px;padding:12px 6px}.hour.selected{background:#20302b;border-color:#617751}.hour strong{font-weight:600}.bar{width:5px;height:40px;border-radius:2px}.bar i{border-radius:2px}.bottom-grid,.sky-layout,.places-layout,.tools-layout,.moon-layout{gap:16px}.milestone-grid strong,.lunar-facts strong,.light-window-time,.comparison-score strong{font-weight:600}.milestone-grid{gap:16px}.moon-card,.frame-result,.aurora-grid{background:var(--surface)}.target-results button,.comparison-card,.saved-targets,.landmark-list button,.quarter-grid button,.eclipse-picker button,.panel-coordinates>div{background:#142129;border-color:var(--line)}.light-window{background:#14222c}.target-results button.active,.landmark-list button.active,.eclipse-picker button.active{background:#26382c}.object-row{padding:15px 0}.object-row strong{font-weight:600}.chart-layer-controls button{border-radius:5px}.place-map{height:280px}.mobile-navigation-trigger{background:#c1df93;color:#142017;border-color:#c1df93;font-weight:600;box-shadow:0 4px 20px #0006}footer{font-size:13px;margin-top:30px;padding-top:20px}.pwa-support{max-width:1456px;padding-left:32px;padding-right:32px}
+@media(max-height:500px){.hour{gap:6px;padding:10px 6px}.hour .bar{height:24px}}
 @media(max-width:1200px){.top{gap:16px}.navigation button{padding:0 8px!important;font-size:12px!important}.time-entry-mode>span{display:none}.control-bar>div>.muted{flex-basis:100%}.page-heading{align-items:flex-start}.heading-utilities{flex-direction:column;align-items:stretch}.score-row{grid-template-columns:122px minmax(0,1fr);gap:18px}.score-ring{width:120px;height:120px}.score-row h2{font-size:30px}}
 @media(max-width:1000px){.top{height:auto;min-height:72px;flex-wrap:wrap;padding-top:16px;gap:0}.top .brand{margin-bottom:16px}.install-shortcut{margin-left:auto;margin-bottom:16px}.nav-wrap{order:3;flex-basis:100%;border-top:1px solid var(--line);justify-content:flex-start}.navigation{height:52px!important;width:100%!important;justify-content:space-between}.navigation button{height:52px;padding:0 10px!important}.navigation button svg{display:block}.dashboard{grid-template-columns:1fr 1fr}.time-entry{gap:12px;padding:12px}.time-entry .control-bar{padding-left:12px}.control-bar label{display:none}.score-row{grid-template-columns:100px minmax(0,1fr);gap:16px}.score-ring{width:96px;height:96px}.score-ring strong{font-size:34px}.score-row h2{font-size:27px}.best-window{padding-left:16px}.best-window>strong{font-size:23px}.atlas-preview .sky-chart{height:310px}.sky-layout,.places-layout,.tools-layout,.moon-layout{grid-template-columns:1fr}.night-outlook-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.metric{padding:16px 12px}.metric strong{font-size:23px;margin-left:0}.metric small{margin-left:0}.metric>div{font-size:11px}}
 @media(max-width:700px){.app{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}.top .brand{font-size:26px}.install-shortcut{font-size:12px;padding:0 12px}.nav-wrap{overflow:visible}.navigation{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));height:auto!important;gap:0!important;padding:0!important}.navigation button{min-height:46px;height:auto;font-size:11px!important;padding:10px 3px!important;line-height:1.3!important;white-space:normal}.navigation button svg{display:none}.page-heading{margin:24px 0 18px;gap:16px;flex-direction:column}h1{font-size:31px;letter-spacing:-.9px;max-width:440px}.page-heading .muted{font-size:13px}.heading-utilities{width:100%;flex-direction:row;align-items:center;gap:8px}.heading-utilities .location-button{flex:1;max-width:none;font-size:13px;padding:10px 12px}.viewing-mode .button{width:auto;font-size:11px;padding:10px;white-space:nowrap}.viewing-mode p{width:min(270px,80vw)}.time-entry{grid-template-columns:1fr;padding:12px;gap:12px;margin-bottom:16px}.time-entry-mode{justify-content:flex-start}.time-entry-mode>span{display:block;font-size:11px}.time-entry-mode button{min-height:44px}.time-entry .control-bar{border-left:0;border-top:1px solid var(--line);padding:12px 0 0;align-items:flex-start}.control-bar>div{gap:8px}.control-bar input{min-height:44px;flex:1;width:100%;max-width:none}.control-bar>div>svg{display:none}.control-bar>.text-button{min-height:44px}.control-bar>div>.muted{font-size:11px;line-height:1.6}.panel{padding:18px}.dashboard{grid-template-columns:1fr;gap:14px}.outlook .score-row{grid-template-columns:100px minmax(0,1fr);gap:18px;margin-top:16px}.score-row h2{font-size:28px}.score-row p{font-size:13px}.score-ring{width:98px;height:98px;padding:4px}.score-ring strong{font-size:35px}.best-window>strong{font-size:25px}.outlook-bottom{margin-top:18px}.pill{font-size:9px}.forecast-freshness{margin-top:12px;padding-top:10px}.forecast-freshness .text-button{min-height:44px}.atlas-preview .sky-chart{height:auto;max-height:none;width:100%;margin:14px auto 8px}.atlas-footer{flex-wrap:wrap}.atlas-footer .text-button{min-height:44px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}.metric{padding:15px;gap:5px}.metric>div{font-size:11px}.metric strong{font-size:25px;margin-left:28px}.metric small{margin-left:28px;font-size:10px}.seven-night-outlook,.next-panel,.milestones,.atmosphere-panel{margin-top:14px}.night-outlook-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.night-outlook-select{padding:14px 12px;min-height:234px}.night-outlook-select .night-date{padding-right:0;min-height:76px;font-size:13px}.night-score{right:auto;left:12px;top:42px;width:40px;height:40px;padding:2px}.night-score>strong{font-size:15px!important}.night-outlook-select>span:not(.night-score):not(.night-date){font-size:11px}.night-outlook-download{font-size:10px;padding:10px 12px;gap:5px}.night-outlook-card.unavailable{min-height:279px}.section-label{font-size:10px;letter-spacing:1px}.footnote{font-size:11px}.bottom-grid{grid-template-columns:1fr}.hourly{margin-right:-18px;padding-right:18px;scroll-snap-type:x proximity}.hour{scroll-snap-align:start}.pwa-support{padding-left:16px;padding-right:16px}.light-window-time{font-weight:600}.moon-globe{height:320px}}
@@ -45,7 +46,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .mobile-visibility>.visibility-peak{width:100%;margin-top:12px;white-space:normal;line-height:1.6;text-align:left;justify-content:flex-start}
 .visibility-opportunity-title{margin-top:24px;font-size:15px;font-weight:500}
 .visibility-opportunity-title+.planet-best-grid{margin-top:12px}
-.altitude[aria-pressed="true"]{outline:2px solid var(--accent-soft);outline-offset:-3px}
+.deep-sky-hours button[aria-pressed="true"],.altitude[aria-pressed="true"]{outline:2px solid var(--accent-soft);outline-offset:-3px}
 
 .visibility-object-navigation{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
 .visibility-object-navigation .button{min-width:44px;min-height:44px;padding:10px}
@@ -265,3 +266,58 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 
 .satellite-viewing-windows.has-window{border-left-color:var(--primary)}
 .satellite-window-time{display:block;margin-top:.75rem;white-space:normal;max-width:100%;min-height:44px;text-align:center}
+/* Shortcuts stay separate from the date input so they wrap on compact screens. */
+.time-shortcuts{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.time-shortcuts .button{min-height:44px;font-size:12px;padding:9px 12px}
+.time-shortcuts .button:disabled{cursor:default}
+.time-shortcuts .footnote{flex:1 1 260px;margin:0;line-height:1.6}
+.forecast-recovery{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:16px}
+.forecast-recovery h2{font-size:20px;letter-spacing:-.3px;margin:0 0 6px}
+.forecast-recovery p{margin:0}
+.comparison-recommendation{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #617751;background:#20302b;padding:16px;border-radius:8px;margin:16px 0}
+.comparison-recommendation>div{min-width:0}
+#comparison-heading{scroll-margin-top:24px}
+#comparison-heading:focus-visible{outline:2px solid var(--accent-soft);outline-offset:4px}
+.comparison-recommendation h3{font-size:18px;margin:0 0 6px;overflow-wrap:anywhere}
+.comparison-recommendation p{margin:0;font-size:12px;overflow-wrap:anywhere}
+.deep-sky-filter-context{display:block}
+.deep-sky-filters input[type="search"],#target-search{scroll-margin-top:32px}
+.deep-sky-filter-context .text-button{margin-top:6px;text-align:left;white-space:normal}
+.deep-sky-toggle-filters,.target-filter-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;min-width:0;max-width:100%}
+.deep-sky-toggle-filters .deep-sky-altitude{gap:8px;margin:0}
+.target-filter-group .target-filter{padding-bottom:0}
+/* Tablets also need full-height label targets, including when a mouse is connected. */
+@media(any-pointer:coarse){.target-filter-group .target-filter{min-height:44px;white-space:normal}}
+@media(any-pointer:coarse){.time-entry-mode button,.time-entry .control-bar input,.time-entry .control-bar>.text-button,.outlook .text-button,.atlas-preview .text-button,.seven-night-outlook .text-button{min-height:44px}}
+@media(any-pointer:coarse){.places-layout summary{min-height:44px;align-content:center}.places-layout .search-form input,.coordinate-form input,.site-name-editor input{font-size:16px}.places-layout .text-button,.place-comparison .text-button{min-height:44px}.places-layout .saved-row>button:last-child{min-width:44px;justify-content:center}}
+.target-note-manager select{min-height:44px;padding:10px 12px}
+.target-note-manager textarea{padding:12px;font:inherit}
+/* Let edge swipes leave this in-page list so touch users can reach the details below. */
+@media(any-pointer:coarse){.deep-sky-results{overscroll-behavior-y:auto}}
+.deep-sky-selection-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.deep-sky-selection-actions .button{flex:1 1 150px;min-height:44px;max-width:100%;white-space:normal;text-align:center}
+.comparison-recommendation .button{min-height:44px;white-space:normal;flex-shrink:0;text-align:left;max-width:45%;overflow-wrap:anywhere}
+.outlook-bottom{flex-wrap:wrap;gap:12px}
+.outlook-bottom>.text-button{min-height:44px}
+.forecast-recovery .button{min-height:44px;flex-shrink:0;white-space:normal;text-align:left}
+@media(max-width:700px){.forecast-recovery{align-items:stretch;flex-direction:column;gap:12px}.time-shortcuts .footnote{flex-basis:100%}}
+@media(max-width:700px){.comparison-recommendation{align-items:stretch;flex-direction:column;gap:12px}.comparison-recommendation .button{max-width:none}}
+
+#deep-sky-browsing{scroll-margin-top:24px}
+.deep-sky-return{min-height:44px;max-width:100%;white-space:normal;text-align:left;margin-bottom:12px}
+@media(max-width:700px){#deep-sky-browsing{scroll-margin-top:96px}}
+@media(any-pointer:coarse){.observing-diary input:not([type=checkbox]),.observing-diary select,.observing-diary textarea{font-size:16px}}
+
+#bright-target-browsing{scroll-margin-top:24px}
+@media(max-width:700px){#bright-target-browsing{scroll-margin-top:96px}}
+
+.target-detail>.target-clear{min-width:44px;min-height:44px;justify-content:center;flex-shrink:0}
+
+.target-detail .target-browse-return{margin:0 0 12px;max-width:100%}
+
+.night-outlook-recommendation{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid var(--line);border-radius:7px;background:var(--surface);margin:16px 0}
+.night-outlook-recommendation>div{min-width:0}
+.night-outlook-recommendation p{margin:0;line-height:1.6;overflow-wrap:anywhere}
+.night-outlook-recommendation .footnote{margin-top:6px}
+.night-outlook-recommendation .button{min-height:44px;flex-shrink:0;max-width:100%;white-space:normal;text-align:center}
+@media(max-width:800px){.night-outlook-recommendation{flex-direction:column;align-items:stretch}}

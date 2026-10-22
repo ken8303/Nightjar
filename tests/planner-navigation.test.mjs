@@ -57,3 +57,14 @@ test('a guarded sky link snapshots its destination and supports cancellation and
  h.navigation.request(intent,true,h.apply);h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,1);
  h.navigation.request(intent,true,h.apply);h.navigation.request({kind:'section',section:'places'},false,h.apply);assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.at(-1).section,'places');
 });
+
+
+test('bright and deep-sky time shortcuts snapshot the object and exact time as one cancellable request',()=>{
+ for(const target of [{catalogue:'deep',id:'M45'},{catalogue:'bright',id:'Jupiter'}]){
+  const h=harness(),date=new Date('2026-10-20T21:15:17.125Z'),intent={kind:'time',section:'sky',date,target:{...target}};
+  assert.equal(h.navigation.request(intent,true,h.apply),false);assert.deepEqual(h.applied,[]);
+  date.setUTCFullYear(2030);intent.target.id='Changed later';assert.deepEqual(h.pending.at(-1).target,target);
+  assert(h.navigation.continue(h.apply));assert.equal(h.applied[0].date.toISOString(),'2026-10-20T21:15:17.125Z');assert.deepEqual(h.applied[0].target,target);assert.equal(h.applied[0].kind,'time');assert.equal('place' in h.applied[0],false,'the shortcut does not replace or write a site');
+  h.navigation.request({kind:'time',section:'sky',date:new Date('2026-10-21T00:00Z'),target},true,h.apply);h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,1);
+ }
+});

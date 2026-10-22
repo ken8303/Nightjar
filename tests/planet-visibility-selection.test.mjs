@@ -8,8 +8,9 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},esbuild:{jsx:'automatic'},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
 const {default:PlanetVisibility}=await vite.ssrLoadModule('/components/planet-visibility.tsx');
+const {createBrightTargetBrowsing}=await vite.ssrLoadModule('/lib/target-browsing.ts');
 const place={name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London'};
-const render=(selected,instant='2026-10-18T19:00:00.000Z')=>renderToStaticMarkup(createElement(PlanetVisibility,{date:new Date(instant),place,selected,onSelect:()=>{},onDate:()=>{}}));
+const render=(selected,instant='2026-10-18T19:00:00.000Z',body=null)=>{const browsing=createBrightTargetBrowsing().visibility;browsing.update({body});return renderToStaticMarkup(createElement(PlanetVisibility,{date:new Date(instant),place,selected,browsing,onPlan:()=>{}}))};
 const pressed=html=>[...html.matchAll(/<button\b[^>]*>/g)].map(match=>match[0]).filter(button=>/aria-pressed="true"/.test(button)).map(button=>button.match(/aria-label="([^"]*)"/)?.[1]);
 test('visibility selection requires both object and exact observing instant',()=>{
  assert.deepEqual(pressed(render('')),[],'a time alone must not select every object');
@@ -20,6 +21,8 @@ test('visibility selection requires both object and exact observing instant',()=
  assert.equal(uranus.length,2,'the desktop and mobile representations may select the same object/time');
  assert(uranus.every(label=>label.startsWith('View Uranus at 18 Oct 2026, 20:00 GMT+1,')));
  assert.deepEqual(pressed(render('Vega')),[],'a selected atlas star must not select a planet cell');
+ assert.equal(pressed(render('Saturn','2026-10-18T19:00:00.000Z','Saturn')).length,2,'a retained picker choice renders the matching planet in both representations');
+ assert.equal(pressed(render('Uranus','2026-10-18T19:00:00.000Z','Saturn')).length,1,'browsing Saturn does not select it when the atlas target is Uranus');
  assert.deepEqual(pressed(render('Saturn','2026-10-18T19:00:00.001Z')),[],'a nearby instant is not the sampled hour');
 });
 test('selection distinguishes both occurrences of the repeated local clock-change hour',()=>{

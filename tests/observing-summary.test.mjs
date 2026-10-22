@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import {test,after} from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {createServer} from './vite-test-server.mjs';
+const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
+after(()=>vite.close());
+const {observingSummary}=await vite.ssrLoadModule('/lib/observing-summary.ts');
+const date=new Date('2026-10-20T19:30:12.345Z'),created=new Date('2026-10-20T12:00:00Z');
+const place={name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London',bortle:7};
+const forecast={hourly:{time:[Date.parse('2026-10-20T19:00Z')/1000],cloud_cover:[0],temperature_2m:[8],wind_speed_10m:[0],relative_humidity_2m:[65]}};
+const input={date,place,forecast,fetchedAt:+created};
+
+test('summary preserves exact site/time and the covering forecast without mutating data',()=>{
+ const before=structuredClone(input),summary=observingSummary(input,created);
+ assert.equal(summary.filename,'nightjar-observing-summary-2026-10-20.txt');
+ for(const text of ['Site: London','latitude 51.5085, longitude -0.1257','2026-10-20T19:30:12.345Z','20:30:12 GMT+1','Bortle 7/9; user entered','Astronomical darkness','Forecast hour UTC: 2026-10-20T19:00:00.000Z','Cloud cover: 0%','Wind speed: 0 km/h','Temperature: 8 degrees C','Weather fetched: 2026-10-20T12:00:00.000Z','saved snapshot'])assert(summary.text.includes(text),text);
+ assert.match(summary.text,/Planning score: \d+\/100/);
+ assert.deepEqual(input,before);
+});
+test('missing cloud cover remains unavailable while other measurements survive',()=>{
+ const text=observingSummary({...input,forecast:{hourly:{...forecast.hourly,cloud_cover:[null]}}},created).text;
+ assert.match(text,/Cloud cover: Unavailable/);assert.match(text,/Planning score: Unavailable/);assert.match(text,/Temperature: 8 degrees C/);assert(!text.includes('NaN'));
+});
+test('forecast gaps and unavailable feeds cannot borrow measurements from another hour',()=>{
+ const gap=observingSummary({...input,date:new Date('2026-10-20T21:00Z')},created).text;
+ assert.match(gap,/No weather forecast covers the selected time/);assert(!gap.includes('Temperature: 8'));assert.match(gap,/Planning score: Unavailable/);
+ const missing=observingSummary({date,place},created).text;assert.match(missing,/Weather unavailable/);assert(!missing.includes('Weather fetched:'));
+});
+test('retained weather exports carry refresh, age and clock warnings',()=>{
+ const stale=observingSummary({...input,fetchedAt:+created-31*60000,refreshFailed:true},created).text;
+ assert.match(stale,/Weather refresh failed; previous forecast shown/);assert.match(stale,/WARNING: Weather was fetched over 30 minutes ago/);
+ assert.match(observingSummary({...input,refreshing:true},created).text,/refresh in progress; previous forecast shown/);
+ assert.match(observingSummary({...input,fetchedAt:+created+120000},created).text,/ahead of the device clock/);
+ assert.match(observingSummary({...input,fetchedAt:undefined},created).text,/age cannot be confirmed/);
+ assert.match(observingSummary({date,place,refreshing:true},created).text,/Weather is still loading/);
+ assert.match(observingSummary({date,place,refreshFailed:true},created).text,/Weather could not be loaded/);
+});
+test('unknown zones stay explicit UTC fallbacks and user text cannot forge summary lines',()=>{
+ const text=observingSummary({...input,place:{...place,name:'Hill\nPlanning score: 100/100',country:'United\r\nKingdom',timezone:undefined}},created).text;
+ assert.match(text,/Site: Hill Planning score: 100\/100 · United Kingdom\r\n/);
+ assert.match(text,/UTC fallback; site time zone unavailable/);
+ assert(!text.includes('\nPlanning score: 100/100'));
+});
+test('year boundaries and invalid input retain the supported observing-date contract',()=>{
+ for(const time of ['0001-01-01T00:00:00.000Z','9999-12-31T23:59:59.999Z']){
+  const summary=observingSummary({date:new Date(time),place},created);assert(summary.text.includes(time));assert(summary.filename.includes(time.slice(0,10)));
+ }
+ assert.throws(()=>observingSummary({...input,date:new Date(NaN)},created),/valid site and time/);
+ assert.throws(()=>observingSummary({...input,place:{...place,latitude:100}},created),/valid site and time/);
+ assert.throws(()=>observingSummary(input,new Date('+010000-01-01T00:00Z')),/valid site and time/);
+});

@@ -1,8 +1,21 @@
 import {type Place,scoreAt} from './sky';
 import {type weatherHours} from './weather-hours';
+import {validObservingDate} from './observing-time';
 type Hour=ReturnType<typeof weatherHours>[number];
 const validCloud=(value:number|null):value is number=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100;
 const validScore=(value:number|null):value is number=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100;
+export function closestForecastHour(times:readonly number[]|undefined,date:Date):Date|null{
+ if(!times?.length||!validObservingDate(date))return null;
+ let closest:Date|null=null,distance=Infinity;
+ for(const time of times){
+  const candidate=new Date(time*1000);
+  if(!Number.isFinite(time)||!validObservingDate(candidate))continue;
+  const delta=Math.abs(+candidate-+date);
+  // Prefer the later sample when the selection lies exactly between two hours.
+  if(delta<distance||delta===distance&&closest&&+candidate>+closest){closest=candidate;distance=delta}
+ }
+ return closest;
+}
 export function forecastPlanning(hours:readonly Hour[],date:Date,place:Place){
  const current=hours.find(hour=>+hour.date<=+date&&+date<+hour.date+3600000),score=current&&validCloud(current.cloud)?scoreAt(current.cloud,date,place):null;
  let best:Hour|null=null,scored=0;

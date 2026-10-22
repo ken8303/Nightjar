@@ -1,10 +1,17 @@
+import {validTimeZone} from './valid-timezone';
+
 export function validObservingDate(date:Date){return Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999}
+export function shiftObservingHour(date:Date,direction:-1|1):Date|null{
+ if(!validObservingDate(date)||direction!==-1&&direction!==1)return null;
+ const next=new Date(+date+direction*3600000);
+ return validObservingDate(next)?next:null;
+}
 export function parseObservingInstant(value:unknown):Date|null{
  if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value))return null;
  const date=new Date(value);return validObservingDate(date)&&date.toISOString()===value?date:null;
 }
 export function observingTimeZone(value:unknown):{zone:string;known:boolean}{
- if(typeof value==='string'&&value){try{new Intl.DateTimeFormat('en',{timeZone:value});return {zone:value,known:true}}catch{}}
+ if(validTimeZone(value))return {zone:value,known:true};
  return {zone:'UTC',known:false};
 }
 function formatter(timezone:string){return new Intl.DateTimeFormat('en-GB',{timeZone:timezone,calendar:'gregory',numberingSystem:'latn',era:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'})}

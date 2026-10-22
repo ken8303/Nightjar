@@ -35,14 +35,19 @@ test('failed HTTP, unreadable and invalid provider bodies are not cached and rem
 });
 
 
-test('rejected aurora bodies are cancelled and cleanup errors do not pin shared retries',{timeout:2000},async t=>{
+test('rejected aurora bodies are cancelled and cleanup errors do not pin shared retries',async t=>{
  let read;t.mock.method(globalThis,'fetch',()=>read());
  for(const cleanupFails of [false,true,'pending']){
-  const GET=await route(t);let rejectBody=true,cancelled=0,calls=0;
-  read=async()=>{calls++;return rejectBody?new Response(new ReadableStream({cancel(){cancelled++;if(cleanupFails==='pending')return new Promise(()=>{});if(cleanupFails)throw Error('Private cleanup failure')}}),{status:503}):Response.json(provider())};
-  const first=GET(),second=GET();
-  for(const response of await Promise.all([first,second])){assert.equal(response.status,502);assert.deepEqual(await response.json(),{error:'NOAA’s aurora feed is temporarily unavailable. Try again shortly.'})}
-  assert.equal(cancelled,1);assert.equal(calls,1);
-  rejectBody=false;assert.equal((await GET()).status,200);assert.equal(calls,2);
+  // Vite startup is setup work; the deadline checks that provider cleanup
+  // cannot block the HTTP responses or a subsequent request.
+  const GET=await route(t);
+  await t.test(`cleanup ${cleanupFails}`,{timeout:2000},async()=>{
+   let rejectBody=true,cancelled=0,calls=0;
+   read=async()=>{calls++;return rejectBody?new Response(new ReadableStream({cancel(){cancelled++;if(cleanupFails==='pending')return new Promise(()=>{});if(cleanupFails)throw Error('Private cleanup failure')}}),{status:503}):Response.json(provider())};
+   const first=GET(),second=GET();
+   for(const response of await Promise.all([first,second])){assert.equal(response.status,502);assert.deepEqual(await response.json(),{error:'NOAA’s aurora feed is temporarily unavailable. Try again shortly.'})}
+   assert.equal(cancelled,1);assert.equal(calls,1);
+   rejectBody=false;assert.equal((await GET()).status,200);assert.equal(calls,2);
+  });
  }
 });

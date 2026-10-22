@@ -5,6 +5,15 @@ import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {findSkyTargets}=await vite.ssrLoadModule('/lib/sky-target-search.ts');
 const targets=[{name:'Vega',altitude:61,selected:true},{name:'Alpha Centauri',altitude:-45},{name:'Référence',altitude:30},{name:'Exact horizon',altitude:0},{name:'Above boundary',altitude:30.01}];
+test('saved bright-target scope composes with text and altitude without dropping legacy stored names',()=>{
+ const saved=['Vega','Alpha Centauri','Older catalogue name','Vega'],before=[...saved];
+ assert.deepEqual(findSkyTargets(targets,'',null,saved),[targets[0],targets[1]]);
+ assert.deepEqual(findSkyTargets(targets,'',0,saved),[targets[0]]);
+ assert.deepEqual(findSkyTargets(targets,'Alpha',30,saved),[]);
+ assert.deepEqual(findSkyTargets(targets,'',null,[]),[]);
+ assert.deepEqual(findSkyTargets(targets,'',null,['Older catalogue name']),[]);
+ assert.deepEqual(saved,before);assert.equal(findSkyTargets(targets,'',null,saved)[0],targets[0]);
+});
 test('target search matches mobile Unicode and spacing while retaining original records and order',()=>{
  assert.deepEqual(findSkyTargets(targets,'Ｖ ｅ Ｇ Ａ'),[targets[0]]);assert.equal(findSkyTargets(targets,'alpha\ncentauri')[0],targets[1]);assert.equal(findSkyTargets(targets,'Re\u0301fe\u0301rence')[0],targets[2]);assert.deepEqual(findSkyTargets(targets,'  '),targets);assert.deepEqual(findSkyTargets(targets,'missing'),[]);assert(targets[0].selected);
 });
