@@ -120,6 +120,7 @@ try{
    }else await route.fulfill({json:{results:[paris]}});
   });
   await activate(locate);await query.fill('Paris');
+  assert.equal(await page.getByRole('button',{name:'Keep selected site',exact:true}).count(),0,'typing a newer town cancels pending GPS before submitting');
   await activate(page.locator('.search-form').getByRole('button',{name:'Search',exact:true}));
   const result=page.locator('.search-results button');await result.waitFor();
   assert.equal(await page.getByRole('button',{name:'Keep selected site',exact:true}).count(),0);
@@ -139,6 +140,24 @@ try{
   assert.equal(await result.count(),0);assert((await feedback.textContent()).includes('timed out'));
   assert.equal(await query.inputValue(),'Oxford');assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),lookupSite);
   if(evidence)await feedback.screenshot({path:`${evidence}/location-lookup-race-${name}.png`});
+  await activate(page.getByText('Or enter precise coordinates',{exact:true}));
+  for(const [axis,value] of [['latitude','12.5'],['longitude','23.75']]){
+   await activate(locate);
+   await page.getByRole('button',{name:'Keep selected site',exact:true}).waitFor();
+   const input=page.locator(`#manual-${axis}`);await input.fill(value);
+   assert.equal(await page.getByRole('button',{name:'Keep selected site',exact:true}).count(),0,`editing ${axis} cancels pending GPS`);
+   await page.evaluate(()=>{const obsolete=window.locationRequests.at(-1);obsolete.success({coords:{latitude:-33,longitude:151}});obsolete.failure({code:1})});
+   assert.equal(await input.inputValue(),value);assert.equal(await page.locator('.unsaved-view-warning').count(),0);
+   assert.equal(await feedback.count(),0);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),lookupSite);
+   assert.equal((await exact()).split(' UTC')[0],instant.split(' UTC')[0]);
+  }
+  if(evidence)await page.locator('.coordinate-form').screenshot({path:`${evidence}/location-manual-entry-${name}.png`});
+  await activate(locate);
+  await activate(page.getByRole('button',{name:'Clear coordinates',exact:true}));
+  assert.equal(await page.getByRole('button',{name:'Keep selected site',exact:true}).count(),0);
+  await page.evaluate(()=>window.locationRequests.at(-1).success({coords:{latitude:-33,longitude:151}}));
+  assert.equal(await page.locator('#manual-latitude').inputValue(),'');assert.equal(await page.locator('#manual-longitude').inputValue(),'');
+  assert.equal(await page.locator('.unsaved-view-warning').count(),0);assert.deepEqual(await stored(),lookupSite);
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);
   assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
   console.log(`${name}: location recovery, guarded acceptance, Tonight reveal and latest-lookup ownership preserve unfinished edits, observing time and saved data PASS`);
