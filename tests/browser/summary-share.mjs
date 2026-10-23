@@ -21,21 +21,22 @@ try{
   ['narrow',{width:320,height:740}],['landscape',{width:640,height:320}],
   ['tablet-portrait',{width:820,height:1180}],['tablet-landscape',{width:1180,height:820}],
  ])for(const supported of [true,false]){
+  const placeName=supported?'London':'星空 / Hill? #1';
   const touch=name!=='desktop',page=await browser.newPage({viewport,hasTouch:touch,isMobile:touch});
   page.setDefaultTimeout(15000);
   const errors=[],logs=[];
   page.on('pageerror',error=>errors.push(error.message));
   page.on('console',entry=>{if(['warning','error'].includes(entry.type()))logs.push(entry.text())});
-  await page.addInitScript(({origin,supported})=>{
+  await page.addInitScript(({origin,supported,placeName})=>{
    if(location.origin!==origin)return;
-   const place={name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'};
+   const place={name:placeName,latitude:51.5,longitude:0,timezone:'Europe/London'};
    sessionStorage.setItem('nightjar-recovery-context-v1',JSON.stringify({version:1,time:'2026-10-20T19:00:17.125Z',place}));
    localStorage.setItem('nightjar-sky-view-v1','2d');
    localStorage.setItem('nightjar-target-notes-v1',JSON.stringify({Vega:'Share test note'}));
    localStorage.setItem('nightjar-deep-targets-v1',JSON.stringify(['M31']));
    window.shareRequests=[];
    Object.defineProperty(navigator,'share',{configurable:true,value:supported?data=>new Promise((resolve,reject)=>window.shareRequests.push({data,resolve,reject})):undefined});
-  },{origin:base.origin,supported});
+  },{origin:base.origin,supported,placeName});
   await page.context().route('**/api/weather?*',route=>route.fulfill({json:{hourly:{
    time:[19,20,21].map(hour=>Date.parse(`2026-10-20T${hour}:00Z`)/1000),cloud_cover:[30,30,30],cloud_cover_low:[0,10,20],cloud_cover_mid:[20,30,40],cloud_cover_high:[30,40,50],dew_point_2m:[-2.5,0,5],visibility:[12345,100,200],
   }}}));
@@ -72,8 +73,8 @@ try{
    assert((await notice.textContent()).includes('Use Download summary instead'));
   }else assert.equal(await share.count(),0);
   const downloaded=page.waitForEvent('download');await activate(download);const file=await downloaded;
-  assert.equal(file.suggestedFilename(),'nightjar-observing-summary-2026-10-20.txt');
-  const text=await readFile(await file.path(),'utf8');assert(text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));assert(text.includes('Cloud cover: 30%'));
+  assert.equal(file.suggestedFilename(),`nightjar-observing-summary-${supported?'london':'星空-hill-1'}-2026-10-20T19-00-17-125Z.txt`);
+  const text=await readFile(await file.path(),'utf8');assert(text.includes(`Site: ${placeName}`));assert(text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));assert(text.includes('Cloud cover: 30%'));
   for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Near-surface visibility: 12345 metres'])assert(text.includes(line),line);
   assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),saved);
   assert.equal(await page.locator('.unsaved-view-warning').count(),0);

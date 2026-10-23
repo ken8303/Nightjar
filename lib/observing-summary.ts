@@ -7,6 +7,13 @@ import {moonInfo,scoreAt,sunAltitude,type Place} from './sky';
 type Input={date:Date;place:Place;forecast?:WeatherForecast|null;fetchedAt?:number;refreshing?:boolean;refreshFailed?:boolean};
 const oneLine=(text:string)=>text.replace(/[\r\n\t]+/g,' ').trim();
 const measurement=(value:number|null|undefined,unit:string)=>typeof value==='number'&&Number.isFinite(value)?`${value}${unit}`:'Unavailable';
+function summaryFilename(place:Place,date:Date){
+ // Bound Unicode code points so the full UTF-8 filename fits common file
+ // systems, and remove path separators, controls and reserved punctuation.
+ const cleaned=place.name.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');
+ const site=Array.from(cleaned).slice(0,40).join('').replace(/-+$/,'')||'site';
+ return `nightjar-observing-summary-${site}-${date.toISOString().replace(/[:.]/g,'-')}.txt`;
+}
 
 export function observingSummary(input:Input,created=new Date()){
  const {date,place}=input;
@@ -59,5 +66,5 @@ export function observingSummary(input:Input,created=new Date()){
   'Planning scores are estimates based on clouds, darkness and moonlight, not astronomical seeing or transparency.',
   'Positions use an ideal horizon; terrain, buildings and local conditions can obstruct the view.',
   'Weather source: Open-Meteo. Recheck conditions before heading out.');
- return {text:lines.join('\r\n')+'\r\n',filename:`nightjar-observing-summary-${date.toISOString().slice(0,10)}.txt`};
+ return {text:lines.join('\r\n')+'\r\n',filename:summaryFilename(place,date)};
 }

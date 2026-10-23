@@ -12,7 +12,7 @@ const input={date,place,forecast,fetchedAt:+created};
 
 test('summary preserves exact site/time and the covering forecast without mutating data',()=>{
  const before=structuredClone(input),summary=observingSummary(input,created);
- assert.equal(summary.filename,'nightjar-observing-summary-2026-10-20.txt');
+ assert.equal(summary.filename,'nightjar-observing-summary-london-2026-10-20T19-30-12-345Z.txt');
  for(const text of ['Site: London','latitude 51.5085, longitude -0.1257','2026-10-20T19:30:12.345Z','20:30:12 GMT+1','Bortle 7/9; user entered','Astronomical darkness','Forecast hour UTC: 2026-10-20T19:00:00.000Z','Cloud cover: 0%','Wind speed: 0 km/h','Temperature: 8 degrees C','Weather fetched: 2026-10-20T12:00:00.000Z','saved snapshot'])assert(summary.text.includes(text),text);
  assert.match(summary.text,/Planning score: \d+\/100/);
  assert.deepEqual(input,before);
@@ -63,4 +63,23 @@ test('missing or invalid extra conditions stay unavailable and zero readings sur
  }
  const text=observingSummary({...input,forecast:{hourly:{...forecast.hourly,dew_point_2m:[0],visibility:[0]}}},created).text;
  assert(text.includes('Dew point: 0 degrees C'));assert(text.includes('Near-surface visibility: 0 metres'));
+});
+
+test('summary filenames distinguish observing sites and exact instants on the same date',()=>{
+ const first=observingSummary(input,created).filename;
+ const otherSite=observingSummary({...input,place:{...place,name:'Hill top'}},created).filename;
+ const otherTime=observingSummary({...input,date:new Date(+date+1)},created).filename;
+ assert.notEqual(first,otherSite);assert.notEqual(first,otherTime);
+ assert.equal(otherSite,'nightjar-observing-summary-hill-top-2026-10-20T19-30-12-345Z.txt');
+ assert(otherTime.endsWith('19-30-12-346Z.txt'));
+});
+test('summary filenames bound Unicode names and remove filesystem punctuation',()=>{
+ for(const name of ['../Hill / creek: \"?*|<>', '星空の丘', 'Étoile du soir', '𐐀'.repeat(99), '... / \"?*|<>']){
+  const {filename,text}=observingSummary({...input,place:{...place,name}},created);
+  assert(!/[<>:"/\\|?*\x00-\x1f\x7f]/.test(filename));assert(Buffer.byteLength(filename,'utf8')<240);
+  assert(filename.startsWith('nightjar-observing-summary-'));assert(filename.endsWith('2026-10-20T19-30-12-345Z.txt'));
+  assert(text.includes(`Site: ${name}`),'the full original site name stays in the summary');
+ }
+ assert(observingSummary({...input,place:{...place,name:'星空の丘'}},created).filename.includes('星空の丘'));
+ assert(observingSummary({...input,place:{...place,name:'... / ?*'}},created).filename.includes('-site-'));
 });
