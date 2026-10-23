@@ -4,9 +4,11 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Current completion checklist — 22 October 2026
 
-The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **837 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Integrated production browser reruns also pass all 24 site-comparison, six diary-edit and 18 suggested-window cases across desktop, phone, narrow/landscape and both tablet orientations. The suggested-window harness waits for the rendered action instead of network idle. Its 18 cases also verify the inline refresh action beside an expired-suggestion message, including touch target size, real mobile/tablet taps and preservation of unfinished input. Hosted validation and physical-device acceptance remain pending.
+The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **839 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Integrated production browser reruns also pass all 24 site-comparison, six diary-edit and 18 suggested-window cases across desktop, phone, narrow/landscape and both tablet orientations. The suggested-window harness waits for the rendered action instead of network idle. Its 18 cases also verify the inline refresh action beside an expired-suggestion message, including touch target size, real mobile/tablet taps and preservation of unfinished input. Hosted validation and physical-device acceptance remain pending.
 
 Completed locally:
+
+- [x] Current sites offer an Apple Maps link with full coordinates and encoded names. Eighteen browser scenarios verify destination isolation, no pre-activation Maps request, retained edits/data and mobile/tablet layout. External Maps requests are intercepted; native app handoff remains pending.
 
 - [x] ±24h touch shortcuts preserve precise elapsed time and protect unfinished edits. Accepted time/context changes permanently retire discarded drafts, preventing their reappearance on a return to the old time. All 24 new browser scenarios and eight existing time-control journeys pass; the narrow-phone layout was visually inspected.
 
@@ -24,12 +26,12 @@ Completed locally:
 - [x] Seven-night suggested-window selection uses fresh successful weather and the existing nightly ranking; production checks at eight sizes cover unfinished-time review, missing/stale/failed-refresh weather and clock uncertainty.
 - [x] Planner time/site controls, forecasts, target browsing, notes, diary forms, reports and backup/recovery flows are implemented and covered by the recorded checks below.
 - [x] Light-pollution map and explicit numeric model readings, lunar libration and the existing 2D/3D atlas imaging grid are implemented. Earlier scope descriptions that listed these as missing were outdated.
-- [x] The integrated review branch passes all 837 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
+- [x] The integrated review branch passes all 839 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
 - [x] Latest bright-target return actions pass fixture-based Chromium checks at desktop, phone portrait/landscape, both tablet orientations, 744 px split view and 701 px breakpoint widths. These checks establish browser behavior rather than physical-device acceptance.
 
 Required release acceptance, still pending:
 
-- [ ] Test touch navigation, rotation/split view, native form entry, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
+- [ ] Test touch navigation, rotation/split view, native form entry, Apple Maps handoff, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
 - [ ] Verify home-screen installation, standalone reopening, background/resume, reconnect and a real installed-app update without losing saved plans or unfinished text.
 - [ ] Verify the saved-data offline fallback and recovery downloads on a real device; full planner startup offline remains unsupported.
 - [ ] Receive and inspect native backup/recovery downloads, import a backup, open diary CSV/reports, print/save PDF, complete native observing-summary sharing and import calendar events with correct time zones.

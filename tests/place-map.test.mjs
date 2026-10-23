@@ -3,7 +3,7 @@ import {test,after} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {placeMapSource,placeMapLatitudeLimit:limit}=await vite.ssrLoadModule('/lib/place-map.ts');
+const {placeMapSource,placeAppleMapsLink,placeMapLatitudeLimit:limit}=await vite.ssrLoadModule('/lib/place-map.ts');
 test('polar sites offer no misleading Mercator map or invalid latitude bounds',()=>{
  assert(limit>85&&limit<86);
  for(const latitude of [-90,-85.1,-limit,-limit+1e-8,limit-1e-8,limit,85.1,90])assert.equal(placeMapSource({latitude,longitude:180}),null);
@@ -23,4 +23,16 @@ test('near-edge maps bound their view while preserving the exact observing marke
 test('ordinary maps retain their source and invalid coordinates cannot reach the provider',()=>{
  assert.equal(placeMapSource({latitude:51.5,longitude:0}),'https://www.openstreetmap.org/export/embed.html?bbox=-0.12%2C51.42%2C0.12%2C51.58&layer=mapnik&marker=51.5%2C0');
  for(const site of [{latitude:NaN,longitude:0},{latitude:0,longitude:Infinity},{latitude:0,longitude:180.1},{latitude:0,longitude:-180.1}])assert.equal(placeMapSource(site),null);
+});
+
+test('Apple Maps links preserve exact coordinates and encode labels without extra parameters',()=>{
+ for(const [latitude,longitude] of [[51.508512345,-.125712345],[-33.123456789,151.987654321],[90,180],[-90,-180],[0,0]]){
+  const name='星空 & hill? #1 / &daddr=other',place={latitude,longitude,name},before={...place};
+  const url=new URL(placeAppleMapsLink(place));
+  assert.equal(url.origin,'https://maps.apple.com');assert.equal(url.searchParams.get('ll'),`${latitude},${longitude}`);
+  assert.equal(url.searchParams.get('q'),name);assert.deepEqual([...url.searchParams.keys()],['ll','q']);assert.equal(url.hash,'');assert.deepEqual(place,before);
+ }
+});
+test('invalid coordinates cannot create an external Maps handoff',()=>{
+ for(const [latitude,longitude] of [[NaN,0],[Infinity,0],[91,0],[-91,0],[0,NaN],[0,181],[0,-181]])assert.equal(placeAppleMapsLink({latitude,longitude,name:'Site'}),null);
 });
