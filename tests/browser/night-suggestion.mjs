@@ -50,7 +50,9 @@ try{
    // Fixed Date advances no timers: the visible suggestion really is the old
    // one, rather than a fresh render produced by the planning-clock interval.
    await page.clock.setFixedTime(new Date(initial));
-   await page.goto(base.href,{waitUntil:'networkidle'});
+   // App readiness is the visible suggestion below. Background requests and
+   // service-worker traffic need not become idle before testing that action.
+   await page.goto(base.href,{waitUntil:'domcontentloaded'});
    assert.match(await page.title(),/Nightjar/);
    assert.equal(new URL(page.url()).origin,base.origin);
    const panel=page.locator('.seven-night-outlook'),action=panel.getByRole('button',{name:'Use suggested window',exact:true});
@@ -68,9 +70,11 @@ try{
    assert.equal(await time.inputValue(),'');
    assert.equal(await page.getByRole('heading',{name:'Your edits have not been saved',exact:true}).count(),0);
    assert.equal(await action.count(),0);
+   const recovery=panel.getByRole('button',{name:'Refresh and review suggested windows',exact:true});
+   assert((await recovery.boundingBox()).height>=44);
    if(evidence)await page.screenshot({path:`${evidence}/night-boundary-${name}-${kind}.png`});
    refreshed=true;
-   await panel.getByRole('button',{name:'Refresh seven-night forecast',exact:true}).click();
+   if(touch)await recovery.tap();else await recovery.click();
    await action.waitFor();
    assert.equal(await panel.locator('#night-outlook-planning-status').count(),0);
    if(touch)await action.tap();else await action.click();

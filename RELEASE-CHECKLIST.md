@@ -2,26 +2,43 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-## Current completion checklist — 22 October 2026
+## Current completion checklist — 23 October 2026
 
-The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **826 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Hosted validation and physical-device acceptance remain pending.
+The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **843 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Integrated production browser reruns also pass all 24 site-comparison, six diary-edit and 18 suggested-window cases across desktop, phone, narrow/landscape and both tablet orientations. The suggested-window harness waits for the rendered action instead of network idle. Its 18 cases also verify the inline refresh action beside an expired-suggestion message, including touch target size, real mobile/tablet taps and preservation of unfinished input. Hosted validation and physical-device acceptance remain pending.
 
 Completed locally:
 
+- [x] Observing-summary filenames identify the site and exact UTC time, with bounded Unicode labels and filesystem-safe punctuation. All 12 summary-share/download browser scenarios pass, including actual non-Latin filenames and retained full names in the text. Native Files handling remains pending.
+
+- [x] Coordinate-pair paste fills both fields/hemispheres for explicit review without selecting a site. Six browser journeys cover precision, normal scalar paste fallback, cancelled obsolete GPS, edit protection and retained data. Parser bounds/format cases pass; native mobile clipboard interaction remains pending.
+
+- [x] Current sites offer an Apple Maps link with full coordinates and encoded names. Eighteen browser scenarios verify destination isolation, no pre-activation Maps request, retained edits/data and mobile/tablet layout. External Maps requests are intercepted; native app handoff remains pending.
+
+- [x] ±24h touch shortcuts preserve precise elapsed time and protect unfinished edits. Accepted time/context changes permanently retire discarded drafts, preventing their reappearance on a return to the old time. All 24 new browser scenarios and eight existing time-control journeys pass; the narrow-phone layout was visually inspected.
+
+- [x] Atmospheric timestamps distinguish forecast hours from unavailable selected times and include the date/UTC offset. Six rendered journeys cover repeated local hours, gaps, date changes and retained edits; all 12 summary-share scenarios pass with explicit near-surface visibility labeling.
+
+- [x] Shared/downloaded observing summaries include low/mid/high clouds, dew point and visibility from the covering forecast hour, preserving missing/invalid values as unavailable and valid zeros. Two added unit tests and all 12 summary-share browser scenarios pass; native sharing remains mocked.
+
+- [x] Native text sharing is offered for observing summaries when supported, with duplicate prevention, quiet cancellation and download fallback. Twelve production browser scenarios across six sizes use a mocked share API and real downloaded text to verify payloads, failure/retry, exact snapshot identity after later edits and retained data. Native share sheets/destinations remain untested.
+- [x] Silent reconnect recovery distinguishes requests started offline from online retries. Thirteen unit checks and twelve production browser scenarios across six sizes verify recovery without duplicate requests, retained exact time/unfinished input and unchanged saved data. Browser connectivity/lifecycle events are synthetic; physical installed-PWA acceptance remains pending.
+- [x] Closest-forecast recovery skips unknown cloud estimates and also handles a selected hour with missing clouds. Eighteen production browser scenarios across six sizes cover missing-cloud/outside-forecast/all-unavailable states, touch target size, edit review and exact time/data retention; no recovery time is offered when no cloud estimate is known.
+- [x] Tonight’s best-hour recommendation revalidates forecast age/clock at tap time. Eighteen production browser scenarios across six sizes cover expiry refusal, inline refresh, failed-refresh retry, the still-fresh boundary and retained edit review/time/data. Both action and recovery controls meet the 44 px touch target check.
+- [x] Device-location recovery distinguishes permission denial, an unavailable position and timeout. Six production browser viewport cases verify retry/cancel, ignored obsolete callbacks, guarded successful fixes and explicit acceptance while preserving exact UTC time and saved places/notes; unfinished input survives refusal and Keep editing. Immediate clean location selection also reveals the Tonight heading after scrolling, matching saved-site selection; six production viewport cases verify this alongside failure/edit-review recovery. Starting GPS or a valid town search cancels the competing lookup; six viewport cases deliver obsolete GPS callbacks and a deferred town response to verify that the latest result/feedback and unfinished input are kept. Manual town/coordinate edits and Clear coordinates also cancel GPS immediately; obsolete success/failure callbacks cannot interrupt the newer edit with site-change review. Six production viewport runs check retained fields and saved data. Browser geolocation is mocked; native prompts and real GPS remain device checks.
 - [x] Recommended-site planning revalidates every peer forecast at tap time; 24 production browser cases across six sizes cover expiry, an expired lower-scoring peer, clock uncertainty and the still-fresh boundary, with refresh/edit-review recovery.
 - [x] Suggested-window taps revalidate the actual window start and forecast-age/clock boundaries; 18 production browser cases across six sizes preserve unfinished input and verify refresh/review recovery. The optional browser regression is documented in README.md.
 - [x] Seven-night suggested-window selection uses fresh successful weather and the existing nightly ranking; production checks at eight sizes cover unfinished-time review, missing/stale/failed-refresh weather and clock uncertainty.
 - [x] Planner time/site controls, forecasts, target browsing, notes, diary forms, reports and backup/recovery flows are implemented and covered by the recorded checks below.
 - [x] Light-pollution map and explicit numeric model readings, lunar libration and the existing 2D/3D atlas imaging grid are implemented. Earlier scope descriptions that listed these as missing were outdated.
-- [x] The integrated review branch passes all 826 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
+- [x] The integrated review branch passes all 843 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
 - [x] Latest bright-target return actions pass fixture-based Chromium checks at desktop, phone portrait/landscape, both tablet orientations, 744 px split view and 701 px breakpoint widths. These checks establish browser behavior rather than physical-device acceptance.
 
 Required release acceptance, still pending:
 
-- [ ] Test touch navigation, rotation/split view, native form entry, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
+- [ ] Test touch navigation, rotation/split view, native form entry/coordinate-pair paste, Apple Maps handoff, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
 - [ ] Verify home-screen installation, standalone reopening, background/resume, reconnect and a real installed-app update without losing saved plans or unfinished text.
 - [ ] Verify the saved-data offline fallback and recovery downloads on a real device; full planner startup offline remains unsupported.
-- [ ] Receive and inspect native backup/recovery downloads, import a backup, open diary CSV/reports, print/save PDF and import calendar events with correct time zones.
+- [ ] Receive and inspect native backup/recovery downloads, import a backup, open diary CSV/reports, print/save PDF, complete native observing-summary sharing and import calendar events with correct time zones.
 - [ ] Run GitHub validation for the published mobile-planner commit before merging; earlier hosted successes do not validate this branch.
 - [ ] Deploy and verify the final HTTPS origin, live APIs, manifest, service worker, offline fallback and update behavior. Browser data is origin-specific.
 

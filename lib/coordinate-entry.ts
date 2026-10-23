@@ -27,6 +27,18 @@ export function coordinateEntryPoint(latitude:string,longitude:string):Place|nul
  return lat===null||lon===null?null:{name:`${lat.toFixed(3)}°, ${lon.toFixed(3)}°`,latitude:lat,longitude:lon};
 }
 
+// Require a comma followed by whitespace so a single decimal-comma value
+// such as "51,5" keeps its existing meaning in either individual field.
+export function coordinatePairDraft(value:string):{latitude:string;longitude:string}|null{
+ if(value.length>200)return null;
+ const raw=value.normalize('NFKC').trim();
+ const content=raw.startsWith('(')&&raw.endsWith(')')?raw.slice(1,-1).trim():raw;
+ const match=/^([+\-−]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?)\s*,\s+([+\-−]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?)$/i.exec(content);
+ if(!match||match[1].length>80||match[2].length>80)return null;
+ const latitude=match[1].replace(/^−/,'-'),longitude=match[2].replace(/^−/,'-');
+ return coordinateEntryPoint(latitude,longitude)?{latitude,longitude}:null;
+}
+
 export function coordinateEntryMatchesPoint(latitude:string,longitude:string,place:Pick<Place,'latitude'|'longitude'>){
  const point=coordinateEntryPoint(latitude,longitude);
  return Boolean(point&&point.latitude===place.latitude&&point.longitude===place.longitude);

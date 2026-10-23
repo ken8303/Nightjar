@@ -1,9 +1,9 @@
 import {validTimeZone} from './valid-timezone';
 
 export function validObservingDate(date:Date){return Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999}
-export function shiftObservingHour(date:Date,direction:-1|1):Date|null{
- if(!validObservingDate(date)||direction!==-1&&direction!==1)return null;
- const next=new Date(+date+direction*3600000);
+export function shiftObservingHour(date:Date,direction:-1|1,step:1|24=1):Date|null{
+ if(!validObservingDate(date)||direction!==-1&&direction!==1||step!==1&&step!==24)return null;
+ const next=new Date(+date+direction*step*3600000);
  return validObservingDate(next)?next:null;
 }
 export function parseObservingInstant(value:unknown):Date|null{

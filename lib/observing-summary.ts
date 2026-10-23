@@ -7,6 +7,13 @@ import {moonInfo,scoreAt,sunAltitude,type Place} from './sky';
 type Input={date:Date;place:Place;forecast?:WeatherForecast|null;fetchedAt?:number;refreshing?:boolean;refreshFailed?:boolean};
 const oneLine=(text:string)=>text.replace(/[\r\n\t]+/g,' ').trim();
 const measurement=(value:number|null|undefined,unit:string)=>typeof value==='number'&&Number.isFinite(value)?`${value}${unit}`:'Unavailable';
+function summaryFilename(place:Place,date:Date){
+ // Bound Unicode code points so the full UTF-8 filename fits common file
+ // systems, and remove path separators, controls and reserved punctuation.
+ const cleaned=place.name.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');
+ const site=Array.from(cleaned).slice(0,40).join('').replace(/-+$/,'')||'site';
+ return `nightjar-observing-summary-${site}-${date.toISOString().replace(/[:.]/g,'-')}.txt`;
+}
 
 export function observingSummary(input:Input,created=new Date()){
  const {date,place}=input;
@@ -43,14 +50,21 @@ export function observingSummary(input:Input,created=new Date()){
   const cloud=hourly!.cloud_cover[index],score=typeof cloud==='number'&&Number.isFinite(cloud)?scoreAt(cloud,date,place):null;
   lines.push(`Forecast hour UTC: ${new Date(hourly!.time[index]*1000).toISOString()}`,
    `Cloud cover: ${measurement(cloud,'%')}`,
+   `Low cloud cover: ${measurement(hourly!.cloud_cover_low?.[index],'%')}`,
+   `Mid cloud cover: ${measurement(hourly!.cloud_cover_mid?.[index],'%')}`,
+   `High cloud cover: ${measurement(hourly!.cloud_cover_high?.[index],'%')}`,
    `Temperature: ${measurement(hourly!.temperature_2m?.[index],' degrees C')}`,
+   `Dew point: ${measurement(hourly!.dew_point_2m?.[index],' degrees C')}`,
+   `Near-surface visibility: ${measurement(hourly!.visibility?.[index],' metres')}`,
    `Wind speed: ${measurement(hourly!.wind_speed_10m?.[index],' km/h')}`,
    `Humidity: ${measurement(hourly!.relative_humidity_2m?.[index],'%')}`,
    `Planning score: ${score===null?'Unavailable':`${score}/100`}`);
  }
  lines.push('','This is a saved snapshot; weather and sky conditions do not update in this file.',
+  'Cloud layers can overlap; their percentages do not add up to total cloud cover.',
+  'Near-surface visibility is horizontal visibility, not astronomical transparency or seeing.',
   'Planning scores are estimates based on clouds, darkness and moonlight, not astronomical seeing or transparency.',
   'Positions use an ideal horizon; terrain, buildings and local conditions can obstruct the view.',
   'Weather source: Open-Meteo. Recheck conditions before heading out.');
- return {text:lines.join('\r\n')+'\r\n',filename:`nightjar-observing-summary-${date.toISOString().slice(0,10)}.txt`};
+ return {text:lines.join('\r\n')+'\r\n',filename:summaryFilename(place,date)};
 }
