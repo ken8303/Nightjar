@@ -5,10 +5,25 @@ import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {watchForecastRefresh}=await vite.ssrLoadModule('/lib/forecast-refresh.ts');
 function harness(initialOnline=true){
- const page=new EventTarget(),visibility=new EventTarget();let hidden=false,online=initialOnline,time=0,attempted=0,calls=0;const ticks=[];
- const stop=watchForecastRefresh(()=>{calls++;attempted=time},page,visibility,{hidden:()=>hidden,online:()=>online,attemptedAt:()=>attempted,now:()=>time,maxAge:900000,schedule:tick=>{const task={tick,cancelled:false};ticks.push(task);return()=>{task.cancelled=true}}});
- return {page,stop,ticks,manual:()=>{calls++;attempted=time},get calls(){return calls},time:value=>{time=value},visible:value=>{hidden=!value;visibility.dispatchEvent(new Event('visibilitychange'))},silentNetwork:value=>{online=value},network:value=>{online=value;page.dispatchEvent(new Event(value?'online':'offline'))}};
+ const page=new EventTarget(),visibility=new EventTarget();let hidden=false,online=initialOnline,time=0,attempted=0,attemptedOnline=initialOnline,calls=0;const ticks=[];
+ const acquire=()=>{calls++;attempted=time;attemptedOnline=online};
+ const stop=watchForecastRefresh(acquire,page,visibility,{hidden:()=>hidden,online:()=>online,attemptedAt:()=>attempted,attemptedOnline:()=>attemptedOnline,now:()=>time,maxAge:900000,schedule:tick=>{const task={tick,cancelled:false};ticks.push(task);return()=>{task.cancelled=true}}});
+ return {page,stop,ticks,manual:acquire,get calls(){return calls},time:value=>{time=value},visible:value=>{hidden=!value;visibility.dispatchEvent(new Event('visibilitychange'))},silentNetwork:value=>{online=value},network:value=>{online=value;page.dispatchEvent(new Event(value?'online':'offline'))}};
 }
+test('an offline mount acquisition does not satisfy a later silent reconnection',()=>{
+ const h=harness(false);h.time(1);h.manual();assert.equal(h.calls,1);
+ h.time(1001);h.silentNetwork(true);h.visible(true);assert.equal(h.calls,2);
+ h.visible(true);h.page.dispatchEvent(new Event('pageshow'));assert.equal(h.calls,2);h.stop();
+});
+test('an offline retry after the offline event cannot suppress recovery on silent return',()=>{
+ const h=harness();h.time(100);h.network(false);h.time(500);h.manual();assert.equal(h.calls,1);
+ h.time(2000);h.silentNetwork(true);h.visible(true);assert.equal(h.calls,2);
+ h.ticks.at(-1).tick();h.visible(true);assert.equal(h.calls,2);h.stop();
+});
+test('an online manual retry still satisfies the silent reconnection after an offline attempt',()=>{
+ const h=harness(false);h.time(1);h.manual();h.time(1001);h.silentNetwork(true);h.manual();
+ h.visible(true);h.page.dispatchEvent(new Event('pageshow'));assert.equal(h.calls,2);h.stop();
+});
 test('foreground reconnect and regular return share the request throttle',()=>{
  const h=harness();h.time(999);h.network(true);assert.equal(h.calls,0);h.time(1000);h.network(true);h.network(true);assert.equal(h.calls,1);h.time(901000);h.visible(true);assert.equal(h.calls,2);h.stop();
 });

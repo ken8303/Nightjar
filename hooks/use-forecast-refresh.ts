@@ -9,14 +9,15 @@ import {watchForecastRefresh} from '@/lib/forecast-refresh';
 export function useForecastRefresh(maxAge=15*60*1000){
  const [revision,setRevision]=useState(0);
  const attemptedAt=useRef(0);
- const recordAttempt=useCallback(()=>{attemptedAt.current=Date.now()},[]);
+ const attemptedOnline=useRef(true);
+ const recordAttempt=useCallback(()=>{attemptedAt.current=Date.now();attemptedOnline.current=navigator.onLine!==false},[]);
  const refresh=useCallback(()=>{
-  attemptedAt.current=Date.now();
+  recordAttempt();
   setRevision(value=>value+1);
- },[]);
+ },[recordAttempt]);
  useEffect(()=>{
-  attemptedAt.current=Date.now();
-  return watchForecastRefresh(refresh,window,document,{hidden:()=>document.visibilityState==='hidden',online:()=>navigator.onLine!==false,attemptedAt:()=>attemptedAt.current,now:Date.now,maxAge});
- },[maxAge,refresh]);
+  recordAttempt();
+  return watchForecastRefresh(refresh,window,document,{hidden:()=>document.visibilityState==='hidden',online:()=>navigator.onLine!==false,attemptedAt:()=>attemptedAt.current,attemptedOnline:()=>attemptedOnline.current,now:Date.now,maxAge});
+ },[maxAge,refresh,recordAttempt]);
  return {revision,refresh,recordAttempt};
 }

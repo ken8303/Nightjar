@@ -1,6 +1,6 @@
 import {watchPlanningClock} from './planning-clock';
 type Events=Pick<EventTarget,'addEventListener'|'removeEventListener'>;
-type Options={hidden:()=>boolean;online:()=>boolean;attemptedAt:()=>number;now:()=>number;maxAge?:number;schedule?:(tick:()=>void,interval:number)=>()=>void};
+type Options={hidden:()=>boolean;online:()=>boolean;attemptedAt:()=>number;attemptedOnline?:()=>boolean;now:()=>number;maxAge?:number;schedule?:(tick:()=>void,interval:number)=>()=>void};
 // A reconnect can occur during suspension. Remember it for the next visible
 // return, sharing the same throttle as ordinary foreground refreshes.
 export function watchForecastRefresh(refresh:()=>void,page:Events,visibility:Events,options:Options){
@@ -16,7 +16,8 @@ export function watchForecastRefresh(refresh:()=>void,page:Events,visibility:Eve
   const connected=readNetwork();
   if(pageHidden||options.hidden()||!connected)return;
   const attempted=options.attemptedAt();
-  if(reconnected&&attempted!==reconnectAttempt)reconnected=false;
+  // A request started offline cannot satisfy a later silent reconnection.
+  if(reconnected&&attempted!==reconnectAttempt&&options.attemptedOnline?.()!==false)reconnected=false;
   const age=options.now()-attempted;
   if(age<0||age>=(reconnected?1000:options.maxAge??15*60*1000)){reconnected=false;refresh()}
  };
