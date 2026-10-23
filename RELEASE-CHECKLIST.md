@@ -8,6 +8,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Native text sharing is offered for observing summaries when supported, with duplicate prevention, quiet cancellation and download fallback. Twelve production browser scenarios across six sizes use a mocked share API and real downloaded text to verify payloads, failure/retry, exact snapshot identity after later edits and retained data. Native share sheets/destinations remain untested.
 - [x] Silent reconnect recovery distinguishes requests started offline from online retries. Thirteen unit checks and twelve production browser scenarios across six sizes verify recovery without duplicate requests, retained exact time/unfinished input and unchanged saved data. Browser connectivity/lifecycle events are synthetic; physical installed-PWA acceptance remains pending.
 - [x] Closest-forecast recovery skips unknown cloud estimates and also handles a selected hour with missing clouds. Eighteen production browser scenarios across six sizes cover missing-cloud/outside-forecast/all-unavailable states, touch target size, edit review and exact time/data retention; no recovery time is offered when no cloud estimate is known.
 - [x] Tonight’s best-hour recommendation revalidates forecast age/clock at tap time. Eighteen production browser scenarios across six sizes cover expiry refusal, inline refresh, failed-refresh retry, the still-fresh boundary and retained edit review/time/data. Both action and recovery controls meet the 44 px touch target check.
@@ -25,7 +26,7 @@ Required release acceptance, still pending:
 - [ ] Test touch navigation, rotation/split view, native form entry, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
 - [ ] Verify home-screen installation, standalone reopening, background/resume, reconnect and a real installed-app update without losing saved plans or unfinished text.
 - [ ] Verify the saved-data offline fallback and recovery downloads on a real device; full planner startup offline remains unsupported.
-- [ ] Receive and inspect native backup/recovery downloads, import a backup, open diary CSV/reports, print/save PDF and import calendar events with correct time zones.
+- [ ] Receive and inspect native backup/recovery downloads, import a backup, open diary CSV/reports, print/save PDF, complete native observing-summary sharing and import calendar events with correct time zones.
 - [ ] Run GitHub validation for the published mobile-planner commit before merging; earlier hosted successes do not validate this branch.
 - [ ] Deploy and verify the final HTTPS origin, live APIs, manifest, service worker, offline fallback and update behavior. Browser data is origin-specific.
 
