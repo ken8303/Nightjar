@@ -37,7 +37,7 @@ try{
    Object.defineProperty(navigator,'share',{configurable:true,value:supported?data=>new Promise((resolve,reject)=>window.shareRequests.push({data,resolve,reject})):undefined});
   },{origin:base.origin,supported});
   await page.context().route('**/api/weather?*',route=>route.fulfill({json:{hourly:{
-   time:[19,20,21].map(hour=>Date.parse(`2026-10-20T${hour}:00Z`)/1000),cloud_cover:[30,30,30],
+   time:[19,20,21].map(hour=>Date.parse(`2026-10-20T${hour}:00Z`)/1000),cloud_cover:[30,30,30],cloud_cover_low:[0,10,20],cloud_cover_mid:[20,30,40],cloud_cover_high:[30,40,50],dew_point_2m:[-2.5,0,5],visibility:[12345,100,200],
   }}}));
   await page.context().route('**/*',route=>route.request().resourceType()==='image'&&new URL(route.request().url()).origin!==base.origin
    ?route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'}):route.fallback());
@@ -58,6 +58,7 @@ try{
    // A disabled repeat activation must not open a second native share request.
    await share.evaluate(button=>button.click());assert.equal(await page.evaluate(()=>window.shareRequests.length),1);
    const payload=await page.evaluate(()=>window.shareRequests[0].data);
+   for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Visibility: 12345 metres'])assert(payload.text.includes(line),line);
    assert.equal(payload.title,'Nightjar observing summary');assert.equal(payload.files,undefined);
    assert(payload.text.includes('Site: London'));assert(payload.text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));
    assert(payload.text.includes('Weather fetched: 2026-10-20T18:30:00.000Z'));assert(payload.text.includes('Weather source: Open-Meteo'));
@@ -73,6 +74,7 @@ try{
   const downloaded=page.waitForEvent('download');await activate(download);const file=await downloaded;
   assert.equal(file.suggestedFilename(),'nightjar-observing-summary-2026-10-20.txt');
   const text=await readFile(await file.path(),'utf8');assert(text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));assert(text.includes('Cloud cover: 30%'));
+  for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Visibility: 12345 metres'])assert(text.includes(line),line);
   assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),saved);
   assert.equal(await page.locator('.unsaved-view-warning').count(),0);
   if(supported){

@@ -43,7 +43,12 @@ export function observingSummary(input:Input,created=new Date()){
   const cloud=hourly!.cloud_cover[index],score=typeof cloud==='number'&&Number.isFinite(cloud)?scoreAt(cloud,date,place):null;
   lines.push(`Forecast hour UTC: ${new Date(hourly!.time[index]*1000).toISOString()}`,
    `Cloud cover: ${measurement(cloud,'%')}`,
+   `Low cloud cover: ${measurement(hourly!.cloud_cover_low?.[index],'%')}`,
+   `Mid cloud cover: ${measurement(hourly!.cloud_cover_mid?.[index],'%')}`,
+   `High cloud cover: ${measurement(hourly!.cloud_cover_high?.[index],'%')}`,
    `Temperature: ${measurement(hourly!.temperature_2m?.[index],' degrees C')}`,
+   `Dew point: ${measurement(hourly!.dew_point_2m?.[index],' degrees C')}`,
+   `Visibility: ${measurement(hourly!.visibility?.[index],' metres')}`,
    `Wind speed: ${measurement(hourly!.wind_speed_10m?.[index],' km/h')}`,
    `Humidity: ${measurement(hourly!.relative_humidity_2m?.[index],'%')}`,
    `Planning score: ${score===null?'Unavailable':`${score}/100`}`);
