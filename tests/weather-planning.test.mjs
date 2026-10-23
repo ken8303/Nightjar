@@ -4,9 +4,20 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {weatherHours}=await vite.ssrLoadModule('/lib/weather-hours.ts');
-const {forecastPlanning,forecastHourLabel}=await vite.ssrLoadModule('/lib/weather-planning.ts');
+const {forecastPlanning,forecastHourLabel,closestCloudForecastHour}=await vite.ssrLoadModule('/lib/weather-planning.ts');
 const place={name:'London QA',latitude:51.5,longitude:0,timezone:'UTC'},start=Date.parse('2026-10-08T20:00Z')/1000;
 const hourly=(offsets,cloud)=>({time:offsets.map(value=>start+value*3600),cloud_cover:offsets.map((_,index)=>Array.isArray(cloud)?cloud[index]:cloud)});
+test('cloud forecast recovery skips missing estimates, preserves known zero and favours the later equal-distance sample',()=>{
+ const data=hourly([0,1,2,4],[0,null,null,100]),before=structuredClone(data);
+ assert.equal(+closestCloudForecastHour(data,new Date((start+3600)*1000)),start*1000);
+ assert.equal(+closestCloudForecastHour(data,new Date((start+7200)*1000)),(start+14400)*1000);
+ assert.deepEqual(data,before);
+});
+test('cloud forecast recovery refuses unavailable clouds and invalid times instead of inventing a scored hour',()=>{
+ const date=new Date(start*1000);
+ for(const data of [undefined,hourly([],0),hourly([0,1,2],[null,NaN,101]),{time:[NaN,Infinity],cloud_cover:[0,0]}])assert.equal(closestCloudForecastHour(data,date),null);
+ assert.equal(closestCloudForecastHour(hourly([0],0),new Date(NaN)),null);
+});
 test('forecast rows stay inside twelve elapsed hours and include partial boundary hours without filling timestamp gaps',()=>{
  const data=hourly(Array.from({length:20},(_,index)=>index),40),before=structuredClone(data);
  const exact=weatherHours(data,new Date(start*1000),place),partial=weatherHours(data,new Date((start+1800)*1000),place);

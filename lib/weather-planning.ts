@@ -1,5 +1,5 @@
 import {type Place,scoreAt} from './sky';
-import {type weatherHours} from './weather-hours';
+import {type weatherHours,type HourlyForecast} from './weather-hours';
 import {validObservingDate} from './observing-time';
 type Hour=ReturnType<typeof weatherHours>[number];
 const validCloud=(value:number|null):value is number=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100;
@@ -15,6 +15,11 @@ export function closestForecastHour(times:readonly number[]|undefined,date:Date)
   if(delta<distance||delta===distance&&closest&&+candidate>+closest){closest=candidate;distance=delta}
  }
  return closest;
+}
+// Recovery should lead to a calculable planning score, including known 0%
+// cloud, rather than another timestamp whose cloud estimate is unavailable.
+export function closestCloudForecastHour(hourly:HourlyForecast|undefined,date:Date):Date|null{
+ return closestForecastHour(hourly?.time.filter((_,index)=>validCloud(hourly.cloud_cover[index])),date);
 }
 export function forecastPlanning(hours:readonly Hour[],date:Date,place:Place){
  const current=hours.find(hour=>+hour.date<=+date&&+date<+hour.date+3600000),score=current&&validCloud(current.cloud)?scoreAt(current.cloud,date,place):null;
