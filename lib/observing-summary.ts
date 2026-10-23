@@ -48,12 +48,14 @@ export function observingSummary(input:Input,created=new Date()){
    `High cloud cover: ${measurement(hourly!.cloud_cover_high?.[index],'%')}`,
    `Temperature: ${measurement(hourly!.temperature_2m?.[index],' degrees C')}`,
    `Dew point: ${measurement(hourly!.dew_point_2m?.[index],' degrees C')}`,
-   `Visibility: ${measurement(hourly!.visibility?.[index],' metres')}`,
+   `Near-surface visibility: ${measurement(hourly!.visibility?.[index],' metres')}`,
    `Wind speed: ${measurement(hourly!.wind_speed_10m?.[index],' km/h')}`,
    `Humidity: ${measurement(hourly!.relative_humidity_2m?.[index],'%')}`,
    `Planning score: ${score===null?'Unavailable':`${score}/100`}`);
  }
  lines.push('','This is a saved snapshot; weather and sky conditions do not update in this file.',
+  'Cloud layers can overlap; their percentages do not add up to total cloud cover.',
+  'Near-surface visibility is horizontal visibility, not astronomical transparency or seeing.',
   'Planning scores are estimates based on clouds, darkness and moonlight, not astronomical seeing or transparency.',
   'Positions use an ideal horizon; terrain, buildings and local conditions can obstruct the view.',
   'Weather source: Open-Meteo. Recheck conditions before heading out.');

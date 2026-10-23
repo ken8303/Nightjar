@@ -53,14 +53,14 @@ test('year boundaries and invalid input retain the supported observing-date cont
 test('summary includes cloud layers, dew point and visibility from the covering hour',()=>{
  const hourly={time:[19,20].map(hour=>Date.parse(`2026-10-20T${hour}:00Z`)/1000),cloud_cover:[30,90],cloud_cover_low:[0,80],cloud_cover_mid:[20,70],cloud_cover_high:[30,60],dew_point_2m:[-2.5,5],visibility:[12345,100]};
  const text=observingSummary({...input,forecast:{hourly}},created).text;
- for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Visibility: 12345 metres'])assert(text.includes(line),line);
- assert(!text.includes('Visibility: 100 metres'));
+ for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Near-surface visibility: 12345 metres'])assert(text.includes(line),line);
+ assert(!text.includes('Near-surface visibility: 100 metres'));
 });
 test('missing or invalid extra conditions stay unavailable and zero readings survive',()=>{
  for(const extra of [{},{cloud_cover_low:[-1],cloud_cover_mid:[101],cloud_cover_high:[null],dew_point_2m:[NaN],visibility:[-1]}]){
   const text=observingSummary({...input,forecast:{hourly:{...forecast.hourly,...extra}}},created).text;
-  for(const label of ['Low cloud cover','Mid cloud cover','High cloud cover','Dew point','Visibility'])assert(text.includes(`${label}: Unavailable`));
+  for(const label of ['Low cloud cover','Mid cloud cover','High cloud cover','Dew point','Near-surface visibility'])assert(text.includes(`${label}: Unavailable`));
  }
  const text=observingSummary({...input,forecast:{hourly:{...forecast.hourly,dew_point_2m:[0],visibility:[0]}}},created).text;
- assert(text.includes('Dew point: 0 degrees C'));assert(text.includes('Visibility: 0 metres'));
+ assert(text.includes('Dew point: 0 degrees C'));assert(text.includes('Near-surface visibility: 0 metres'));
 });

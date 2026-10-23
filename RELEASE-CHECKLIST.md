@@ -8,6 +8,8 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Atmospheric timestamps distinguish forecast hours from unavailable selected times and include the date/UTC offset. Six rendered journeys cover repeated local hours, gaps, date changes and retained edits; all 12 summary-share scenarios pass with explicit near-surface visibility labeling.
+
 - [x] Shared/downloaded observing summaries include low/mid/high clouds, dew point and visibility from the covering forecast hour, preserving missing/invalid values as unavailable and valid zeros. Two added unit tests and all 12 summary-share browser scenarios pass; native sharing remains mocked.
 
 - [x] Native text sharing is offered for observing summaries when supported, with duplicate prevention, quiet cancellation and download fallback. Twelve production browser scenarios across six sizes use a mocked share API and real downloaded text to verify payloads, failure/retry, exact snapshot identity after later edits and retained data. Native share sheets/destinations remain untested.

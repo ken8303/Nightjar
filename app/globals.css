@@ -167,3 +167,5 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .best-hour-recovery p{margin:0;line-height:1.6}
 .best-hour-recovery .button{white-space:normal;border:1px solid #607971;background:#18252b}
 .best-window .forecast-best-hour-action{min-height:44px;white-space:normal;text-align:left}
+
+.atmosphere-panel>.section-label{flex-wrap:wrap}.atmosphere-timestamp{overflow-wrap:anywhere}
