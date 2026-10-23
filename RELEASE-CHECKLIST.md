@@ -4,9 +4,11 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Current completion checklist — 22 October 2026
 
-The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **835 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Integrated production browser reruns also pass all 24 site-comparison, six diary-edit and 18 suggested-window cases across desktop, phone, narrow/landscape and both tablet orientations. The suggested-window harness waits for the rendered action instead of network idle. Its 18 cases also verify the inline refresh action beside an expired-suggestion message, including touch target size, real mobile/tablet taps and preservation of unfinished input. Hosted validation and physical-device acceptance remain pending.
+The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **837 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Integrated production browser reruns also pass all 24 site-comparison, six diary-edit and 18 suggested-window cases across desktop, phone, narrow/landscape and both tablet orientations. The suggested-window harness waits for the rendered action instead of network idle. Its 18 cases also verify the inline refresh action beside an expired-suggestion message, including touch target size, real mobile/tablet taps and preservation of unfinished input. Hosted validation and physical-device acceptance remain pending.
 
 Completed locally:
+
+- [x] ±24h touch shortcuts preserve precise elapsed time and protect unfinished edits. Accepted time/context changes permanently retire discarded drafts, preventing their reappearance on a return to the old time. All 24 new browser scenarios and eight existing time-control journeys pass; the narrow-phone layout was visually inspected.
 
 - [x] Atmospheric timestamps distinguish forecast hours from unavailable selected times and include the date/UTC offset. Six rendered journeys cover repeated local hours, gaps, date changes and retained edits; all 12 summary-share scenarios pass with explicit near-surface visibility labeling.
 
@@ -22,7 +24,7 @@ Completed locally:
 - [x] Seven-night suggested-window selection uses fresh successful weather and the existing nightly ranking; production checks at eight sizes cover unfinished-time review, missing/stale/failed-refresh weather and clock uncertainty.
 - [x] Planner time/site controls, forecasts, target browsing, notes, diary forms, reports and backup/recovery flows are implemented and covered by the recorded checks below.
 - [x] Light-pollution map and explicit numeric model readings, lunar libration and the existing 2D/3D atlas imaging grid are implemented. Earlier scope descriptions that listed these as missing were outdated.
-- [x] The integrated review branch passes all 835 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
+- [x] The integrated review branch passes all 837 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
 - [x] Latest bright-target return actions pass fixture-based Chromium checks at desktop, phone portrait/landscape, both tablet orientations, 744 px split view and 701 px breakpoint widths. These checks establish browser behavior rather than physical-device acceptance.
 
 Required release acceptance, still pending:

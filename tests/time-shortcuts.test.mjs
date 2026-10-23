@@ -58,3 +58,21 @@ test('forecast recovery ignores invalid timestamps and never manufactures a samp
  assert.equal(closestForecastHour([+date/1000],new Date(NaN)),null);
  assert.equal(closestForecastHour([Infinity,+date/1000,NaN],date).toISOString(),date.toISOString());
 });
+
+test('24-hour shortcuts preserve exact instants across clock changes and leap days',()=>{
+ for(const text of ['2026-03-28T20:30:12.345Z','2026-10-24T20:30:12.345Z','2028-02-28T20:30:12.345Z']){
+  const date=new Date(text),next=shiftObservingHour(date,1,24);
+  assert.equal(+next-+date,86400000);
+  assert.equal(next.getUTCSeconds(),12);assert.equal(next.getUTCMilliseconds(),345);
+  assert.equal(shiftObservingHour(next,-1,24).toISOString(),text);assert.equal(date.toISOString(),text);
+ }
+ assert.equal(shiftObservingHour(new Date('2028-02-28T20:30:12.345Z'),1,24).toISOString(),'2028-02-29T20:30:12.345Z');
+});
+test('24-hour shortcuts disable at calendar limits and reject unsupported step sizes',()=>{
+ assert.equal(shiftObservingHour(new Date('0001-01-01T23:59:59.999Z'),-1,24),null);
+ assert.equal(shiftObservingHour(new Date('9999-12-31T00:00:00.000Z'),1,24),null);
+ assert.equal(shiftObservingHour(new Date('0001-01-02T00:00:00.000Z'),-1,24).toISOString(),'0001-01-01T00:00:00.000Z');
+ assert.equal(shiftObservingHour(new Date('9999-12-30T23:59:59.999Z'),1,24).toISOString(),'9999-12-31T23:59:59.999Z');
+ for(const step of [0,2,Infinity,NaN,-24])assert.equal(shiftObservingHour(new Date(),1,step),null);
+ assert.equal(shiftObservingHour(new Date(NaN),1,24),null);
+});
