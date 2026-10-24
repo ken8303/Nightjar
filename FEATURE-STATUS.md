@@ -2,6 +2,8 @@
 
 Source inventory updated 20 October 2026; see the dated reference-site review below. Nightjar is a beta; this is a scope inventory, not a claim of production readiness or full feature parity. A single completion percentage would hide the difference between implemented features, missing features and device acceptance.
 
+Current display policy, 24 October 2026: observing information is shown only with the geometric Sun centre strictly below −18°. Bright-time views offer a bounded next-darkness preview; eligible timeline samples and event shortcuts are filtered without moving actual astronomical event times. Tonight, summary snapshots and printable checklists include remaining full darkness and its calculated endpoint. Golden/blue-hour information is hidden. Keyboard-control design and further photo-feature development remain paused; the capability inventory below records the underlying features, with this display policy applied.
+
 For exact test/build evidence and remaining release checks, use [BETA-HANDOFF.md](./BETA-HANDOFF.md) and [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md). Those records distinguish local work from the last successful GitHub validation and an actual Cloudflare deployment.
 
 ## Reference coverage

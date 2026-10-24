@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),{chromium}=require('playwright'),A=require('astronomy-engine');
 const base=new URL(process.argv[2]||'http://127.0.0.1:8788/');
@@ -18,6 +19,7 @@ try{
     localStorage.setItem('nightjar-places',JSON.stringify([place,{...place,name:'Opposite longitude',longitude:180}]));
     localStorage.setItem('nightjar-target-notes-v1',JSON.stringify({Vega:'Keep this note'}));
     localStorage.setItem('nightjar-deep-targets-v1',JSON.stringify(['M31']));
+    localStorage.setItem('nightjar-targets-v1',JSON.stringify(['Vega']));
    },{origin:base.origin,place,time});
    let auroraTime=time,auroraFails=false;
    await page.context().route('**/api/aurora',route=>auroraFails?route.fulfill({status:503,json:{error:'Fixture outage'}}):route.fulfill({json:{forecastAt:auroraTime,observedAt:new Date(Date.parse(auroraTime)-1800000).toISOString(),fetchedAt:time,cells:Array.from({length:100},(_,i)=>[i,52,50])}}));
@@ -57,6 +59,7 @@ try{
     await page.getByRole('button',{name:'Use selected time',exact:true}).click();await warning.waitFor({state:'hidden'});
     await page.locator('.outlook').waitFor();
     assert.equal(await page.locator('#observing-time').inputValue(),preview.slice(0,16));
+    const duration=await page.locator('.darkness-remaining strong').textContent();
     const end=new Date(await page.locator('.darkness-remaining time').getAttribute('datetime'));assert(+end>Date.parse(preview));
     assert(sun(new Date(+end-2000),place)<-18);assert(sun(new Date(+end+2000),place)>-18);
     await page.locator('.darkness-remaining').screenshot({path:`/tmp/nightjar-darkness-remaining-${name}.png`});
@@ -72,6 +75,16 @@ try{
      const date=new Date(label.match(/^Select (.*), score /)[1]);assert(sun(date,place)<-18,label);
     }
     await section('Sky atlas');await page.locator('#visibility-planner').waitFor();
+    for(const label of ['Download print-ready plan','Download deep-sky observing plan']){
+     const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:label,exact:true}).click();
+     const file=await downloaded,html=await readFile(await file.path(),'utf8');
+     assert(html.includes(`${duration} after the selected time`));assert(html.includes(end.toISOString().replace('T',' ').replace('Z',' UTC')));
+     const report=await browser.newPage({viewport});await report.setContent(html);
+     await report.getByText('FULL DARKNESS ENDS (UTC)',{exact:true}).waitFor();
+     assert(await report.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+     if(name==='narrow'&&label==='Download print-ready plan')await report.locator('.meta').screenshot({path:'/tmp/nightjar-print-darkness-narrow.png'});
+     await report.close();
+    }
     for(const label of await page.locator('.deep-sky-hours button').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('aria-label')))){const date=new Date(label.match(/ at (.*), altitude /)[1]);assert(sun(date,place)<-18,label)}
     const buttons=page.locator('#visibility-planner button[aria-label^="View "][aria-label*="altitude"]');
     for(const label of await buttons.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('aria-label')))){
