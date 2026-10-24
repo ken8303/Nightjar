@@ -52,6 +52,7 @@ try{
   const stored=()=>page.evaluate(()=>({site:localStorage.getItem('nightjar-place'),notes:localStorage.getItem('nightjar-target-notes-v1'),deep:localStorage.getItem('nightjar-deep-targets-v1')}));
   async function activate(control){if(touch)await control.tap();else await control.click()}
   async function settled(){await page.waitForFunction(()=>!document.querySelector('button[aria-label="Share observing summary"]')?.disabled)}
+  const duration=await page.locator('.darkness-remaining strong').textContent(),darknessEnd=await page.locator('.darkness-remaining time').getAttribute('datetime');
   const before=await exact(),saved=await stored();await time.fill('');
   if(supported){
    await share.waitFor();assert((await share.boundingBox()).height>=44);
@@ -59,6 +60,7 @@ try{
    // A disabled repeat activation must not open a second native share request.
    await share.evaluate(button=>button.click());assert.equal(await page.evaluate(()=>window.shareRequests.length),1);
    const payload=await page.evaluate(()=>window.shareRequests[0].data);
+   assert(payload.text.includes(`Full darkness remaining: ${duration} after the selected observing time.`));assert(payload.text.includes(`Full darkness ends UTC: ${darknessEnd}`));
    for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Near-surface visibility: 12345 metres'])assert(payload.text.includes(line),line);
    assert.equal(payload.title,'Nightjar observing summary');assert.equal(payload.files,undefined);
    assert(payload.text.includes('Site: London'));assert(payload.text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));
@@ -74,7 +76,7 @@ try{
   }else assert.equal(await share.count(),0);
   const downloaded=page.waitForEvent('download');await activate(download);const file=await downloaded;
   assert.equal(file.suggestedFilename(),`nightjar-observing-summary-${supported?'london':'星空-hill-1'}-2026-10-20T19-00-17-125Z.txt`);
-  const text=await readFile(await file.path(),'utf8');assert(text.includes(`Site: ${placeName}`));assert(text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));assert(text.includes('Cloud cover: 30%'));
+  const text=await readFile(await file.path(),'utf8');assert(text.includes(`Full darkness remaining: ${duration} after the selected observing time.`));assert(text.includes(`Full darkness ends UTC: ${darknessEnd}`));assert(text.includes(`Site: ${placeName}`));assert(text.includes('Observing UTC: 2026-10-20T19:00:17.125Z'));assert(text.includes('Cloud cover: 30%'));
   for(const line of ['Low cloud cover: 0%','Mid cloud cover: 20%','High cloud cover: 30%','Dew point: -2.5 degrees C','Near-surface visibility: 12345 metres'])assert(text.includes(line),line);
   assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),saved);
   assert.equal(await page.locator('.unsaved-view-warning').count(),0);

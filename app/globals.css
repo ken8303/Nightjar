@@ -169,3 +169,8 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .best-window .forecast-best-hour-action{min-height:44px;white-space:normal;text-align:left}
 
 .atmosphere-panel>.section-label{flex-wrap:wrap}.atmosphere-timestamp{overflow-wrap:anywhere}
+
+.darkness-remaining{margin-bottom:22px}
+.darkness-remaining h2{font-size:20px;margin:0 0 10px}
+.darkness-remaining p{line-height:1.6;overflow-wrap:anywhere}
+.darkness-remaining strong{color:#c1df93}

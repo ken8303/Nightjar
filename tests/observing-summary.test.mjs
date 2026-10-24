@@ -83,3 +83,17 @@ test('summary filenames bound Unicode names and remove filesystem punctuation',(
  assert(observingSummary({...input,place:{...place,name:'星空の丘'}},created).filename.includes('星空の丘'));
  assert(observingSummary({...input,place:{...place,name:'... / ?*'}},created).filename.includes('-site-'));
 });
+
+test('summary includes the precise end of full darkness and elapsed duration from the selected time',async()=>{
+ const {remainingDarkness,darknessDuration}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
+ const night=remainingDarkness(date,place),text=observingSummary(input,created).text;
+ assert(text.includes(`Full darkness remaining: ${darknessDuration(date,night.end)} after the selected observing time.`));
+ assert(text.includes(`Full darkness ends UTC: ${night.end.toISOString()}`));
+ assert(text.includes('not a weather or visibility guarantee'));
+});
+test('summary does not invent an end for polar darkness or a duration for daylight',()=>{
+ const polar=observingSummary({date:new Date('2026-12-21T12:00Z'),place:{name:'Pole',latitude:90,longitude:0}},created).text;
+ assert(polar.includes('Full darkness end: not found within 48 hours'));assert(!polar.includes('Full darkness ends UTC:'));
+ const bright=observingSummary({...input,date:new Date('2026-10-24T12:00Z')},created).text;
+ assert(bright.includes('selected time is outside full astronomical darkness'));assert(!bright.includes('Full darkness ends UTC:'));
+});

@@ -27,6 +27,7 @@ try{
    const warning=page.locator('.night-only-notice');await warning.waitFor();
    if(name==='phone'&&!polar)await page.screenshot({path:'/tmp/nightjar-night-only-phone.png'});
    assert.equal(await page.locator('.outlook').isVisible(),false);
+   assert.equal(await page.locator('.darkness-remaining').isVisible(),false);
    assert.equal(await page.getByRole('button',{name:'Download observing summary',exact:true}).isVisible(),false);
    async function section(label){
     const mobile=page.getByRole('button',{name:'Open planner navigation',exact:true});
@@ -46,6 +47,8 @@ try{
     await page.locator('.night-only-empty').waitFor();assert.equal(await page.getByRole('button',{name:'Use this dark time',exact:true}).isDisabled(),true);
     assert.equal(await page.locator('.night-only-preview').count(),0);
     assert.equal(await warning.isVisible(),true);await page.getByRole('button',{name:'Cancel time edit',exact:true}).click();
+    await page.locator('#observing-time').fill('2026-12-21T12:00');await page.locator('.darkness-remaining').waitFor();
+    assert.match(await page.locator('.darkness-remaining').textContent(),/No end of full darkness was found within 48 hours/);assert.equal(await page.locator('.darkness-remaining time').count(),0);
    }else{
     const preview=await page.locator('.night-only-preview time').getAttribute('datetime');assert(sun(new Date(preview),place)<-18);
     await page.getByRole('button',{name:'Use this dark time',exact:true}).click();
@@ -54,6 +57,9 @@ try{
     await page.getByRole('button',{name:'Use selected time',exact:true}).click();await warning.waitFor({state:'hidden'});
     await page.locator('.outlook').waitFor();
     assert.equal(await page.locator('#observing-time').inputValue(),preview.slice(0,16));
+    const end=new Date(await page.locator('.darkness-remaining time').getAttribute('datetime'));assert(+end>Date.parse(preview));
+    assert(sun(new Date(+end-2000),place)<-18);assert(sun(new Date(+end+2000),place)>-18);
+    await page.locator('.darkness-remaining').screenshot({path:`/tmp/nightjar-darkness-remaining-${name}.png`});
     await section('Aurora');await page.getByRole('heading',{name:'Aurora outlook outside full darkness',exact:true}).waitFor();assert.equal(await page.locator('.aurora-value').count(),0);
     auroraFails=true;await page.getByRole('button',{name:'Refresh aurora',exact:true}).click();
     await page.getByRole('alert').filter({hasText:'previous forecast remains hidden'}).waitFor();

@@ -1,3 +1,4 @@
+import {remainingDarkness,darknessDuration} from './darkness-remaining';
 import {validPlace} from './planner-state';
 import {validObservingDate} from './observing-time';
 import {forecastSnapshotNotes} from './forecast-freshness';
@@ -22,7 +23,7 @@ export function observingSummary(input:Input,created=new Date()){
  const index=forecastHourIndex(forecast?.hourly.time,date),hourly=forecast?.hourly;
  const timezone=place.timezone||'UTC';
  const local=new Intl.DateTimeFormat('en-GB',{timeZone:timezone,day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'shortOffset',...(date.getUTCFullYear()<=1?{era:'short' as const}:{})}).format(date);
- const sun=sunAltitude(date,place),moon=moonInfo(date,place);
+ const sun=sunAltitude(date,place),moon=moonInfo(date,place),darkness=remainingDarkness(date,place);
  const lines=[
   'NIGHTJAR OBSERVING SUMMARY',
   `Prepared: ${created.toISOString()} (UTC)`,
@@ -37,6 +38,7 @@ export function observingSummary(input:Input,created=new Date()){
   'SKY AT THE SELECTED TIME',
   `Sky: ${sun<-18?'Astronomical darkness':sun<=-6?'Twilight':'Daylight / civil twilight'}`,
   `Sun altitude: ${sun.toFixed(1)} degrees`,
+  ...(darkness?.end?[`Full darkness remaining: ${darknessDuration(darkness.start,darkness.end)} after the selected observing time.`,`Full darkness ends UTC: ${darkness.end.toISOString()}`]:[darkness?`Full darkness end: not found ${darkness.dateLimited?'before the supported UTC date limit':'within 48 hours of the selected observing time'}.`:'Full darkness remaining: the selected time is outside full astronomical darkness.']),
   `Moon: ${moon.name}; ${Math.round(moon.illumination*100)}% illuminated`,
   `Moon altitude: ${moon.altitude.toFixed(1)} degrees; ${moon.altitude>0?'above':'at or below'} the ideal horizon`,
   '',
@@ -64,6 +66,7 @@ export function observingSummary(input:Input,created=new Date()){
   'Cloud layers can overlap; their percentages do not add up to total cloud cover.',
   'Near-surface visibility is horizontal visibility, not astronomical transparency or seeing.',
   'Planning scores are estimates based on clouds, darkness and moonlight, not astronomical seeing or transparency.',
+  'Darkness duration uses elapsed time with the geometric Sun centre below -18 degrees; it is not a weather or visibility guarantee.',
   'Positions use an ideal horizon; terrain, buildings and local conditions can obstruct the view.',
   'Weather source: Open-Meteo. Recheck conditions before heading out.');
  return {text:lines.join('\r\n')+'\r\n',filename:summaryFilename(place,date)};
