@@ -39,7 +39,7 @@ try{
    ?route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'}):route.fallback());
   await page.goto(base.href,{waitUntil:'domcontentloaded'});
   assert.match(await page.title(),/Nightjar/);assert.equal(new URL(page.url()).origin,base.origin);
-  await page.getByRole('button',{name:'Refresh weather',exact:true}).waitFor();
+  await page.locator('#observing-time').waitFor();
   const input=page.locator('#observing-time'),back=page.getByRole('button',{name:'Back 24 observing hours',exact:true}),forward=page.getByRole('button',{name:'Forward 24 observing hours',exact:true});
   const exact=()=>page.locator('.time-entry [aria-atomic=true]').textContent();
   const saved=()=>page.evaluate(()=>({place:localStorage.getItem('nightjar-place'),notes:localStorage.getItem('nightjar-target-notes-v1'),targets:localStorage.getItem('nightjar-deep-targets-v1')}));

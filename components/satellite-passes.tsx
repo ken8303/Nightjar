@@ -1,7 +1,8 @@
 "use client";
 import {useEffect,useRef,useState} from 'react';
 import type {SatelliteFeed} from '@/lib/satellite-elements';
-import {isAstronomicalNight,type Place} from '@/lib/sky';
+import type {Place} from '@/lib/sky';
+import {fullDarknessPasses} from '@/lib/satellite-night';
 import type {SatellitePassResult} from '@/lib/satellite-passes';
 import PassWorker from '@/lib/satellite-pass.worker?worker';
 import {satelliteViewingAltitude,satelliteViewingSunAltitude,satelliteViewingMinimumMs} from '@/lib/satellite-viewing-rules';
@@ -29,11 +30,7 @@ export default function SatellitePasses({feed,start,place,onDate,weather,now}:{f
    worker.onmessage=({data}:{data:{result?:SatellitePassResult;error?:string}})=>{
     if(active.current?.worker!==worker)return;
     if(!data.result){fail(data.error||'Pass calculations are unavailable.');return}
-    const result={...data.result,passes:data.result.passes.filter(pass=>{
-     const times=[pass.rise,pass.peak,pass.set];
-     for(let time=pass.rise;time<pass.set;time+=30000)times.push(time);
-     return times.every(time=>isAstronomicalNight(new Date(time),place));
-    })};
+    const result=fullDarknessPasses(data.result,place);
     stop();setState({loading:false,result,message:satellitePassSummary(result)});
    };
    worker.onerror=event=>{event.preventDefault();fail('The background pass calculator could not load. Reconnect and try again; selected-time directions remain available.')};
@@ -42,7 +39,7 @@ export default function SatellitePasses({feed,start,place,onDate,weather,now}:{f
   }catch{stop();setState(previous=>({...previous,loading:false,message:'Background calculations are unavailable in this browser. Selected-time directions remain available.'}))}
  };
  return <section className="satellite-passes" aria-label="Upcoming ISS passes">
-  <h3>Upcoming horizon passes</h3><p className="muted">Search the 24 hours after your selected instant, using the orbital data already loaded. Only passes with full darkness at every 30-second sample and at rise, peak and set are shown. All times below are UTC.</p>
+  <h3>Upcoming horizon passes</h3><p className="muted">Search the 24 hours after your selected instant, using the orbital data already loaded. Only passes remaining in full astronomical darkness from rise to set are shown. Displayed window endpoints and midpoints are checked too. All times below are UTC.</p>
   <button className="button" type="button" onClick={search}>{state.loading?'Cancel pass search':state.result?'Recalculate ISS passes':'Find next 24 hours of ISS passes'}</button>
   <p role="status" aria-atomic="true">{state.loading?'Calculating horizon crossings in the background…':state.message}</p>
   {state.result&&<>

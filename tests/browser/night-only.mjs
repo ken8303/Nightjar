@@ -19,8 +19,8 @@ try{
     localStorage.setItem('nightjar-target-notes-v1',JSON.stringify({Vega:'Keep this note'}));
     localStorage.setItem('nightjar-deep-targets-v1',JSON.stringify(['M31']));
    },{origin:base.origin,place,time});
-   let auroraTime=time;
-   await page.context().route('**/api/aurora',route=>route.fulfill({json:{forecastAt:auroraTime,observedAt:new Date(Date.parse(auroraTime)-1800000).toISOString(),fetchedAt:time,cells:Array.from({length:100},(_,i)=>[i,52,50])}}));
+   let auroraTime=time,auroraFails=false;
+   await page.context().route('**/api/aurora',route=>auroraFails?route.fulfill({status:503,json:{error:'Fixture outage'}}):route.fulfill({json:{forecastAt:auroraTime,observedAt:new Date(Date.parse(auroraTime)-1800000).toISOString(),fetchedAt:time,cells:Array.from({length:100},(_,i)=>[i,52,50])}}));
    await page.context().route('**/api/weather?*',route=>route.fulfill({json:{hourly:{time:Array.from({length:48},(_,i)=>Date.parse(time)/1000+i*3600),cloud_cover:Array(48).fill(20)}}}));
    await page.context().route('**/*',route=>new URL(route.request().url()).origin!==base.origin?route.fulfill({status:200,contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg"/>'}):route.fallback());
    await page.goto(base.href,{waitUntil:'domcontentloaded'});
@@ -52,7 +52,10 @@ try{
     await page.getByRole('button',{name:'Use selected time',exact:true}).click();await warning.waitFor({state:'hidden'});
     await page.locator('.outlook').waitFor();
     await section('Aurora');await page.getByRole('heading',{name:'Aurora outlook outside full darkness',exact:true}).waitFor();assert.equal(await page.locator('.aurora-value').count(),0);
-    auroraTime='2026-10-24T00:00:00.000Z';await page.getByRole('button',{name:'Refresh aurora',exact:true}).click();await page.locator('.aurora-value').waitFor();
+    auroraFails=true;await page.getByRole('button',{name:'Refresh aurora',exact:true}).click();
+    await page.getByRole('alert').filter({hasText:'previous forecast remains hidden'}).waitFor();
+    assert.equal(await page.locator('.aurora-value').count(),0);
+    auroraFails=false;auroraTime='2026-10-24T00:00:00.000Z';await page.getByRole('button',{name:'Retry aurora',exact:true}).click();await page.locator('.aurora-value').waitFor();
     await section('Tonight');
     const selected=new Date((await page.locator('#observing-time').inputValue())+'Z');assert(sun(selected,place)<-18);
     await page.locator('.hour').first().waitFor();
