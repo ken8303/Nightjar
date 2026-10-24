@@ -77,6 +77,12 @@ try{
     await page.locator('#observing-time').fill('2026-10-25T00:00');await warning.waitFor({state:'hidden'});
     await page.locator('#visibility-planner').waitFor();
     assert.equal(await page.locator('#visibility-planner').getByText('Day / civil',{exact:true}).count(),0);
+    const dawn=A.SearchAltitude(A.Body.Sun,new A.Observer(place.latitude,place.longitude,0),1,new Date('2026-10-25T00:00Z'),1,-18).date;
+    const beforeDawn=new Date(Math.floor((+dawn-120000)/60000)*60000);
+    await page.locator('#observing-time').fill(beforeDawn.toISOString().slice(0,16));
+    const timeline=page.locator('.deep-sky-timeline');await timeline.locator('svg circle').first().waitFor();
+    assert.match(await timeline.textContent(),/Dots mark isolated dark samples/);
+    await timeline.locator('.deep-sky-plot').screenshot({path:`/tmp/nightjar-isolated-dark-${name}.png`});
    }
    assert.match(await page.evaluate(()=>localStorage.getItem('nightjar-target-notes-v1')),/Keep this note/);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
