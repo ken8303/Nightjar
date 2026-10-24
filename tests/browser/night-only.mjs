@@ -36,21 +36,24 @@ try{
    for(const [key,label] of [['sky','Sky atlas'],['moon','Moon'],['events','Sky calendar'],['tools','Photo tools']]){
     await section(label);await warning.waitFor();assert.equal(await page.locator(`[data-night-content="${key}"]`).isVisible(),false);
    }
-   await section('My places');assert.equal(await warning.isVisible(),false);await page.locator('.place-comparison').waitFor();
+   await page.getByRole('button',{name:'Change observing site',exact:true}).click();assert.equal(await warning.isVisible(),false);await page.locator('.place-comparison').waitFor();
    const currentCard=page.locator(`[data-comparison-card="${place.latitude},0"]`);await currentCard.waitFor();assert.match(await currentCard.textContent(),/Outside full astronomical darkness/);assert.equal(await currentCard.locator('.comparison-score').count(),0);
    if(!polar)await page.locator('[data-comparison-card="51.5,-180"] .comparison-score').waitFor();
    await section('Tonight');await warning.waitFor();
    // Recovery still honours unfinished time edits.
    await page.locator('#observing-time').fill('');
-   await page.getByRole('button',{name:'Find full darkness after selected time',exact:true}).click();
    if(polar){
-    await page.locator('#planner-notice').waitFor();assert.match(await page.locator('#planner-notice').textContent(),/No astronomical darkness/);
+    await page.locator('.night-only-empty').waitFor();assert.equal(await page.getByRole('button',{name:'Use this dark time',exact:true}).isDisabled(),true);
+    assert.equal(await page.locator('.night-only-preview').count(),0);
     assert.equal(await warning.isVisible(),true);await page.getByRole('button',{name:'Cancel time edit',exact:true}).click();
    }else{
+    const preview=await page.locator('.night-only-preview time').getAttribute('datetime');assert(sun(new Date(preview),place)<-18);
+    await page.getByRole('button',{name:'Use this dark time',exact:true}).click();
     await page.getByRole('button',{name:'Keep editing',exact:true}).click();assert.equal(await warning.isVisible(),true);
-    await page.getByRole('button',{name:'Find full darkness after selected time',exact:true}).click();
+    await page.getByRole('button',{name:'Use this dark time',exact:true}).click();
     await page.getByRole('button',{name:'Use selected time',exact:true}).click();await warning.waitFor({state:'hidden'});
     await page.locator('.outlook').waitFor();
+    assert.equal(await page.locator('#observing-time').inputValue(),preview.slice(0,16));
     await section('Aurora');await page.getByRole('heading',{name:'Aurora outlook outside full darkness',exact:true}).waitFor();assert.equal(await page.locator('.aurora-value').count(),0);
     auroraFails=true;await page.getByRole('button',{name:'Refresh aurora',exact:true}).click();
     await page.getByRole('alert').filter({hasText:'previous forecast remains hidden'}).waitFor();

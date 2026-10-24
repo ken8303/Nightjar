@@ -8,6 +8,8 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] The bright-time empty state previews the next fully dark time without changing the plan, reports no-darkness immediately, and offers direct site navigation. Eight browser scenarios verify exact selection, unfinished edits and polar behavior.
+
 - [x] Hidden daytime aurora forecasts retain refresh-error feedback and retry; ISS dark-pass filtering catches brief polar bright crossings and validates displayed window times. Eight night-only, eight observing-time and 24 day-shortcut browser scenarios pass.
 
 - [x] Full astronomical darkness only (Sun strictly below −18°): selected-time panels/exports are hidden outside darkness, timeline samples and event shortcuts are filtered, independent site/aurora times are checked, and polar summer has no twilight fallback. Night recovery preserves unfinished-edit review. Physical iPhone/iPad Safari acceptance remains pending.
