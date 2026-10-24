@@ -1,4 +1,4 @@
-import {type Place,scoreAt} from './sky';
+import {type Place,scoreAt,isAstronomicalNight} from './sky';
 import {type weatherHours,type HourlyForecast} from './weather-hours';
 import {validObservingDate} from './observing-time';
 type Hour=ReturnType<typeof weatherHours>[number];
@@ -18,16 +18,16 @@ export function closestForecastHour(times:readonly number[]|undefined,date:Date)
 }
 // Recovery should lead to a calculable planning score, including known 0%
 // cloud, rather than another timestamp whose cloud estimate is unavailable.
-export function closestCloudForecastHour(hourly:HourlyForecast|undefined,date:Date):Date|null{
- return closestForecastHour(hourly?.time.filter((_,index)=>validCloud(hourly.cloud_cover[index])),date);
+export function closestCloudForecastHour(hourly:HourlyForecast|undefined,date:Date,place?:Place):Date|null{
+ return closestForecastHour(hourly?.time.filter((time,index)=>validCloud(hourly.cloud_cover[index])&&(!place||isAstronomicalNight(new Date(time*1000),place))),date);
 }
 export function forecastPlanning(hours:readonly Hour[],date:Date,place:Place){
- const current=hours.find(hour=>+hour.date<=+date&&+date<+hour.date+3600000),score=current&&validCloud(current.cloud)?scoreAt(current.cloud,date,place):null;
+ const current=isAstronomicalNight(date,place)?hours.find(hour=>+hour.date<=+date&&+date<+hour.date+3600000):undefined,score=current&&validCloud(current.cloud)?scoreAt(current.cloud,date,place):null;
  let best:Hour|null=null,scored=0;
  for(const hour of hours){
   if(hour!==current&&+hour.date<+date)continue;
   const candidate=hour===current?{...hour,date:new Date(+date),score}:hour;
-  if(!validCloud(candidate.cloud)||!validScore(candidate.score))continue;
+  if(!isAstronomicalNight(candidate.date,place)||!validCloud(candidate.cloud)||!validScore(candidate.score))continue;
   scored++;
   if(!best||best.score===null||candidate.score>best.score)best=candidate;
  }

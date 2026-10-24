@@ -55,7 +55,7 @@ export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;st
  const duration=+end-+start;
  if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validMessierId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||samples.length>97)throw Error('Invalid deep-sky calendar window.');
  const included=samples.filter(sample=>+sample.time>=+start&&+sample.time<=+end);
- if(included.length!==duration/900000+1||included.some((sample,index)=>+sample.time!==+start+index*900000||!Number.isFinite(sample.altitude)||sample.altitude<=30||sample.altitude>90||!Number.isFinite(sample.sun)||sample.sun> -18||(moonBelowOnly&&(!Number.isFinite(sample.moonAltitude)||sample.moonAltitude!>0))))throw Error('This interval has no complete qualifying deep-sky window.');
+ if(included.length!==duration/900000+1||included.some((sample,index)=>+sample.time!==+start+index*900000||!Number.isFinite(sample.altitude)||sample.altitude<=30||sample.altitude>90||!Number.isFinite(sample.sun)||sample.sun>= -18||(moonBelowOnly&&(!Number.isFinite(sample.moonAltitude)||sample.moonAltitude!>0))))throw Error('This interval has no complete qualifying deep-sky window.');
  const peak=included.reduce((best,sample)=>sample.altitude>best.altitude?sample:best,included[0]);
  // Calendar DATE-TIME has whole seconds. Round inward so serialization never
  // extends the event outside its sampled interval.

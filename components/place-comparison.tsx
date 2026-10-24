@@ -49,7 +49,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   const place=options.find(p=>key(p)===id)!; const result=results[id],state=siteForecastState(result,requestKey,now);
   const h=result?.data?.hourly; const i=forecastHourIndex(h?.time,new Date(instant*1000));
   const at=new Date(instant*1000),cloud=i>=0?h?.cloud_cover?.[i]:null;
-  const score=typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?scoreAt(cloud,at,place):null;
+  const score=sunAltitude(at,place)<-18&&typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?scoreAt(cloud,at,place):null;
   const {timezone,timezoneKnown,planningPlace}=siteForecastContext(place,result?.data);
   const opportunity=h?bestNightWindow(sevenNightOutlook(h,{...place,timezone},new Date(now))):null;
   return {id,place,result,...state,h,i,at,score,cloud,timezone,timezoneKnown,planningPlace,opportunity,moon:moonInfo(at,place),sun:sunAltitude(at,place)};
@@ -81,7 +81,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
    {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?'Refreshing; previous forecast shown.':'Loading forecast…':r.error?r.result?.data?'Refresh failed; previous forecast shown. Retry forecasts to update it.':r.error:'This forecast was fetched over 30 minutes ago. Refresh before relying on it.'}</p>}
    {r.clockChanged&&<p className="notice" role="status">The weather update time is ahead of your device clock. Its age cannot be confirmed; check your clock and refresh before relying on this forecast.</p>}
    {r.result?.data&&r.result.fetchedAt!==undefined&&<p className="comparison-local">Last successful update: {new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:r.timezone,timeZoneName:'shortOffset'}).format(new Date(r.result.fetchedAt))}</p>}
-   {r.result?.data&&(r.i<0?<p className="muted">This hour is outside the available forecast. Choose a time within the next seven days.</p>:<>
+   {r.sun>=-18&&<p className="muted">Outside full astronomical darkness at this site. Selected-time conditions are hidden; choose a dark window below.</p>}{r.sun<-18&&r.result?.data&&(r.i<0?<p className="muted">This hour is outside the available forecast. Choose a time within the next seven days.</p>:<>
     <div className="comparison-score"><strong>{r.score??'—'}</strong><span>/ 100<br/>planning score</span></div>
     <p className="comparison-best">{best!==null&&r.score===best&&best>0?'Highest score among selected sites':r.sun>-6?'Daylight or civil twilight':r.sun>-18?'Twilight at this hour':'Astronomical darkness'}</p>
     <dl><div><dt>Cloud cover</dt><dd>{metric(r.cloud,'%')}</dd></div><div><dt>Temperature</dt><dd>{metric(r.h?.temperature_2m?.[r.i],' °C')}</dd></div><div><dt>Wind</dt><dd>{metric(r.h?.wind_speed_10m?.[r.i],' km/h')}</dd></div><div><dt>Humidity</dt><dd>{metric(r.h?.relative_humidity_2m?.[r.i],'%')}</dd></div><div><dt>Moon</dt><dd>{Math.round(r.moon.illumination*100)}% · {r.moon.altitude>0?'above':'below'} horizon</dd></div></dl>

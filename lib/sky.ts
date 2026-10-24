@@ -12,6 +12,7 @@ export function bodyPosition(body:A.Body,date:Date,p:Place,refraction:PositionRe
 // Twilight thresholds use the geometric centre of the Sun (USNO definitions),
 // independently of apparent object positions used for viewing and projection.
 export function sunAltitude(date:Date,p:Place){return bodyPosition(A.Body.Sun,date,p,'none').altitude}
+export function isAstronomicalNight(date:Date,p:Place){return validObservingDate(date)&&sunAltitude(date,p)<-18}
 function catalogueHorizon(ra:number,dec:number,date:Date,obs:A.Observer,rotation:A.RotationMatrix){
  const vector=A.VectorFromSphere(new A.Spherical(dec,ra*15,1),date);
  const equator=A.EquatorFromVector(A.RotateVector(rotation,vector));
@@ -45,7 +46,7 @@ export function timeLabel(date:Date,tz?:string){return new Intl.DateTimeFormat('
 export {A};
 export function nextAstronomicalDarkness(from:Date,p:Place):Date|null{
  if(!validObservingDate(from))return null;
- if(sunAltitude(from,p)<=-18)return new Date(+from);
+ if(isAstronomicalNight(from,p))return new Date(+from);
  const end=Math.min(+from+48*3600000,Date.parse('9999-12-31T23:59:59.999Z'));
  if(end<=+from)return null;
  const crossing=A.SearchAltitude(A.Body.Sun,observer(p),-1,from,(end-+from)/86400000,-18)?.date;
@@ -60,23 +61,10 @@ export function nextAstronomicalDarkness(from:Date,p:Place):Date|null{
 }
 export function nextObservingTime(from:Date,p:Place){
  const nextHour=new Date(Math.ceil(+from/3600000)*3600000);
- const sunNow=sunAltitude(from,p);
- const sunAtHour=sunAltitude(nextHour,p);
- if(sunAtHour<=-18)return nextHour;
- if(sunNow<=-18)return from;
- const obs=observer(p);
- const fullDarkness=A.SearchAltitude(A.Body.Sun,obs,-1,from,2,-18)?.date;
- const crossing=fullDarkness||A.SearchAltitude(A.Body.Sun,obs,-1,from,2,-6)?.date;
- if(!crossing)return nextHour;
- const threshold=fullDarkness?-18:-6;
- const rounded=new Date(Math.ceil((+crossing+300000)/3600000)*3600000);
- if(sunAltitude(rounded,p)<=threshold)return rounded;
- // Keep the rounded shortcut on the same geometric side of the threshold.
- for(let minutes=5;minutes<=60;minutes+=5){
-  const candidate=new Date(+crossing+minutes*60000);
-  if(sunAltitude(candidate,p)<=threshold)return candidate;
- }
- return nextHour;
+ if(validObservingDate(nextHour)&&isAstronomicalNight(nextHour,p))return nextHour;
+ // If full darkness never occurs in the search horizon, keep the requested
+ // instant. The UI explains the absence instead of presenting twilight as night.
+ return nextAstronomicalDarkness(from,p)||new Date(+from);
 }
 export function observingMilestones(date:Date,p:Place){
  if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
@@ -136,7 +124,7 @@ export function milkyWayPlanning(date:Date,place:Place){
  for(let minute=0;minute<=24*60;minute+=15){
   const sampleDate=new Date(+date+minute*60000);
   if(!validObservingDate(sampleDate))break;sampleCount++;
-  if(sunAltitude(sampleDate,place)>-18)continue;
+  if(sunAltitude(sampleDate,place)>=-18)continue;
   const position=galacticCentrePosition(sampleDate,place);
   if(position.altitude<10)continue;
   const moon=moonInfo(sampleDate,place);

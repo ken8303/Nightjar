@@ -2,7 +2,7 @@ import {deepSkySampleTimes,bestDeepSkySample,type DeepSkyObject,type DeepSkySamp
 import {deepSkyMoon} from './deep-sky-moon';
 import {A,bodyPosition,j2000Projector,type Place,sunAltitude} from './sky';
 export function deepSkyOpportunity(samples:(DeepSkySample&{moonAltitude?:number})[],moonBelowOnly=false){
- const eligible=(sample:DeepSkySample&{moonAltitude?:number})=>sample.altitude>30&&sample.sun<=-18&&(!moonBelowOnly||(sample.moonAltitude!==undefined&&sample.moonAltitude<=0));
+ const eligible=(sample:DeepSkySample&{moonAltitude?:number})=>sample.altitude>30&&sample.sun< -18&&(!moonBelowOnly||(sample.moonAltitude!==undefined&&sample.moonAltitude<=0));
  const windows:{start:Date;end:Date;minutes:number}[]=[];
  for(let index=1;index<samples.length;index++){
   const previous=samples[index-1],current=samples[index],minutes=(+current.time-+previous.time)/60000;

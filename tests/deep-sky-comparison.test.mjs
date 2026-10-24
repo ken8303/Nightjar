@@ -16,8 +16,8 @@ test('comparison uses the same astronomical samples, sorts highest eligible peak
  assert(compareDeepSky(targets,new Date('2026-06-21T12:00Z'),{name:'North pole',latitude:89,longitude:0}).every(row=>!row.best&&row.minutes===0));
 });
 test('opportunity intervals exclude threshold samples and gaps, split windows and retain isolated peaks',()=>{
- const sample=(index,altitude=40,sun=-18)=>({time:new Date(+date+index*900000),altitude,sun,azimuth:0,ra:0,dec:0});
- const result=deepSkyOpportunity([sample(0),sample(1),sample(2,30),sample(3),sample(4),sample(5,50,-17.99),sample(6,80)]);
+ const sample=(index,altitude=40,sun=-19)=>({time:new Date(+date+index*900000),altitude,sun,azimuth:0,ra:0,dec:0});
+ const result=deepSkyOpportunity([sample(0),sample(1),sample(2,30),sample(3),sample(4),sample(5,50,-18),sample(6,80)]);
  assert.equal(result.minutes,30);assert.equal(result.windows.length,2);assert.equal(result.windows[0].minutes,15);assert.equal(result.best.altitude,80);
  assert.equal(deepSkyOpportunity([sample(0),sample(2)]).minutes,0);assert.equal(deepSkyOpportunity([sample(0,30)]).best,null);assert.equal(deepSkyOpportunity([]).minutes,0);
 });

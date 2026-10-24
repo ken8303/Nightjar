@@ -35,7 +35,7 @@ export function deepSkyWindow(target:DeepSkyObject,date:Date,place:Place){
 }
 export type DeepSkySample=ReturnType<typeof deepSkyWindow>[number];
 export function bestDeepSkySample(samples:DeepSkySample[]){
- return samples.reduce<DeepSkySample|null>((best,sample)=>sample.sun<=-18&&sample.altitude>30&&(!best||sample.altitude>best.altitude)?sample:best,null);
+ return samples.reduce<DeepSkySample|null>((best,sample)=>sample.sun<-18&&sample.altitude>30&&(!best||sample.altitude>best.altitude)?sample:best,null);
 }
 export function bestDeepSkyTime(target:DeepSkyObject,date:Date,place:Place){
  const best=bestDeepSkySample(deepSkyWindow(target,date,place));
@@ -53,7 +53,7 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
 export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
  if(targets.length>109)throw Error('Plan up to 109 deep-sky targets at once.');
  if(!targets.length)return new Map<string,{date:Date;altitude:number;azimuth:number}>();
- const darkTimes=deepSkySampleTimes(date).filter(time=>sunAltitude(time,place)<=-18).map(time=>({time,project:j2000Projector(time,place)}));
+ const darkTimes=deepSkySampleTimes(date).filter(time=>sunAltitude(time,place)<-18).map(time=>({time,project:j2000Projector(time,place)}));
  const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();
  for(const target of targets){
   let best:{date:Date;altitude:number;azimuth:number}|null=null;

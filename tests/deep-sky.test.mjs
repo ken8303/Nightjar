@@ -71,9 +71,10 @@ test('altitude timeline preserves UTC spacing through the repeated London clock-
  for(let i=1;i<samples.length;i++)assert.equal(+samples[i].time-+samples[i-1].time,900000);
  const format=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London',timeZoneName:'shortOffset'});
  assert.notEqual(format.format(samples[0].time),format.format(samples[4].time));
- assert.equal(bestDeepSkySample([{...samples[0],sun:-18,altitude:30}]),null);
+ assert.equal(bestDeepSkySample([{...samples[0],sun:-19,altitude:30}]),null);
+ assert.equal(bestDeepSkySample([{...samples[0],sun:-18,altitude:60}]),null);
  assert.equal(bestDeepSkySample([{...samples[0],sun:-17.99,altitude:70}]),null);
- assert.equal(bestDeepSkySample([{...samples[0],sun:-18,altitude:30.01}]).altitude,30.01);
+ assert.equal(bestDeepSkySample([{...samples[0],sun:-19,altitude:30.01}]).altitude,30.01);
 });
 
 test('primary display names keep aliases searchable and leave catalogue records unchanged',async()=>{

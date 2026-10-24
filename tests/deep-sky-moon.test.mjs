@@ -26,7 +26,7 @@ test('Moon context follows selected site and instant using the same apparent hor
 test('Moon-down filtering excludes bright-Moon samples without weakening darkness and altitude thresholds',()=>{
  const target=findDeepSky('M31','')[0],start=new Date('2026-10-26T20:00Z'),normal=compareDeepSky([target],start,place)[0],filtered=compareDeepSky([target],start,place,true)[0];
  assert(normal.best);assert(filtered.minutes<=normal.minutes);if(filtered.best){assert(filtered.moonAtBest.belowHorizon);assert(filtered.best.altitude>30&&filtered.best.sun<=-18)}
- const sample=(index,moonAltitude)=>({time:new Date(+date+index*900000),sun:-18,altitude:60,azimuth:0,ra:0,dec:0,moonAltitude});
+ const sample=(index,moonAltitude)=>({time:new Date(+date+index*900000),sun:-19,altitude:60,azimuth:0,ra:0,dec:0,moonAltitude});
  const samples=[sample(0,-1),sample(1,0),sample(2,.01),sample(3,-1)];
  assert.equal(deepSkyOpportunity(samples,true).minutes,15);assert.equal(deepSkyOpportunity(samples).minutes,45);
  assert.equal(deepSkyOpportunity([sample(0,.01)],true).best,null);assert.equal(deepSkyOpportunity([sample(0,undefined)],true).best,null);
