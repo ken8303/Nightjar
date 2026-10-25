@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Polar observing-window correction — 25 October 2026
+
+Deep-sky comparisons now split intervals when the Sun briefly rises through −18° between dark 15-minute samples. Calendar exports independently reject those intervals. A real polar grazing fixture reproduced the old failure; individual dark samples remain selectable. Shared interval checks are cached across compared targets. All 869 tests pass, along with TypeScript, lint, production build, compiled Worker integration and 124-asset packaging. Four browser journeys at 320, 390, 820 and 1365 pixels each download a calendar file and verify that it excludes the bright transit, has no rising −18° crossing, and produces no page errors or page overflow. Calendar imports on physical devices remain pending. Release `65cc6196f6e5af9dcfc2ffb570d5a9390d5384c82c308c78cff9651e4b18d7be` verifies 97 inputs, 358 references and 114 client files.
+
 ## Text observing-list continuation — 25 October 2026
 
 Plain-text observing lists now retain the same remaining full-darkness duration and exact UTC endpoint as Tonight and summary exports, with shared wording for polar nights and supported-date limits. Full verification passes all 866 tests, TypeScript, lint, build, compiled Worker integration and 123-asset packaging. All eight night-only browser journeys pass; the four nonpolar journeys download text lists and verify their duration, endpoint and saved Vega entry. Native device acceptance remains pending.

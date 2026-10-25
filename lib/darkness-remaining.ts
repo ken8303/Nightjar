@@ -24,3 +24,10 @@ export function darknessSummaryLines(date:Date,place:Place){
  const darkness=remainingDarkness(date,place);
  return darkness?.end?[`Full darkness remaining: ${darknessDuration(darkness.start,darkness.end)} after the selected observing time.`,`Full darkness ends UTC: ${darkness.end.toISOString()}`]:[darkness?`Full darkness end: not found ${darkness.dateLimited?'before the supported UTC date limit':'within 48 hours of the selected observing time'}.`:'Full darkness remaining: the selected time is outside full astronomical darkness.'];
 }
+
+/** True only for a supported, continuously dark interval of at most 24 hours. */
+export function isFullDarknessInterval(start:Date,end:Date,place:Place){
+ if(!validObservingDate(start)||!validObservingDate(end)||+end<+start||+end-+start>86400000)return false;
+ if(!isAstronomicalNight(start,place)||!isAstronomicalNight(end,place))return false;
+ return +end===+start||A.SearchAltitude(A.Body.Sun,observer(place),1,start,(+end-+start)/86400000,-18)===null;
+}

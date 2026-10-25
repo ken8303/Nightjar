@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {remainingDarkness,darknessDuration}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
+const {remainingDarkness,darknessDuration,isFullDarknessInterval}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
 const {sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
 const london={name:'London',latitude:51.5,longitude:0};
 test('remaining darkness ends at the first ascending astronomical twilight crossing',()=>{
@@ -33,4 +33,12 @@ test('searches stop at the supported date boundary',()=>{
  const start=new Date('9999-12-31T23:59:59.999Z');
  const place=[london,{...london,longitude:180}].find(site=>sunAltitude(start,site)<-18);assert(place);
  const window=remainingDarkness(start,place);assert(window);assert.equal(window.end,null);assert.equal(+window.searchEnd,+start);assert.equal(window.dateLimited,true);
+});
+
+test('continuous darkness checks reject unsupported, reversed, bright and dawn-spanning intervals',()=>{
+ const start=new Date('2026-10-25T00:00Z'),end=remainingDarkness(start,london).end;
+ assert(isFullDarknessInterval(start,start,london));
+ assert(isFullDarknessInterval(start,new Date(+start+900000),london));
+ assert(!isFullDarknessInterval(start,new Date(+end+2000),london));
+ for(const [a,b] of [[start,new Date(+start-1)],[start,new Date(+start+86400001)],[new Date(NaN),start],[start,new Date('+010000-01-01T00:00Z')],[new Date('2026-10-25T12:00Z'),new Date('2026-10-25T12:15Z')]])assert(!isFullDarknessInterval(a,b,london));
 });

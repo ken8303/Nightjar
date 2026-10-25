@@ -36,3 +36,15 @@ test('deep-sky comparison shares bounded dates with individual windows at the fi
  }
  assert.throws(()=>compareDeepSky(targets,new Date('+010000-01-01T00:00:00Z'),place),/UTC years 1–9999/);
 });
+
+test('comparison windows exclude a brief polar twilight crossing between dark samples',async()=>{
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const site={name:'Polar grazing fixture',latitude:84.56058967678678,longitude:0};
+ const transit=A.SearchHourAngle(A.Body.Sun,observer(site),0,new Date('2026-12-21T00:00Z')).time.date;
+ const start=new Date(+transit-450000),end=new Date(+transit+450000);
+ assert(sunAltitude(start,site)<-18);assert(sunAltitude(end,site)<-18);assert(sunAltitude(transit,site)>-18);
+ const row=compareDeepSky([findDeepSky('M81','')[0]],start,site)[0];
+ assert(row.samples[0].altitude>30&&row.samples[1].altitude>30);
+ assert(row.best,'dark samples remain available as individual opportunities');
+ assert(!row.windows.some(window=>+window.start<+transit&&+window.end>+transit),'an observing window must not bridge twilight');
+});
