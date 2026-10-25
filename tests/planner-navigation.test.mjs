@@ -78,3 +78,15 @@ test('forecast confirmation rechecks start, freshness and clock rollback without
  const h=harness();h.navigation.request({kind:'time',section:'tonight',date,forecastFetchedAt:fetched},true,h.apply);
  assert.equal(h.navigation.continue(h.apply,+date),true);assert.equal(+h.applied[0].date,+date);
 });
+
+test('comparison confirmation checks every peer timestamp and snapshots the original ranking inputs',()=>{
+ const now=Date.parse('2026-10-20T20:00Z');
+ for(const times of [[now,now-1800000],[now-1800000,now],[now,now+60001],[now,NaN],[]]){
+  const h=harness();h.navigation.request({kind:'context',section:'tonight',place:site,comparisonFetchedAt:times},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,now),false);assert.deepEqual(h.applied,[]);
+ }
+ const h=harness(),times=[now-1000,now];
+ h.navigation.request({kind:'context',section:'tonight',place:site,comparisonFetchedAt:times},true,h.apply);
+ times[0]=now-1800000;
+ assert.equal(h.navigation.continue(h.apply,now),true);assert.deepEqual(h.applied[0].comparisonFetchedAt,[now-1000,now]);
+});

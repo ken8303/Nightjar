@@ -16,7 +16,7 @@ import { moonInfo, Place, scoreAt, timeLabel, sunAltitude} from '@/lib/sky';
 
 const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
 
-export default function PlaceComparison({ places, current, date, onChoose, onPlan, selection, onSelectionChange:setSelection }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date,forecastFetchedAt?:number)=>void;selection:string[]|null;onSelectionChange:(selection:string[])=>void }) {
+export default function PlaceComparison({ places, current, date, onChoose, onPlan, selection, onSelectionChange:setSelection }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place,comparisonFetchedAt?:number[]) => void; onPlan:(p:Place,date:Date,forecastFetchedAt?:number)=>void;selection:string[]|null;onSelectionChange:(selection:string[])=>void }) {
  const options = useMemo(()=>{const seen=new Set<string>();return [current,...places].filter(place=>{const id=key(place);if(seen.has(id))return false;seen.add(id);return true})},[current,places]);
  const [optionsShown,setOptionsShown]=useState(savedListPageSize);
  const heading=useRef<HTMLHeadingElement>(null),picker=useRef<HTMLDivElement>(null);
@@ -82,7 +82,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   if(!leader||currentRanking.leadingIds.length!==1||currentRanking.leadingIds[0]!==id){
    setPlanningIssue({context:planningContext,text:'The comparison forecasts are no longer fresh enough for this recommendation. Your site and observing time were kept. Refresh forecasts before planning the recommended site.'});return;
   }
-  onChoose(leader.planningPlace);
+  onChoose(leader.planningPlace,rows.map(row=>row.result!.fetchedAt!));
  }
 
  return <section className="panel place-comparison" aria-labelledby="comparison-heading">
