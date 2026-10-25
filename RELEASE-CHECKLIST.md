@@ -8,6 +8,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Six atmosphere browser journeys verify elapsed darkness across repeated local hours, a stable dawn endpoint and daytime panel hiding.
 - [x] Nightly cards and the suggested-window button share exact-tap expiry checks; 36 browser scenarios pass across six layouts.
 - [x] Six rendered lunar regressions verify dark phase/peak/contact filtering, preserved astronomical dates and calendar availability across ordinary, equatorial and polar sites and the final supported instant.
 - [x] Eighteen forecast reconnect scenarios verify one recovery request, retained edits/data and continued night-only hiding during daytime, across six layouts.

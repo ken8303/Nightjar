@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Clock-change darkness coverage — 25 October 2026
+
+The atmosphere browser regression now verifies that remaining darkness decreases by 60 elapsed minutes on each hour step across the repeated UK local hour, with an unchanged exact dawn endpoint. It also checks that selecting daylight hides both atmosphere data and remaining-darkness information. All six desktop/phone/tablet journeys pass, alongside the existing source-hour offsets, missing forecast, unfinished-edit and containment checks. Targeted lint passes. This batch changes tests/documentation only; no application bug was found and the full suite was not rerun. Physical-device acceptance remains pending.
+
 ## Seven-night card expiry guard — 25 October 2026
 
 Nightly cards now share the suggested-window button's exact-tap checks for forecast freshness, clock changes and already-started windows. Refusal preserves the selected time and unfinished input, and brings the recovery message into view. The missing card guard was reproduced before the fix. All 876 tests, type/lint/build, Worker integration and packaging checks pass. All 36 browser scenarios pass across six layouts, covering both controls, three expiry conditions, refresh, edit review and retained saved data. Release `259958e55d563c8f88d1d7311781b19a49710368113727daaf767539da1e8447` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
