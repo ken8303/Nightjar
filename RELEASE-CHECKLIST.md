@@ -8,6 +8,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Six diary browser journeys verify unfinished edits through daylight hiding, darkness recovery and reload, preserving saved observations.
 - [x] Forecast coverage counts say dark samples rather than dark hours in seven-night and saved-place cards. Suggested-window recovery passes 18 browser scenarios across six layouts after the wording change.
 - [x] Deep-sky curves and shading also break across intervening twilight, preserving isolated dark points. Four polar and eight broader night-only browser journeys pass.
 - [x] Deep-sky windows and calendar exports exclude brief polar twilight between dark samples. Four responsive browser journeys verify actual calendar downloads.

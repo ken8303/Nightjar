@@ -93,10 +93,30 @@ try{
   assert.equal((await drafts()).edit,null);
   assert.equal(await page.evaluate(()=>localStorage.getItem('nightjar-place')),site);
   assert.equal(await plannerTime(),restoredTime,'diary editing does not change the planner time');
+  // An autosaved unfinished diary edit must survive the night-only empty state.
+  await activate(diary.locator('[data-diary-edit="typing-second"]'));await editHeading.waitFor();
+  await notes.fill('Keep this unfinished night observation');
+  const savedBeforeDaylight=await entries();
+  await page.locator('#observing-time').fill('2026-10-20T12:00');
+  await page.locator('.night-only-notice').waitFor();assert.equal(await diary.isVisible(),false);
+  assert.equal((await drafts()).edit.draft.notes,'Keep this unfinished night observation');
+  assert.deepEqual(await entries(),savedBeforeDaylight);
+  await activate(page.getByRole('button',{name:'Use this dark time',exact:true}));
+  await editHeading.waitFor();assert.equal(await notes.inputValue(),'Keep this unfinished night observation');
+  assert.deepEqual(await entries(),savedBeforeDaylight);
+  await page.locator('#observing-time').fill('2026-10-20T12:00');await page.locator('.night-only-notice').waitFor();
+  await page.reload({waitUntil:'domcontentloaded'});await navigate('Sky atlas');
+  // Normal reloads choose an upcoming dark time rather than restoring the
+  // selected daytime. The unfinished diary edit must survive either state.
+  if(await page.locator('.night-only-notice').isVisible())await activate(page.getByRole('button',{name:'Use this dark time',exact:true}));
+  await editHeading.waitFor();assert.equal(await notes.inputValue(),'Keep this unfinished night observation');
+  assert.deepEqual(await entries(),savedBeforeDaylight);
+  await activate(diary.getByRole('button',{name:'Cancel diary edit',exact:true}));
+  assert.equal((await drafts()).edit,null);assert.deepEqual(await entries(),savedBeforeDaylight);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);
   assert.match(await page.title(),/Nightjar/);assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
-  console.log(`${name}: continuous diary typing, restored edit, exact save metadata, different-entry handoff and cancel PASS`);
+  console.log(`${name}: continuous diary typing, restored edit, exact save metadata, different-entry handoff, cancel and daylight recovery PASS`);
   await page.close();
  }
 }finally{await browser.close()}

@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Diary night-mode recovery coverage — 25 October 2026
+
+The diary browser regression now checks that an unfinished edit survives selecting daylight, returning to full darkness and reloading while the diary is hidden. Saved observations remain unchanged until an explicit save, and cancelling clears only the unfinished edit. All six desktop/phone/tablet journeys pass, including 320-pixel portrait, phone landscape and both tablet orientations, with no page errors or horizontal overflow. Existing continuous typing, draft restoration and exact save metadata checks also pass. Normal reloads deliberately select an upcoming dark time rather than retaining the manually selected daytime. Targeted lint passes; this batch changes only tests and documentation, with no new application fix or full-suite rerun. Physical device keyboards and native lifecycle acceptance remain pending.
+
 ## Forecast coverage wording — 25 October 2026
 
 Seven-night cards and saved-place comparisons now label their forecast coverage as dark samples rather than dark hours. A sampled dark instant near dawn does not establish a full hour of darkness. The seven-night explanation now states the strict −18° threshold and distinguishes coverage counts from continuously dark suggested windows, including the crossing search. Targeted lint and the final production build pass. All 18 suggested-window browser scenarios pass across six layouts, covering expired windows, forecast age and clock-change recovery; the narrow-screen screenshot was inspected. This wording-only change adds no tests; the previous full verification remains 870 passing tests. Physical-device acceptance remains pending.
