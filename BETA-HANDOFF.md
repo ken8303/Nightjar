@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Seven-night card expiry guard — 25 October 2026
+
+Nightly cards now share the suggested-window button's exact-tap checks for forecast freshness, clock changes and already-started windows. Refusal preserves the selected time and unfinished input, and brings the recovery message into view. The missing card guard was reproduced before the fix. All 876 tests, type/lint/build, Worker integration and packaging checks pass. All 36 browser scenarios pass across six layouts, covering both controls, three expiry conditions, refresh, edit review and retained saved data. Release `259958e55d563c8f88d1d7311781b19a49710368113727daaf767539da1e8447` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
+
 ## Lunar night-only display coverage — 25 October 2026
 
 Six rendered-component regressions cover lunar phase shortcuts, eclipse peaks and displayed contacts at London, an equatorial site and both poles, plus the supported final instant. The checks compare displayed contacts and phase dates with the actual astronomical events, verify omission of bright events and check calendar availability against contact darkness. The full unit suite passes all 876 tests with no failures or cancellations; targeted lint passes. This batch adds tests and documentation only, with no application bug found or new build required. Browser/device acceptance is separate from these server-rendered checks.

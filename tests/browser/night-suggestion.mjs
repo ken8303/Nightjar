@@ -26,7 +26,7 @@ try{
    ['started','2026-10-20T19:59:59.900Z','2026-10-20T20:00:00.001Z','already started'],
    ['stale','2026-10-20T18:30:00.000Z','2026-10-20T19:00:00.000Z','Forecast freshness has changed'],
    ['clock','2026-10-20T18:30:00.000Z','2026-10-20T18:28:59.999Z','Forecast freshness has changed'],
-  ]){
+  ])for(const control of ['card','suggestion']){
    const touch=name!=='desktop',page=await browser.newPage({viewport,hasTouch:touch,isMobile:touch});
    page.setDefaultTimeout(15000);
    const errors=[],logs=[];
@@ -55,7 +55,7 @@ try{
    await page.goto(base.href,{waitUntil:'domcontentloaded'});
    assert.match(await page.title(),/Nightjar/);
    assert.equal(new URL(page.url()).origin,base.origin);
-   const panel=page.locator('.seven-night-outlook'),action=panel.getByRole('button',{name:'Use suggested window',exact:true});
+   const panel=page.locator('.seven-night-outlook'),action=control==='card'?panel.locator('.night-outlook-select').first():panel.getByRole('button',{name:'Use suggested window',exact:true});
    const time=page.locator('#observing-time'),exact=()=>page.locator('.time-entry [aria-atomic=true]').textContent();
    await action.waitFor();
    const before=await exact(),saved=await page.evaluate(()=>({notes:localStorage.getItem('nightjar-target-notes-v1'),deep:localStorage.getItem('nightjar-deep-targets-v1'),site:localStorage.getItem('nightjar-place')}));
@@ -66,15 +66,19 @@ try{
    if(touch)await action.tap();else await action.click();
    await panel.locator('#night-outlook-planning-status').waitFor();
    assert((await panel.locator('#night-outlook-planning-status').textContent()).includes(message));
+   await page.waitForFunction(()=>document.activeElement?.id==='night-outlook-planning-status');
+   const statusBox=await panel.locator('#night-outlook-planning-status').boundingBox();
+   assert(statusBox.y>=-1&&statusBox.y<viewport.height,JSON.stringify(statusBox));
    assert.equal(await exact(),before);
    assert.equal(await time.inputValue(),'');
    assert.equal(await page.getByRole('heading',{name:'Your edits have not been saved',exact:true}).count(),0);
-   assert.equal(await action.count(),0);
+   if(control==='suggestion')assert.equal(await action.count(),0);
    const recovery=panel.getByRole('button',{name:'Refresh and review suggested windows',exact:true});
    assert((await recovery.boundingBox()).height>=44);
-   if(evidence)await page.screenshot({path:`${evidence}/night-boundary-${name}-${kind}.png`});
+   if(evidence)await page.screenshot({path:`${evidence}/night-boundary-${name}-${kind}-${control}.png`});
    refreshed=true;
    if(touch)await recovery.tap();else await recovery.click();
+   await panel.getByRole('button',{name:'Refresh seven-night forecast',exact:true}).waitFor();
    await action.waitFor();
    assert.equal(await panel.locator('#night-outlook-planning-status').count(),0);
    if(touch)await action.tap();else await action.click();
@@ -90,7 +94,7 @@ try{
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
    assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);
    assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
-   console.log(`${name}/${kind}: expired tap refused; exact time/draft/data retained; refresh and guarded selection recover PASS`);
+   console.log(`${name}/${kind}/${control}: expired tap refused; exact time/draft/data retained; refresh and guarded selection recover PASS`);
    await page.close();
   }
  }

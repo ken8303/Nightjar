@@ -1,5 +1,6 @@
 "use client";
 
+import {deferFocusAndScroll} from '@/lib/deferred-focus';
 import {downloadFile} from '@/lib/download';
 import {useMemo, useState, type CSSProperties} from 'react';
 import {ArrowUpRight, CalendarDays, Download, Moon} from 'lucide-react';
@@ -29,18 +30,21 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
  const timezone=place.timezone||'UTC';
  const dateLabel=(key:string)=>new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(`${key}T12:00:00Z`));
  const windowLabel=(start:Date,hours:number)=>observingWindowLabel(start,hours,timezone);
- function planSuggestedWindow(instant:number){
-  if(!suggested)return;
+ function reportPlanningIssue(text:string){
+  setPlanningIssue({context:planningContext,text});
+  deferFocusAndScroll(()=>document.getElementById('night-outlook-planning-status'));
+ }
+ function planWindow(window:NonNullable<typeof bestWindow>,instant:number){
   // The minute-resolution display can outlive its forecast or window boundary.
   // Validate the exact tap time before queuing a planner-time change.
   const freshness=forecastFreshness(fetchedAt,instant);
   if(loading||error||typeof fetchedAt!=='number'||!Number.isFinite(fetchedAt)||freshness.stale||freshness.clockChanged){
-   setPlanningIssue({context:planningContext,text:'Forecast freshness has changed. Your observing time was kept. Refresh the forecast before using a suggested window.'});return;
+   reportPlanningIssue('Forecast freshness has changed. Your observing time was kept. Refresh the forecast before planning a window.');return;
   }
-  if(+suggested.date<instant){
-   setPlanningIssue({context:planningContext,text:'This suggested window has already started. Your observing time was kept. Choose a later window from the cards below.'});return;
+  if(+window.date<instant){
+   reportPlanningIssue('This observing window has already started. Your observing time was kept. Choose a later window or refresh the forecast.');return;
   }
-  onDate(suggested.date);
+  onDate(window.date);
  }
  function download(night:typeof nights[number]){
   if(!night.best)return;
@@ -55,9 +59,9 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
   <div className="section-label"><span id="seven-night-title">THE NEXT SEVEN NIGHTS</span><CalendarDays size={18}/></div>
   <p className="muted">Compare upcoming forecast samples when the Sun is strictly below −18° in {place.name}. Choose a card to set your observing time.</p>
   <WeatherFreshness hasForecast={Boolean(hourly)} fetchedAt={fetchedAt} timezone={timezone} loading={loading} error={error} stale={stale} clockChanged={clockChanged} onRefresh={onRefresh} refreshLabel={error?'Retry seven-night forecast':'Refresh seven-night forecast'}/>
-  {suggested&&!planningStatus&&<div className="night-outlook-recommendation"><div><p id="night-outlook-suggestion"><strong>Suggested window</strong> · {windowLabel(suggested.date,suggested.hours)} · {suggested.score}/100</p><p className="footnote">Highest planning score among the available nightly windows. Equal scores favour longer windows, then earlier starts.</p></div><button type="button" className="button" aria-describedby="night-outlook-suggestion" onClick={()=>planSuggestedWindow(Date.now())}>Use suggested window</button></div>}
-  {planningStatus&&<div className="notice night-outlook-recovery"><p id="night-outlook-planning-status" role="status">{planningStatus}</p><button type="button" className="button" onClick={onRefresh} disabled={loading}>Refresh and review suggested windows</button></div>}
-  {nights.length?<div className="night-outlook-grid">{nights.map(night=>night.best?<div className={`night-outlook-card${selectedDate&&+selectedDate===+night.best.date?' selected':''}`} key={night.key}><button type="button" className="night-outlook-select" onClick={()=>onDate(night.best!.date)} aria-pressed={Boolean(selectedDate&&+selectedDate===+night.best.date)} aria-label={`${dateLabel(night.key)}: planning score ${night.best.score} out of 100; select ${windowLabel(night.best.date,night.best.hours)}`}>
+  {suggested&&!planningStatus&&<div className="night-outlook-recommendation"><div><p id="night-outlook-suggestion"><strong>Suggested window</strong> · {windowLabel(suggested.date,suggested.hours)} · {suggested.score}/100</p><p className="footnote">Highest planning score among the available nightly windows. Equal scores favour longer windows, then earlier starts.</p></div><button type="button" className="button" aria-describedby="night-outlook-suggestion" onClick={()=>planWindow(suggested,Date.now())}>Use suggested window</button></div>}
+  {planningStatus&&<div className="notice night-outlook-recovery"><p id="night-outlook-planning-status" tabIndex={-1} role="status">{planningStatus}</p><button type="button" className="button" onClick={onRefresh} disabled={loading}>Refresh and review suggested windows</button></div>}
+  {nights.length?<div className="night-outlook-grid">{nights.map(night=>night.best?<div className={`night-outlook-card${selectedDate&&+selectedDate===+night.best.date?' selected':''}`} key={night.key}><button type="button" className="night-outlook-select" onClick={()=>planWindow(night.best!,Date.now())} aria-pressed={Boolean(selectedDate&&+selectedDate===+night.best.date)} aria-label={`${dateLabel(night.key)}: planning score ${night.best.score} out of 100; select ${windowLabel(night.best.date,night.best.hours)}`}>
    <span className="night-date">{dateLabel(night.key)} <ArrowUpRight size={15}/></span>
    <span className="night-score" style={{'--night-score':`${night.best.score}%`} as CSSProperties}><strong>{night.best.score}<small>/100</small></strong></span>
    <span>Best {night.best.hours===2?'2-hour window':'forecast hour'} · {windowLabel(night.best.date,night.best.hours)}</span>
