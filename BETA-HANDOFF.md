@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Polar timeline correction — 25 October 2026
+
+Deep-sky altitude curves and shading now break when the Sun briefly leaves full darkness between adjacent samples. Isolated dark samples remain visible as dots. A rendered-component regression reproduced the previous shading failure. Full verification passes all 870 tests, TypeScript/lint, production build, compiled Worker integration and 124-asset packaging. Four expanded polar browser journeys verify the curve gap, unshaded interval, isolated dot and real calendar downloads; eight broader night-only journeys also pass. The 320-pixel plot screenshot was inspected. Release `c3c0d48d95c9a4fa9b08bd463cb01f48afbee000c53361397578dc53e06c369f` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
+
 ## Polar observing-window correction — 25 October 2026
 
 Deep-sky comparisons now split intervals when the Sun briefly rises through −18° between dark 15-minute samples. Calendar exports independently reject those intervals. A real polar grazing fixture reproduced the old failure; individual dark samples remain selectable. Shared interval checks are cached across compared targets. All 869 tests pass, along with TypeScript, lint, production build, compiled Worker integration and 124-asset packaging. Four browser journeys at 320, 390, 820 and 1365 pixels each download a calendar file and verify that it excludes the bright transit, has no rising −18° crossing, and produces no page errors or page overflow. Calendar imports on physical devices remain pending. Release `65cc6196f6e5af9dcfc2ffb570d5a9390d5384c82c308c78cff9651e4b18d7be` verifies 97 inputs, 358 references and 114 client files.

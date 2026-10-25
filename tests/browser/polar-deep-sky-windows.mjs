@@ -24,6 +24,13 @@ try{
   const mobile=page.getByRole('button',{name:'Open planner navigation',exact:true});
   if(await mobile.isVisible()){await mobile.click();await page.locator('.mobile-navigation-options').getByRole('button',{name:'Sky atlas',exact:true}).click()}
   else await page.getByRole('tab',{name:'Sky atlas',exact:true}).click();
+  await page.getByRole('button',{name:'Select saved M81',exact:true}).click();
+  const plot=page.locator('.deep-sky-timeline svg');await plot.waitFor();
+  const path=await plot.locator('path').getAttribute('d');
+  assert.match(path,/^M40\.00,[\d.]+ M49\.58,/,'the curve must restart after the twilight interval');
+  assert.equal(await plot.locator('circle[cx="40"]').count(),1,'the isolated starting sample stays visible');
+  for(const x of await plot.locator('rect').evaluateAll(nodes=>nodes.map(node=>Number(node.getAttribute('x')))))assert(x>40,'no shading over the first interval');
+  if(name==='narrow')await page.locator('.deep-sky-plot').screenshot({path:'/tmp/nightjar-polar-timeline-narrow.png'});
   await page.locator('.deep-sky-comparison summary').click();
   const buttons=page.locator('.deep-compare-window button');await buttons.first().waitFor();
   const count=await buttons.count();assert(count>0);
@@ -37,6 +44,6 @@ try{
    assert(text.includes('strictly below -18 degrees throughout this interval'));
   }
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
-  await page.close();console.log(`${name}: polar comparison and ${count} calendar downloads passed`);
+  await page.close();console.log(`${name}: polar timeline, comparison and ${count} calendar downloads passed`);
  }
 }finally{await browser.close()}

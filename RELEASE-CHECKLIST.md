@@ -4,10 +4,11 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Current completion checklist — 24 October 2026
 
-The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The current source passes TypeScript, full lint, all **869 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. Release-asset verification reports 97 inputs, 358 references, 114 client files and valid manifest/recovery bytes; packaging stages 124 assets. Full-darkness browser coverage uses phone, narrow phone, tablet and desktop Chromium with fixture weather and aurora. Earlier browser evidence below records the behavior at its original revision; broad legacy daytime fixtures have not all been adapted to the new night-only requirement. Hosted validation and physical-device acceptance remain pending.
+The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The current source passes TypeScript, full lint, all **870 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. Release-asset verification reports 97 inputs, 358 references, 114 client files and valid manifest/recovery bytes; packaging stages 124 assets. Full-darkness browser coverage uses phone, narrow phone, tablet and desktop Chromium with fixture weather and aurora. Earlier browser evidence below records the behavior at its original revision; broad legacy daytime fixtures have not all been adapted to the new night-only requirement. Hosted validation and physical-device acceptance remain pending.
 
 Completed locally:
 
+- [x] Deep-sky curves and shading also break across intervening twilight, preserving isolated dark points. Four polar and eight broader night-only browser journeys pass.
 - [x] Deep-sky windows and calendar exports exclude brief polar twilight between dark samples. Four responsive browser journeys verify actual calendar downloads.
 - [x] Plain-text observing lists retain the displayed full-darkness duration and exact UTC endpoint; real downloads match across four viewport sizes.
 - [x] Both printable catalogue checklists retain remaining darkness and the exact UTC endpoint. Eight real HTML downloads render without narrow-screen overflow; native print/PDF remains pending. Forecast recovery additionally passes nearer-bright-hour and bright-only-data cases (30 scenarios), alongside 18 best-hour and 18 suggested-window scenarios.
@@ -44,7 +45,7 @@ Completed locally:
 - [x] Seven-night suggested-window selection uses fresh successful weather and the existing nightly ranking; production checks at eight sizes cover unfinished-time review, missing/stale/failed-refresh weather and clock uncertainty.
 - [x] Planner time/site controls, forecasts, target browsing, notes, diary forms, reports and backup/recovery flows are implemented and covered by the recorded checks below.
 - [x] Light-pollution map and explicit numeric model readings, lunar libration and the existing 2D/3D atlas imaging grid are implemented. Earlier scope descriptions that listed these as missing were outdated.
-- [x] The integrated review branch passes all 869 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (124 assets).
+- [x] The integrated review branch passes all 870 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (124 assets).
 - [x] Latest bright-target return actions pass fixture-based Chromium checks at desktop, phone portrait/landscape, both tablet orientations, 744 px split view and 701 px breakpoint widths. These checks establish browser behavior rather than physical-device acceptance.
 
 Required release acceptance, still pending:

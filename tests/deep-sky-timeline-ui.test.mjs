@@ -25,3 +25,15 @@ test('single dark samples render as points; exact -18 and brighter samples stay 
   assert(!html.includes('aria-label="View M31 at'));
  }
 });
+
+test('polar twilight between dark samples breaks both curve and shading',async()=>{
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const place={name:'Polar grazing fixture',latitude:84.56058967678678,longitude:0,timezone:'UTC'};
+ const transit=A.SearchHourAngle(A.Body.Sun,observer(place),0,new Date('2026-12-21T00:00Z')).time.date;
+ const samples=[-450000,450000].map(offset=>{const time=new Date(+transit+offset);return {time,sun:sunAltitude(time,place),altitude:40,azimuth:0,ra:0,dec:0}});
+ assert(samples.every(sample=>sample.sun<-18));assert(sunAltitude(transit,place)>-18);
+ const html=renderToStaticMarkup(createElement(Timeline,{name:'M81',place,samples,onDate:()=>{}}));
+ assert.equal(count(html,'rect'),0,'shading must not bridge the twilight crossing');
+ assert.equal(count(html,'circle'),2,'both remaining dark samples must stay visible');
+ assert(!html.match(/<path d="([^"]*)"/)[1].includes('L'));
+});
