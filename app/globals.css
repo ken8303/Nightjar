@@ -163,9 +163,14 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .night-outlook-recovery p{margin:0;line-height:1.6}
 .night-outlook-recovery .button{white-space:normal;border:1px solid #607971;background:#18252b}
 /* Keep best-hour recovery beside the recommendation on narrow screens. */
-.notice.best-hour-recovery{display:grid;gap:12px;min-width:0;margin:12px 0}
-.best-hour-recovery p{margin:0;line-height:1.6}
-.best-hour-recovery .button{white-space:normal;border:1px solid #607971;background:#18252b}
+.notice.best-hour-recovery,.notice.comparison-window-recovery{display:grid;gap:12px;min-width:0;margin:12px 0}
+.best-hour-recovery p,.comparison-window-recovery p{margin:0;line-height:1.6}
+.best-hour-recovery .button,.comparison-window-recovery .button{white-space:normal;border:1px solid #607971;background:#18252b}
 .best-window .forecast-best-hour-action{min-height:44px;white-space:normal;text-align:left}
 
 .atmosphere-panel>.section-label{flex-wrap:wrap}.atmosphere-timestamp{overflow-wrap:anywhere}
+
+.darkness-remaining{margin-bottom:22px}
+.darkness-remaining h2{font-size:20px;margin:0 0 10px}
+.darkness-remaining p{line-height:1.6;overflow-wrap:anywhere}
+.darkness-remaining strong{color:#c1df93}

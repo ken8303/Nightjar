@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 
 // Optional rendered regression: Playwright and its browser are provided by the
 // caller, rather than added to the application's runtime dependencies.
-const require=createRequire(import.meta.url);
+const require=createRequire(import.meta.url),A=require('astronomy-engine');
 let chromium;
 try{({chromium}=require('playwright'))}
 catch{throw Error('Install/provide Playwright to run this optional browser check. See README.md.');}
@@ -30,8 +30,8 @@ async function open(time,place,viewport){
  await page.route('**/api/weather?*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({
   timezone:place.timezone,hourly:{time:[Date.parse('2026-10-20T19:00Z')/1000],cloud_cover:[10]},
  })}));
- await page.goto(base.href,{waitUntil:'networkidle'});
- await page.getByRole('button',{name:'Refresh weather',exact:true}).waitFor();
+ await page.goto(base.href,{waitUntil:'domcontentloaded'});
+ await page.locator('#observing-time').waitFor();
  return {page,errors};
 }
 
@@ -77,14 +77,19 @@ try{
    assert.equal(await page.locator('#observing-time').inputValue(),time.slice(0,16));
    assert.equal(await page.getByRole('button',{name:'Site local time',exact:true}).isDisabled(),true);
    assert.equal(await page.getByRole('button',{name:kind==='first'?'Previous observing hour':'Next observing hour',exact:true}).isDisabled(),true);
-   const downloading=page.waitForEvent('download');
-   await page.getByRole('button',{name:'Download observing summary',exact:true}).click();
-   const file=await downloading,text=await readFile(await file.path(),'utf8');
-   assert(text.includes(time));
-   assert.match(text,kind==='first'?/BC/:/10000/);
+   const instant=new Date(time),observer=new A.Observer(place.latitude,place.longitude,0),equator=A.Equator(A.Body.Sun,instant,observer,true,true);
+   const dark=A.Horizon(instant,observer,equator.ra,equator.dec).altitude< -18;
+   const summary=page.getByRole('button',{name:'Download observing summary',exact:true});
+   if(dark){
+    const downloading=page.waitForEvent('download');await summary.click();
+    const file=await downloading,text=await readFile(await file.path(),'utf8');
+    assert(text.includes(time));assert.match(text,kind==='first'?/BC/:/10000/);
+   }else{
+    await page.locator('.night-only-notice').waitFor();assert.equal(await summary.isVisible(),false);
+   }
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
    assert.deepEqual(errors,[]);
-   console.log(`${name} ${kind} year: bounded controls, local range fallback and exact summary PASS`);
+   console.log(`${name} ${kind} year: bounded controls, local range fallback and night-only summary availability PASS`);
    await page.close();
   }
  }

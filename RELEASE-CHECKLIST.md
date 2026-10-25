@@ -2,11 +2,31 @@
 
 The app remains a beta. Automated and desktop-browser results do not establish live-phone camera alignment or installed-PWA reliability.
 
-## Current completion checklist — 23 October 2026
+## Current completion checklist — 24 October 2026
 
-The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The combined source passes TypeScript, full lint, all **843 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. The changed aurora test also passes lint separately: Vite startup is outside its two-second HTTP cleanup/retry subtests. Release-asset verification reports 99 inputs, 376 references, 116 client files and valid manifest/recovery bytes; packaging stages 126 assets. Integrated production browser reruns also pass all 24 site-comparison, six diary-edit and 18 suggested-window cases across desktop, phone, narrow/landscape and both tablet orientations. The suggested-window harness waits for the rendered action instead of network idle. Its 18 cases also verify the inline refresh action beside an expired-suggestion message, including touch target size, real mobile/tablet taps and preservation of unfinished input. Hosted validation and physical-device acceptance remain pending.
+The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The current source passes TypeScript, full lint, all **876 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. Release-asset verification reports 97 inputs, 358 references, 114 client files and valid manifest/recovery bytes; packaging stages 124 assets. Full-darkness browser coverage uses phone, narrow phone, tablet and desktop Chromium with fixture weather and aurora. Earlier browser evidence below records the behavior at its original revision; broad legacy daytime fixtures have not all been adapted to the new night-only requirement. Hosted validation and physical-device acceptance remain pending.
 
 Completed locally:
+
+- [x] Six rendered lunar regressions verify dark phase/peak/contact filtering, preserved astronomical dates and calendar availability across ordinary, equatorial and polar sites and the final supported instant.
+- [x] Eighteen forecast reconnect scenarios verify one recovery request, retained edits/data and continued night-only hiding during daytime, across six layouts.
+- [x] Saved-site upcoming windows revalidate freshness and start time on tap, with an adjacent refresh recovery action. All 18 new window scenarios and 24 site-leader scenarios pass across six layouts.
+- [x] Six diary browser journeys verify unfinished edits through daylight hiding, darkness recovery and reload, preserving saved observations.
+- [x] Forecast coverage counts say dark samples rather than dark hours in seven-night and saved-place cards. Suggested-window recovery passes 18 browser scenarios across six layouts after the wording change.
+- [x] Deep-sky curves and shading also break across intervening twilight, preserving isolated dark points. Four polar and eight broader night-only browser journeys pass.
+- [x] Deep-sky windows and calendar exports exclude brief polar twilight between dark samples. Four responsive browser journeys verify actual calendar downloads.
+- [x] Plain-text observing lists retain the displayed full-darkness duration and exact UTC endpoint; real downloads match across four viewport sizes.
+- [x] Both printable catalogue checklists retain remaining darkness and the exact UTC endpoint. Eight real HTML downloads render without narrow-screen overflow; native print/PDF remains pending. Forecast recovery additionally passes nearer-bright-hour and bright-only-data cases (30 scenarios), alongside 18 best-hour and 18 suggested-window scenarios.
+
+- [x] Remaining full darkness is shown from the selected time, using elapsed duration and the exact astronomical end. Polar/search-limit states are explicit. Downloaded/shared summaries match the panel; eight night-only and twelve summary scenarios pass after workspace reconnection.
+
+- [x] Deep-sky plots retain isolated dark samples as dots and shade only adjacent dark samples. Rendered regressions and pre-dawn production browser cases pass; isolated samples are explicitly not continuous windows.
+
+- [x] The bright-time empty state previews the next fully dark time without changing the plan, reports no-darkness immediately, and offers direct site navigation. Eight browser scenarios verify exact selection, unfinished edits and polar behavior.
+
+- [x] Hidden daytime aurora forecasts retain refresh-error feedback and retry; ISS dark-pass filtering catches brief polar bright crossings and validates displayed window times. Eight night-only, eight observing-time and 24 day-shortcut browser scenarios pass.
+
+- [x] Full astronomical darkness only (Sun strictly below −18°): selected-time panels/exports are hidden outside darkness, timeline samples and event shortcuts are filtered, independent site/aurora times are checked, and polar summer has no twilight fallback. Night recovery preserves unfinished-edit review. Physical iPhone/iPad Safari acceptance remains pending.
 
 - [x] Observing-summary filenames identify the site and exact UTC time, with bounded Unicode labels and filesystem-safe punctuation. All 12 summary-share/download browser scenarios pass, including actual non-Latin filenames and retained full names in the text. Native Files handling remains pending.
 
@@ -30,7 +50,7 @@ Completed locally:
 - [x] Seven-night suggested-window selection uses fresh successful weather and the existing nightly ranking; production checks at eight sizes cover unfinished-time review, missing/stale/failed-refresh weather and clock uncertainty.
 - [x] Planner time/site controls, forecasts, target browsing, notes, diary forms, reports and backup/recovery flows are implemented and covered by the recorded checks below.
 - [x] Light-pollution map and explicit numeric model readings, lunar libration and the existing 2D/3D atlas imaging grid are implemented. Earlier scope descriptions that listed these as missing were outdated.
-- [x] The integrated review branch passes all 843 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (126 assets).
+- [x] The integrated review branch passes all 876 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (124 assets).
 - [x] Latest bright-target return actions pass fixture-based Chromium checks at desktop, phone portrait/landscape, both tablet orientations, 744 px split view and 701 px breakpoint widths. These checks establish browser behavior rather than physical-device acceptance.
 
 Required release acceptance, still pending:

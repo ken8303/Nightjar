@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import {test,after} from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {createServer} from './vite-test-server.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},esbuild:{jsx:'automatic'},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
+const {default:Eclipses}=await vite.ssrLoadModule('/components/lunar-eclipses.tsx');
+const {nextLunarEclipses}=await vite.ssrLoadModule('/lib/lunar-events.ts');
+const {isAstronomicalNight}=await vite.ssrLoadModule('/lib/sky.ts');
+const sites=[{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},{name:'Equator',latitude:0,longitude:120,timezone:'UTC'},{name:'North Pole',latitude:90,longitude:0,timezone:'UTC'},{name:'South Pole',latitude:-90,longitude:0,timezone:'UTC'}];
+for(const place of sites)test(`eclipse contacts and shortcuts use actual dark event times at ${place.name}`,()=>{
+ const date=new Date('2026-10-25T00:00Z'),events=nextLunarEclipses(date),eligible=events.filter(event=>isAstronomicalNight(event.peak.date,place));
+ const html=renderToStaticMarkup(createElement(Eclipses,{date,place,onDate:()=>{}}));
+ if(!eligible.length){assert(html.includes('None of the next supported lunar eclipses peaks in full astronomical darkness'));assert(!html.includes('Set observing time to peak'));return}
+ assert.equal((html.match(/aria-pressed=/g)||[]).length,eligible.length);
+ const event=eligible[0],offsets=[-event.sd_penum,...(event.sd_partial>0?[-event.sd_partial]:[]),...(event.sd_total>0?[-event.sd_total]:[]),0,...(event.sd_total>0?[event.sd_total]:[]),...(event.sd_partial>0?[event.sd_partial]:[]),event.sd_penum];
+ const contacts=offsets.map(minutes=>new Date(+event.peak.date+minutes*60000));
+ const displayed=[...html.matchAll(/dateTime="([^"]+)"/g)].map(match=>match[1]);
+ assert.deepEqual(displayed,contacts.filter(time=>isAstronomicalNight(time,place)).map(time=>time.toISOString()));
+ const download=[...html.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)].map(match=>match[0]).find(button=>button.includes('Download eclipse calendar'));assert(download);
+ assert.equal(download.includes('disabled=""'),contacts.some(time=>!isAstronomicalNight(time,place)));
+});
+test('no lunar eclipse shortcut or calendar escapes the supported final instant',()=>{
+ const html=renderToStaticMarkup(createElement(Eclipses,{date:new Date('9999-12-31T23:59:59.999Z'),place:sites[0],onDate:()=>{}}));
+ assert(html.includes('None of the next supported lunar eclipses'));assert(!html.includes('Download eclipse calendar'));assert(!html.includes('<time'));
+});
+
+test('phase shortcuts omit bright events without changing the displayed event dates',async()=>{
+ const {default:MoonExplorer}=await vite.ssrLoadModule('/components/moon-explorer.tsx');
+ const {nextLunarPhases}=await vite.ssrLoadModule('/lib/lunar-events.ts');
+ const {deepSkyTimestampFormatter}=await vite.ssrLoadModule('/lib/deep-sky-time.ts');
+ const date=new Date('2026-10-25T00:00Z'),events=nextLunarPhases(date);
+ for(const place of sites){
+  const html=renderToStaticMarkup(createElement(MoonExplorer,{date,place,onDate:()=>{}}));
+  const grid=html.match(/class="quarter-grid">([\s\S]*?)<\/div>/)[1],format=deepSkyTimestampFormatter(date,place.timezone).format;
+  const eligible=events.filter(event=>isAstronomicalNight(event.time.date,place));
+  assert.equal((grid.match(/<button\b/g)||[]).length,eligible.length);
+  for(const event of events)assert.equal(grid.includes(format(event.time.date)),isAstronomicalNight(event.time.date,place));
+  if(!eligible.length)assert(html.includes('None of the next supported lunar phases occurs in full astronomical darkness'));
+ }
+});

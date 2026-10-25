@@ -16,8 +16,8 @@ test('comparison uses the same astronomical samples, sorts highest eligible peak
  assert(compareDeepSky(targets,new Date('2026-06-21T12:00Z'),{name:'North pole',latitude:89,longitude:0}).every(row=>!row.best&&row.minutes===0));
 });
 test('opportunity intervals exclude threshold samples and gaps, split windows and retain isolated peaks',()=>{
- const sample=(index,altitude=40,sun=-18)=>({time:new Date(+date+index*900000),altitude,sun,azimuth:0,ra:0,dec:0});
- const result=deepSkyOpportunity([sample(0),sample(1),sample(2,30),sample(3),sample(4),sample(5,50,-17.99),sample(6,80)]);
+ const sample=(index,altitude=40,sun=-19)=>({time:new Date(+date+index*900000),altitude,sun,azimuth:0,ra:0,dec:0});
+ const result=deepSkyOpportunity([sample(0),sample(1),sample(2,30),sample(3),sample(4),sample(5,50,-18),sample(6,80)]);
  assert.equal(result.minutes,30);assert.equal(result.windows.length,2);assert.equal(result.windows[0].minutes,15);assert.equal(result.best.altitude,80);
  assert.equal(deepSkyOpportunity([sample(0),sample(2)]).minutes,0);assert.equal(deepSkyOpportunity([sample(0,30)]).best,null);assert.equal(deepSkyOpportunity([]).minutes,0);
 });
@@ -35,4 +35,16 @@ test('deep-sky comparison shares bounded dates with individual windows at the fi
   assert(row.windows.every(window=>window.start.getUTCFullYear()===9999&&window.end.getUTCFullYear()===9999));if(row.best)assert.equal(row.best.time.getUTCFullYear(),9999);
  }
  assert.throws(()=>compareDeepSky(targets,new Date('+010000-01-01T00:00:00Z'),place),/UTC years 1–9999/);
+});
+
+test('comparison windows exclude a brief polar twilight crossing between dark samples',async()=>{
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const site={name:'Polar grazing fixture',latitude:84.56058967678678,longitude:0};
+ const transit=A.SearchHourAngle(A.Body.Sun,observer(site),0,new Date('2026-12-21T00:00Z')).time.date;
+ const start=new Date(+transit-450000),end=new Date(+transit+450000);
+ assert(sunAltitude(start,site)<-18);assert(sunAltitude(end,site)<-18);assert(sunAltitude(transit,site)>-18);
+ const row=compareDeepSky([findDeepSky('M81','')[0]],start,site)[0];
+ assert(row.samples[0].altitude>30&&row.samples[1].altitude>30);
+ assert(row.best,'dark samples remain available as individual opportunities');
+ assert(!row.windows.some(window=>+window.start<+transit&&+window.end>+transit),'an observing window must not bridge twilight');
 });

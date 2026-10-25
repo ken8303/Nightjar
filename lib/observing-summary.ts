@@ -1,3 +1,4 @@
+import {darknessSummaryLines} from './darkness-remaining';
 import {validPlace} from './planner-state';
 import {validObservingDate} from './observing-time';
 import {forecastSnapshotNotes} from './forecast-freshness';
@@ -37,6 +38,7 @@ export function observingSummary(input:Input,created=new Date()){
   'SKY AT THE SELECTED TIME',
   `Sky: ${sun<-18?'Astronomical darkness':sun<=-6?'Twilight':'Daylight / civil twilight'}`,
   `Sun altitude: ${sun.toFixed(1)} degrees`,
+  ...darknessSummaryLines(date,place),
   `Moon: ${moon.name}; ${Math.round(moon.illumination*100)}% illuminated`,
   `Moon altitude: ${moon.altitude.toFixed(1)} degrees; ${moon.altitude>0?'above':'at or below'} the ideal horizon`,
   '',
@@ -64,6 +66,7 @@ export function observingSummary(input:Input,created=new Date()){
   'Cloud layers can overlap; their percentages do not add up to total cloud cover.',
   'Near-surface visibility is horizontal visibility, not astronomical transparency or seeing.',
   'Planning scores are estimates based on clouds, darkness and moonlight, not astronomical seeing or transparency.',
+  'Darkness duration uses elapsed time with the geometric Sun centre below -18 degrees; it is not a weather or visibility guarantee.',
   'Positions use an ideal horizon; terrain, buildings and local conditions can obstruct the view.',
   'Weather source: Open-Meteo. Recheck conditions before heading out.');
  return {text:lines.join('\r\n')+'\r\n',filename:summaryFilename(place,date)};

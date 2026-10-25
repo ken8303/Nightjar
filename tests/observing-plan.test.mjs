@@ -91,3 +91,17 @@ test('real UTC and other known site zones keep their local-time identity in prin
   assert(html.includes('<strong>TIME AT SITE</strong>'));assert(!html.includes('site time zone unavailable'));assert(html.includes(clock));assert(html.includes(` · ${timezone}</span>`));assert(html.includes('2026-10-16 20:00:37.125 UTC'));
  }
 });
+
+test('printable plans retain remaining darkness and exact UTC end without changing the observing snapshot',async()=>{
+ const {remainingDarkness,darknessDuration}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
+ const plan=input(),before=structuredClone(plan),darkness=remainingDarkness(plan.date,plan.place),html=printableObservingPlan(plan);
+ assert(html.includes('FULL DARKNESS REMAINING'));assert(html.includes(`${darknessDuration(plan.date,darkness.end)} after the selected time`));
+ assert(html.includes(darkness.end.toISOString().replace('T',' ').replace('Z',' UTC')));assert(html.includes('FULL DARKNESS ENDS (UTC)'));
+ assert.deepEqual(plan,before);
+});
+test('printable plans distinguish polar search limits from bright observing times',()=>{
+ const plan=input();plan.date=new Date('2026-12-21T12:00Z');plan.place={name:'Pole',latitude:90,longitude:0};
+ const polar=printableObservingPlan(plan);assert(polar.includes('No end found within 48 hours'));assert(!polar.includes('FULL DARKNESS ENDS (UTC)'));
+ plan.place=input().place;
+ const bright=printableObservingPlan(plan);assert(bright.includes('Selected time is outside full astronomical darkness'));assert(!bright.includes('FULL DARKNESS ENDS (UTC)'));
+});

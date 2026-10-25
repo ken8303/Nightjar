@@ -4,14 +4,14 @@ export const minimumTargetAltitude=30;
 export type VisibilitySample={time:Date;sun:number;altitude:number;azimuth:number};
 export type VisibilitySamples={body:A.Body;positions:VisibilitySample[]};
 
-// Rank the whole sampled window, including daylight. Twilight shortcuts are separate.
+// Rank only samples in full astronomical darkness, using the geometric Sun centre.
 export function rankVisibilitySamples(rows:VisibilitySamples[]){
- return rows.flatMap(row=>{
+ return rows.map(row=>({...row,positions:row.positions.filter(sample=>sample.sun< -18)})).flatMap(row=>{
   if(!row.positions.length)return [];
   const peakSample=row.positions.reduce((best,sample)=>sample.altitude>best.altitude?sample:best);
   if(!(peakSample.altitude>minimumTargetAltitude))return [];
   const best=row.positions.reduce<VisibilitySample|null>((best,sample)=>
-   sample.sun<=-6&&sample.altitude>minimumTargetAltitude&&(!best||sample.altitude>best.altitude)?sample:best,null);
+   sample.sun< -18&&sample.altitude>minimumTargetAltitude&&(!best||sample.altitude>best.altitude)?sample:best,null);
   return [{...row,peak:peakSample.altitude,peakSample,best}];
  }).sort((a,b)=>b.peak-a.peak||a.body.localeCompare(b.body));
 }
@@ -26,9 +26,9 @@ export function planetVisibilityWindow(start:number,place:Place){
  const times=Array.from({length:12},(_,i)=>new Date(start+i*3600000)).filter(validObservingDate);
  const hours=times.map(time=>{
   return {time,sun:sunAltitude(time,place)};
- });
+ }).filter(hour=>hour.sun< -18);
  const samples=skyBodies.map(body=>({
   body,positions:hours.map(hour=>({...hour,...bodyPosition(body,hour.time,place)}))
  }));
- return {hours,rows:rankVisibilitySamples(samples)};
+ return {sampleCount:times.length,hours,rows:rankVisibilitySamples(samples)};
 }

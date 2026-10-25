@@ -1,4 +1,4 @@
-import {Place, scoreAt} from './sky';
+import {Place, scoreAt, isAstronomicalNight} from './sky';
 import {validObservingDate} from './observing-time';
 
 export type HourlyForecast={time:number[];cloud_cover:(number|null)[];[field:string]:(number|null)[]};
@@ -33,11 +33,11 @@ export function forecastHourIndex(times:number[]|undefined,date:Date){
  return Array.isArray(times)?times.findIndex(time=>finite(time)&&time<=instant&&instant<time+3600):-1;
 }
 
-export function weatherHours(hourly:HourlyForecast|undefined,date:Date|null,place:Place){
+export function weatherHours(hourly:HourlyForecast|undefined,date:Date|null,place:Place,includeSelectedHour=false){
  if(!Array.isArray(hourly?.time)||!date)return [];
  const index=forecastHourIndex(hourly.time,date);
  const instant=+date/1000,start=index>=0?hourly.time[index]:instant;
- return hourly.time.map((time,index)=>({time,index})).filter(({time})=>finite(time)&&Number.isFinite(+new Date(time*1000))&&time>=start&&time<instant+12*3600).sort((a,b)=>a.time-b.time).slice(0,13).map(({time,index})=>{
+ return hourly.time.map((time,index)=>({time,index})).filter(({time})=>finite(time)&&Number.isFinite(+new Date(time*1000))&&time>=start&&time<instant+12*3600&&(isAstronomicalNight(new Date(time*1000),place)||includeSelectedHour&&index>=0&&time===start&&isAstronomicalNight(date,place))).sort((a,b)=>a.time-b.time).slice(0,13).map(({time,index})=>{
   const at=new Date(time*1000);
   const value=(field:string)=>{const raw=hourly[field]?.[index];return finite(raw)?raw:null};
   const rawCloud=value('cloud_cover'),cloud=rawCloud!==null&&rawCloud>=0&&rawCloud<=100?rawCloud:null;

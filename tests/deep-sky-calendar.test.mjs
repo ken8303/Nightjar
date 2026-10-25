@@ -39,3 +39,13 @@ test('deep-sky event notes preserve unknown site zones instead of declaring UTC 
  assert(known.includes('Site time zone: UTC.')&&!known.includes('Site time zone unavailable'));
  for(const property of ['DTSTART:','DTEND:'])assert.equal(unknown.split('\r\n').find(line=>line.startsWith(property)),known.split('\r\n').find(line=>line.startsWith(property)));
 });
+
+test('calendar rejects a polar twilight excursion hidden between qualifying samples',async()=>{
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const site={name:'Polar grazing fixture',latitude:84.56058967678678,longitude:0};
+ const transit=A.SearchHourAngle(A.Body.Sun,observer(site),0,new Date('2026-12-21T00:00Z')).time.date;
+ const times=[new Date(+transit-450000),new Date(+transit+450000)];
+ const samples=times.map(time=>({time,altitude:40,azimuth:0,sun:sunAltitude(time,site)}));
+ assert(samples.every(sample=>sample.sun<-18));assert(sunAltitude(transit,site)>-18);
+ assert.throws(()=>deepSkyWindowCalendar({target,place:site,start:times[0],end:times[1],samples,moonBelowOnly:false},created),/leaves full astronomical darkness/);
+});

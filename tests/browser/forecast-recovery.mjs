@@ -20,10 +20,12 @@ try{
   ['desktop',{width:1365,height:1000}],['phone',{width:390,height:844}],
   ['narrow',{width:320,height:740}],['landscape',{width:640,height:320}],
   ['tablet-portrait',{width:820,height:1180}],['tablet-landscape',{width:1180,height:820}],
- ])for(const [kind,selected,clouds] of [
+ ])for(const [kind,selected,clouds,hours=[19,20,21],expected=21] of [
   ['missing','2026-10-20T20:00:17.125Z',[100,null,0]],
-  ['outside','2026-10-20T18:00:17.125Z',[null,null,0]],
+  ['outside','2026-10-20T22:00:17.125Z',[null,null,0]],
   ['unavailable','2026-10-20T20:00:17.125Z',[null,null,null]],
+  ['bright-nearest','2026-10-20T19:00:17.125Z',[0,null,0],[18,19,22],22],
+  ['bright-only','2026-10-20T20:00:17.125Z',[0,null,null],[18,20,21]],
  ]){
   const touch=name!=='desktop',page=await browser.newPage({viewport,hasTouch:touch,isMobile:touch});
   page.setDefaultTimeout(15000);
@@ -39,7 +41,7 @@ try{
    localStorage.setItem('nightjar-deep-targets-v1',JSON.stringify(['M31']));
   },{origin:base.origin,selected});
   await page.context().route('**/api/weather?*',route=>route.fulfill({json:{hourly:{
-   time:[19,20,21].map(hour=>Date.parse(`2026-10-20T${hour}:00Z`)/1000),cloud_cover:clouds,temperature_2m:[10,11,12],
+   time:hours.map(hour=>Date.parse(`2026-10-20T${hour}:00Z`)/1000),cloud_cover:clouds,temperature_2m:[10,11,12],
   }}}));
   await page.context().route('**/*',route=>route.request().resourceType()==='image'&&new URL(route.request().url()).origin!==base.origin
    ?route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'}):route.fallback());
@@ -53,21 +55,21 @@ try{
   async function activate(control){if(touch)await control.tap();else await control.click()}
   const before=await exact(),saved=await stored();
   assert.equal(await outlook.locator('.score-ring strong').textContent(),'—');
-  if(kind==='unavailable'){
+  if(kind==='unavailable'||kind==='bright-only'){
    assert.equal(await panel.count(),0);assert.equal(await exact(),before);assert.deepEqual(await stored(),saved);
    assert((await outlook.locator('.forecast-coverage').textContent()).includes('Scored 0'));
   }else{
    const action=panel.getByRole('button',{name:'Use closest forecast hour',exact:true});await action.waitFor();
-   assert((await panel.textContent()).includes('closest hour with cloud data'));
-   assert((await panel.textContent()).includes('22:00'));
+   assert((await panel.textContent()).includes('closest full-darkness hour with cloud data'));
+   assert((await panel.textContent()).includes(`${expected+1}:00`));
    await time.fill('');await action.scrollIntoViewIfNeeded();assert((await action.boundingBox()).height>=44);
    if(evidence)await panel.screenshot({path:`${evidence}/cloud-recovery-${name}-${kind}.png`});
    await activate(action);await page.getByRole('heading',{name:'Your edits have not been saved',exact:true}).waitFor();
    assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),saved);
    await activate(page.getByRole('button',{name:'Keep editing',exact:true}));assert.equal(await time.inputValue(),'');
    await activate(action);await activate(page.getByRole('button',{name:'Use selected time',exact:true}));
-   await page.waitForFunction(()=>document.querySelector('#observing-time')?.value==='2026-10-20T21:00');
-   assert((await exact()).includes('2026-10-20 21:00:00.000 UTC'));
+   await page.waitForFunction(expected=>document.querySelector('#observing-time')?.value===`2026-10-20T${expected}:00`,expected);
+   assert((await exact()).includes(`2026-10-20 ${expected}:00:00.000 UTC`));
    assert.notEqual(await outlook.locator('.score-ring strong').textContent(),'—');assert.equal(await panel.count(),0);assert.deepEqual(await stored(),saved);
   }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
