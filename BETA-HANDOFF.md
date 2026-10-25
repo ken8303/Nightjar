@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Forecast coverage wording — 25 October 2026
+
+Seven-night cards and saved-place comparisons now label their forecast coverage as dark samples rather than dark hours. A sampled dark instant near dawn does not establish a full hour of darkness. The seven-night explanation now states the strict −18° threshold and distinguishes coverage counts from continuously dark suggested windows, including the crossing search. Targeted lint and the final production build pass. All 18 suggested-window browser scenarios pass across six layouts, covering expired windows, forecast age and clock-change recovery; the narrow-screen screenshot was inspected. This wording-only change adds no tests; the previous full verification remains 870 passing tests. Physical-device acceptance remains pending.
+
 ## Polar timeline correction — 25 October 2026
 
 Deep-sky altitude curves and shading now break when the Sun briefly leaves full darkness between adjacent samples. Isolated dark samples remain visible as dots. A rendered-component regression reproduced the previous shading failure. Full verification passes all 870 tests, TypeScript/lint, production build, compiled Worker integration and 124-asset packaging. Four expanded polar browser journeys verify the curve gap, unshaded interval, isolated dot and real calendar downloads; eight broader night-only journeys also pass. The 320-pixel plot screenshot was inspected. Release `c3c0d48d95c9a4fa9b08bd463cb01f48afbee000c53361397578dc53e06c369f` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
