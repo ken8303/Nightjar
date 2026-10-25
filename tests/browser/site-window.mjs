@@ -84,7 +84,17 @@ try{
    await page.getByRole('heading',{name:'Your edits have not been saved',exact:true}).waitFor();
    assert.equal(await page.locator('.location-button').textContent(),'London');assert.equal(await utc(),before);
    await tap(page.getByRole('button',{name:'Keep editing',exact:true}));assert.equal(await time.inputValue(),'');
-   await tap(action);await tap(page.getByRole('button',{name:'Leave without saving',exact:true}));
+   await tap(action);
+   if(kind==='started')await page.clock.setFixedTime(new Date('2026-10-20T22:00:00.001Z'));
+   await tap(page.getByRole('button',{name:'Leave without saving',exact:true}));
+   if(kind==='started'){
+    await page.getByRole('status').filter({hasText:'expired while awaiting confirmation'}).waitFor();
+    assert.equal(await page.locator('.location-button').textContent(),'London');assert.equal(await utc(),before);assert.equal(await time.inputValue(),'');
+    assert.deepEqual(await page.evaluate(()=>({places:localStorage.getItem('nightjar-places'),notes:localStorage.getItem('nightjar-target-notes-v1'),diary:localStorage.getItem('nightjar-observing-diary-v1')})),saved);
+    assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
+    console.log(`${name}/${kind}: confirmation expiry preserves site, time, draft and saved data PASS`);
+    await page.close();continue;
+   }
    await page.waitForFunction(()=>document.querySelector('.location-button')?.textContent==='Paris');
    assert.equal(await time.inputValue(),'2026-10-20T22:00');
    assert.deepEqual(await page.evaluate(()=>({places:localStorage.getItem('nightjar-places'),notes:localStorage.getItem('nightjar-target-notes-v1'),diary:localStorage.getItem('nightjar-observing-diary-v1')})),saved);

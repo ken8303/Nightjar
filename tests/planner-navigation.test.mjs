@@ -68,3 +68,13 @@ test('bright and deep-sky time shortcuts snapshot the object and exact time as o
   h.navigation.request({kind:'time',section:'sky',date:new Date('2026-10-21T00:00Z'),target},true,h.apply);h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,1);
  }
 });
+
+test('forecast confirmation rechecks start, freshness and clock rollback without applying the queued context',()=>{
+ const fetched=Date.parse('2026-10-20T20:00Z'),date=new Date('2026-10-20T20:20Z');
+ for(const kind of ['time','context'])for(const [now,start] of [[+date+1,date],[fetched+1800000,new Date(fetched+7200000)],[fetched-60001,date]]){
+  const h=harness();h.navigation.request({kind,section:'tonight',date:start,place:site,forecastFetchedAt:fetched},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,now),false);assert.deepEqual(h.applied,[]);assert.equal(h.pending.at(-1),null);
+ }
+ const h=harness();h.navigation.request({kind:'time',section:'tonight',date,forecastFetchedAt:fetched},true,h.apply);
+ assert.equal(h.navigation.continue(h.apply,+date),true);assert.equal(+h.applied[0].date,+date);
+});

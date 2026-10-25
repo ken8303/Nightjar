@@ -16,7 +16,7 @@ import { moonInfo, Place, scoreAt, timeLabel, sunAltitude} from '@/lib/sky';
 
 const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
 
-export default function PlaceComparison({ places, current, date, onChoose, onPlan, selection, onSelectionChange:setSelection }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date)=>void;selection:string[]|null;onSelectionChange:(selection:string[])=>void }) {
+export default function PlaceComparison({ places, current, date, onChoose, onPlan, selection, onSelectionChange:setSelection }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place) => void; onPlan:(p:Place,date:Date,forecastFetchedAt?:number)=>void;selection:string[]|null;onSelectionChange:(selection:string[])=>void }) {
  const options = useMemo(()=>{const seen=new Set<string>();return [current,...places].filter(place=>{const id=key(place);if(seen.has(id))return false;seen.add(id);return true})},[current,places]);
  const [optionsShown,setOptionsShown]=useState(savedListPageSize);
  const heading=useRef<HTMLHeadingElement>(null),picker=useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
   if(+window.date<instant){
    reportWindowIssue('This observing window has already started. Your site and observing time were kept. Refresh forecasts and choose a later window.');return;
   }
-  onPlan(row.planningPlace,window.date);
+  onPlan(row.planningPlace,window.date,fetchedAt);
  }
  function chooseFreshLeader(id:string,instant:number){
   const currentRanking=compareSiteScores(rows.map(row=>({...row,...siteForecastState(row.result,requestKey,instant)})));

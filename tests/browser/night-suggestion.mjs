@@ -86,7 +86,17 @@ try{
    await page.getByRole('button',{name:'Keep editing',exact:true}).click();
    assert.equal(await time.inputValue(),'');
    if(touch)await action.tap();else await action.click();
+   if(kind==='started')await page.clock.setFixedTime(new Date('2026-10-20T21:00:00.001Z'));
    await page.getByRole('button',{name:'Use selected time',exact:true}).click();
+   if(kind==='started'){
+    await page.getByRole('status').filter({hasText:'expired while awaiting confirmation'}).waitFor();
+    assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');
+    assert.deepEqual(await page.evaluate(()=>({notes:localStorage.getItem('nightjar-target-notes-v1'),deep:localStorage.getItem('nightjar-deep-targets-v1'),site:localStorage.getItem('nightjar-place')})),saved);
+    assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
+    console.log(`${name}/${kind}/${control}: confirmation expiry preserves time, draft and saved data PASS`);
+    await page.close();continue;
+   }
+
    await page.waitForFunction(()=>document.querySelector('#observing-time')?.value==='2026-10-20T21:00');
    assert((await exact()).includes('2026-10-20 21:00:00.000 UTC'));
    assert.equal(await panel.locator('.night-outlook-card.selected').count(),1);

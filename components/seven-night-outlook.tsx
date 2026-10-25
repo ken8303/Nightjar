@@ -13,7 +13,7 @@ import WeatherFreshness from '@/components/weather-freshness';
 import {forecastFreshness} from '@/lib/forecast-freshness';
 
 type Hourly={time:number[];cloud_cover:(number|null)[]};
-export default function SevenNightOutlook({hourly,place,loading,selectedDate,onDate,fetchedAt,error,onRefresh,requestKey}:{hourly?:Hourly;place:Place;loading:boolean;selectedDate:Date|null;onDate:(date:Date)=>void;fetchedAt?:number;error:string;onRefresh:()=>void;requestKey:string}){
+export default function SevenNightOutlook({hourly,place,loading,selectedDate,onDate,fetchedAt,error,onRefresh,requestKey}:{hourly?:Hourly;place:Place;loading:boolean;selectedDate:Date|null;onDate:(date:Date,forecastFetchedAt?:number)=>void;fetchedAt?:number;error:string;onRefresh:()=>void;requestKey:string}){
  const now=usePlanningClock();
  const {stale,clockChanged}=forecastFreshness(hourly?fetchedAt:undefined,now);
  const nights=useMemo(()=>hourly?.time?.length?sevenNightOutlook(hourly,place,new Date(now)):[],[hourly,place,now]);
@@ -44,7 +44,7 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
   if(+window.date<instant){
    reportPlanningIssue('This observing window has already started. Your observing time was kept. Choose a later window or refresh the forecast.');return;
   }
-  onDate(window.date);
+  onDate(window.date,fetchedAt);
  }
  function download(night:typeof nights[number]){
   if(!night.best)return;
