@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Lunar night-only display coverage — 25 October 2026
+
+Six rendered-component regressions cover lunar phase shortcuts, eclipse peaks and displayed contacts at London, an equatorial site and both poles, plus the supported final instant. The checks compare displayed contacts and phase dates with the actual astronomical events, verify omission of bright events and check calendar availability against contact darkness. The full unit suite passes all 876 tests with no failures or cancellations; targeted lint passes. This batch adds tests and documentation only, with no application bug found or new build required. Browser/device acceptance is separate from these server-rendered checks.
+
 ## Daytime forecast reconnect coverage — 25 October 2026
 
 The reconnect browser harness now covers foreground recovery while selected-time observing panels are hidden for daylight. A successful recovery remains hidden, issues only one request despite repeated resume signals, and preserves the exact selected instant, unfinished time input and saved data. Returning to darkness exercises both keeping the edit and confirming the new time without another weather request. All 18 reconnect scenarios pass across six desktop/phone/tablet layouts, including the original offline startup and offline retry paths. Targeted lint passes. This batch changes tests and documentation only; no application regression was found, and the full suite was not rerun. Network state and resume events are simulated; physical-device and installed-PWA acceptance remain pending.
