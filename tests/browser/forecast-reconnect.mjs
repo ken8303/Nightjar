@@ -20,7 +20,7 @@ try{
   ['desktop',{width:1365,height:1000}],['phone',{width:390,height:844}],
   ['narrow',{width:320,height:740}],['landscape',{width:640,height:320}],
   ['tablet-portrait',{width:820,height:1180}],['tablet-landscape',{width:1180,height:820}],
- ])for(const kind of ['offline-mount','offline-retry']){
+ ])for(const kind of ['offline-mount','offline-retry','daylight-reconnect']){
   const touch=name!=='desktop',page=await browser.newPage({viewport,hasTouch:touch,isMobile:touch});
   page.setDefaultTimeout(15000);
   const errors=[],logs=[];
@@ -52,11 +52,11 @@ try{
   await page.goto(base.href,{waitUntil:'domcontentloaded'});
   assert.match(await page.title(),/Nightjar/);assert.equal(new URL(page.url()).origin,base.origin);
   const panel=page.locator('.outlook'),freshness=panel.locator('.forecast-freshness');
-  const retry=freshness.getByRole('button',{name:'Retry forecast',exact:true}),refresh=freshness.getByRole('button',{name:'Refresh weather',exact:true});
+  const retry=freshness.getByRole('button',{name:'Retry forecast',exact:true}),refresh=freshness.getByRole('button',{name:'Refresh weather',exact:true,includeHidden:true});
   await (kind==='offline-mount'?retry:refresh).waitFor();assert.equal(requests,1);
   const time=page.locator('#observing-time'),exact=()=>page.locator('.time-entry [aria-atomic=true]').textContent();
   const stored=()=>page.evaluate(()=>({site:localStorage.getItem('nightjar-place'),notes:localStorage.getItem('nightjar-target-notes-v1'),deep:localStorage.getItem('nightjar-deep-targets-v1')}));
-  const before=await exact(),saved=await stored();await time.fill('');
+  let before=await exact();const saved=await stored();await time.fill('');
   failed=true;await page.clock.setFixedTime(new Date('2026-10-20T18:30:01.000Z'));
   await page.evaluate(()=>{window.fixtureOnline=false;dispatchEvent(new Event('offline'))});
   const response=page.waitForResponse(response=>response.url().includes('/api/weather?')&&response.status()===503);
@@ -64,11 +64,15 @@ try{
   if(touch)await control.tap();else await control.click();
   await response;await retry.waitFor();assert.equal(requests,2);
   assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),saved);
+  if(kind==='daylight-reconnect'){
+   await time.fill('2026-10-20T12:00');await page.locator('.night-only-notice').waitFor();
+   assert.equal(await panel.isVisible(),false);before=await exact();await time.fill('');
+  }
   // Simulate a missed online event on return. The request made offline must
   // not satisfy the reconnect; one foreground acquisition is still needed.
   failed=false;await page.clock.setFixedTime(new Date('2026-10-20T18:30:02.001Z'));
   await page.evaluate(()=>{window.fixtureOnline=true;dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))});
-  await refresh.waitFor();assert.equal(requests,3);
+  await refresh.waitFor({state:kind==='daylight-reconnect'?'attached':'visible'});assert.equal(requests,3);
   assert((await freshness.textContent()).includes('Weather fetched'));
   assert.equal(await freshness.locator('.error').count(),0);
   await page.evaluate(()=>{
@@ -82,6 +86,19 @@ try{
   assert.equal(await page.locator('.unsaved-view-warning').count(),0);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
+  if(kind==='daylight-reconnect'){
+   assert.equal(await panel.isVisible(),false,'reconnect must not reveal daytime observing information');
+   assert.equal(await page.locator('.darkness-remaining').isVisible(),false);
+   const recover=page.getByRole('button',{name:'Use this dark time',exact:true});
+   if(touch)await recover.tap();else await recover.click();
+   await page.getByRole('heading',{name:'Your edits have not been saved',exact:true}).waitFor();
+   await page.getByRole('button',{name:'Keep editing',exact:true}).click();
+   assert.equal(await time.inputValue(),'');assert.equal(await exact(),before);
+   if(touch)await recover.tap();else await recover.click();
+   await page.getByRole('button',{name:'Use selected time',exact:true}).click();
+   await panel.waitFor();await refresh.waitFor();assert.equal(requests,3);
+   assert.equal(await freshness.locator('.error').count(),0);assert.deepEqual(await stored(),saved);
+  }
   if(evidence)await panel.screenshot({path:`${evidence}/forecast-reconnect-${name}-${kind}.png`});
   console.log(`${name}/${kind}: silent reconnect after offline retry refreshes once and preserves exact time, unfinished input and saved data PASS`);
   await page.close();
