@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Text observing-list continuation — 25 October 2026
+
+Plain-text observing lists now retain the same remaining full-darkness duration and exact UTC endpoint as Tonight and summary exports, with shared wording for polar nights and supported-date limits. Full verification passes all 866 tests, TypeScript, lint, build, compiled Worker integration and 123-asset packaging. All eight night-only browser journeys pass; the four nonpolar journeys download text lists and verify their duration, endpoint and saved Vega entry. Native device acceptance remains pending.
+
 ## Latest cloud continuation — 24 October 2026
 
 Printable bright-target and deep-sky checklists now retain the same remaining-darkness duration and precise UTC end as Tonight. Polar and bright-time states remain explicit, and the report stays an offline snapshot. Full verification passes 866 tests, TypeScript/lint/build, compiled Worker integration and 123-asset packaging. All eight final night-only browser scenarios pass, including eight actual HTML downloads across four sizes, offline rendering and narrow-screen overflow checks; the 320 px report metadata screenshot was inspected. Release `544033c28dc99547e546b37a51ffd0419a64e3afa0738f244df4180fd343d6a7` verifies 96 inputs, 353 references and 113 client files. Separately, 30 closest-forecast, 18 best-hour and 18 suggested-window browser scenarios pass. Closest-forecast fixtures now respect night-only mode and explicitly cover a nearer bright cloud sample and a feed whose only known cloud sample is bright. Actual phone printing/PDF and native Safari remain pending.

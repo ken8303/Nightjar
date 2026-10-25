@@ -18,3 +18,9 @@ export function darknessDuration(start:Date,end:Date){
  const hours=Math.floor(minutes/60),rest=minutes%60;
  return [hours?`${hours} ${hours===1?'hour':'hours'}`:'',rest?`${rest} ${rest===1?'minute':'minutes'}`:''].filter(Boolean).join(' ');
 }
+
+/** Shared wording for text exports, including bounded polar-night searches. */
+export function darknessSummaryLines(date:Date,place:Place){
+ const darkness=remainingDarkness(date,place);
+ return darkness?.end?[`Full darkness remaining: ${darknessDuration(darkness.start,darkness.end)} after the selected observing time.`,`Full darkness ends UTC: ${darkness.end.toISOString()}`]:[darkness?`Full darkness end: not found ${darkness.dateLimited?'before the supported UTC date limit':'within 48 hours of the selected observing time'}.`:'Full darkness remaining: the selected time is outside full astronomical darkness.'];
+}

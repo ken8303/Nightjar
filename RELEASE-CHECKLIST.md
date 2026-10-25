@@ -8,6 +8,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Plain-text observing lists retain the displayed full-darkness duration and exact UTC endpoint; real downloads match across four viewport sizes.
 - [x] Both printable catalogue checklists retain remaining darkness and the exact UTC endpoint. Eight real HTML downloads render without narrow-screen overflow; native print/PDF remains pending. Forecast recovery additionally passes nearer-bright-hour and bright-only-data cases (30 scenarios), alongside 18 best-hour and 18 suggested-window scenarios.
 
 - [x] Remaining full darkness is shown from the selected time, using elapsed duration and the exact astronomical end. Polar/search-limit states are explicit. Downloaded/shared summaries match the panel; eight night-only and twelve summary scenarios pass after workspace reconnection.

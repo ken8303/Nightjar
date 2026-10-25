@@ -75,6 +75,10 @@ try{
      const date=new Date(label.match(/^Select (.*), score /)[1]);assert(sun(date,place)<-18,label);
     }
     await section('Sky atlas');await page.locator('#visibility-planner').waitFor();
+    const textDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download observing list',exact:true}).click();
+    const textFile=await textDownload,text=await readFile(await textFile.path(),'utf8');
+    assert(text.includes(`Full darkness remaining: ${duration} after the selected observing time.`));
+    assert(text.includes(`Full darkness ends UTC: ${end.toISOString()}`));assert(text.includes('[ ] Vega'));
     for(const label of ['Download print-ready plan','Download deep-sky observing plan']){
      const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:label,exact:true}).click();
      const file=await downloaded,html=await readFile(await file.path(),'utf8');
