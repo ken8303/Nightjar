@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Summary completion during daylight — 25 October 2026
+
+The summary-share browser regression now completes a pending dark-time share after the planner changes to daylight. It verifies that completion identifies the original snapshot, keeps observing panels/export controls hidden, preserves saved data and does not share again when darkness is restored. All 12 share/download scenarios pass across six layouts; targeted lint passes. This batch changes tests/documentation only, with no application bug found or full-suite rerun. Native sharing is mocked and downloads are local; no message is sent. Physical native-share acceptance remains pending.
+
 ## Clock-change darkness coverage — 25 October 2026
 
 The atmosphere browser regression now verifies that remaining darkness decreases by 60 elapsed minutes on each hour step across the repeated UK local hour, with an unchanged exact dawn endpoint. It also checks that selecting daylight hides both atmosphere data and remaining-darkness information. All six desktop/phone/tablet journeys pass, alongside the existing source-hour offsets, missing forecast, unfinished-edit and containment checks. Targeted lint passes. This batch changes tests/documentation only; no application bug was found and the full suite was not rerun. Physical-device acceptance remains pending.

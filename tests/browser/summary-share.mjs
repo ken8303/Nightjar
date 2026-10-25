@@ -84,13 +84,18 @@ try{
    await activate(share);await page.evaluate(()=>window.shareRequests[3].resolve());await settled();
    await activate(share);
    await activate(page.getByRole('button',{name:'Cancel time edit',exact:true}));
-   await time.fill('2026-10-20T21:00');
-   await page.waitForFunction(()=>document.querySelector('#observing-time')?.value==='2026-10-20T21:00');
+   await time.fill('2026-10-20T12:00');
+   await page.waitForFunction(()=>document.querySelector('#observing-time')?.value==='2026-10-20T12:00');
+   await page.locator('.night-only-notice').waitFor();
+   assert.equal(await panel.isVisible(),false);assert.equal(await download.isVisible(),false);
    await page.evaluate(()=>window.shareRequests[4].resolve());await settled();
    const notice=await page.locator('#planner-notice').textContent();
    assert(notice.includes('2026-10-20 19:00:17.125 UTC'),'completion identifies the shared snapshot, not a newer planner instant');
-   assert((await exact()).includes('2026-10-20 21:00:00.000 UTC'));assert.deepEqual(await stored(),saved);
+   assert((await exact()).includes('2026-10-20 12:00:00.000 UTC'));assert.deepEqual(await stored(),saved);
    assert((await page.evaluate(()=>window.shareRequests[4].data.text)).includes('Observing UTC: 2026-10-20T19:00:17.125Z'));
+   assert.equal(await panel.isVisible(),false,'share completion must not reveal daytime observing data');
+   await time.fill('2026-10-20T21:00');await panel.waitFor();
+   assert.equal(await page.evaluate(()=>window.shareRequests.length),5);
   }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
