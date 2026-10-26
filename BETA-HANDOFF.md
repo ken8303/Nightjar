@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Continuous eclipse-calendar darkness — 26 October 2026
+
+Eclipse calendar availability now checks continuous astronomical darkness over the exported interval, including whole-second rounding of the calendar boundaries. A real partial eclipse on 12 January 2028 at latitude 86.26504344241616, longitude 136.10833333333335 has five dark contacts but briefly enters twilight between contacts. Its actual dark contact times remain displayed; calendar export is disabled. The calendar utility independently enforces this when called in night-only mode; general astronomical date references retain their existing behavior. All 880 tests, type/lint/build, Worker integration and 124-asset packaging checks pass. Four browser journeys at 320, 390, 820 and 1365 pixels verify the disabled export, retained dark contacts and layout containment. Release `4f490240309819e7d5db1a54c72b7faf707455f37bfcce640b6d13da9951752d` verifies 97 inputs, 359 references and 114 client files. Native calendar acceptance remains pending.
+
 ## Manual time recovery after expiry — 26 October 2026
 
 Best-hour browser coverage now follows an expired confirmation through cancelling the retained time edit and explicitly entering an earlier observing instant. All 18 scenarios pass across six layouts, confirming that recommendation expiry does not block ordinary manual time selection or change saved data. Targeted lint passes. This batch changes tests/documentation only; no application bug was found and the full suite was not rerun. Physical-device acceptance remains pending.
