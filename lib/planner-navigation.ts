@@ -1,7 +1,7 @@
 import {forecastFreshness} from './forecast-freshness';
 import {type Place} from './sky';
 export type PlannerTimeTarget={catalogue:'deep'|'bright';id:string};
-export type PlannerNavigationIntent=({kind:'section';section:string}|{kind:'sky-anchor';section:'sky';anchor:{id:string;label:string}}|{kind:'time';section:string;date:Date;target?:PlannerTimeTarget}|{kind:'context';section:string;place:Place;date?:Date;deepTarget?:string;persist?:boolean}|{kind:'imaging';section:'tools';target:{id:string;ra:number;dec:number}})&{forecastFetchedAt?:number;comparisonFetchedAt?:number[]};
+export type PlannerNavigationIntent=({kind:'section';section:string}|{kind:'sky-anchor';section:'sky';anchor:{id:string;label:string}}|{kind:'time';section:string;date:Date;target?:PlannerTimeTarget}|{kind:'context';section:string;place:Place;date?:Date;deepTarget?:string;persist?:boolean}|{kind:'imaging';section:'tools';target:{id:string;ra:number;dec:number}})&{forecastFetchedAt?:number;forecastMayHaveStarted?:boolean;comparisonFetchedAt?:number[]};
 const snapshotIntent=(intent:PlannerNavigationIntent):PlannerNavigationIntent=>intent.kind==='section'?{...intent}:intent.kind==='sky-anchor'?{...intent,anchor:{...intent.anchor}}:intent.kind==='time'?{...intent,date:new Date(+intent.date),...(intent.target?{target:{...intent.target}}:{})}:intent.kind==='imaging'?{...intent,target:{...intent.target}}:{...intent,place:{...intent.place},...(intent.date?{date:new Date(+intent.date)}:{})};
 const snapshot=(intent:PlannerNavigationIntent):PlannerNavigationIntent=>({...snapshotIntent(intent),...(intent.comparisonFetchedAt?{comparisonFetchedAt:[...intent.comparisonFetchedAt]}:{})});
 // Only an explicit continuation applies a blocked site/time/catalogue request.
@@ -17,7 +17,7 @@ export function createPlannerNavigation({onPending}:{onPending:(intent:PlannerNa
    })))return false;
    if(next.forecastFetchedAt!==undefined){
     const freshness=forecastFreshness(next.forecastFetchedAt,now),date=next.kind==='time'||next.kind==='context'?next.date:undefined;
-    if(!Number.isFinite(next.forecastFetchedAt)||!Number.isFinite(now)||!date||!Number.isFinite(+date)||+date<now||freshness.stale||freshness.clockChanged)return false;
+    if(!Number.isFinite(next.forecastFetchedAt)||!Number.isFinite(now)||!date||!Number.isFinite(+date)||(!next.forecastMayHaveStarted&&+date<now)||freshness.stale||freshness.clockChanged)return false;
    }
    apply(next);return true},
  };

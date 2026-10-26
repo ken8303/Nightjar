@@ -5,7 +5,7 @@ import {CalendarDays} from 'lucide-react';
 import {forecastFreshness} from '@/lib/forecast-freshness';
 import {forecastHourLabel} from '@/lib/weather-planning';
 
-type Props={best:{date:Date;score:number|null}|null;timezone:string;fetchedAt?:number;loading:boolean;error:string;stale:boolean;clockChanged:boolean;contextKey:string;onDate:(date:Date)=>void;onRefresh:()=>void};
+type Props={best:{date:Date;score:number|null}|null;timezone:string;fetchedAt?:number;loading:boolean;error:string;stale:boolean;clockChanged:boolean;contextKey:string;onDate:(date:Date,fetchedAt:number)=>void;onRefresh:()=>void};
 
 export default function ForecastBestHour({best,timezone,fetchedAt,loading,error,stale,clockChanged,contextKey,onDate,onRefresh}:Props){
  const context=JSON.stringify([contextKey,best?+best.date:null,best?.score,fetchedAt,loading,error]);
@@ -17,7 +17,7 @@ export default function ForecastBestHour({best,timezone,fetchedAt,loading,error,
   // A rendered action can outlive the age/clock boundary between clock ticks.
   const freshness=forecastFreshness(fetchedAt,Date.now());
   if(freshness.stale||freshness.clockChanged){setIssue(context);return}
-  onDate(chosenDate);
+  onDate(chosenDate,fetchedAt!);
  }
  return <button type="button" className="text-button forecast-best-hour-action" onClick={plan} aria-label={`Plan best hour: ${forecastHourLabel(best.date,timezone).full}`}><CalendarDays size={16}/>Plan best hour</button>;
 }

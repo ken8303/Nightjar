@@ -90,3 +90,11 @@ test('comparison confirmation checks every peer timestamp and snapshots the orig
  times[0]=now-1800000;
  assert.equal(h.navigation.continue(h.apply,now),true);assert.deepEqual(h.applied[0].comparisonFetchedAt,[now-1000,now]);
 });
+
+test('best-hour snapshots allow an in-progress hour but still expire when their forecast becomes stale',()=>{
+ const fetched=Date.parse('2026-10-20T20:00Z'),date=new Date(fetched-600000);
+ for(const [now,expected] of [[fetched+1000,true],[fetched+1800000,false],[fetched-60001,false]]){
+  const h=harness();h.navigation.request({kind:'time',section:'tonight',date,forecastFetchedAt:fetched,forecastMayHaveStarted:true},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,now),expected);assert.equal(h.applied.length,expected?1:0);
+ }
+});
