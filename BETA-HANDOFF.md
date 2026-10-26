@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Manual time recovery after expiry — 26 October 2026
+
+Best-hour browser coverage now follows an expired confirmation through cancelling the retained time edit and explicitly entering an earlier observing instant. All 18 scenarios pass across six layouts, confirming that recommendation expiry does not block ordinary manual time selection or change saved data. Targeted lint passes. This batch changes tests/documentation only; no application bug was found and the full suite was not rerun. Physical-device acceptance remains pending.
+
 ## Best-hour confirmation freshness — 26 October 2026
 
 Tonight's Plan best hour action now carries its forecast timestamp through edit review, so confirmation rechecks forecast age and clock changes before applying the queued time. Expired recommendations preserve the selected instant, unfinished input and saved data. Best-hour snapshots explicitly permit selecting an hour already in progress when its forecast remains fresh; upcoming-window recommendations retain their stricter start-time check. The missing confirmation guard was reproduced before the fix. All 879 tests, type/lint/build, Worker integration and packaging checks pass. All 18 best-hour browser scenarios pass across six layouts, including expiry while confirmation is open and failed-refresh retry. Release `39f8db85860f1c8e83e9f1336db1b15676278a5248a65471b648ac3130a1a5b2` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
