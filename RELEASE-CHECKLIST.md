@@ -8,6 +8,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Validation workflow triggers include mobile-planner branch pushes; workflow syntax and branch matching are checked locally. Hosted run status remains unverified because the GitHub Actions API returned Forbidden.
 - [x] Observing-list and printable-plan filenames include the site and precise UTC instant; eight night-only and 12 summary browser journeys pass.
 - [x] Meteor downloads are explicitly labelled as all-day peak-date references; four responsive browser checks verify their files and readable labels.
 - [x] Eight eclipse browser journeys cover both blocked polar intervals and allowed London calendars; four real downloads preserve contact times and site coordinates.

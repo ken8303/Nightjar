@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Mobile-branch CI trigger correction — 26 October 2026
+
+GitHub validation now triggers on pushes to codex/mobile-planner-improvements-* branches as well as main, pull requests and manual dispatch. Previously the development branch's direct pushes did not match the main-only trigger. Parsed workflow checks verify the current branch matches, unrelated feature branches do not, and read-only permissions and npm run verify remain intact. No application source changed and the app suite was not rerun. GitHub Actions API access returned Forbidden in this environment, so a hosted run is not confirmed; the published-commit CI acceptance gate remains pending.
+
 ## Observing-plan filename clarity — 26 October 2026
 
 Plain-text target lists and printable bright/deep-sky plans now include the site label and precise UTC observing instant in their filenames. Both direct plan downloads and preview filenames use the shared Unicode-aware bounded naming helper; summary filenames retain their existing format. This makes different observing-time snapshots easier to distinguish in mobile Files apps, including repeated local clock hours. All 880 tests, type/lint/build, Worker integration and packaging pass. Eight night-only browser journeys verify actual text/HTML filenames and retained darkness metadata, while 12 summary-sharing/download journeys verify compatibility. Release `2b67b032a5d834b47a528c41c7b190355b89b71df7efba8df70fe9f041ef08e4` verifies 97 inputs, 359 references and 114 client files. Native Files/share acceptance remains pending.
