@@ -255,3 +255,21 @@ test('a cancelled module failure cannot replace a newer pending recovery request
  assert.equal(work.length,2);assert.equal(page.elements.get('download-recovery').disabled,true);assert.equal(page.elements.get('recovery-status').textContent,'Preparing a recovery copy…');
  work[1].resolve({makePlannerRecovery});await second;assert.equal(page.blobs.length,1);assert(page.elements.get('recovery-status').textContent.includes('Recovery copy prepared'));
 });
+
+test('offline diary search filters the rendered snapshot across Unicode, notes and site text without rereading stores',()=>{
+ const entry={target:'M31',observedAt:'2026-10-08T20:00:00.000Z',place:{name:'Hill 星空',latitude:51.5,longitude:0},outcome:'seen',equipment:'Binoculars',notes:'Clear <night>'};
+ const page=load({'nightjar-observing-diary-v1':[entry,{...entry,target:'M45',place:{...entry.place,name:'Garden'},notes:'Faint cluster'}]});
+ const search=page.elements.get('diary-search'),clear=page.elements.get('diary-search-clear'),rows=page.elements.get('diary').children,before=[...page.reads],raw=[...page.raw];
+ const find=query=>{search.value=query;search.listeners.get('input')()};
+ assert.equal(page.elements.get('diary-search-tools').hidden,false);
+ find('Ｍ３１');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ assert.equal(page.elements.get('diary-search-count').textContent,'1 of 2 saved observations shown.');
+ find('星空');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ find('<NIGHT>');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ find('no matching note');assert(rows.every(row=>row.hidden));assert.equal(page.elements.get('diary-search-empty').hidden,false);
+ clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert.equal(search.value,'');assert(search.focused);assert(clear.disabled);
+ assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
+});
+test('offline diary search stays hidden for empty or unreadable observations',()=>{
+ for(const page of [load(),load({},true),load({'nightjar-observing-diary-v1':[{}]})])assert.equal(page.elements.get('diary-search-tools').hidden,true);
+});
