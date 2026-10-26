@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Observing-plan filename clarity — 26 October 2026
+
+Plain-text target lists and printable bright/deep-sky plans now include the site label and precise UTC observing instant in their filenames. Both direct plan downloads and preview filenames use the shared Unicode-aware bounded naming helper; summary filenames retain their existing format. This makes different observing-time snapshots easier to distinguish in mobile Files apps, including repeated local clock hours. All 880 tests, type/lint/build, Worker integration and packaging pass. Eight night-only browser journeys verify actual text/HTML filenames and retained darkness metadata, while 12 summary-sharing/download journeys verify compatibility. Release `2b67b032a5d834b47a528c41c7b190355b89b71df7efba8df70fe9f041ef08e4` verifies 97 inputs, 359 references and 114 client files. Native Files/share acceptance remains pending.
+
 ## Meteor date-reference clarity — 26 October 2026
 
 Meteor cards now label the calendar action Download peak-date reference. The nearby explanation and completion message identify it as a typical annual-date reference in an all-day calendar file, while Explore window continues to use the calculated dark Moon-free interval. Targeted lint and production build pass. Four local browser checks at 320, 390, 820 and 1365 pixels download the calendar, confirm its all-day DATE fields and reference description, and check page containment with no page errors. The narrow card screenshot was inspected. This wording-only change adds no tests and does not rerun the full suite; native calendar import remains pending.
