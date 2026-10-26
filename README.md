@@ -158,7 +158,7 @@ Nightjar displays observing information only in full astronomical darkness: the 
 
 Run `node tests/browser/polar-deep-sky-windows.mjs http://localhost:5173` to verify that deep-sky chart curves/shading, comparison windows and downloaded calendar files exclude a brief polar twilight interval between dark samples, across four screen sizes. Native calendar import remains a device check.
 
-Run `node tests/browser/eclipse-night-interval.mjs http://localhost:5173` to check a real polar eclipse whose contacts are dark but whose intervening interval enters twilight. Four screen sizes verify that actual dark contacts remain displayed and calendar export is disabled.
+Run `node tests/browser/eclipse-night-interval.mjs http://localhost:5173` to check a real polar eclipse whose contacts are dark but whose intervening interval enters twilight. Eight journeys across four screen sizes verify that actual dark contacts remain displayed, the polar export is disabled and a normal fully dark London eclipse downloads a calendar with its original contact times.
 
 Run `node tests/browser/night-only.mjs http://localhost:5173` with the optional browser setup below for full-darkness recovery, polar summer, selected-time panel gating, weather/planet sample filtering, retained data and clock-change coverage at phone, narrow phone, tablet and desktop sizes. Browser checks use fixture weather and Chromium; physical iPhone/iPad Safari acceptance remains separate.
 

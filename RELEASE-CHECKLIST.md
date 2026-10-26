@@ -8,6 +8,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 
 Completed locally:
 
+- [x] Eight eclipse browser journeys cover both blocked polar intervals and allowed London calendars; four real downloads preserve contact times and site coordinates.
 - [x] Eclipse calendar export requires darkness throughout the exported interval, including between contacts; a real polar eclipse regression and four browser layouts pass.
 - [x] Manual time recovery remains available after an expired recommendation is refused; all 18 best-hour browser scenarios pass with the expanded recovery check.
 - [x] Best-hour confirmations recheck forecast freshness while allowing a fresh in-progress hour; all 18 browser scenarios pass across six layouts.

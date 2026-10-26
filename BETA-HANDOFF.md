@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Eclipse export positive-path coverage — 26 October 2026
+
+The eclipse browser harness now pairs the blocked polar case with an allowed London eclipse at each screen size. All eight journeys pass. Four real calendar downloads retain the source contact timestamps and site coordinates, and their exported intervals have no rising −18° crossing; the polar interval stays blocked. Contact display and page containment remain checked in both cases. Targeted lint passes. This batch changes tests/documentation only, with no application bug found or full-suite rerun. Native calendar import remains a separate device check.
+
 ## Continuous eclipse-calendar darkness — 26 October 2026
 
 Eclipse calendar availability now checks continuous astronomical darkness over the exported interval, including whole-second rounding of the calendar boundaries. A real partial eclipse on 12 January 2028 at latitude 86.26504344241616, longitude 136.10833333333335 has five dark contacts but briefly enters twilight between contacts. Its actual dark contact times remain displayed; calendar export is disabled. The calendar utility independently enforces this when called in night-only mode; general astronomical date references retain their existing behavior. All 880 tests, type/lint/build, Worker integration and 124-asset packaging checks pass. Four browser journeys at 320, 390, 820 and 1365 pixels verify the disabled export, retained dark contacts and layout containment. Release `4f490240309819e7d5db1a54c72b7faf707455f37bfcce640b6d13da9951752d` verifies 97 inputs, 359 references and 114 client files. Native calendar acceptance remains pending.
