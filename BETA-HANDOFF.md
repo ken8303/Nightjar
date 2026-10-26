@@ -6,6 +6,10 @@ Reference-feature coverage and the remaining implementation backlog are tracked 
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
 
+## Meteor date-reference clarity — 26 October 2026
+
+Meteor cards now label the calendar action Download peak-date reference. The nearby explanation and completion message identify it as a typical annual-date reference in an all-day calendar file, while Explore window continues to use the calculated dark Moon-free interval. Targeted lint and production build pass. Four local browser checks at 320, 390, 820 and 1365 pixels download the calendar, confirm its all-day DATE fields and reference description, and check page containment with no page errors. The narrow card screenshot was inspected. This wording-only change adds no tests and does not rerun the full suite; native calendar import remains pending.
+
 ## Eclipse export positive-path coverage — 26 October 2026
 
 The eclipse browser harness now pairs the blocked polar case with an allowed London eclipse at each screen size. All eight journeys pass. Four real calendar downloads retain the source contact timestamps and site coordinates, and their exported intervals have no rising −18° crossing; the polar interval stays blocked. Contact display and page containment remain checked in both cases. Targeted lint passes. This batch changes tests/documentation only, with no application bug found or full-suite rerun. Native calendar import remains a separate device check.
