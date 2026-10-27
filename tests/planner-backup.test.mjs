@@ -91,7 +91,7 @@ test('version 2 backups round-trip deep-sky lists while legacy version 1 remains
  const review=previewPlannerMerge(readSavedPlan(existing),incoming.data);assert.equal(review.added.deepTargets,1);
  assert.deepEqual(restorePlannerBackup(existing,incoming).deepTargets,['M31','M45']);
  const backup=makePlannerBackup(existing);assert.equal(backup.version,4);assert.deepEqual(parsePlannerBackup(JSON.stringify(backup)).data.deepTargets,['M31','M45']);
- for(const value of [['M102'],['bad'],Array(165).fill('M31')])assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...backup.data,deepTargets:value}})));
+ for(const value of [['M102'],['bad'],Array(195).fill('M31')])assert.throws(()=>parsePlannerBackup(JSON.stringify({...backup,data:{...backup.data,deepTargets:value}})));
 });
 
 test('full-capacity Unicode backups export and restore without the former one-megabyte rejection',()=>{

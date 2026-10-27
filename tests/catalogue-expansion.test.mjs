@@ -7,34 +7,34 @@ const {saveDiary}=await vite.ssrLoadModule('/lib/observing-diary.ts');
 const {normalizeDiaryDrafts,saveDiaryDrafts,readStoredDiaryDrafts}=await vite.ssrLoadModule('/lib/diary-drafts.ts');
 const site={name:'Expansion QA',latitude:51.5,longitude:0,timezone:'UTC'},date=new Date('2026-10-27T00:00Z');
 const store=()=>{const values=new Map();return {getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)}};
-test('curated expansion contains 55 distinct non-Messier records and retains original catalogue identities',()=>{
- assert.equal(messierCatalogue.length,109);assert.equal(deepSkyCatalogue.length,164);assert.equal(deepSkyListLimit,164);assert.equal(new Set(deepSkyCatalogue.map(target=>target.id)).size,164);
- const extra=deepSkyCatalogue.filter(target=>!validMessierId(target.id));assert.equal(extra.length,55);
+test('curated expansion contains 85 distinct non-Messier records and retains original catalogue identities',()=>{
+ assert.equal(messierCatalogue.length,109);assert.equal(deepSkyCatalogue.length,194);assert.equal(deepSkyListLimit,194);assert.equal(new Set(deepSkyCatalogue.map(target=>target.id)).size,194);
+ const extra=deepSkyCatalogue.filter(target=>!validMessierId(target.id));assert.equal(extra.length,85);
  for(const target of extra){assert(validDeepSkyId(target.id));assert(target.ra>=0&&target.ra<24);assert(Math.abs(target.dec)<=90);assert(target.major===null||target.major>0);assert(!messierCatalogue.some(old=>old.catalogue===target.catalogue))}
  for(const id of ['M102','NGC1','NGC99999','IC9999','NGC07000'])assert(!validDeepSkyId(id));
  const north=findDeepSky('NGC 07000','')[0];assert.equal(north.id,'NGC7000');assert.equal(north.magnitude,null);assert.equal(north.major,120);assert(Math.abs(north.ra-(20+59/60+17.14/3600))<1e-12);assert(Math.abs(north.dec-(44+31/60+43.6/3600))<1e-12);
- assert.equal(findDeepSky('Centaurus A','')[0].id,'NGC5128');assert.equal(findDeepSky('Needle Galaxy','')[0].id,'NGC4565');assert.equal(findDeepSky('Omega Centauri','')[0].id,'NGC5139');assert.equal(findDeepSky('Helix','')[0].id,'NGC7293');assert(!findDeepSky('NGC7000','',{maximumMagnitude:20}).length);
+ assert.equal(findDeepSky('Iris Nebula','')[0].id,'NGC7023');assert.equal(findDeepSky('Bubble Nebula','')[0].id,'NGC7635');assert.equal(findDeepSky('Centaurus A','')[0].id,'NGC5128');assert.equal(findDeepSky('Needle Galaxy','')[0].id,'NGC4565');assert.equal(findDeepSky('Omega Centauri','')[0].id,'NGC5139');assert.equal(findDeepSky('Helix','')[0].id,'NGC7293');assert(!findDeepSky('NGC7000','',{maximumMagnitude:20}).length);
 });
 test('expanded saved targets and diaries round-trip through backups without losing legacy Messier entries',()=>{
- const storage=store();saveDeepSkyList(['M31','NGC7000','IC1396','NGC5128'],storage);
+ const storage=store();saveDeepSkyList(['M31','NGC7000','IC1396','NGC5128','NGC7023'],storage);
  const entry={id:'new-object',target:'NGC7000',observedAt:date.toISOString(),place:site,outcome:'seen',equipment:'Binoculars',notes:'Saved new catalogue target'};saveDiary([entry],storage);
  const backup=parsePlannerBackup(JSON.stringify(makePlannerBackup(storage,date))),restored=store();restorePlannerBackup(restored,backup);
- assert.deepEqual(readDeepSkyList(restored),['M31','NGC7000','IC1396','NGC5128']);assert.equal(JSON.parse(restored.getItem('nightjar-observing-diary-v1'))[0].target,'NGC7000');
+ assert.deepEqual(readDeepSkyList(restored),['M31','NGC7000','IC1396','NGC5128','NGC7023']);assert.equal(JSON.parse(restored.getItem('nightjar-observing-diary-v1'))[0].target,'NGC7000');
  const all=deepSkyCatalogue.map(target=>target.id);saveDeepSkyList(all,restored);assert.deepEqual(readDeepSkyList(restored),all);
 });
 test('every catalogue object can retain a maximum-length unfinished diary form',()=>{
  const forms=deepSkyCatalogue.map((target,index)=>({id:`draft-${index}`,target:target.id,observedAt:date.toISOString(),place:{...site,name:'\u0000'.repeat(199),country:'\u0000'.repeat(199)},outcome:'seen',equipment:'\u0000'.repeat(100),notes:'\u0000'.repeat(2000)}));
- const state=normalizeDiaryDrafts({version:1,drafts:forms,edit:null}),storage=store();assert(saveDiaryDrafts(state,storage));assert(storage.getItem('nightjar-diary-drafts-v1').length>2*1024*1024);assert.equal(readStoredDiaryDrafts(storage).drafts.length,164);
+ const state=normalizeDiaryDrafts({version:1,drafts:forms,edit:null}),storage=store();assert(saveDiaryDrafts(state,storage));assert(storage.getItem('nightjar-diary-drafts-v1').length>2*1024*1024);assert.equal(readStoredDiaryDrafts(storage).drafts.length,194);
 });
 test('full expanded catalogue recommendations remain bounded and exclude polar daylight',()=>{
  assert(deepSkyRecommendations(deepSkyCatalogue,date,site).size>0);
  assert.equal(deepSkyRecommendations(deepSkyCatalogue,new Date('2026-06-21T12:00Z'),{...site,latitude:90}).size,0);
- assert.throws(()=>deepSkyRecommendations([...deepSkyCatalogue,deepSkyCatalogue[0]],date,site),/164/);
+ assert.throws(()=>deepSkyRecommendations([...deepSkyCatalogue,deepSkyCatalogue[0]],date,site),/194/);
 });
 
 test('catalogue selections combine with search, type, magnitude and saved targets',()=>{
  const messier=findDeepSky('','',{catalogue:'messier'}),ngc=findDeepSky('','',{catalogue:'ngc'}),ic=findDeepSky('','',{catalogue:'ic'});
- assert.equal(messier.length,109);assert.equal(ngc.length,53);assert.equal(ic.length,2);
+ assert.equal(messier.length,109);assert.equal(ngc.length,83);assert.equal(ic.length,2);
  assert(messier.some(target=>target.id==='M31'));assert(!ngc.some(target=>target.id==='M31'));
  assert.deepEqual(findDeepSky('NGC 7000','',{catalogue:'ngc'}).map(target=>target.id),['NGC7000']);
  assert.equal(findDeepSky('NGC 7000','',{catalogue:'messier'}).length,0);

@@ -1,6 +1,6 @@
 # Nightjar beta handoff
 
-The deep-sky planner now contains 164 objects: 109 Messier and 55 curated NGC/IC records. The additional 25 records include Centaurus A and the Needle Galaxy; source provenance and exclusions remain as documented below. Catalogue selection and unknown-magnitude filters support the expanded list.
+The deep-sky planner now contains 194 objects: 109 Messier and 85 curated NGC/IC records. Recent additions include the Iris Nebula, Bubble Nebula, Centaurus A and the Needle Galaxy; source provenance and exclusions remain as documented below. Catalogue selection and unknown-magnitude filters support the expanded list.
 
 Nightjar remains a beta. Desktop-browser and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
