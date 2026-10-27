@@ -64,3 +64,12 @@ test('lunar phase symbols distinguish new, quarters and full without claiming lo
  const icons=[0,1,2,3].map(quarter=>renderToStaticMarkup(createElement(LunarPhaseSymbol,{quarter})));
  assert.equal(new Set(icons).size,4);assert(!icons[0].includes('<path'));assert(!icons[2].includes('<path'));assert(icons[1].includes('A14 14 0 0 1'));assert(icons[3].includes('A14 14 0 0 0'));assert(icons.every(icon=>icon.includes('aria-hidden="true"')));
 });
+
+test('lunar illumination indicator matches the displayed percentage',async()=>{
+ const {default:MoonExplorer}=await vite.ssrLoadModule('/components/moon-explorer.tsx');
+ const {moonInfo}=await vite.ssrLoadModule('/lib/sky.ts');
+ for(const date of [new Date('2026-10-25T00:00Z'),new Date('2026-11-09T00:00Z')]){
+  const html=renderToStaticMarkup(createElement(MoonExplorer,{date,place:sites[0],onDate:()=>{}})),value=Math.round(moonInfo(date,sites[0]).illumination*100);
+  assert(html.includes(`<strong>${value}%</strong><span>Illuminated</span>`));assert(html.includes(`style="width:${value}%"`));
+ }
+});

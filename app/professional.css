@@ -335,3 +335,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .deep-compare-window-visual{margin:12px 0}.deep-compare-window-visual p{margin:0 0 6px;color:var(--text-secondary);font-size:12px}.deep-compare-window-track{position:relative;width:100%;height:9px;border-radius:5px;background:#34454a;overflow:hidden}.deep-compare-window-track i{position:absolute;top:0;height:100%;background:#b2cf8a}.deep-compare-window-axis{display:flex;justify-content:space-between;gap:8px;margin-top:4px;color:var(--text-secondary);font-size:10px}
 
 .lunar-phase-symbol{display:block;width:32px;height:32px;flex:none}.lunar-phase-note{margin:10px 0 0}
+
+.lunar-facts>div.lunar-illumination-fact{display:grid;grid-template-columns:1fr auto;gap:8px 14px}.lunar-illumination-track{grid-column:1/-1;height:8px;background:#34454a;border-radius:4px;overflow:hidden}.lunar-illumination-track i{display:block;height:100%;background:#c1df93;border-radius:4px}
