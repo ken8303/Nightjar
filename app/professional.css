@@ -323,3 +323,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .night-outlook-recommendation .footnote{margin-top:6px}
 .night-outlook-recommendation .button{min-height:44px;flex-shrink:0;max-width:100%;white-space:normal;text-align:center}
 @media(max-width:800px){.night-outlook-recommendation{flex-direction:column;align-items:stretch}}
+
+.hourly-score-key{margin:12px 0 0;color:var(--text-secondary);font-size:12px}.hour .bar{width:9px}.hour .bar.unavailable{background:transparent;border:1px dashed #a9bdc6}.hour .forecast-cloud-label{white-space:normal;overflow-wrap:anywhere;line-height:1.3}
