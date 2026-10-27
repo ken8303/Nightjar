@@ -1,3 +1,4 @@
+import {validDeepSkyId} from './deep-sky-list';
 export type PhotographyDraft={width:string;height:string;focal:string;pixel:string;name:string;ra:string;dec:string;cols:string;rows:string;overlap:string;rotation:string;rms:string;catalogueId:string};
 export type PhotographyDraftStatus='new'|'restored'|'invalid'|'unavailable'|'visit';
 const key='nightjar-imaging-draft-v1';
@@ -11,7 +12,7 @@ export function parsePhotographyDraft(value:unknown):PhotographyDraft|null{
  for(const field of Object.keys(defaults) as (keyof PhotographyDraft)[]){
   const text=draft[field];if(typeof text!=='string')return null;
   if(field==='name'){if(text.length>80)return null}
-  else if(field==='catalogueId'){if(text!==''&&!/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(text))return null}
+  else if(field==='catalogueId'){if(text!==''&&!validDeepSkyId(text))return null}
   // Drafts retain bounded raw text, including invalid/incomplete input.
   // Calculation and saved-equipment validation are separate.
   else if(text.length>40)return null;

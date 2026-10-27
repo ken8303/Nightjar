@@ -1,10 +1,72 @@
 # Nightjar beta handoff
 
+The deep-sky planner now contains 459 objects: 109 Messier and 350 curated NGC/IC records. Recent additions include the Pelican Nebula, the Small Magellanic Cloud and Flaming Star Nebula, Fornax A, the Blue Flash, Tarantula, Saturn, Iris and Bubble nebulae, Centaurus A and the Needle Galaxy; source provenance and exclusions remain as documented below. Catalogue selection and unknown-magnitude filters support the expanded list.
+
 Nightjar remains a beta. Desktop-browser and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
 Reference-feature coverage and the remaining implementation backlog are tracked separately in [FEATURE-STATUS.md](./FEATURE-STATUS.md). This handoff records release evidence rather than a full-parity completion percentage.
 
 Current user priority (21 October 2026): keyboard-control design and further photo-feature development are paused. Existing controls and photo tools/images stay available. Focus on touch-first planner improvements for mobile and iPad, confirmed bugs and mobile/PWA reliability; physical-device and final-origin checks remain explicit release gates.
+
+## Curated deep-sky catalogue expansion — 27 October 2026
+
+At this earlier milestone the planner contained 139 objects: the unchanged 109 Messier records plus 30 non-Messier NGC/IC objects, including Omega Centauri, Helix, North America Nebula and both Double Cluster components. Data come from pinned OpenNGC revision be3cd6c5498806a2fbb2f7e0452ef802dbb02be0 under CC BY-SA 4.0, with a reproducible hash-checked importer and a local data licence. Missing magnitudes remain unknown. The full extension stays with the deferred explorer; a lightweight ID list supports validation.
+
+New identities work in search/type/constellation/magnitude filters, dark recommendations, saved lists, diary records and unfinished drafts, backup round trips, coordinate copies, printable plans, comparison calendars and offline display/search. Original Messier IDs and existing backups remain supported; unsupported IDs such as M102 remain rejected. Expanded-ID backups require the updated app; older versions reject unknown targets rather than silently dropping them. The saved-target/draft bounds rise to 139, and draft storage accommodates maximum escaped fields. The offline cache advances to v9. Existing imaging coordinate handoff validation accepts new IDs; camera discovery remains the original 109 Messier objects, with the unsupported camera action disabled for the new NGC/IC targets. No camera or photo-feature expansion was added.
+
+All 887 tests pass, including source-coordinate/search checks, full-catalogue draft capacity, backup round trips and offline identity parity. Final type/lint/build and 123-asset packaging checks pass after a redundant heading-label correction; compiled Worker integration also passes. Four new-object browser journeys at 320, 390, 820 and 1365 pixels exercise search/save/diary/HTML plan/comparison/calendar/offline flows while preserving M31. Eight broader night-only journeys pass. The narrow details screenshot was inspected. Release cc32745130d624e2c618fe1101dc065d63b8f90e23aa54a441b828bb725c9a7b verifies 96 inputs, 358 references and 113 client files. Hosted CI and physical-device acceptance remain pending.
+
+## Offline diary search — 26 October 2026
+
+The saved-data offline page now searches diary observations by displayed target, notes, site and equipment. Unicode-normalized case-insensitive matching, a result count, an empty-result message and Clear search work entirely on the existing rendered snapshot. Typing never rereads or rewrites storage, and changed-data warnings remain independent of filtering. Search is hidden for empty or unreadable diaries. The offline cache advances to v8 through the established guarded service-worker update flow. All 882 tests, type/lint/build, Worker integration and packaging checks pass. Four browser journeys at 320, 390, 820 and 1365 pixels verify search with networking disabled, zero requests, unchanged stored records, safe literal note text and retained snapshot-change warnings. The narrow screenshot was inspected. Release `6955df8ebdce89be9fff284651197a86c57b9d59f4391b403ec767f12c54cf21` verifies 97 inputs, 359 references and 114 client files. Full offline planner startup remains unsupported; native installed-PWA acceptance remains pending.
+
+## Mobile-branch CI trigger correction — 26 October 2026
+
+GitHub validation now triggers on pushes to codex/mobile-planner-improvements-* branches as well as main, pull requests and manual dispatch. Previously the development branch's direct pushes did not match the main-only trigger. Parsed workflow checks verify the current branch matches, unrelated feature branches do not, and read-only permissions and npm run verify remain intact. No application source changed and the app suite was not rerun. GitHub Actions API access returned Forbidden in this environment, so a hosted run is not confirmed; the published-commit CI acceptance gate remains pending.
+
+## Observing-plan filename clarity — 26 October 2026
+
+Plain-text target lists and printable bright/deep-sky plans now include the site label and precise UTC observing instant in their filenames. Both direct plan downloads and preview filenames use the shared Unicode-aware bounded naming helper; summary filenames retain their existing format. This makes different observing-time snapshots easier to distinguish in mobile Files apps, including repeated local clock hours. All 880 tests, type/lint/build, Worker integration and packaging pass. Eight night-only browser journeys verify actual text/HTML filenames and retained darkness metadata, while 12 summary-sharing/download journeys verify compatibility. Release `2b67b032a5d834b47a528c41c7b190355b89b71df7efba8df70fe9f041ef08e4` verifies 97 inputs, 359 references and 114 client files. Native Files/share acceptance remains pending.
+
+## Meteor date-reference clarity — 26 October 2026
+
+Meteor cards now label the calendar action Download peak-date reference. The nearby explanation and completion message identify it as a typical annual-date reference in an all-day calendar file, while Explore window continues to use the calculated dark Moon-free interval. Targeted lint and production build pass. Four local browser checks at 320, 390, 820 and 1365 pixels download the calendar, confirm its all-day DATE fields and reference description, and check page containment with no page errors. The narrow card screenshot was inspected. This wording-only change adds no tests and does not rerun the full suite; native calendar import remains pending.
+
+## Eclipse export positive-path coverage — 26 October 2026
+
+The eclipse browser harness now pairs the blocked polar case with an allowed London eclipse at each screen size. All eight journeys pass. Four real calendar downloads retain the source contact timestamps and site coordinates, and their exported intervals have no rising −18° crossing; the polar interval stays blocked. Contact display and page containment remain checked in both cases. Targeted lint passes. This batch changes tests/documentation only, with no application bug found or full-suite rerun. Native calendar import remains a separate device check.
+
+## Continuous eclipse-calendar darkness — 26 October 2026
+
+Eclipse calendar availability now checks continuous astronomical darkness over the exported interval, including whole-second rounding of the calendar boundaries. A real partial eclipse on 12 January 2028 at latitude 86.26504344241616, longitude 136.10833333333335 has five dark contacts but briefly enters twilight between contacts. Its actual dark contact times remain displayed; calendar export is disabled. The calendar utility independently enforces this when called in night-only mode; general astronomical date references retain their existing behavior. All 880 tests, type/lint/build, Worker integration and 124-asset packaging checks pass. Four browser journeys at 320, 390, 820 and 1365 pixels verify the disabled export, retained dark contacts and layout containment. Release `4f490240309819e7d5db1a54c72b7faf707455f37bfcce640b6d13da9951752d` verifies 97 inputs, 359 references and 114 client files. Native calendar acceptance remains pending.
+
+## Manual time recovery after expiry — 26 October 2026
+
+Best-hour browser coverage now follows an expired confirmation through cancelling the retained time edit and explicitly entering an earlier observing instant. All 18 scenarios pass across six layouts, confirming that recommendation expiry does not block ordinary manual time selection or change saved data. Targeted lint passes. This batch changes tests/documentation only; no application bug was found and the full suite was not rerun. Physical-device acceptance remains pending.
+
+## Best-hour confirmation freshness — 26 October 2026
+
+Tonight's Plan best hour action now carries its forecast timestamp through edit review, so confirmation rechecks forecast age and clock changes before applying the queued time. Expired recommendations preserve the selected instant, unfinished input and saved data. Best-hour snapshots explicitly permit selecting an hour already in progress when its forecast remains fresh; upcoming-window recommendations retain their stricter start-time check. The missing confirmation guard was reproduced before the fix. All 879 tests, type/lint/build, Worker integration and packaging checks pass. All 18 best-hour browser scenarios pass across six layouts, including expiry while confirmation is open and failed-refresh retry. Release `39f8db85860f1c8e83e9f1336db1b15676278a5248a65471b648ac3130a1a5b2` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
+
+## Site-ranking confirmation freshness — 25 October 2026
+
+Recommended-site confirmations now retain an immutable copy of every compared site's forecast timestamp. Confirmation refuses the recommendation if any peer's forecast has expired or leads the device clock beyond tolerance, preserving the selected site, exact time and unfinished edit. Ordinary explicit site selection remains available. A browser reproduction confirmed the prior gap: a leader selected one millisecond before expiry was accepted after expiry. All 878 tests, type/lint/build, Worker integration and packaging checks pass. All 24 comparison browser scenarios pass across six layouts, including expiry during confirmation, expired peer forecasts and valid refresh/review/cancel/accept flows. Release `79b31489ca0787eb5cdd1b52d26bab97077843b516f21c8f3b781217e8046709` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
+
+## Confirmation-time forecast expiry fix — 25 October 2026
+
+Queued forecast-window selections now retain their forecast timestamp and recheck start time, forecast age and backward clock changes when the user confirms. Expired requests are cleared without applying the site/time change or discarding the unfinished edit, with a message asking the user to refresh and choose again. This covers nightly cards, suggested windows and saved-site windows; ordinary historical time navigation remains unaffected. The review reproduction previously accepted a 21:00 window after 21:00 while its confirmation was open. All 877 tests, type/lint/build, Worker integration and packaging pass; the refined navigation regression separately verifies age expiry while the window is still in the future. All 36 nightly and 18 saved-site browser scenarios pass, including delayed confirmation at six layouts and normal valid-window confirmation. Release `7786777633ee5cf6af1705f22480aca35f557c29645ef09307e4dc80070de569` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
+
+## Summary completion during daylight — 25 October 2026
+
+The summary-share browser regression now completes a pending dark-time share after the planner changes to daylight. It verifies that completion identifies the original snapshot, keeps observing panels/export controls hidden, preserves saved data and does not share again when darkness is restored. All 12 share/download scenarios pass across six layouts; targeted lint passes. This batch changes tests/documentation only, with no application bug found or full-suite rerun. Native sharing is mocked and downloads are local; no message is sent. Physical native-share acceptance remains pending.
+
+## Clock-change darkness coverage — 25 October 2026
+
+The atmosphere browser regression now verifies that remaining darkness decreases by 60 elapsed minutes on each hour step across the repeated UK local hour, with an unchanged exact dawn endpoint. It also checks that selecting daylight hides both atmosphere data and remaining-darkness information. All six desktop/phone/tablet journeys pass, alongside the existing source-hour offsets, missing forecast, unfinished-edit and containment checks. Targeted lint passes. This batch changes tests/documentation only; no application bug was found and the full suite was not rerun. Physical-device acceptance remains pending.
+
+## Seven-night card expiry guard — 25 October 2026
+
+Nightly cards now share the suggested-window button's exact-tap checks for forecast freshness, clock changes and already-started windows. Refusal preserves the selected time and unfinished input, and brings the recovery message into view. The missing card guard was reproduced before the fix. All 876 tests, type/lint/build, Worker integration and packaging checks pass. All 36 browser scenarios pass across six layouts, covering both controls, three expiry conditions, refresh, edit review and retained saved data. Release `259958e55d563c8f88d1d7311781b19a49710368113727daaf767539da1e8447` verifies 97 inputs, 358 references and 114 client files. Physical-device acceptance remains pending.
 
 ## Lunar night-only display coverage — 25 October 2026
 

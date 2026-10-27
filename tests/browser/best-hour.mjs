@@ -73,7 +73,21 @@ try{
   }
   await page.getByRole('heading',{name:'Your edits have not been saved',exact:true}).waitFor();
   await activate(page.getByRole('button',{name:'Keep editing',exact:true}));assert.equal(await time.inputValue(),'');assert.equal(await exact(),before);
-  await activate(action);await activate(page.getByRole('button',{name:'Use selected time',exact:true}));
+  await activate(action);
+  if(kind==='fresh')await page.clock.setFixedTime(new Date('2026-10-20T19:00:00.001Z'));
+  await activate(page.getByRole('button',{name:'Use selected time',exact:true}));
+  if(kind==='fresh'){
+   await page.getByRole('status').filter({hasText:'expired while awaiting confirmation'}).waitFor();
+   assert.equal(await exact(),before);assert.equal(await time.inputValue(),'');assert.deepEqual(await stored(),saved);
+   await activate(page.getByRole('button',{name:'Cancel time edit',exact:true}));
+   await time.fill('2026-10-20T19:00');
+   await page.waitForFunction(()=>document.querySelector('.time-entry [aria-atomic=true]')?.textContent.includes('2026-10-20 19:00:00.000 UTC'));
+   assert.equal(await page.locator('.unsaved-view-warning').count(),0);assert.deepEqual(await stored(),saved);
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+   assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
+   console.log(`${name}/${kind}: expired confirmation preserves edits and permits explicit historical time recovery PASS`);
+   await page.close();continue;
+  }
   const expected=kind==='fresh'?'2026-10-20T20:00':'2026-10-20T21:00';
   await page.waitForFunction(expected=>document.querySelector('#observing-time')?.value===expected,expected);
   assert((await exact()).includes(`${expected.replace('T',' ')}:00.000 UTC`));assert.deepEqual(await stored(),saved);

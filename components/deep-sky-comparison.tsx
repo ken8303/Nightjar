@@ -5,11 +5,11 @@ import {useMemo,useRef,useState,useSyncExternalStore} from 'react';
 import type {DeepSkyComparisonBrowsing} from '@/lib/target-browsing';
 import ListFocusRecovery from '@/components/list-focus-recovery';
 import DeepSkyMoonContext from '@/components/deep-sky-moon';
-import {messierCatalogue,deepSkyName} from '@/lib/deep-sky';
+import {deepSkyCatalogue,deepSkyName} from '@/lib/deep-sky';
 import {compareDeepSky} from '@/lib/deep-sky-comparison';
 import {deepSkyTimestampFormatter} from '@/lib/deep-sky-time';
 import {timeLabel,type Place} from '@/lib/sky';
-function comparisonRows(ids:string,date:Date,place:Place,moonBelowOnly:boolean){const targets=ids.split(',').flatMap(id=>{const target=messierCatalogue.find(value=>value.id===id);return target?[target]:[]});return compareDeepSky(targets,date,place,moonBelowOnly)}
+function comparisonRows(ids:string,date:Date,place:Place,moonBelowOnly:boolean){const targets=ids.split(',').flatMap(id=>{const target=deepSkyCatalogue.find(value=>value.id===id);return target?[target]:[]});return compareDeepSky(targets,date,place,moonBelowOnly)}
 function useComparisonRows(open:boolean,ids:string,instant:number,latitude:number,longitude:number,moonBelowOnly:boolean){return useMemo(()=>open&&ids?comparisonRows(ids,new Date(instant),{name:'Selected site',latitude,longitude},moonBelowOnly):[],[open,ids,instant,latitude,longitude,moonBelowOnly])}
 export default function DeepSkyComparison({saved,date,place,onPlan,browsing}:{browsing:DeepSkyComparisonBrowsing;saved:string[];date:Date;place:Place;onPlan:(id:string,date:Date)=>void}){
  const heading=useRef<HTMLHeadingElement>(null);

@@ -68,3 +68,33 @@ test('bright and deep-sky time shortcuts snapshot the object and exact time as o
   h.navigation.request({kind:'time',section:'sky',date:new Date('2026-10-21T00:00Z'),target},true,h.apply);h.navigation.cancel();assert.equal(h.navigation.continue(h.apply),false);assert.equal(h.applied.length,1);
  }
 });
+
+test('forecast confirmation rechecks start, freshness and clock rollback without applying the queued context',()=>{
+ const fetched=Date.parse('2026-10-20T20:00Z'),date=new Date('2026-10-20T20:20Z');
+ for(const kind of ['time','context'])for(const [now,start] of [[+date+1,date],[fetched+1800000,new Date(fetched+7200000)],[fetched-60001,date]]){
+  const h=harness();h.navigation.request({kind,section:'tonight',date:start,place:site,forecastFetchedAt:fetched},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,now),false);assert.deepEqual(h.applied,[]);assert.equal(h.pending.at(-1),null);
+ }
+ const h=harness();h.navigation.request({kind:'time',section:'tonight',date,forecastFetchedAt:fetched},true,h.apply);
+ assert.equal(h.navigation.continue(h.apply,+date),true);assert.equal(+h.applied[0].date,+date);
+});
+
+test('comparison confirmation checks every peer timestamp and snapshots the original ranking inputs',()=>{
+ const now=Date.parse('2026-10-20T20:00Z');
+ for(const times of [[now,now-1800000],[now-1800000,now],[now,now+60001],[now,NaN],[]]){
+  const h=harness();h.navigation.request({kind:'context',section:'tonight',place:site,comparisonFetchedAt:times},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,now),false);assert.deepEqual(h.applied,[]);
+ }
+ const h=harness(),times=[now-1000,now];
+ h.navigation.request({kind:'context',section:'tonight',place:site,comparisonFetchedAt:times},true,h.apply);
+ times[0]=now-1800000;
+ assert.equal(h.navigation.continue(h.apply,now),true);assert.deepEqual(h.applied[0].comparisonFetchedAt,[now-1000,now]);
+});
+
+test('best-hour snapshots allow an in-progress hour but still expire when their forecast becomes stale',()=>{
+ const fetched=Date.parse('2026-10-20T20:00Z'),date=new Date(fetched-600000);
+ for(const [now,expected] of [[fetched+1000,true],[fetched+1800000,false],[fetched-60001,false]]){
+  const h=harness();h.navigation.request({kind:'time',section:'tonight',date,forecastFetchedAt:fetched,forecastMayHaveStarted:true},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,now),expected);assert.equal(h.applied.length,expected?1:0);
+ }
+});

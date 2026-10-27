@@ -76,12 +76,12 @@ try{
     }
     await section('Sky atlas');await page.locator('#visibility-planner').waitFor();
     const textDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download observing list',exact:true}).click();
-    const textFile=await textDownload,text=await readFile(await textFile.path(),'utf8');
+    const textFile=await textDownload;assert(textFile.suggestedFilename().includes(`-london-${preview.replace(/[:.]/g,'-')}.txt`));const text=await readFile(await textFile.path(),'utf8');
     assert(text.includes(`Full darkness remaining: ${duration} after the selected observing time.`));
     assert(text.includes(`Full darkness ends UTC: ${end.toISOString()}`));assert(text.includes('[ ] Vega'));
     for(const label of ['Download print-ready plan','Download deep-sky observing plan']){
      const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:label,exact:true}).click();
-     const file=await downloaded,html=await readFile(await file.path(),'utf8');
+     const file=await downloaded;assert(file.suggestedFilename().includes(`-london-${preview.replace(/[:.]/g,'-')}.html`));const html=await readFile(await file.path(),'utf8');
      assert(html.includes(`${duration} after the selected time`));assert(html.includes(end.toISOString().replace('T',' ').replace('Z',' UTC')));
      const report=await browser.newPage({viewport});await report.setContent(html);
      await report.getByText('FULL DARKNESS ENDS (UTC)',{exact:true}).waitFor();

@@ -1,11 +1,14 @@
 import catalogue from '@/data/messier.json';
+import additional from '@/data/additional-deep-sky.json';
 import {validObservingDate} from './observing-time';
 import {constellationName} from './constellations';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
 import {j2000Position,j2000Projector,type Place,sunAltitude} from '@/lib/sky';
-export const messierCatalogue=catalogue;
-export type DeepSkyObject=(typeof catalogue)[number];
+export type DeepSkyObject={id:string;catalogue:string;name:string;type:string;constellation:string;ra:number;dec:number;magnitude:number|null;major:number|null;minor:number|null;positionAngle:number|null;crossReferences?:string[]};
+export const messierCatalogue:DeepSkyObject[]=catalogue;
+export const deepSkyCatalogue:DeepSkyObject[]=[...catalogue,...additional];
+
 import {deepSkyName,deepSkyNames} from './deep-sky-names';
 export {deepSkyName,deepSkyNames};
 export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
@@ -18,11 +21,12 @@ export function deepSkyPositions(targets:DeepSkyObject[],date:Date,place:Place){
  return targets.map(target=>({...target,...project(target.ra,target.dec)}));
 }
 
-export function findDeepSky(query:string,type:string,{constellation='',maximumMagnitude,savedIds}:{constellation?:string;maximumMagnitude?:number;savedIds?:readonly string[]}={}){
+export type DeepSkyCatalogueFilter=''|'messier'|'ngc'|'ic';
+export function findDeepSky(query:string,type:string,{constellation='',catalogue='',maximumMagnitude,unknownMagnitudeOnly=false,savedIds}:{constellation?:string;catalogue?:DeepSkyCatalogueFilter;maximumMagnitude?:number;unknownMagnitudeOnly?:boolean;savedIds?:readonly string[]}={}){
  const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g,'').replace(/^messier(?=\d)/,'m').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
  const normalized=normalize(query.trim());
  const subset=savedIds===undefined?null:new Set(savedIds);
- return catalogue.filter(target=>(!subset||subset.has(target.id))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation)].some(value=>normalize(value).includes(normalized)));
+ return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation),...(target.crossReferences??[])].some(value=>normalize(value).includes(normalized)));
 }
 export function deepSkySampleTimes(date:Date){
  if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
@@ -51,7 +55,7 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
 // Share the Sun samples across the catalogue; search text does not need to
 // recalculate the same 24-hour opportunity window for each keystroke.
 export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
- if(targets.length>109)throw Error('Plan up to 109 deep-sky targets at once.');
+ if(targets.length>deepSkyCatalogue.length)throw Error(`Plan up to ${deepSkyCatalogue.length} deep-sky targets at once.`);
  if(!targets.length)return new Map<string,{date:Date;altitude:number;azimuth:number}>();
  const darkTimes=deepSkySampleTimes(date).filter(time=>sunAltitude(time,place)<-18).map(time=>({time,project:j2000Projector(time,place)}));
  const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();

@@ -27,6 +27,7 @@
     li:last-child{padding-bottom:0}
     strong{display:block;font-size:15px;font-weight:500;color:#e8f0ec}
     small{display:block;color:#9cb3be;font-size:12px;line-height:1.5;margin-top:3px;overflow-wrap:anywhere}
+    .diary-search-fields{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}.diary-search-fields input{flex:1;min-width:0;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid #526b75;border-radius:6px;background:#102029;color:#e8f0ec}.diary-search-fields button{min-height:44px;padding:10px 14px;border:1px solid #526b75;border-radius:6px;background:#172a32;color:#e8f0ec;font:inherit}.diary-search-fields button:disabled{opacity:.5}.diary-search-fields input:focus-visible,.diary-search-fields button:focus-visible{outline:2px solid #c1df93;outline-offset:3px}
     .empty{font-size:14px;margin:0}
     .note{color:#c9d6c3;white-space:pre-wrap;font-size:14px}.connection{font-size:14px}.retry:focus-visible{outline:2px solid #e9eeef;outline-offset:4px}html[data-red-light=on]::after{content:"";position:fixed;inset:0;z-index:2147483647;pointer-events:none;background:#ff1616;mix-blend-mode:multiply}html[data-red-light=on]{background:#090000}
     footer{font-size:13px;color:#91a8b3;margin-top:26px;max-width:580px}
@@ -48,7 +49,7 @@
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
-      <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
+      <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><div id="diary-search-tools" hidden><label for="diary-search">Find a saved observation</label><div class="diary-search-fields"><input id="diary-search" type="search" maxlength="100" placeholder="Target, notes, site or equipment" aria-controls="diary"/><button id="diary-search-clear" type="button" disabled>Clear search</button></div><p id="diary-search-count" class="connection" role="status" aria-atomic="true"></p><p id="diary-search-empty" class="empty" hidden>No saved observations match this search.</p></div><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
       <section class="targets-card" id="other-notes-card" aria-labelledby="other-notes-title" hidden><h2 id="other-notes-title">Notes for other targets</h2><ul id="other-notes"></ul></section>
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
@@ -65,6 +66,9 @@
       const validDimension=(value,limit)=>typeof value==='number'&&Number.isFinite(value)&&value>0&&value<=limit;
       const safeNote=value=>typeof value==='string'?value.slice(0,2000):'';
       const safeText = value => typeof value === 'string' ? value.trim().slice(0, 300) : '';
+      const extraDeepSkyIds=new Set(["NGC104", "NGC253", "NGC281", "NGC457", "NGC663", "NGC869", "NGC884", "NGC1499", "NGC2024", "NGC2237", "NGC2264", "NGC2516", "NGC2808", "NGC3132", "NGC3372", "NGC3532", "NGC3766", "NGC4755", "NGC5139", "NGC6397", "NGC6543", "NGC6633", "NGC6752", "NGC6888", "NGC6960", "NGC6992", "NGC7000", "NGC7293", "NGC55", "NGC247", "NGC300", "NGC404", "NGC752", "NGC891", "NGC1023", "NGC1365", "NGC1535", "NGC1851", "NGC2392", "NGC2403", "NGC2683", "NGC2903", "NGC3115", "NGC3242", "NGC3628", "NGC4565", "NGC4631", "NGC5128", "NGC5907", "NGC6826", "NGC6946", "NGC7331", "NGC7662", "NGC129", "NGC147", "NGC185", "NGC246", "NGC288", "NGC362", "NGC654", "NGC7789", "NGC1232", "NGC1501", "NGC1514", "NGC1931", "NGC2174", "NGC2359", "NGC2362", "NGC2419", "NGC2420", "NGC2440", "NGC2477", "NGC2841", "NGC3521", "NGC3603", "NGC4038", "NGC4039", "NGC4449", "NGC4490", "NGC6302", "NGC6818", "NGC7023", "NGC7635", "NGC1360", "NGC1850", "NGC2070", "NGC2298", "NGC2438", "NGC2451", "NGC2506", "NGC2547", "NGC3918", "NGC4372", "NGC4833", "NGC6025", "NGC6067", "NGC6087", "NGC6188", "NGC6210", "NGC6231", "NGC6357", "NGC6388", "NGC6441", "NGC6520", "NGC6723", "NGC6744", "NGC6811", "NGC6934", "NGC7009", "NGC7380", "NGC7793", "NGC6369", "NGC7027", "NGC772", "NGC1097", "NGC1300", "NGC1313", "NGC1316", "NGC1566", "NGC1672", "NGC2281", "NGC2354", "NGC2371", "NGC2997", "NGC3199", "NGC3293", "NGC3324", "NGC3576", "NGC3621", "NGC4147", "NGC4236", "NGC4361", "NGC4945", "NGC5189", "NGC5466", "NGC5986", "NGC6207", "NGC6229", "NGC6362", "NGC6541", "NGC6781", "NGC6905", "NGC7129", "NGC40", "NGC292", "NGC1275", "NGC1317", "NGC1977", "NGC1980", "NGC1981", "NGC2301", "NGC2360", "NGC2537", "NGC2685", "NGC2736", "NGC3928", "NGC4194", "NGC4435", "NGC4438", "NGC4567", "NGC4568", "NGC4609", "NGC4651", "NGC6309", "NGC6537", "NGC6741", "NGC6819", "NGC6822", "NGC134", "NGC488", "NGC936", "NGC1808", "NGC2022", "NGC2539", "NGC2655", "NGC2976", "NGC3079", "NGC3184", "NGC3718", "NGC4214", "NGC4244", "NGC4559", "NGC4725", "NGC5248", "NGC5315", "NGC7006", "NGC7217", "NGC7479", "NGC1549", "NGC1947", "NGC2100", "NGC5927", "NGC6167", "NGC6326", "NGC6802", "NGC278", "NGC925", "NGC1055", "NGC3486", "NGC5005", "NGC5033", "NGC7048", "NGC6569", "NGC6251", "NGC2186", "NGC2383", "NGC2395", "NGC2482", "NGC2587", "NGC2613", "NGC2708", "NGC2784", "NGC2835", "NGC3109", "NGC3384", "NGC3504", "NGC3640", "NGC3686", "NGC3773", "NGC3783", "NGC3955", "NGC4203", "NGC4459", "NGC4535", "NGC4636", "NGC4697", "NGC4762", "NGC5053", "NGC5694", "NGC5634", "NGC6058", "NGC6101", "NGC6139", "NGC6144", "NGC6284", "NGC6304", "NGC6316", "NGC6401", "NGC6426", "NGC6522", "NGC6535", "NGC6553", "NGC6584", "NGC6638", "NGC6642", "NGC6652", "NGC6712", "NGC6717", "NGC6804", "NGC6866", "NGC7008", "NGC7044", "NGC7142", "NGC7184", "NGC7332", "NGC7448", "NGC225", "NGC1027", "NGC1342", "NGC1444", "NGC1502", "NGC1528", "NGC1545", "NGC1582", "NGC1647", "NGC1662", "NGC1746", "NGC1807", "NGC1857", "NGC2129", "NGC2169", "NGC2232", "NGC2343", "NGC2423", "NGC2439", "NGC2520", "NGC2546", "NGC2571", "NGC2669", "NGC3114", "NGC3228", "NGC3572", "NGC5281", "NGC5316", "NGC5460", "NGC5617", "NGC1049", "NGC2573", "NGC3172", "NGC3561", "NGC6445", "NGC45", "NGC524", "NGC584", "NGC613", "NGC720", "NGC908", "NGC1326", "NGC1332", "NGC1350", "NGC1380", "NGC1395", "NGC1398", "NGC1399", "NGC1404", "NGC1407", "NGC1433", "NGC1512", "NGC1532", "NGC1543", "NGC1553", "NGC1574", "NGC1617", "NGC1792", "NGC2768", "NGC2775", "IC1396", "IC1805", "IC405", "IC2391", "IC2574", "IC2602", "IC5146", "IC348", "IC443", "IC2944", "IC4604", "IC5070", "IC1613", "IC342", "IC4182", "IC4665", "IC4756", "IC4662", "IC5152", "IC127", "IC418", "IC1369", "IC1434", "IC1442", "IC1848", "IC2157", "IC2395", "IC2488", "IC2581", "IC2714", "IC4291", "IC4499", "IC4651", "IC4996"]);
+      const deepSkyLimit=109+extraDeepSkyIds.size;
+      const validDeepSkyId=value=>typeof value==='string'&&(/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(value)||extraDeepSkyIds.has(value));
       const canonicalInstant=value=>{
         if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value))return null;
         const instant=new Date(value);return Number.isFinite(+instant)&&instant.getUTCFullYear()>=1&&instant.getUTCFullYear()<=9999&&instant.toISOString()===value?instant:null;
@@ -128,13 +132,13 @@
       showEmpty('targets','nightjar-targets-v1');
 
       const deepTargets=read('nightjar-deep-targets-v1',[],Array.isArray);
-      const deepPrefix=deepTargets.slice(0,200),deepRows=deepPrefix.filter(id=>typeof id==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(id));
-      if(deepTargets.length>200||deepRows.length<deepPrefix.length)markPartial('nightjar-deep-targets-v1','Saved deep-sky list');
-      for(const id of Array.from(new Set(deepRows)).slice(0,109))add('deep-targets',id,'Reconnect for object details and positions.');
+      const deepPrefix=deepTargets.slice(0,deepSkyLimit),deepRows=deepPrefix.filter(id=>validDeepSkyId(id));
+      if(deepTargets.length>deepSkyLimit||deepRows.length<deepPrefix.length)markPartial('nightjar-deep-targets-v1','Saved deep-sky list');
+      for(const id of Array.from(new Set(deepRows)).slice(0,deepSkyLimit))add('deep-targets',id,'Reconnect for object details and positions.');
       showEmpty('deep-targets','nightjar-deep-targets-v1');
 
       const diary=read('nightjar-observing-diary-v1',[],Array.isArray);
-      const diaryPrefix=diary.slice(0,200),diaryRows=diaryPrefix.filter(entry=>entry&&typeof entry==='object'&&typeof entry.target==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180));
+      const diaryPrefix=diary.slice(0,200),diaryRows=diaryPrefix.filter(entry=>entry&&typeof entry==='object'&&validDeepSkyId(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180));
       if(diary.length>200||diaryRows.length<diaryPrefix.length)markPartial('nightjar-observing-diary-v1','Observing diary');
       for(const entry of diaryRows.sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
         if(typeof entry.notes==='string'&&entry.notes.length>2000||entry.notes!=null&&typeof entry.notes!=='string'||typeof entry.equipment==='string'&&entry.equipment.trim().length>300||entry.equipment!=null&&typeof entry.equipment!=='string'||entry.place.name.trim().length>300||typeof entry.place.country==='string'&&entry.place.country.trim().length>300)markPartial('nightjar-observing-diary-v1','Observing diary');
@@ -142,6 +146,24 @@
         add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.place.country)?' · '+safeText(entry.place.country):'')+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
       }
       showEmpty('diary','nightjar-observing-diary-v1');
+      // Filter only this already-rendered snapshot; never read or write stores
+      // while typing, and keep the snapshot-change warning independent.
+      const diaryItems=Array.from(document.getElementById('diary').children);
+      const diarySearch=document.getElementById('diary-search'),clearSearch=document.getElementById('diary-search-clear');
+      const searchText=value=>value.normalize('NFKC').toLowerCase();
+      const diarySearchRows=diaryItems.map(item=>({item,text:searchText(item.textContent)}));
+      document.getElementById('diary-search-tools').hidden=!diaryItems.length;
+      const filterDiary=()=>{
+        const query=searchText((diarySearch.value||'').slice(0,100).trim());let shown=0;
+        for(const row of diarySearchRows){row.item.hidden=Boolean(query&&!row.text.includes(query));if(!row.item.hidden)shown++}
+        clearSearch.disabled=!(diarySearch.value||'');
+        document.getElementById('diary-search-count').textContent=shown+' of '+diaryItems.length+' saved observations shown.';
+        document.getElementById('diary-search-empty').hidden=shown!==0;
+      };
+      diarySearch.addEventListener('input',filterDiary);
+      clearSearch.addEventListener('click',()=>{diarySearch.value='';filterDiary();diarySearch.focus()});
+      filterDiary();
+
 
       const places = read('nightjar-places', [], Array.isArray);
       const placeList=places.slice(0,100);

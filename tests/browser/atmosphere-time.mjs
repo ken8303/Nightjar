@@ -50,6 +50,11 @@ try{
   }
   await check('2026-10-25T00:00:00.000Z',/Forecast hour: 25 Oct 2026, 01:00 GMT\+1/);
   assert((await panel.textContent()).includes('12.3 km'));
+  const darkness=page.locator('.darkness-remaining');
+  const end=await darkness.locator('time').getAttribute('datetime');
+  const remaining=async()=>{const text=await darkness.locator('strong').textContent();return Number(text.match(/(\d+) hours?/)?.[1]||0)*60+Number(text.match(/(\d+) minutes?/)?.[1]||0)};
+  const initialMinutes=await remaining();assert(initialMinutes>120);
+
   // An unfinished edit must not change the source timestamp or measurements.
   await input.fill('');
   await activate(page.getByRole('button',{name:'Next observing hour',exact:true}));
@@ -61,15 +66,23 @@ try{
   await activate(page.getByRole('button',{name:'Next observing hour',exact:true}));
   await check('2026-10-25T01:00:00.000Z',/Forecast hour: 25 Oct 2026, 01:00 GMT(?:\+0)? · Europe\/London/);
   assert((await panel.textContent()).includes('0.1 km'));
+  assert.equal(await remaining(),initialMinutes-60,'repeated local hour still consumes one elapsed hour of darkness');
+  assert.equal(await darkness.locator('time').getAttribute('datetime'),end);
+
   await activate(page.getByRole('button',{name:'Next observing hour',exact:true}));
   await check('2026-10-25T02:30:17.125Z',/Selected time: 25 Oct 2026, 02:30 GMT/);
   assert((await panel.textContent()).includes('No atmospheric forecast for this hour'));
   assert.equal(await panel.locator('.atmosphere-grid').count(),0);
+  assert.equal(await remaining(),initialMinutes-120);
+  assert.equal(await darkness.locator('time').getAttribute('datetime'),end);
+  await input.fill('2026-10-25T12:00');await page.locator('.night-only-notice').waitFor();
+  assert.equal(await panel.isVisible(),false);assert.equal(await darkness.isVisible(),false);
+
   await input.fill('2026-10-26T00:30');
   await check('2026-10-26T00:30:00.000Z',/Selected time: 26 Oct 2026, 00:30 GMT/);
   assert.equal(await page.evaluate(()=>localStorage.getItem('nightjar-target-notes-v1')),saved);
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);assert.deepEqual(errors,[]);
-  console.log(`${name}: repeated-hour offsets, gaps, date change, retained draft and containment PASS`);
+  console.log(`${name}: repeated-hour offsets, gaps, date change, elapsed darkness, daylight hiding, retained draft and containment PASS`);
   await page.close();
  }
 }finally{await browser.close()}

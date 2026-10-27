@@ -41,3 +41,20 @@ test('phase shortcuts omit bright events without changing the displayed event da
   if(!eligible.length)assert(html.includes('None of the next supported lunar phases occurs in full astronomical darkness'));
  }
 });
+
+test('real polar eclipse cannot export a night-only interval that briefly crosses twilight between dark contacts',async()=>{
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const {lunarEclipseCalendar}=await vite.ssrLoadModule('/lib/calendar.ts');
+ const place={name:'Polar eclipse fixture',latitude:86.26504344241616,longitude:136.10833333333335,timezone:'UTC'},date=new Date('2028-01-11T00:00Z');
+ const event=nextLunarEclipses(date)[0];assert.equal(event.peak.date.toISOString(),'2028-01-12T04:13:00.859Z');
+ const contacts=[-event.sd_penum,-event.sd_partial,0,event.sd_partial,event.sd_penum].map((minutes,index)=>({label:`Contact ${index}`,time:new Date(+event.peak.date+minutes*60000),altitude:0}));
+ assert(contacts.every(contact=>isAstronomicalNight(contact.time,place)));
+ const transit=A.SearchHourAngle(A.Body.Sun,observer(place),0,contacts[0].time).time.date;
+ assert(+transit<+contacts.at(-1).time);assert(sunAltitude(transit,place)>-18);
+ const html=renderToStaticMarkup(createElement(Eclipses,{date,place,onDate:()=>{}}));
+ const button=[...html.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)].map(match=>match[0]).find(button=>button.includes('Download eclipse calendar'));
+ assert(button.includes('disabled=""'));
+ const input={kind:event.kind,peak:event.peak.date,place:place.name,latitude:place.latitude,longitude:place.longitude,contacts};
+ assert.throws(()=>lunarEclipseCalendar({...input,nightOnly:true}),/leaves full astronomical darkness/);
+ assert(lunarEclipseCalendar(input).includes('BEGIN:VCALENDAR'),'general astronomical date references keep their existing behavior');
+});

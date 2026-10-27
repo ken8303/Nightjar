@@ -1,8 +1,9 @@
+import {deepSkyListLimit} from './deep-sky-list';
 import {normalizeDiary,type Observation} from './observing-diary';
 export const diaryDraftKey='nightjar-diary-drafts-v1';
-// JSON escaping can expand valid form text sixfold. The full 109-form schema,
+// JSON escaping can expand valid form text sixfold. The full catalogue draft schema,
 // plus an edit's original/draft pair, must fit both the writer and the reader.
-export const diaryDraftMaxStoredChars=2*1024*1024;
+export const diaryDraftMaxStoredChars=7*1024*1024;
 export type DiaryDraftState={drafts:Observation[];edit:{original:Observation;draft:Observation}|null};
 export function emptyDiaryDrafts():DiaryDraftState{return {drafts:[],edit:null}}
 export function sameObservation(first:Observation,second:Observation){return JSON.stringify(normalizeDiary([first])[0])===JSON.stringify(normalizeDiary([second])[0])}
@@ -17,8 +18,8 @@ export function startDiaryEdit(state:DiaryDraftState,entry:Observation):DiaryDra
 export function normalizeDiaryDrafts(value:unknown):DiaryDraftState{
  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid diary draft.');
  const raw=value as Record<string,unknown>;
- if(raw.version!==1||!Array.isArray(raw.drafts)||raw.drafts.length>109)throw Error('Invalid diary draft.');
- const drafts=normalizeDiary(raw.drafts);
+ if(raw.version!==1||!Array.isArray(raw.drafts)||raw.drafts.length>deepSkyListLimit)throw Error('Invalid diary draft.');
+ const drafts=normalizeDiary(raw.drafts,deepSkyListLimit);
  if(new Set(drafts.map(entry=>entry.target)).size!==drafts.length)throw Error('Duplicate diary drafts.');
  let edit:DiaryDraftState['edit']=null;
  if(raw.edit!==null){

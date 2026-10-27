@@ -1,7 +1,7 @@
 import {isFullDarknessInterval} from './darkness-remaining';
 import {utcDate} from './utc-date';
 import {validPlace} from './planner-state';
-import {validMessierId} from './deep-sky-list';
+import {validDeepSkyId} from './deep-sky-list';
 import {deepSkyName} from './deep-sky-names';
 import type {DeepSkyObject,DeepSkySample} from './deep-sky';
 import type {Place} from './sky';
@@ -27,13 +27,14 @@ function calendarSite(input:CalendarCoordinates){
 const calendarDateValid=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
 const calendarZoneNote=(timezone?:string)=>timezone?`Site time zone: ${timezone}.`:'Site time zone unavailable; event times use UTC.';
 function calendarIdentity(text:string){let hash=2166136261;for(const char of text)hash=Math.imul(hash^char.codePointAt(0)!,16777619)>>>0;return hash.toString(16)}
-export function lunarEclipseCalendar(input:{kind:string;peak:Date;place:string;timezone?:string;contacts:{label:string;time:Date;altitude:number}[]}&CalendarCoordinates,created=new Date()){
+export function lunarEclipseCalendar(input:{kind:string;peak:Date;place:string;timezone?:string;contacts:{label:string;time:Date;altitude:number}[];nightOnly?:boolean}&CalendarCoordinates,created=new Date()){
  const {contacts,peak,kind,place}=input,site=calendarSite(input);
  if(contacts.length<2||contacts.length>20)throw new Error('Eclipse contacts are required');
  const start=contacts[0].time,end=contacts[contacts.length-1].time;
  if(!calendarDateValid(peak)||!calendarDateValid(start)||!calendarDateValid(end)||!calendarDateValid(created)||+end<=+start||+peak<+start||+peak>+end||!['penumbral','partial','total'].includes(kind)||!place.trim()||place.length>=200||contacts.some((contact,index)=>!calendarDateValid(contact.time)||!Number.isFinite(contact.altitude)||Math.abs(contact.altitude)>90||!contact.label.trim()||contact.label.length>100||(index>0&&+contact.time<=+contacts[index-1].time)))throw new Error('Invalid eclipse interval');
  const eventStart=new Date(Math.floor(+start/1000)*1000),eventEnd=new Date(Math.ceil(+end/1000)*1000);
  if(!calendarDateValid(eventStart)||!calendarDateValid(eventEnd))throw Error('Eclipse interval exceeds the supported calendar years.');
+ if(input.nightOnly&&(!site||!isFullDarknessInterval(eventStart,eventEnd,{name:place,...site})))throw Error('This eclipse interval leaves full astronomical darkness.');
  const description=[`Greatest eclipse: ${peak.toISOString()} (UTC).`,...contacts.map(c=>`${c.label}: ${c.time.toISOString()} (UTC); Moon altitude ${c.altitude.toFixed(1)} degrees, ${c.altitude>0?'above':'below'} horizon at ${place}.`),...(site?[`Observing coordinates: latitude ${site.latitude}, longitude ${site.longitude}.`]:[]),calendarZoneNote(input.timezone),'Times calculated by Astronomy Engine. Horizon visibility does not include weather, terrain or buildings.'].join('\n');
  const identity=site?`-${calendarIdentity(`${place}|${site.latitude}|${site.longitude}`)}`:'';
  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Lunar Eclipse Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:lunar-eclipse-${calendarTime(peak)}${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(`${kind[0].toUpperCase()+kind.slice(1)} lunar eclipse`)}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
@@ -54,7 +55,7 @@ export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;st
  const {target,place,start,end,samples,moonBelowOnly}=input;
  const validTime=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
  const duration=+end-+start;
- if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validMessierId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||samples.length>97)throw Error('Invalid deep-sky calendar window.');
+ if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validDeepSkyId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||samples.length>97)throw Error('Invalid deep-sky calendar window.');
  const included=samples.filter(sample=>+sample.time>=+start&&+sample.time<=+end);
  if(included.length!==duration/900000+1||included.some((sample,index)=>+sample.time!==+start+index*900000||!Number.isFinite(sample.altitude)||sample.altitude<=30||sample.altitude>90||!Number.isFinite(sample.sun)||sample.sun>= -18||(moonBelowOnly&&(!Number.isFinite(sample.moonAltitude)||sample.moonAltitude!>0))))throw Error('This interval has no complete qualifying deep-sky window.');
  if(!isFullDarknessInterval(start,end,place))throw Error('This interval leaves full astronomical darkness. Choose another deep-sky window.');
