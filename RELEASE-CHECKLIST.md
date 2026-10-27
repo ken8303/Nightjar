@@ -82,7 +82,7 @@ Additional functions outside the current beta implementation:
 - [ ] Cloud accounts and automatic cross-device synchronization.
 - [ ] Push notifications and automatic aurora alerts.
 - [ ] Multiple weather-model comparison.
-- [x] Deep-sky catalogue expansion: 284 objects, comprising the original 109 Messier objects plus 175 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
+- [x] Deep-sky catalogue expansion: 309 objects, comprising the original 109 Messier objects plus 200 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
 
 These additional functions are scope choices rather than required first-release acceptance gates. Keyboard-control and photo enhancements remain paused at the user’s request. Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record physical-device results; unrun checks must stay pending.
 
