@@ -16,7 +16,7 @@ test('saved-target scope composes with catalogue filters without changing saved 
  assert.deepEqual(findDeepSky('','Galaxy',{savedIds:['M45']}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:[]}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:['M102','not-a-target']}),[]);
- assert.equal(findDeepSky('','',{savedIds:undefined}).length,254);
+ assert.equal(findDeepSky('','',{savedIds:undefined}).length,284);
  assert.deepEqual(saved,before);
 });
 test('full constellation names and Unicode identifiers work without losing catalogue codes',async()=>{
