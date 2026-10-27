@@ -58,3 +58,9 @@ test('real polar eclipse cannot export a night-only interval that briefly crosse
  assert.throws(()=>lunarEclipseCalendar({...input,nightOnly:true}),/leaves full astronomical darkness/);
  assert(lunarEclipseCalendar(input).includes('BEGIN:VCALENDAR'),'general astronomical date references keep their existing behavior');
 });
+
+test('lunar phase symbols distinguish new, quarters and full without claiming local orientation',async()=>{
+ const {LunarPhaseSymbol}=await vite.ssrLoadModule('/components/moon-explorer.tsx');
+ const icons=[0,1,2,3].map(quarter=>renderToStaticMarkup(createElement(LunarPhaseSymbol,{quarter})));
+ assert.equal(new Set(icons).size,4);assert(!icons[0].includes('<path'));assert(!icons[2].includes('<path'));assert(icons[1].includes('A14 14 0 0 1'));assert(icons[3].includes('A14 14 0 0 0'));assert(icons.every(icon=>icon.includes('aria-hidden="true"')));
+});
