@@ -325,3 +325,5 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 @media(max-width:800px){.night-outlook-recommendation{flex-direction:column;align-items:stretch}}
 
 .hourly-score-key{margin:12px 0 0;color:var(--text-secondary);font-size:12px}.hour .bar{width:9px}.hour .bar.unavailable{background:transparent;border:1px dashed #a9bdc6}.hour .forecast-cloud-label{white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+
+.cloud-layer-description{margin:0 0 8px;color:var(--text-secondary);font-size:12px}.cloud-layer-scale{display:flex;justify-content:space-between;color:var(--text-secondary);font-size:11px}.cloud-layer-bar{height:8px}.cloud-layer-bar.unavailable{background:transparent;border:1px dashed #a9bdc6}
