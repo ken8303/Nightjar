@@ -41,3 +41,12 @@ test('catalogue selections combine with search, type, magnitude and saved target
  assert.deepEqual(findDeepSky('','Cluster with nebulosity',{catalogue:'ic',maximumMagnitude:7,savedIds:['IC1805']}).map(target=>target.id),['IC1805']);
  assert.equal(findDeepSky('','',{catalogue:'ic',maximumMagnitude:7,savedIds:['IC1396']}).length,0);
 });
+
+test('unknown-magnitude filter finds objects without a listed magnitude and composes with catalogue and type',()=>{
+ const unknown=findDeepSky('','',{catalogue:'ngc',type:'H II region',unknownMagnitudeOnly:true});
+ assert(unknown.some(target=>target.id==='NGC7000'));assert(unknown.every(target=>target.magnitude===null));
+ assert.equal(findDeepSky('NGC7000','',{unknownMagnitudeOnly:true}).length,1);
+ assert.equal(findDeepSky('NGC7000','',{maximumMagnitude:15}).length,0);
+ assert.equal(findDeepSky('NGC7000','',{maximumMagnitude:15,unknownMagnitudeOnly:true}).length,0);
+ assert.equal(findDeepSky('M31','',{unknownMagnitudeOnly:true}).length,0);
+});
