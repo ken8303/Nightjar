@@ -10,8 +10,8 @@ export function validObservation(value:unknown):value is Observation{
  const entry=value as Record<string,unknown>;
  return typeof entry.id==='string'&&/^[a-zA-Z0-9-]{1,80}$/.test(entry.id)&&validDeepSkyId(entry.target)&&Boolean(parseObservingInstant(entry.observedAt))&&validPlace(entry.place)&&['seen','not-seen','imaged'].includes(entry.outcome as string)&&typeof entry.equipment==='string'&&entry.equipment.length<=100&&typeof entry.notes==='string'&&entry.notes.length<=2000;
 }
-export function normalizeDiary(value:unknown):Observation[]{
- if(!Array.isArray(value)||value.length>diaryLimit||!value.every(validObservation)||new Set(value.map(entry=>entry.id)).size!==value.length)throw Error('The observing diary contains invalid entries.');
+export function normalizeDiary(value:unknown,limit=diaryLimit):Observation[]{
+ if(!Array.isArray(value)||value.length>limit||!value.every(validObservation)||new Set(value.map(entry=>entry.id)).size!==value.length)throw Error('The observing diary contains invalid entries.');
  return value.map(entry=>({id:entry.id,target:entry.target,observedAt:entry.observedAt,place:{name:entry.place.name,latitude:entry.place.latitude,longitude:entry.place.longitude,...(entry.place.country!==undefined?{country:entry.place.country}:{}),...(entry.place.timezone?{timezone:entry.place.timezone}:{}),...(entry.place.bortle?{bortle:entry.place.bortle}:{})},outcome:entry.outcome,equipment:entry.equipment,notes:entry.notes}));
 }
 export function readDiary(storage:Pick<Storage,'getItem'>){const raw=storage.getItem(diaryKey);if(raw&&raw.length>diaryMaxStoredChars)throw Error('The saved diary is too large.');return normalizeDiary(JSON.parse(raw===null?'[]':raw))}

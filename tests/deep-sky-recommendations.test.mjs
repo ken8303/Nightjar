@@ -16,7 +16,7 @@ test('shared catalogue recommendations agree with the independent per-object win
 });
 test('polar daylight produces no dark-sky suggestions and catalogue inputs are bounded',()=>{
  assert.equal(deepSkyRecommendations(messierCatalogue,new Date('2026-06-21T12:00Z'),{name:'Polar site',latitude:89,longitude:0}).size,0);
- assert.throws(()=>deepSkyRecommendations(Array(195).fill(messierCatalogue[0]),new Date(),london),/194/);
+ assert.throws(()=>deepSkyRecommendations(Array(225).fill(messierCatalogue[0]),new Date(),london),/224/);
 });
 test('recommendations remain on UTC sample boundaries during repeated local clock hours',()=>{
  const start=new Date('2026-10-25T00:00Z'),recommendations=deepSkyRecommendations(messierCatalogue,start,london);
