@@ -90,6 +90,7 @@ try{
      await report.close();
     }
     for(const label of await page.locator('.deep-sky-hours button').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('aria-label')))){const date=new Date(label.match(/ at (.*), altitude /)[1]);assert(sun(date,place)<-18,label)}
+    const mobileBars=page.locator('.mobile-altitude-grid button');for(const card of await mobileBars.all()){const label=await card.getAttribute('aria-label'),degrees=Number(label.match(/altitude (-?[\d.]+) degrees/)[1]);const width=await card.locator('.mobile-altitude-bar i').evaluate(node=>parseFloat(node.style.width));assert(Math.abs(width-Math.max(0,Math.min(90,degrees))/90*100)<0.12);}
     const buttons=page.locator('#visibility-planner button[aria-label^="View "][aria-label*="altitude"]');
     for(const label of await buttons.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('aria-label')))){
      const date=new Date(label.match(/ at (.*), altitude /)[1]);assert(sun(date,place)<-18,label);
