@@ -39,8 +39,8 @@ test('polar twilight between dark samples breaks both curve and shading',async()
 });
 
 test('graph summary reports only the highest fully dark sample',()=>{
- const html=render([-19,0,-19]);assert.match(html,/Highest dark sample:/);assert.match(html,/<strong>32\.0°<\/strong>/);assert(html.includes('30° guide'));assert(html.includes('Continuous darkness'));
- const bright=render([-18,0]);assert(bright.includes('No fully dark samples in this window.'));assert(!bright.includes('Highest dark sample:'));
+ const html=render([-19,0,-19]);assert.match(html,/Highest dark sample:/);assert.match(html,/<strong>32\.0°<\/strong>/);assert(html.includes('dateTime="2026-10-24T00:30:00.000Z"'));assert(html.includes('Use this sampled time')); assert(html.includes('30° guide'));assert(html.includes('Continuous darkness'));
+ const bright=render([-18,0]);assert(bright.includes('No fully dark samples in this window.'));assert(!bright.includes('Highest dark sample:'));assert(!bright.includes('Use this sampled time'));
 });
 
 test('selected-time marker appears only when the starting instant is fully dark',()=>{

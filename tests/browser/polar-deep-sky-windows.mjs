@@ -44,6 +44,8 @@ try{
    assert.equal(A.SearchAltitude(A.Body.Sun,observer,1,start,(+end-+start)/86400000,-18),null);
    assert(text.includes('strictly below -18 degrees throughout this interval'));
   }
+  const peakTime=await timeline.locator('.deep-sky-plot-summary time').getAttribute('datetime');assert(A.Equator(A.Body.Sun,new Date(peakTime),observer,true,true).dec!==undefined);assert(A.Horizon(new Date(peakTime),observer,A.Equator(A.Body.Sun,new Date(peakTime),observer,true,true).ra,A.Equator(A.Body.Sun,new Date(peakTime),observer,true,true).dec,'normal').altitude< -18);
+  await timeline.getByRole('button',{name:'Use this sampled time',exact:true}).click();await page.waitForFunction(expected=>JSON.parse(sessionStorage.getItem('nightjar-current-time-v1')||'null')===expected,peakTime);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
   await page.close();console.log(`${name}: polar timeline, comparison and ${count} calendar downloads passed`);
  }
