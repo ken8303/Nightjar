@@ -136,7 +136,7 @@ test('offline missing collections remain empty but present empty/null/wrong-shap
 
 test('offline bounded and filtered views identify omitted collections without treating duplicates as missing identities',()=>{
  const site={name:'Site QA',latitude:51,longitude:0},setup={name:'Setup QA',focal:400,width:36,height:24,pixel:3.76};
- const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(201).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
+ const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(340).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
  const coverage=page.elements.get('coverage-warning');assert.equal(coverage.hidden,false);
  for(const name of ['Saved targets','Saved deep-sky list','Target notes','Your places','Imaging setups'])assert(coverage.textContent.includes(name));
  assert.equal(page.elements.get('targets').children.length,42);assert.equal(page.elements.get('places').children.length,100);assert.equal(page.elements.get('equipment').children.length,100);assert.deepEqual(page.raw,before);assert.equal(page.session.size,0);
@@ -277,6 +277,8 @@ test('offline diary search stays hidden for empty or unreadable observations',()
 test('offline recovery recognizes every curated NGC/IC identity in lists and diary records',()=>{
  const extra=JSON.parse(readFileSync(new URL('../data/additional-deep-sky.json',import.meta.url),'utf8'));
  const entries=extra.map((target,index)=>({id:`extra-${index}`,target:target.id,observedAt:'2026-10-27T00:00:00.000Z',place:{name:'Site',latitude:51.5,longitude:0},outcome:'seen',equipment:'',notes:'New object'}));
- const page=load({'nightjar-deep-targets-v1':extra.map(target=>target.id),'nightjar-observing-diary-v1':entries});
- assert.equal(page.elements.get('deep-targets').children.length,200);assert.equal(page.elements.get('diary').children.length,200);assert.equal(page.elements.get('coverage-warning').hidden,true);
+ for(let offset=0;offset<entries.length;offset+=200){
+  const batch=entries.slice(offset,offset+200),page=load({'nightjar-deep-targets-v1':extra.map(target=>target.id),'nightjar-observing-diary-v1':batch});
+  assert.equal(page.elements.get('deep-targets').children.length,extra.length);assert.equal(page.elements.get('diary').children.length,batch.length);assert.equal(page.elements.get('coverage-warning').hidden,true);
+ }
 });
