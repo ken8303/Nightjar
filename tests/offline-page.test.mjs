@@ -278,5 +278,5 @@ test('offline recovery recognizes every curated NGC/IC identity in lists and dia
  const extra=JSON.parse(readFileSync(new URL('../data/additional-deep-sky.json',import.meta.url),'utf8'));
  const entries=extra.map((target,index)=>({id:`extra-${index}`,target:target.id,observedAt:'2026-10-27T00:00:00.000Z',place:{name:'Site',latitude:51.5,longitude:0},outcome:'seen',equipment:'',notes:'New object'}));
  const page=load({'nightjar-deep-targets-v1':extra.map(target=>target.id),'nightjar-observing-diary-v1':entries});
- assert.equal(page.elements.get('deep-targets').children.length,115);assert.equal(page.elements.get('diary').children.length,115);assert.equal(page.elements.get('coverage-warning').hidden,true);
+ assert.equal(page.elements.get('deep-targets').children.length,145);assert.equal(page.elements.get('diary').children.length,145);assert.equal(page.elements.get('coverage-warning').hidden,true);
 });

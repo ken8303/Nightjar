@@ -12,11 +12,11 @@ try{for(const width of [320,390,820,1365]){
  await page.route('**/*',route=>new URL(route.request().url()).origin!==base.origin?route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg"/>'}):route.fallback());
  await page.goto(base.href,{waitUntil:'domcontentloaded'});await page.locator('#observing-time').waitFor();
  const menu=page.getByRole('button',{name:'Open planner navigation',exact:true});if(await menu.isVisible()){await menu.click();await page.getByRole('dialog').getByRole('button',{name:'Sky atlas',exact:true}).click()}else await page.getByRole('tab',{name:'Sky atlas',exact:true}).click();
- const finder=page.locator('#deep-sky-finder');await finder.waitFor();assert.match(await finder.textContent(),/Browse 224 deep-sky objects/);
+ const finder=page.locator('#deep-sky-finder');await finder.waitFor();assert.match(await finder.textContent(),/Browse 254 deep-sky objects/);
  const selection=finder.getByLabel('Catalogue selection');await selection.selectOption('ic');assert.equal(await page.locator('#deep-sky-results button').count(),2);
  await selection.selectOption('messier');await finder.getByRole('searchbox',{name:'Search deep-sky objects',exact:true}).fill('NGC 07000');assert.equal(await page.locator('#deep-sky-results button').count(),0);
  await selection.selectOption('ngc');
- await finder.getByRole('searchbox',{name:'Search deep-sky objects',exact:true}).fill('Tarantula Nebula');assert.match(await page.locator('#deep-sky-results').textContent(),/NGC2070/);
+ await finder.getByRole('searchbox',{name:'Search deep-sky objects',exact:true}).fill('Blue Flash Nebula');assert.match(await page.locator('#deep-sky-results').textContent(),/NGC6905/);
  const magnitude=finder.getByLabel('Maximum visual magnitude');await magnitude.selectOption('unknown');
  await finder.getByRole('searchbox',{name:'Search deep-sky objects',exact:true}).fill('NGC 07000');
  const result=page.locator('#deep-sky-results button');await result.waitFor();assert.equal(await result.count(),1);await magnitude.selectOption('12');assert.equal(await result.count(),0);await magnitude.selectOption('unknown');await result.click();
@@ -29,7 +29,7 @@ try{for(const width of [320,390,820,1365]){
  const comparison=finder.locator('.deep-sky-comparison');await comparison.locator('summary').click();await comparison.getByRole('button',{name:'Plan NGC7000 at best dark-sky sample',exact:true}).waitFor();
  const calendarPending=page.waitForEvent('download');await comparison.getByRole('button',{name:/Download NGC7000 window from/}).first().click();const calendar=await calendarPending,ics=(await readFile(await calendar.path(),'utf8')).replace(/\r\n /g,'');assert(ics.includes('UID:deep-sky-NGC7000'));assert(ics.includes('GEO:51.5;0'));
 
- await finder.getByRole('button',{name:'Clear deep-sky filters',exact:true}).first().click();assert.equal(await selection.inputValue(),'');assert.equal(await magnitude.inputValue(),'');assert.equal(await page.locator('#deep-sky-results button').count(),224);
+ await finder.getByRole('button',{name:'Clear deep-sky filters',exact:true}).first().click();assert.equal(await selection.inputValue(),'');assert.equal(await magnitude.inputValue(),'');assert.equal(await page.locator('#deep-sky-results button').count(),254);
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));if(width===320)await page.locator('#deep-sky-object-details').screenshot({path:'/tmp/nightjar-expanded-catalogue-narrow.png'});
  await page.goto(new URL('/offline',base).href,{waitUntil:'load'});assert.match(await page.locator('#deep-targets').textContent(),/NGC7000/);assert.match(await page.locator('#diary').textContent(),/Expanded catalogue observation/);assert.equal(await page.locator('#coverage-warning').isVisible(),false);assert.deepEqual(errors,[]);
  await page.close();console.log(`${width}: new NGC search/save/diary/plan/comparison/offline flow preserves legacy targets PASS`);
