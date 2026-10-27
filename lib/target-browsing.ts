@@ -18,7 +18,7 @@ function browsingStore<T extends object>(initial:T){
 }
 
 export function createDeepSkyBrowsing(){
- return {...browsingStore({query:'',type:'',constellation:'',magnitude:'',above:false,darkOnly:false,savedOnly:false,selected:'M31'}),diary:createDiaryBrowsing(),comparison:createDeepSkyComparisonBrowsing()};
+ return {...browsingStore({query:'',type:'',constellation:'',catalogue:'' as ''|'messier'|'ngc'|'ic',magnitude:'',above:false,darkOnly:false,savedOnly:false,selected:'M31'}),diary:createDiaryBrowsing(),comparison:createDeepSkyComparisonBrowsing()};
 }
 function createDeepSkyComparisonBrowsing(){
  return browsingStore<{open:boolean;moonBelowOnly:boolean;chosen:string|null}>({open:false,moonBelowOnly:false,chosen:null});

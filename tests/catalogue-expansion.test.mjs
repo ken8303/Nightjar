@@ -31,3 +31,13 @@ test('full expanded catalogue recommendations remain bounded and exclude polar d
  assert.equal(deepSkyRecommendations(deepSkyCatalogue,new Date('2026-06-21T12:00Z'),{...site,latitude:90}).size,0);
  assert.throws(()=>deepSkyRecommendations([...deepSkyCatalogue,deepSkyCatalogue[0]],date,site),/139/);
 });
+
+test('catalogue selections combine with search, type, magnitude and saved targets',()=>{
+ const messier=findDeepSky('','',{catalogue:'messier'}),ngc=findDeepSky('','',{catalogue:'ngc'}),ic=findDeepSky('','',{catalogue:'ic'});
+ assert.equal(messier.length,109);assert.equal(ngc.length,28);assert.equal(ic.length,2);
+ assert(messier.some(target=>target.id==='M31'));assert(!ngc.some(target=>target.id==='M31'));
+ assert.deepEqual(findDeepSky('NGC 7000','',{catalogue:'ngc'}).map(target=>target.id),['NGC7000']);
+ assert.equal(findDeepSky('NGC 7000','',{catalogue:'messier'}).length,0);
+ assert.deepEqual(findDeepSky('','Cluster with nebulosity',{catalogue:'ic',maximumMagnitude:7,savedIds:['IC1805']}).map(target=>target.id),['IC1805']);
+ assert.equal(findDeepSky('','',{catalogue:'ic',maximumMagnitude:7,savedIds:['IC1396']}).length,0);
+});
