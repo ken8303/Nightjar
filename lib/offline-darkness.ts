@@ -1,10 +1,15 @@
 import {darknessSummaryLines} from './darkness-remaining';
 import {validObservingDate} from './observing-time';
-import type {Place} from './sky';
+import {isAstronomicalNight,nextAstronomicalDarkness,type Place} from './sky';
 
 // The offline page supplies an explicitly selected saved snapshot, not live weather.
 export function offlineDarkness(time:string,place:Place){
  const date=new Date(time);
  if(!validObservingDate(date)||date.toISOString()!==time||!Number.isFinite(place.latitude)||Math.abs(place.latitude)>90||!Number.isFinite(place.longitude)||Math.abs(place.longitude)>180)throw Error('A valid saved time and site are required.');
- return darknessSummaryLines(date,place);
+ const lines=darknessSummaryLines(date,place);
+ if(!isAstronomicalNight(date,place)){
+  const next=nextAstronomicalDarkness(date,place);
+  lines.push(next?`Next fully dark time UTC: ${next.toISOString()}`:'No full darkness found within 48 hours or before the supported date limit.');
+ }
+ return lines;
 }

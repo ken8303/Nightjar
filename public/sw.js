@@ -1,5 +1,5 @@
 // Cache the public offline page and immutable app files, never HTML or live forecasts.
-const CACHE = 'nightjar-offline-v26';
+const CACHE = 'nightjar-offline-v27';
 const STATIC_CACHE = 'nightjar-static-v1';
 const MAX_STATIC_FILES = 80;
 const OFFLINE = '/offline';
