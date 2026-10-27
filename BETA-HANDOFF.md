@@ -1,6 +1,6 @@
 # Nightjar beta handoff
 
-The deep-sky planner now contains 339 objects: 109 Messier and 230 curated NGC/IC records. Recent additions include the Pelican Nebula, the Small Magellanic Cloud and Flaming Star Nebula, Fornax A, the Blue Flash, Tarantula, Saturn, Iris and Bubble nebulae, Centaurus A and the Needle Galaxy; source provenance and exclusions remain as documented below. Catalogue selection and unknown-magnitude filters support the expanded list.
+The deep-sky planner now contains 369 objects: 109 Messier and 260 curated NGC/IC records. Recent additions include the Pelican Nebula, the Small Magellanic Cloud and Flaming Star Nebula, Fornax A, the Blue Flash, Tarantula, Saturn, Iris and Bubble nebulae, Centaurus A and the Needle Galaxy; source provenance and exclusions remain as documented below. Catalogue selection and unknown-magnitude filters support the expanded list.
 
 Nightjar remains a beta. Desktop-browser and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
