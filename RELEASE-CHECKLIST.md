@@ -78,7 +78,7 @@ Required release acceptance, still pending:
 
 Additional functions outside the current beta implementation:
 
-- [ ] Full planner startup and fresh sky calculations when reopening offline. The saved-data fallback can calculate full darkness at a chosen saved site for the saved time, current device time or an entered UTC time, and compute saved deep-sky target positions for checked fully dark times.
+- [ ] Full planner startup and fresh sky calculations when reopening offline. The saved-data fallback can calculate full darkness at a chosen saved site for the saved time, current device time or an entered UTC time, and compute supported saved-target positions for checked fully dark times.
 - [ ] Cloud accounts and automatic cross-device synchronization.
 - [ ] Push notifications and automatic aurora alerts.
 - [ ] Multiple weather-model comparison.

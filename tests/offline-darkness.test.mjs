@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 import {createServer} from './vite-test-server.mjs';
-import {offlineDarkness,offlineDeepSkyPosition} from '../public/offline-darkness.mjs';
+import {offlineDarkness,offlineDeepSkyPosition,offlineBrightPosition} from '../public/offline-darkness.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {darknessSummaryLines}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
@@ -40,4 +40,12 @@ test('offline target positions match the planner and reject daylight or unknown 
  const {deepSkyCatalogue,deepSkyPosition}=await vite.ssrLoadModule('/lib/deep-sky.ts');const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},time='2026-10-27T00:00:00.000Z';
  for(const id of ['M31','NGC7000']){const expected=deepSkyPosition(deepSkyCatalogue.find(target=>target.id===id),new Date(time),site),actual=offlineDeepSkyPosition(time,site,id);assert(Math.abs(expected.altitude-actual.altitude)<1e-9);assert(Math.abs(expected.azimuth-actual.azimuth)<1e-9)}
  assert.throws(()=>offlineDeepSkyPosition('2026-10-27T12:00:00.000Z',site,'M31'),/only during full astronomical darkness/);assert.throws(()=>offlineDeepSkyPosition(time,site,'NGC99999'),/not in the offline catalogue/);
+});
+
+test('offline bright-star and Moon positions match the planner and reject daylight',()=>{
+ const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},time='2026-10-27T00:00:00.000Z',date=new Date(time);
+ const star=sky.stars.find(item=>item[0]==='Polaris'),expectedStar=sky.j2000Position(star[1],star[2],date,site),actualStar=offlineBrightPosition(time,site,'Polaris');
+ const expectedMoon=sky.bodyPosition(sky.A.Body.Moon,date,site),actualMoon=offlineBrightPosition(time,site,'Moon');
+ for(const [a,b] of [[actualStar,expectedStar],[actualMoon,expectedMoon]]){assert(Math.abs(a.altitude-b.altitude)<1e-9);assert(Math.abs(a.azimuth-b.azimuth)<1e-9)}
+ assert.throws(()=>offlineBrightPosition('2026-10-27T12:00:00.000Z',site,'Moon'),/only during full astronomical darkness/);assert.throws(()=>offlineBrightPosition(time,site,'Legacy target'),/not in the offline catalogue/);
 });

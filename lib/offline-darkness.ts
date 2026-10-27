@@ -1,7 +1,7 @@
 /*! Deep-sky coordinates adapted from OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0: https://github.com/mattiaverga/OpenNGC ; https://creativecommons.org/licenses/by-sa/4.0/ */
 import {darknessSummaryLines} from './darkness-remaining';
 import {validObservingDate} from './observing-time';
-import {isAstronomicalNight,j2000Position,nextAstronomicalDarkness,type Place} from './sky';
+import {A,bodyPosition,isAstronomicalNight,j2000Position,nextAstronomicalDarkness,skyBodies,stars,type Place} from './sky';
 import messier from '../data/messier.json';
 import additional from '../data/additional-deep-sky.json';
 
@@ -25,4 +25,16 @@ export function offlineDeepSkyPosition(time:string,place:Place,id:string){
  const target=[...messier,...additional].find(item=>item.id===id);
  if(!target)throw Error('This target is not in the offline catalogue.');
  return j2000Position(target.ra,target.dec,new Date(time),place);
+}
+
+export const offlineBrightTargetNames=[...stars.map(star=>star[0]),...skyBodies.map(String)];
+export function offlineBrightPosition(time:string,place:Place,name:string){
+ const {dark}=offlineDarknessDetails(time,place);
+ if(!dark)throw Error('Target positions are available only during full astronomical darkness.');
+ const star=stars.find(item=>item[0]===name);
+ if(star)return j2000Position(star[1],star[2],new Date(time),place);
+ const body=skyBodies.find(item=>String(item)===name);
+ if(!body)throw Error('This target is not in the offline catalogue.');
+ const position=bodyPosition(body as A.Body,new Date(time),place);
+ return {altitude:position.altitude,azimuth:position.azimuth};
 }

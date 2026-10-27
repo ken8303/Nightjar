@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {makePlannerRecovery} from '../public/planner-recovery.mjs';
-import {offlineDarknessDetails,offlineDeepSkyPosition} from '../public/offline-darkness.mjs';
+import {offlineDarknessDetails,offlineDeepSkyPosition,offlineBrightPosition,offlineBrightTargetNames} from '../public/offline-darkness.mjs';
 const html=readFileSync(new URL('../public/offline.html',import.meta.url),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match=>match[1]);
 class Element{
@@ -22,7 +22,7 @@ function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessio
  const raw=new Map(Object.entries(data).map(([key,value])=>[key,key==='nightjar-red-light'?value:JSON.stringify(value)]));
  for(const [key,value] of Object.entries(rawOverrides))raw.set(key,value);
  const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),visibilityListeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
- const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadDarkness:async()=>({offlineDarknessDetails,offlineDeepSkyPosition}),loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
+ const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadDarkness:async()=>({offlineDarknessDetails,offlineDeepSkyPosition,offlineBrightPosition,offlineBrightTargetNames}),loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
  for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()').replaceAll("import('/offline-darkness.mjs')",'loadDarkness()'),context);
@@ -333,4 +333,11 @@ test('offline target calculation requires a checked dark time and clears on site
  assert.equal(page.elements.get('offline-target-tools').hidden,true);await page.elements.get('check-offline-darkness').listeners.get('click')();assert.equal(page.elements.get('offline-target-tools').hidden,false);
  await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/M31 at London.*Altitude.*Azimuth/);
  page.elements.get('offline-darkness-site').listeners.get('change')();assert.equal(page.elements.get('offline-target-tools').hidden,true);assert.equal(page.elements.get('offline-target-status').textContent,'');assert.deepEqual([...page.raw],before);
+});
+
+test('offline positions include supported saved bright targets but skip legacy names',async()=>{
+ const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},page=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T00:00:00.000Z','nightjar-targets-v1':['Polaris','Moon','Legacy target']}),before=[...page.raw];
+ await page.elements.get('check-offline-darkness').listeners.get('click')();const select=page.elements.get('offline-target-select');assert.deepEqual(select.children.map(item=>item.value),['bright:Polaris','bright:Moon']);
+ select.value='bright:Polaris';await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/Polaris at London.*Altitude.*Azimuth/);
+ select.value='bright:Moon';await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/Moon at London.*Altitude.*Azimuth/);assert.deepEqual([...page.raw],before);
 });
