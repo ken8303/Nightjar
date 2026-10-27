@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';import {test,after} from 'node:test';import {fileURLToPath} from 'node:url';import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {deepSkyCatalogue,messierCatalogue,findDeepSky,deepSkyRecommendations}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+const {deepSkyCatalogue,messierCatalogue,findDeepSky,exactDeepSkyIdentifier,deepSkyRecommendations}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {validDeepSkyId,validMessierId,readDeepSkyList,saveDeepSkyList,deepSkyListLimit}=await vite.ssrLoadModule('/lib/deep-sky-list.ts');
 const {makePlannerBackup,parsePlannerBackup,restorePlannerBackup}=await vite.ssrLoadModule('/lib/planner-backup.ts');
 const {saveDiary,normalizeDiary}=await vite.ssrLoadModule('/lib/observing-diary.ts');
@@ -58,4 +58,9 @@ test('alternate NGC and IC designations find the same curated object without cha
  const galaxy=findDeepSky('NGC 4228','',{catalogue:'ngc'}).find(target=>target.id==='NGC4214');
  assert(galaxy);assert(galaxy.crossReferences.includes('NGC4228'));
  assert(!findDeepSky('IC 1985','',{catalogue:'messier'}).some(target=>target.id==='IC348'));
+});
+
+test('exact catalogue identifiers distinguish full matches from longer identifiers',()=>{
+ const matches=findDeepSky('IC 0418','',{catalogue:'ic'});assert(matches.some(target=>target.id==='IC4182'));assert(exactDeepSkyIdentifier(matches.find(target=>target.id==='IC418'),'IC 0418'));assert(!exactDeepSkyIdentifier(matches.find(target=>target.id==='IC4182'),'IC 0418'));
+ const alternate=findDeepSky('IC 1985','').find(target=>target.id==='IC348');assert(exactDeepSkyIdentifier(alternate,'IC 01985'));assert(!exactDeepSkyIdentifier(alternate,''));
 });
