@@ -3,7 +3,7 @@ import {normalizeDiary,type Observation} from './observing-diary';
 export const diaryDraftKey='nightjar-diary-drafts-v1';
 // JSON escaping can expand valid form text sixfold. The full catalogue draft schema,
 // plus an edit's original/draft pair, must fit both the writer and the reader.
-export const diaryDraftMaxStoredChars=6*1024*1024;
+export const diaryDraftMaxStoredChars=7*1024*1024;
 export type DiaryDraftState={drafts:Observation[];edit:{original:Observation;draft:Observation}|null};
 export function emptyDiaryDrafts():DiaryDraftState{return {drafts:[],edit:null}}
 export function sameObservation(first:Observation,second:Observation){return JSON.stringify(normalizeDiary([first])[0])===JSON.stringify(normalizeDiary([second])[0])}
