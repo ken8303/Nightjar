@@ -34,12 +34,13 @@ try{
   if(name==='narrow')await page.locator('.deep-sky-plot').screenshot({path:'/tmp/nightjar-polar-timeline-narrow.png'});
   await page.locator('.deep-sky-comparison summary').click();
   const buttons=page.locator('.deep-compare-window button');await buttons.first().waitFor();
-  const count=await buttons.count();assert(count>0);
+  const count=await buttons.count();assert(count>0);const segments=page.locator('.deep-compare-window-track i');assert.equal(await segments.count(),count);for(const item of await segments.all()){const position=await item.evaluate(node=>({left:parseFloat(node.style.left),width:parseFloat(node.style.width)}));assert(position.left>=0&&position.width>0&&position.left+position.width<=100.001)}
   for(let index=0;index<count;index++){
    const pending=page.waitForEvent('download');await buttons.nth(index).click();
    const file=await pending,text=(await readFile(await file.path(),'utf8')).replace(/\r\n /g,'');
    const parse=key=>{const value=text.match(new RegExp(`${key}:(\\d{8}T\\d{6}Z)`))[1];return new Date(value.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/,'$1-$2-$3T$4:$5:$6Z'))};
    const start=parse('DTSTART'),end=parse('DTEND');assert(+end>+start);
+   const segment=await segments.nth(index).evaluate(node=>({left:parseFloat(node.style.left),width:parseFloat(node.style.width)}));assert(Math.abs(segment.left-(+start-+new Date(time))/86400000*100)<0.003);assert(Math.abs(segment.width-(+end-+start)/86400000*100)<0.003);
    assert(!(+start<+transit&&+end>+transit),'export must not bridge the bright transit');
    assert.equal(A.SearchAltitude(A.Body.Sun,observer,1,start,(+end-+start)/86400000,-18),null);
    assert(text.includes('strictly below -18 degrees throughout this interval'));
