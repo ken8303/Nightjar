@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),{chromium}=require('playwright');
+const base=new URL(process.argv[2]||'http://127.0.0.1:8788/');
+if(!['localhost','127.0.0.1','[::1]'].includes(base.hostname))throw Error('Use a local Nightjar server.');
+const browser=await chromium.launch({headless:true,executablePath:process.env.NIGHTJAR_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:process.env.NIGHTJAR_CHROMIUM_NO_SANDBOX==='1'?['--no-sandbox']:[]});
+try{for(const width of [320,390,820,1365]){
+ const context=await browser.newContext({viewport:{width,height:900},hasTouch:width<1000,isMobile:width<1000}),page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto(base.href,{waitUntil:'domcontentloaded'});
+ await page.evaluate(async()=>{await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready});
+ await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
+ await page.evaluate(()=>{localStorage.setItem('nightjar-place',JSON.stringify({name:'London',latitude:51.5,longitude:0,timezone:'UTC'}));localStorage.setItem('nightjar-observing-time',JSON.stringify('2026-10-27T00:00:00.000Z'));sessionStorage.clear()});
+ await context.setOffline(true);await page.goto(base.href,{waitUntil:'load'});
+ await page.getByRole('button',{name:'Check darkness at saved time'}).click();await page.getByText(/Full darkness remaining:/).waitFor();
+ assert.match(await page.locator('#offline-darkness-status').textContent(),/Full darkness ends UTC:/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
+ console.log(`${width}: installed offline fallback calculates saved-time darkness PASS`);await context.close();
+}}finally{await browser.close()}

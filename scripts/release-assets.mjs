@@ -23,7 +23,7 @@ export async function checkClientRelease(buildRoot,sourceRoot){
  // Vinext adds its two legacy manifests and Cloudflare adds _headers after
  // writeBundle. Public files are copied separately; recovery files are explicit.
  const inputNames=files.filter(name=>!publicNames.has(name)&&name!=='_headers'&&!/\/_(?:build|ssg)Manifest\.js$/.test(name));
- const inputs=await Promise.all([...inputNames,'offline.html','planner-recovery.mjs'].map(async name=>{
+ const inputs=await Promise.all([...inputNames,'offline.html','planner-recovery.mjs','offline-darkness.mjs'].map(async name=>{
   let bytes=await readFile(join(client,name));
   // Cloudflare appends this one ignore entry after the client bundle is stamped.
   if(name==='.assetsignore')bytes=Buffer.from(bytes.toString().replace(/\.vite\n$/,''));
@@ -41,7 +41,7 @@ export async function checkClientRelease(buildRoot,sourceRoot){
    references++;
   }
  }
- for(const name of ['offline.html','planner-recovery.mjs','manifest.webmanifest']){
+ for(const name of ['offline.html','planner-recovery.mjs','offline-darkness.mjs','manifest.webmanifest']){
   if(!(await readFile(join(client,name))).equals(await readFile(join(publicRoot,name))))throw Error(`Built ${name} differs from its public source. Rebuild before packaging.`);
  }
  const manifest=JSON.parse(await readFile(join(client,'manifest.webmanifest'),'utf8'));

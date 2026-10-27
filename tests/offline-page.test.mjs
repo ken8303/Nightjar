@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {makePlannerRecovery} from '../public/planner-recovery.mjs';
+import {offlineDarkness} from '../public/offline-darkness.mjs';
 const html=readFileSync(new URL('../public/offline.html',import.meta.url),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match=>match[1]);
 class Element{
@@ -21,10 +22,10 @@ function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessio
  const raw=new Map(Object.entries(data).map(([key,value])=>[key,key==='nightjar-red-light'?value:JSON.stringify(value)]));
  for(const [key,value] of Object.entries(rawOverrides))raw.set(key,value);
  const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),visibilityListeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
- const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
+ const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadDarkness:async()=>({offlineDarkness}),loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
- for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()'),context);
+ for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()').replace("import('/offline-darkness.mjs')",'loadDarkness()'),context);
  return {allowSessionWrites:()=>{sessionWriteBlocked=false},storage:context.localStorage,document:context.document,elements,raw,session,listeners,visibilityListeners,navigator,root,body,blobs,timers,revoked,reads,parseSizes};
 }
 test('offline notes retain 2,000 characters, newlines and text markup without interpreting HTML',()=>{
@@ -291,4 +292,12 @@ test('offline deep-sky search filters the snapshot without storage reads or writ
  find('Messier 31');assert.deepEqual(rows.map(row=>row.hidden),[false,true,true]);find('NGC9999');assert.equal(page.elements.get('deep-search-empty').hidden,false);
  clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert(search.focused);assert(clear.disabled);assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
  for(const empty of [load(),load({},true),load({'nightjar-deep-targets-v1':[{}]})])assert.equal(empty.elements.get('deep-search-tools').hidden,true);
+});
+
+test('offline darkness uses the saved site and time without changing stored plans',async()=>{
+ const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},time='2026-10-27T00:00:00.000Z',page=load({'nightjar-place':site,'nightjar-observing-time':time}),before=[...page.raw];
+ assert.equal(page.elements.get('offline-darkness-tools').hidden,false);await page.elements.get('check-offline-darkness').listeners.get('click')();
+ assert.match(page.elements.get('offline-darkness-status').textContent,/Full darkness remaining:/);assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+ const day=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T12:00:00.000Z'});await day.elements.get('check-offline-darkness').listeners.get('click')();assert.match(day.elements.get('offline-darkness-status').textContent,/outside full astronomical darkness/);
+ assert.equal(load().elements.get('offline-darkness-tools').hidden,true);
 });

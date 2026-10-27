@@ -13,10 +13,10 @@ async function fixture(t,{entry='import "./b.js";',includeB=true}={}){
  await mkdir(join(publicRoot,'icons'),{recursive:true});
  const worker="const CACHE = 'nightjar-offline-v7';\nconst STATIC_CACHE = 'nightjar-static-v1';";
  const manifest=JSON.stringify({id:'/',start_url:'/',scope:'/',display:'standalone'});
- for(const [name,data] of [['sw.js',worker],['offline.html','<!doctype html>offline'],['planner-recovery.mjs','export const recovery=true'],['manifest.webmanifest',manifest]])await writeFile(join(publicRoot,name),data);
+ for(const [name,data] of [['sw.js',worker],['offline.html','<!doctype html>offline'],['planner-recovery.mjs','export const recovery=true'],['offline-darkness.mjs','export const darkness=true'],['manifest.webmanifest',manifest]])await writeFile(join(publicRoot,name),data);
  for(const name of ['icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png'])await writeFile(join(publicRoot,'icons',name),await readFile(new URL('../public/icons/'+name,import.meta.url)));
  await cp(publicRoot,client,{recursive:true});
- const inputs=[['offline.html','<!doctype html>offline'],['planner-recovery.mjs','export const recovery=true'],['_next/static/chunks/a.js',entry],['.assetsignore','node_modules\n']];
+ const inputs=[['offline.html','<!doctype html>offline'],['planner-recovery.mjs','export const recovery=true'],['offline-darkness.mjs','export const darkness=true'],['_next/static/chunks/a.js',entry],['.assetsignore','node_modules\n']];
  if(includeB)inputs.push(['_next/static/chunks/b.js','export const value=1']);
  for(const [name,data] of inputs){await mkdir(dirname(join(client,name)),{recursive:true});await writeFile(join(client,name),name==='.assetsignore'?data+'.vite\n':data)}
  await writeFile(join(client,'_headers'),'generated headers');
@@ -27,7 +27,7 @@ async function fixture(t,{entry='import "./b.js";',includeB=true}={}){
 test('the artifact gate verifies the built fingerprint, literal imports, recovery, manifest and icon headers without mutation',async t=>{
  const f=await fixture(t),before=await readFile(join(f.client,'sw.js'));
  const result=await checkClientRelease(f.build,f.source);
- assert.match(result.release,/^[a-f0-9]{64}$/);assert.equal(result.inputs,5);assert.equal(result.references,1);assert.equal(result.manifestIcons,'pass');assert.equal(result.recoveryBytes,'pass');
+ assert.match(result.release,/^[a-f0-9]{64}$/);assert.equal(result.inputs,6);assert.equal(result.references,1);assert.equal(result.manifestIcons,'pass');assert.equal(result.recoveryBytes,'pass');
  assert.deepEqual(await checkClientRelease(f.build,f.source),result);assert((await readFile(join(f.client,'sw.js'))).equals(before));
 });
 test('changed app bytes and unexpected ignore-file additions cannot reuse an old offline fingerprint',async t=>{
@@ -45,7 +45,7 @@ test('a generated import cannot escape the isolated client root',async t=>{
  await assert.rejects(checkClientRelease(f.build,f.source),/leaves the client build/);
 });
 test('source changes to recovery or manifest files require a rebuild even if the old emitted fingerprint still matches',async t=>{
- for(const name of ['offline.html','planner-recovery.mjs','manifest.webmanifest']){
+ for(const name of ['offline.html','planner-recovery.mjs','offline-darkness.mjs','manifest.webmanifest']){
   const f=await fixture(t);await writeFile(join(f.publicRoot,name),'new public source');
   await assert.rejects(checkClientRelease(f.build,f.source),/differs from its public source/);
  }

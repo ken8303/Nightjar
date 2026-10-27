@@ -16,7 +16,8 @@ export function nightjarRelease():Plugin{
    const source=await readFile(resolve(root,'public/sw.js'),'utf8');
    const offline=await readFile(resolve(root,'public/offline.html'),'utf8');
    const recovery=await readFile(resolve(root,'public/planner-recovery.mjs'),'utf8');
-   const files:[string,string|Uint8Array][]=[['offline.html',offline],['planner-recovery.mjs',recovery]];
+   const darkness=await readFile(resolve(root,'public/offline-darkness.mjs'),'utf8');
+   const files:[string,string|Uint8Array][]=[['offline.html',offline],['planner-recovery.mjs',recovery],['offline-darkness.mjs',darkness]];
    for(const [name,output] of Object.entries(bundle))files.push([name,output.type==='chunk'?output.code:output.source]);
    await writeFile(resolve(root,options.dir,'sw.js'),stampServiceWorker(source,files));
   },
