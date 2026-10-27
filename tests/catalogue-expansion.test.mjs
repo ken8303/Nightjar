@@ -51,3 +51,11 @@ test('unknown-magnitude filter finds objects without a listed magnitude and comp
  assert.equal(findDeepSky('NGC7000','',{maximumMagnitude:15,unknownMagnitudeOnly:true}).length,0);
  assert.equal(findDeepSky('M31','',{unknownMagnitudeOnly:true}).length,0);
 });
+
+test('alternate NGC and IC designations find the same curated object without changing its identity',()=>{
+ const cluster=findDeepSky('IC 01985','',{catalogue:'ic'}).find(target=>target.id==='IC348');
+ assert(cluster);assert(cluster.crossReferences.includes('IC1985'));assert.equal(cluster.catalogue,'IC0348');
+ const galaxy=findDeepSky('NGC 4228','',{catalogue:'ngc'}).find(target=>target.id==='NGC4214');
+ assert(galaxy);assert(galaxy.crossReferences.includes('NGC4228'));
+ assert(!findDeepSky('IC 1985','',{catalogue:'messier'}).some(target=>target.id==='IC348'));
+});

@@ -66,6 +66,16 @@ for identifier in IDS:
     record = dict(id=prefix+str(int(identifier[len(prefix):])), catalogue=identifier,
                   name=row['Common names'], type=TYPES[row['Type']], constellation=row['Const'],
                   ra=angle(row['RA'], True), dec=angle(row['Dec']))
+    references = []
+    for catalogue in ('NGC', 'IC'):
+        for number in row[catalogue].split(','):
+            number = number.strip()
+            if number.isdigit():
+                reference = catalogue + str(int(number))
+                if reference != record['id'] and reference not in references:
+                    references.append(reference)
+    if references:
+        record['crossReferences'] = references
     for field, column in [('magnitude','V-Mag'), ('major','MajAx'), ('minor','MinAx'), ('positionAngle','PosAng')]:
         record[field] = float(row[column]) if row[column] else None
     records.append(record)

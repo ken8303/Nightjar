@@ -33,6 +33,9 @@
     "constellation": "Cas",
     "ra": 0.8831527777777778,
     "dec": 56.62188888888889,
+    "crossReferences": [
+      "IC11"
+    ],
     "magnitude": null,
     "major": 35.0,
     "minor": 30.0,
@@ -293,6 +296,9 @@
     "constellation": "Pav",
     "ra": 19.181050000000003,
     "dec": -59.981861111111115,
+    "crossReferences": [
+      "NGC6777"
+    ],
     "magnitude": 6.28,
     "major": 13.2,
     "minor": null,
@@ -540,6 +546,9 @@
     "constellation": "Leo",
     "ra": 9.536141666666667,
     "dec": 21.500833333333333,
+    "crossReferences": [
+      "NGC2905"
+    ],
     "magnitude": 8.91,
     "major": 11.94,
     "minor": 5.28,
@@ -631,6 +640,9 @@
     "constellation": "Dra",
     "ra": 15.264936111111112,
     "dec": 56.32877777777778,
+    "crossReferences": [
+      "NGC5906"
+    ],
     "magnitude": 10.37,
     "major": 11.3,
     "minor": 1.75,
@@ -1593,6 +1605,9 @@
     "constellation": "Gem",
     "ra": 7.426294444444444,
     "dec": 29.49063888888889,
+    "crossReferences": [
+      "NGC2372"
+    ],
     "magnitude": 11.2,
     "major": 2.2,
     "minor": 0.96,
@@ -1684,6 +1699,9 @@
     "constellation": "Com",
     "ra": 12.168380555555554,
     "dec": 18.54213888888889,
+    "crossReferences": [
+      "NGC4153"
+    ],
     "magnitude": 10.74,
     "major": 2.4,
     "minor": null,
@@ -1736,6 +1754,9 @@
     "constellation": "Mus",
     "ra": 13.559141666666667,
     "dec": -65.97405555555555,
+    "crossReferences": [
+      "IC4274"
+    ],
     "magnitude": 14.5,
     "major": 2.33,
     "minor": null,
@@ -1905,6 +1926,9 @@
     "constellation": "For",
     "ra": 3.3789694444444445,
     "dec": -37.10369444444444,
+    "crossReferences": [
+      "NGC1318"
+    ],
     "magnitude": 10.88,
     "major": 3.1,
     "minor": 2.58,
@@ -2178,6 +2202,9 @@
     "constellation": "Sgr",
     "ra": 19.749372222222224,
     "dec": -14.803444444444445,
+    "crossReferences": [
+      "IC4895"
+    ],
     "magnitude": 10.05,
     "major": 17.38,
     "minor": 16.75,
@@ -2334,6 +2361,9 @@
     "constellation": "CVn",
     "ra": 12.260880555555556,
     "dec": 36.326888888888895,
+    "crossReferences": [
+      "NGC4228"
+    ],
     "magnitude": 9.77,
     "major": 6.79,
     "minor": 5.28,
@@ -2737,6 +2767,9 @@
     "constellation": "Hya",
     "ra": 8.935569444444445,
     "dec": -3.3601111111111113,
+    "crossReferences": [
+      "NGC2727"
+    ],
     "magnitude": 11.96,
     "major": 2.93,
     "minor": 1.06,
@@ -2789,6 +2822,9 @@
     "constellation": "Leo",
     "ra": 10.804691666666667,
     "dec": 12.629277777777778,
+    "crossReferences": [
+      "NGC3371"
+    ],
     "magnitude": 9.96,
     "major": 5.24,
     "minor": 2.37,
@@ -3348,6 +3384,9 @@
     "constellation": "Cas",
     "ra": 2.709738888888889,
     "dec": 61.59436111111111,
+    "crossReferences": [
+      "IC1824"
+    ],
     "magnitude": 6.7,
     "major": 7.8,
     "minor": null,
@@ -3582,6 +3621,9 @@
     "constellation": "Pup",
     "ra": 8.082827777777778,
     "dec": -28.146666666666665,
+    "crossReferences": [
+      "NGC2527"
+    ],
     "magnitude": 6.5,
     "major": 9.3,
     "minor": null,
@@ -3816,6 +3858,9 @@
     "constellation": "Cet",
     "ra": 1.5224305555555555,
     "dec": -6.868055555555556,
+    "crossReferences": [
+      "IC1712"
+    ],
     "magnitude": 10.35,
     "major": 3.78,
     "minor": 2.51,
@@ -4206,6 +4251,9 @@
     "constellation": "Per",
     "ra": 3.7428305555555554,
     "dec": 32.16283333333333,
+    "crossReferences": [
+      "IC1985"
+    ],
     "magnitude": null,
     "major": 10.0,
     "minor": 10.0,

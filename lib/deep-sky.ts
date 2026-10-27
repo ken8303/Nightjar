@@ -5,7 +5,7 @@ import {constellationName} from './constellations';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
 import {j2000Position,j2000Projector,type Place,sunAltitude} from '@/lib/sky';
-export type DeepSkyObject={id:string;catalogue:string;name:string;type:string;constellation:string;ra:number;dec:number;magnitude:number|null;major:number|null;minor:number|null;positionAngle:number|null};
+export type DeepSkyObject={id:string;catalogue:string;name:string;type:string;constellation:string;ra:number;dec:number;magnitude:number|null;major:number|null;minor:number|null;positionAngle:number|null;crossReferences?:string[]};
 export const messierCatalogue:DeepSkyObject[]=catalogue;
 export const deepSkyCatalogue:DeepSkyObject[]=[...catalogue,...additional];
 
@@ -26,7 +26,7 @@ export function findDeepSky(query:string,type:string,{constellation='',catalogue
  const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g,'').replace(/^messier(?=\d)/,'m').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
  const normalized=normalize(query.trim());
  const subset=savedIds===undefined?null:new Set(savedIds);
- return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation)].some(value=>normalize(value).includes(normalized)));
+ return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation),...(target.crossReferences??[])].some(value=>normalize(value).includes(normalized)));
 }
 export function deepSkySampleTimes(date:Date){
  if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
