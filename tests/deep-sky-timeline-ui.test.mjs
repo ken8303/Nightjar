@@ -42,3 +42,8 @@ test('graph summary reports only the highest fully dark sample',()=>{
  const html=render([-19,0,-19]);assert.match(html,/Highest dark sample:/);assert.match(html,/<strong>32\.0°<\/strong>/);assert(html.includes('30° guide'));assert(html.includes('Continuous darkness'));
  const bright=render([-18,0]);assert(bright.includes('No fully dark samples in this window.'));assert(!bright.includes('Highest dark sample:'));
 });
+
+test('selected-time marker appears only when the starting instant is fully dark',()=>{
+ const dark=render([-19,-19]);assert(dark.includes('deep-sky-selected-marker'));assert(dark.includes('Selected time'));
+ for(const sun of [-18,-6,0]){const html=render([sun,-19]);assert(!html.includes('deep-sky-selected-marker'));assert(!html.includes('deep-sky-key-selected'))}
+});
