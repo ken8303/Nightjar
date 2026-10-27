@@ -136,7 +136,7 @@ test('offline missing collections remain empty but present empty/null/wrong-shap
 
 test('offline bounded and filtered views identify omitted collections without treating duplicates as missing identities',()=>{
  const site={name:'Site QA',latitude:51,longitude:0},setup={name:'Setup QA',focal:400,width:36,height:24,pixel:3.76};
- const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(460).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
+ const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(470).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
  const coverage=page.elements.get('coverage-warning');assert.equal(coverage.hidden,false);
  for(const name of ['Saved targets','Saved deep-sky list','Target notes','Your places','Imaging setups'])assert(coverage.textContent.includes(name));
  assert.equal(page.elements.get('targets').children.length,42);assert.equal(page.elements.get('places').children.length,100);assert.equal(page.elements.get('equipment').children.length,100);assert.deepEqual(page.raw,before);assert.equal(page.session.size,0);
