@@ -37,3 +37,8 @@ test('polar twilight between dark samples breaks both curve and shading',async()
  assert.equal(count(html,'circle'),2,'both remaining dark samples must stay visible');
  assert(!html.match(/<path d="([^"]*)"/)[1].includes('L'));
 });
+
+test('graph summary reports only the highest fully dark sample',()=>{
+ const html=render([-19,0,-19]);assert.match(html,/Highest dark sample:/);assert.match(html,/<strong>32\.0°<\/strong>/);assert(html.includes('30° guide'));assert(html.includes('Continuous darkness'));
+ const bright=render([-18,0]);assert(bright.includes('No fully dark samples in this window.'));assert(!bright.includes('Highest dark sample:'));
+});

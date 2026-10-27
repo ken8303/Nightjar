@@ -224,6 +224,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 #install-app:focus-visible{outline:2px solid var(--accent-soft);outline-offset:4px}
 
 /* Keep altitude/timeline labels readable instead of scaling SVG text down. */
+.deep-sky-plot-summary{margin:14px 0 8px;color:var(--text-secondary);font-size:14px}.deep-sky-plot-summary strong{color:#e9f0f0}.deep-sky-plot-key{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--text-secondary);font-size:12px}.deep-sky-plot-key span{display:inline-flex;align-items:center;gap:6px}.deep-sky-plot-key i{display:inline-block;width:20px;flex:none}.deep-sky-key-curve{border-top:3px solid #c1df93}.deep-sky-key-threshold{border-top:2px dashed #c1df93}.deep-sky-key-darkness{height:10px;background:rgba(193,223,147,.18);border:1px solid #72846a}
 .deep-sky-plot{display:grid;grid-template-columns:36px minmax(0,1fr);grid-template-rows:180px 22px;column-gap:4px;row-gap:8px;margin:24px 0;min-width:0}
 .deep-sky-plot>svg{grid-column:2;grid-row:1;width:100%;height:100%;display:block;overflow:visible}
 .deep-sky-plot-altitudes{grid-column:1;grid-row:1;position:relative;color:var(--text-secondary);font-size:12px;line-height:1.2}

@@ -25,7 +25,8 @@ try{
   if(await mobile.isVisible()){await mobile.click();await page.locator('.mobile-navigation-options').getByRole('button',{name:'Sky atlas',exact:true}).click()}
   else await page.getByRole('tab',{name:'Sky atlas',exact:true}).click();
   await page.getByRole('button',{name:'Select saved M81',exact:true}).click();
-  const plot=page.locator('.deep-sky-timeline svg');await plot.waitFor();
+  const timeline=page.locator('.deep-sky-timeline');assert.match(await timeline.locator('.deep-sky-plot-summary').textContent(),/Highest dark sample:/);assert.match(await timeline.locator('.deep-sky-plot-key').textContent(),/Altitude.*30° guide.*Continuous darkness/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  const plot=timeline.locator('svg');await plot.waitFor();
   const path=await plot.locator('path').getAttribute('d');
   assert.match(path,/^M40\.00,[\d.]+ M49\.58,/,'the curve must restart after the twilight interval');
   assert.equal(await plot.locator('circle[cx="40"]').count(),1,'the isolated starting sample stays visible');
