@@ -4,10 +4,11 @@ The app remains a beta. Automated and desktop-browser results do not establish l
 
 ## Current completion checklist — 24 October 2026
 
-The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The current source passes TypeScript, full lint, all **882 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. Release-asset verification reports 97 inputs, 359 references, 114 client files and valid manifest/recovery bytes; packaging stages 124 assets. Full-darkness browser coverage uses phone, narrow phone, tablet and desktop Chromium with fixture weather and aurora. Earlier browser evidence below records the behavior at its original revision; broad legacy daytime fixtures have not all been adapted to the new night-only requirement. Hosted validation and physical-device acceptance remain pending.
+The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preserving its nine newer commits. The current source passes TypeScript, full lint, all **887 tests** (no failures or cancellations), production build, compiled Worker integration and Cloudflare packaging dry-run on Node 22.16.0. Release-asset verification reports 96 inputs, 358 references, 113 client files and valid manifest/recovery bytes; packaging stages 123 assets. Full-darkness browser coverage uses phone, narrow phone, tablet and desktop Chromium with fixture weather and aurora. Earlier browser evidence below records the behavior at its original revision; broad legacy daytime fixtures have not all been adapted to the new night-only requirement. Hosted validation and physical-device acceptance remain pending.
 
 Completed locally:
 
+- [x] New NGC/IC objects work through search, saves, diary/drafts, backups, plans, comparison calendars and offline recovery. Four new-object and eight night-only browser journeys pass.
 - [x] Offline diary search filters the saved snapshot without network/storage writes; Unicode, clear, empty results and changed-data warnings pass unit and four responsive browser checks.
 - [x] Validation workflow triggers include mobile-planner branch pushes; workflow syntax and branch matching are checked locally. Hosted run status remains unverified because the GitHub Actions API returned Forbidden.
 - [x] Observing-list and printable-plan filenames include the site and precise UTC instant; eight night-only and 12 summary browser journeys pass.
@@ -63,7 +64,7 @@ Completed locally:
 - [x] Seven-night suggested-window selection uses fresh successful weather and the existing nightly ranking; production checks at eight sizes cover unfinished-time review, missing/stale/failed-refresh weather and clock uncertainty.
 - [x] Planner time/site controls, forecasts, target browsing, notes, diary forms, reports and backup/recovery flows are implemented and covered by the recorded checks below.
 - [x] Light-pollution map and explicit numeric model readings, lunar libration and the existing 2D/3D atlas imaging grid are implemented. Earlier scope descriptions that listed these as missing were outdated.
-- [x] The integrated review branch passes all 882 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (124 assets).
+- [x] The integrated review branch passes all 887 tests, TypeScript, lint, production build, compiled satellite Worker integration and Cloudflare packaging dry-run (123 assets).
 - [x] Latest bright-target return actions pass fixture-based Chromium checks at desktop, phone portrait/landscape, both tablet orientations, 744 px split view and 701 px breakpoint widths. These checks establish browser behavior rather than physical-device acceptance.
 
 Required release acceptance, still pending:
@@ -81,7 +82,7 @@ Additional functions outside the current beta implementation:
 - [ ] Cloud accounts and automatic cross-device synchronization.
 - [ ] Push notifications and automatic aurora alerts.
 - [ ] Multiple weather-model comparison.
-- [ ] Deep-sky catalogue expansion beyond 109 Messier objects.
+- [x] First deep-sky catalogue expansion: 139 objects, comprising the original 109 Messier objects plus 30 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
 
 These additional functions are scope choices rather than required first-release acceptance gates. Keyboard-control and photo enhancements remain paused at the user’s request. Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record physical-device results; unrun checks must stay pending.
 

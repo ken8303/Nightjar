@@ -5,7 +5,7 @@ import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
-const {messierCatalogue,findDeepSky,deepSkyPosition,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+const {messierCatalogue,deepSkyCatalogue,findDeepSky,deepSkyPosition,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {A,bodyPosition}=await vite.ssrLoadModule('/lib/sky.ts');
 const place={name:'London',latitude:51.508,longitude:-.126,timezone:'Europe/London'};
 test('saved-target scope composes with catalogue filters without changing saved identities',()=>{
@@ -16,7 +16,7 @@ test('saved-target scope composes with catalogue filters without changing saved 
  assert.deepEqual(findDeepSky('','Galaxy',{savedIds:['M45']}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:[]}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:['M102','not-a-target']}),[]);
- assert.equal(findDeepSky('','',{savedIds:undefined}).length,109);
+ assert.equal(findDeepSky('','',{savedIds:undefined}).length,139);
  assert.deepEqual(saved,before);
 });
 test('full constellation names and Unicode identifiers work without losing catalogue codes',async()=>{
@@ -29,8 +29,8 @@ test('constellation and magnitude filters compose with catalogue search and obje
  const andromeda=findDeepSky('','Galaxy',{constellation:'And',maximumMagnitude:9});assert(andromeda.some(target=>target.id==='M31'));assert(andromeda.every(target=>target.constellation==='And'&&target.type==='Galaxy'&&target.magnitude<=9));assert.deepEqual(findDeepSky('M31','',{constellation:'And',maximumMagnitude:6}).map(t=>t.id),['M31']);assert.equal(findDeepSky('M31','',{constellation:'Cyg'}).length,0);assert.equal(findDeepSky('M31','',{maximumMagnitude:0}).length,0);
 });
 test('unknown magnitudes remain in unfiltered searches and cannot pass a brightness limit',()=>{
- const original=messierCatalogue[0],unknown={...original,magnitude:null};messierCatalogue[0]=unknown;
- try{assert(findDeepSky(unknown.id,'').some(target=>target.id===unknown.id));assert(!findDeepSky(unknown.id,'',{maximumMagnitude:15}).some(target=>target.id===unknown.id));assert.equal(findDeepSky('','',{maximumMagnitude:NaN}).length,0);assert.equal(findDeepSky('','',{maximumMagnitude:Infinity}).length,0)}finally{messierCatalogue[0]=original}
+ const original=deepSkyCatalogue[0],unknown={...original,magnitude:null};deepSkyCatalogue[0]=unknown;
+ try{assert(findDeepSky(unknown.id,'').some(target=>target.id===unknown.id));assert(!findDeepSky(unknown.id,'',{maximumMagnitude:15}).some(target=>target.id===unknown.id));assert.equal(findDeepSky('','',{maximumMagnitude:NaN}).length,0);assert.equal(findDeepSky('','',{maximumMagnitude:Infinity}).length,0)}finally{deepSkyCatalogue[0]=original}
 });
 test('Messier search handles common names, spaced identifiers and object-type filters',()=>{
  assert.equal(messierCatalogue.length,109);assert.equal(new Set(messierCatalogue.map(t=>t.id)).size,109);

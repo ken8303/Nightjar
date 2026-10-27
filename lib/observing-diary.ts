@@ -1,5 +1,5 @@
 import {parseObservingInstant} from './observing-time';
-import {validMessierId} from './deep-sky-list';
+import {validDeepSkyId} from './deep-sky-list';
 import {validPlace} from './planner-state';
 import {type Place} from './sky';
 export const diaryKey='nightjar-observing-diary-v1';
@@ -8,7 +8,7 @@ export type Observation={id:string;target:string;observedAt:string;place:Place;o
 export function validObservation(value:unknown):value is Observation{
  if(!value||typeof value!=='object')return false;
  const entry=value as Record<string,unknown>;
- return typeof entry.id==='string'&&/^[a-zA-Z0-9-]{1,80}$/.test(entry.id)&&validMessierId(entry.target)&&Boolean(parseObservingInstant(entry.observedAt))&&validPlace(entry.place)&&['seen','not-seen','imaged'].includes(entry.outcome as string)&&typeof entry.equipment==='string'&&entry.equipment.length<=100&&typeof entry.notes==='string'&&entry.notes.length<=2000;
+ return typeof entry.id==='string'&&/^[a-zA-Z0-9-]{1,80}$/.test(entry.id)&&validDeepSkyId(entry.target)&&Boolean(parseObservingInstant(entry.observedAt))&&validPlace(entry.place)&&['seen','not-seen','imaged'].includes(entry.outcome as string)&&typeof entry.equipment==='string'&&entry.equipment.length<=100&&typeof entry.notes==='string'&&entry.notes.length<=2000;
 }
 export function normalizeDiary(value:unknown):Observation[]{
  if(!Array.isArray(value)||value.length>diaryLimit||!value.every(validObservation)||new Set(value.map(entry=>entry.id)).size!==value.length)throw Error('The observing diary contains invalid entries.');

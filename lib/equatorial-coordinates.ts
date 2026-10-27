@@ -1,4 +1,4 @@
-import {validMessierId} from './deep-sky-list';
+import {validDeepSkyId} from './deep-sky-list';
 
 function parts(value:number,wrap=false){
  const rounded=Math.round(Math.abs(value)*36000);
@@ -12,7 +12,7 @@ export function formatEquatorialCoordinates(raHours:number,decDegrees:number){
  return {ra:`${ra.major}h ${ra.minute}m ${ra.second}s`,dec:`${sign}${dec.major}° ${dec.minute}′ ${dec.second}″`};
 }
 export function catalogueCoordinateCopy(target:{id:string;ra:number;dec:number}){
- if(!validMessierId(target.id))throw Error('Invalid catalogue target.');
+ if(!validDeepSkyId(target.id))throw Error('Invalid catalogue target.');
  const formatted=formatEquatorialCoordinates(target.ra,target.dec);
  const decimalDec=Object.is(target.dec,-0)?'-0':`${target.dec<0?'':'+'}${target.dec}`;
  return `${target.id} catalogue coordinates (J2000)\nRA: ${formatted.ra}\nDec: ${formatted.dec}\nDecimal RA (hours): ${target.ra}\nDecimal Dec (degrees): ${decimalDec}`;

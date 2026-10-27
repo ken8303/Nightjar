@@ -1,7 +1,7 @@
 import {isFullDarknessInterval} from './darkness-remaining';
 import {utcDate} from './utc-date';
 import {validPlace} from './planner-state';
-import {validMessierId} from './deep-sky-list';
+import {validDeepSkyId} from './deep-sky-list';
 import {deepSkyName} from './deep-sky-names';
 import type {DeepSkyObject,DeepSkySample} from './deep-sky';
 import type {Place} from './sky';
@@ -55,7 +55,7 @@ export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;st
  const {target,place,start,end,samples,moonBelowOnly}=input;
  const validTime=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
  const duration=+end-+start;
- if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validMessierId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||samples.length>97)throw Error('Invalid deep-sky calendar window.');
+ if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validDeepSkyId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||samples.length>97)throw Error('Invalid deep-sky calendar window.');
  const included=samples.filter(sample=>+sample.time>=+start&&+sample.time<=+end);
  if(included.length!==duration/900000+1||included.some((sample,index)=>+sample.time!==+start+index*900000||!Number.isFinite(sample.altitude)||sample.altitude<=30||sample.altitude>90||!Number.isFinite(sample.sun)||sample.sun>= -18||(moonBelowOnly&&(!Number.isFinite(sample.moonAltitude)||sample.moonAltitude!>0))))throw Error('This interval has no complete qualifying deep-sky window.');
  if(!isFullDarknessInterval(start,end,place))throw Error('This interval leaves full astronomical darkness. Choose another deep-sky window.');

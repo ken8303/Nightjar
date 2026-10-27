@@ -1,3 +1,4 @@
+import {deepSkyListLimit} from './deep-sky-list';
 import {remainingDarkness,darknessDuration} from './darkness-remaining';
 import {moonInfo,skyTargetLimit,type Place,sunAltitude} from './sky';
 import {validPlace} from './planner-state';
@@ -18,7 +19,7 @@ export function targetCoverageNotice(omitted:number){
 export function printableObservingPlan(input:Plan):string{
  const {date,place,targets,notes,equipment}=input,omitted=input.equipmentOmitted??0;
  if(!Number.isSafeInteger(omitted)||omitted<0||!Number.isSafeInteger(equipment.length+omitted)||input.equipmentUnavailable&&omitted>0)throw Error('The equipment coverage is invalid.');
- if(!validObservingDate(date)||!validPlace(place)||targets.length>skyTargetLimit+109||!targets.every(target=>typeof target.name==='string'&&target.name.length<=100&&Number.isFinite(target.altitude)&&Math.abs(target.altitude)<=90&&Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<=360)||equipment.length>100||!equipment.every(validEquipment))throw Error('The observing plan contains invalid data.');
+ if(!validObservingDate(date)||!validPlace(place)||targets.length>skyTargetLimit+deepSkyListLimit||!targets.every(target=>typeof target.name==='string'&&target.name.length<=100&&Number.isFinite(target.altitude)&&Math.abs(target.altitude)<=90&&Number.isFinite(target.azimuth)&&target.azimuth>=0&&target.azimuth<=360)||equipment.length>100||!equipment.every(validEquipment))throw Error('The observing plan contains invalid data.');
  const targetsNotice=targetCoverageNotice(input.targetsOmitted??0);
  if(!Number.isSafeInteger(targets.length+(input.targetsOmitted??0)))throw Error('The target coverage is invalid.');
  const zone=place.timezone||'UTC',notesNotice=notesCoverageNotice(Boolean(input.notesUnavailable),Boolean(input.notesUnsaved));
