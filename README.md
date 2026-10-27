@@ -83,7 +83,7 @@ The planning score is a transparent heuristic, not astronomical seeing or transp
 
 Implemented locally: the optional 2025 light-pollution map and explicit numeric model readings, lunar libration with an Earth-facing globe view, and the current equipment/mosaic grid on the 2D and 3D atlas. Model readings are annual estimates rather than live sky measurements; see [LIGHT-POLLUTION-DATA.md](./LIGHT-POLLUTION-DATA.md).
 
-Not implemented: multi-model weather comparison, automatic aurora alerts (the short-term outlook is included), automatic camera-lens calibration, the full NGC/IC catalogue, sky-photo recognition, cloud accounts and push notifications. Full planner startup when reopening offline is also unsupported; the offline fallback provides saved device data and on-demand full-darkness calculations for a chosen saved site using either the saved observing time or the device clock. Keyboard-control and photo enhancements are paused at the user’s request.
+Not implemented: multi-model weather comparison, automatic aurora alerts (the short-term outlook is included), automatic camera-lens calibration, the full NGC/IC catalogue, sky-photo recognition, cloud accounts and push notifications. Full planner startup when reopening offline is also unsupported; the offline fallback provides saved device data and on-demand full-darkness calculations for a chosen saved site using the saved observing time, the device clock or an entered UTC time. Keyboard-control and photo enhancements are paused at the user’s request.
 
 For remaining release checks, see [Current completion checklist](./RELEASE-CHECKLIST.md#current-completion-checklist--22-october-2026).
 
@@ -242,4 +242,4 @@ Successful explicit target-note save retries return focus to the relevant note f
 
 Aurora requests within one active Worker instance share an in-flight NOAA fetch and retain the existing five-minute success cache. Failed reads are not cached and later requests can retry. Separate Worker instances keep separate caches; this is not a distributed request limit.
 
-The offline darkness calculator is generated from the locked astronomy dependency with `npm run build:offline-darkness`; tests verify its bytes and agreement with the planner. It uses a chosen saved site and the explicitly chosen saved or current device time; it is not a weather forecast.
+The offline darkness calculator is generated from the locked astronomy dependency with `npm run build:offline-darkness`; tests verify its bytes and agreement with the planner. It uses a chosen saved site and the explicitly chosen saved, current device or entered UTC time; it is not a weather forecast.

@@ -312,3 +312,10 @@ test('offline darkness can compare saved sites without replacing the plan',async
  await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/At Sydney.*Full darkness remaining: [0-9]/);
  assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
 });
+
+test('offline darkness accepts a validated UTC time without changing saved data',async()=>{
+ const site={name:'Sydney',latitude:-33.86,longitude:151.2,timezone:'Australia/Sydney'},page=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T00:00:00.000Z'}),before=[...page.raw],input=page.elements.get('offline-darkness-time');
+ input.value='2026-10-27T12:00';await page.elements.get('check-offline-entered').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/Entered UTC time: 2026-10-27T12:00:00.000Z.*Full darkness remaining: [0-9]/);
+ for(const bad of ['2026-02-30T12:00','0000-01-01T00:00','2026-10-27T24:00','not-a-date']){input.value=bad;await page.elements.get('check-offline-entered').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/Enter a valid UTC/)}
+ assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+});
