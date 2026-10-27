@@ -302,3 +302,13 @@ test('offline darkness uses the saved site and time without changing stored plan
  assert.equal(load().elements.get('offline-darkness-tools').hidden,true);
  const nowOnly=load({'nightjar-place':site});assert.equal(nowOnly.elements.get('offline-darkness-tools').hidden,false);assert.equal(nowOnly.elements.get('check-offline-darkness').hidden,true);await nowOnly.elements.get('check-offline-now').listeners.get('click')();assert.match(nowOnly.elements.get('offline-darkness-status').textContent,/Device time: \d{4}-/);assert.equal(nowOnly.raw.has('nightjar-observing-time'),false);
 });
+
+test('offline darkness can compare saved sites without replacing the plan',async()=>{
+ const london={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},sydney={name:'Sydney',latitude:-33.86,longitude:151.2,timezone:'Australia/Sydney'},time='2026-10-27T12:00:00.000Z';
+ const page=load({'nightjar-place':london,'nightjar-places':[london,sydney],'nightjar-observing-time':time}),before=[...page.raw];
+ const select=page.elements.get('offline-darkness-site');assert.equal(select.children.length,2);
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/At London.*outside full astronomical darkness/);
+ select.value='1';select.listeners.get('change')();assert.equal(page.elements.get('offline-darkness-status').textContent,'');
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/At Sydney.*Full darkness remaining: [0-9]/);
+ assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+});

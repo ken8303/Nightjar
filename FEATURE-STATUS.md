@@ -6,7 +6,7 @@ Catalogue update, 27 October 2026: the planner now includes 30 additional NGC/IC
 
 Current display policy, 24 October 2026: observing information is shown only with the geometric Sun centre strictly below −18°. Bright-time views offer a bounded next-darkness preview; eligible timeline samples and event shortcuts are filtered without moving actual astronomical event times. Tonight, summary snapshots and printable checklists include remaining full darkness and its calculated endpoint. Golden/blue-hour information is hidden. Keyboard-control design and further photo-feature development remain paused; the capability inventory below records the underlying features, with this display policy applied.
 
-Offline planning update: the saved-data fallback can calculate full darkness for its saved site at either the saved time or the current device time without network access. The full planner still cannot restart offline.
+Offline planning update: the saved-data fallback can calculate full darkness at a chosen saved site for either the saved time or the current device time without network access. The full planner still cannot restart offline.
 
 For exact test/build evidence and remaining release checks, use [BETA-HANDOFF.md](./BETA-HANDOFF.md) and [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md). Those records distinguish local work from the last successful GitHub validation and an actual Cloudflare deployment.
 
