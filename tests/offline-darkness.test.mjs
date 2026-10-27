@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 import {createServer} from './vite-test-server.mjs';
-import {offlineDarkness} from '../public/offline-darkness.mjs';
+import {offlineDarkness,offlineDeepSkyPosition} from '../public/offline-darkness.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {darknessSummaryLines}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
@@ -34,4 +34,10 @@ test('offline daylight preview stays dark and polar no-darkness is explicit',()=
  const london={name:'London',latitude:51.5,longitude:0},polar={name:'North Pole',latitude:90,longitude:0};
  const result=offlineDarkness('2026-10-27T12:00:00.000Z',london);assert.match(result[1],/^Next fully dark time UTC:/);assert(sky.isAstronomicalNight(new Date(result[1].split('UTC: ')[1]),london));
  assert.match(offlineDarkness('2026-06-21T12:00:00.000Z',polar)[1],/No full darkness found within 48 hours/);
+});
+
+test('offline target positions match the planner and reject daylight or unknown objects',async()=>{
+ const {deepSkyCatalogue,deepSkyPosition}=await vite.ssrLoadModule('/lib/deep-sky.ts');const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},time='2026-10-27T00:00:00.000Z';
+ for(const id of ['M31','NGC7000']){const expected=deepSkyPosition(deepSkyCatalogue.find(target=>target.id===id),new Date(time),site),actual=offlineDeepSkyPosition(time,site,id);assert(Math.abs(expected.altitude-actual.altitude)<1e-9);assert(Math.abs(expected.azimuth-actual.azimuth)<1e-9)}
+ assert.throws(()=>offlineDeepSkyPosition('2026-10-27T12:00:00.000Z',site,'M31'),/only during full astronomical darkness/);assert.throws(()=>offlineDeepSkyPosition(time,site,'NGC99999'),/not in the offline catalogue/);
 });
