@@ -47,3 +47,10 @@ test('selected-time marker appears only when the starting instant is fully dark'
  const dark=render([-19,-19]);assert(dark.includes('deep-sky-selected-marker'));assert(dark.includes('Selected time'));
  for(const sun of [-18,-6,0]){const html=render([sun,-19]);assert(!html.includes('deep-sky-selected-marker'));assert(!html.includes('deep-sky-key-selected'))}
 });
+
+test('graph marks the highest dark sample and labels a below-horizon peak',()=>{
+ const html=render([-19,0,-19]);assert.match(html,/deep-sky-peak-marker/);assert.match(html,/left:100%;top:/);
+ assert(!render([-18,0]).includes('deep-sky-peak-marker'));
+ const below=renderToStaticMarkup(createElement(Timeline,{name:'Southern object',place:{name:'Fixture',latitude:51.5,longitude:0,timezone:'UTC'},onDate:()=>{},samples:[{time:new Date('2026-10-24T00:00Z'),sun:-19,altitude:-12,azimuth:180,ra:0,dec:0}]}));
+ assert(below.includes('Below horizon'));assert(below.includes('deep-sky-peak-marker'));
+});
