@@ -1,5 +1,7 @@
 # Nightjar beta handoff
 
+The deep-sky planner now contains 164 objects: 109 Messier and 55 curated NGC/IC records. The additional 25 records include Centaurus A and the Needle Galaxy; source provenance and exclusions remain as documented below. Catalogue selection and unknown-magnitude filters support the expanded list.
+
 Nightjar remains a beta. Desktop-browser and automated checks do not establish physical-phone camera alignment, native phone file handling or installed-PWA reliability.
 
 Reference-feature coverage and the remaining implementation backlog are tracked separately in [FEATURE-STATUS.md](./FEATURE-STATUS.md). This handoff records release evidence rather than a full-parity completion percentage.
@@ -8,7 +10,7 @@ Current user priority (21 October 2026): keyboard-control design and further pho
 
 ## Curated deep-sky catalogue expansion — 27 October 2026
 
-The planner now contains 139 objects: the unchanged 109 Messier records plus 30 non-Messier NGC/IC objects, including Omega Centauri, Helix, North America Nebula and both Double Cluster components. Data come from pinned OpenNGC revision be3cd6c5498806a2fbb2f7e0452ef802dbb02be0 under CC BY-SA 4.0, with a reproducible hash-checked importer and a local data licence. Missing magnitudes remain unknown. The full extension stays with the deferred explorer; a lightweight ID list supports validation.
+At this earlier milestone the planner contained 139 objects: the unchanged 109 Messier records plus 30 non-Messier NGC/IC objects, including Omega Centauri, Helix, North America Nebula and both Double Cluster components. Data come from pinned OpenNGC revision be3cd6c5498806a2fbb2f7e0452ef802dbb02be0 under CC BY-SA 4.0, with a reproducible hash-checked importer and a local data licence. Missing magnitudes remain unknown. The full extension stays with the deferred explorer; a lightweight ID list supports validation.
 
 New identities work in search/type/constellation/magnitude filters, dark recommendations, saved lists, diary records and unfinished drafts, backup round trips, coordinate copies, printable plans, comparison calendars and offline display/search. Original Messier IDs and existing backups remain supported; unsupported IDs such as M102 remain rejected. Expanded-ID backups require the updated app; older versions reject unknown targets rather than silently dropping them. The saved-target/draft bounds rise to 139, and draft storage accommodates maximum escaped fields. The offline cache advances to v9. Existing imaging coordinate handoff validation accepts new IDs; camera discovery remains the original 109 Messier objects, with the unsupported camera action disabled for the new NGC/IC targets. No camera or photo-feature expansion was added.
 

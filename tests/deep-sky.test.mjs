@@ -16,7 +16,7 @@ test('saved-target scope composes with catalogue filters without changing saved 
  assert.deepEqual(findDeepSky('','Galaxy',{savedIds:['M45']}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:[]}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:['M102','not-a-target']}),[]);
- assert.equal(findDeepSky('','',{savedIds:undefined}).length,139);
+ assert.equal(findDeepSky('','',{savedIds:undefined}).length,164);
  assert.deepEqual(saved,before);
 });
 test('full constellation names and Unicode identifiers work without losing catalogue codes',async()=>{
@@ -38,7 +38,7 @@ test('Messier search handles common names, spaced identifiers and object-type fi
  assert.equal(findDeepSky('NGC 224','')[0].id,'M31');
  assert.equal(findDeepSky('NGC 0224','')[0].id,'M31');
  assert.equal(findDeepSky('pleiades','')[0].id,'M45');
- assert.equal(findDeepSky('andromeda','Open cluster').length,0);
+ assert.equal(findDeepSky('andromeda','Open cluster',{catalogue:'messier'}).length,0);
  for(const t of messierCatalogue){assert(t.ra>=0&&t.ra<24);assert(Math.abs(t.dec)<=90);assert(t.major===null||t.major>0)}
 });
 test('J2000 positions are precessed to the selected epoch before horizon conversion',()=>{
