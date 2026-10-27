@@ -300,4 +300,5 @@ test('offline darkness uses the saved site and time without changing stored plan
  assert.match(page.elements.get('offline-darkness-status').textContent,/Full darkness remaining:/);assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
  const day=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T12:00:00.000Z'});await day.elements.get('check-offline-darkness').listeners.get('click')();assert.match(day.elements.get('offline-darkness-status').textContent,/outside full astronomical darkness/);
  assert.equal(load().elements.get('offline-darkness-tools').hidden,true);
+ const nowOnly=load({'nightjar-place':site});assert.equal(nowOnly.elements.get('offline-darkness-tools').hidden,false);assert.equal(nowOnly.elements.get('check-offline-darkness').hidden,true);await nowOnly.elements.get('check-offline-now').listeners.get('click')();assert.match(nowOnly.elements.get('offline-darkness-status').textContent,/Device time: \d{4}-/);assert.equal(nowOnly.raw.has('nightjar-observing-time'),false);
 });

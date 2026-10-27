@@ -11,7 +11,9 @@ try{for(const width of [320,390,820,1365]){
  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
  await page.evaluate(()=>{localStorage.setItem('nightjar-place',JSON.stringify({name:'London',latitude:51.5,longitude:0,timezone:'UTC'}));localStorage.setItem('nightjar-observing-time',JSON.stringify('2026-10-27T00:00:00.000Z'));sessionStorage.clear()});
  await context.setOffline(true);await page.goto(base.href,{waitUntil:'load'});
+ const savedBefore=await page.evaluate(()=>localStorage.getItem('nightjar-observing-time'));
  await page.getByRole('button',{name:'Check darkness at saved time'}).click();await page.getByText(/Full darkness remaining:/).waitFor();
- assert.match(await page.locator('#offline-darkness-status').textContent(),/Full darkness ends UTC:/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
+ assert.match(await page.locator('#offline-darkness-status').textContent(),/Full darkness ends UTC:/);
+ await page.clock.setFixedTime(new Date('2026-10-27T12:00:00.000Z'));await page.getByRole('button',{name:'Check darkness now'}).click();await page.getByText(/Device time: 2026-10-27T12:00:00.000Z/).waitFor();assert.match(await page.locator('#offline-darkness-status').textContent(),/Device time: 2026-10-27T12:00:00.000Z.*outside full astronomical darkness/);assert.equal(await page.evaluate(()=>localStorage.getItem('nightjar-observing-time')),savedBefore);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
  console.log(`${width}: installed offline fallback calculates saved-time darkness PASS`);await context.close();
 }}finally{await browser.close()}

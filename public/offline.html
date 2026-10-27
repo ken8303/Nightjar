@@ -17,7 +17,7 @@
     p{color:#a9bdc7;margin:12px 0}
     .intro{max-width:560px}
     .retry{display:inline-flex;align-items:center;justify-content:center;min-height:48px;background:#c1df93;color:#152218;border-radius:8px;padding:10px 22px;text-decoration:none;font-weight:600;margin:14px 0 20px}
-    .recovery{margin-top:22px;border-top:1px solid #334851;padding-top:18px}.recovery summary{cursor:pointer;min-height:44px;color:#c1df93}.recovery button,#check-offline-darkness{font:inherit;cursor:pointer;min-height:48px;max-width:100%;white-space:normal;overflow-wrap:anywhere;border:1px solid #526b75;border-radius:8px;background:#172a32;color:#e9eeef;padding:10px 16px}.recovery button:disabled{opacity:.6;cursor:wait}.recovery p{font-size:14px}.recovery button:focus-visible,#check-offline-darkness:focus-visible,.recovery summary:focus-visible{outline:2px solid #c1df93;outline-offset:4px}
+    .recovery{margin-top:22px;border-top:1px solid #334851;padding-top:18px}.recovery summary{cursor:pointer;min-height:44px;color:#c1df93}.recovery button,#check-offline-darkness,#check-offline-now{font:inherit;cursor:pointer;min-height:48px;max-width:100%;white-space:normal;overflow-wrap:anywhere;border:1px solid #526b75;border-radius:8px;background:#172a32;color:#e9eeef;padding:10px 16px}.recovery button:disabled{opacity:.6;cursor:wait}.recovery p{font-size:14px}.recovery button:focus-visible,#check-offline-darkness:focus-visible,#check-offline-now:focus-visible,.recovery summary:focus-visible{outline:2px solid #c1df93;outline-offset:4px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
     section{min-width:0;background:#142129;border:1px solid #334851;border-radius:10px;padding:18px}
     .session-card,.targets-card{grid-column:1/-1}
@@ -46,7 +46,7 @@
     <p id="coverage-warning" class="connection" role="status" hidden></p>
     <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><button type="button" id="cancel-recovery" hidden>Cancel preparing recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <div class="grid">
-      <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><div id="offline-darkness-tools" hidden><button type="button" id="check-offline-darkness">Check darkness at saved time</button><p id="offline-darkness-status" class="connection" role="status"></p></div><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
+      <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><div id="offline-darkness-tools" hidden><button type="button" id="check-offline-darkness">Check darkness at saved time</button> <button type="button" id="check-offline-now">Check darkness now</button><p id="offline-darkness-status" class="connection" role="status"></p></div><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><div id="deep-search-tools" hidden><label for="deep-search">Find a saved deep-sky object</label><div class="diary-search-fields"><input id="deep-search" type="search" maxlength="100" placeholder="M31, NGC 7000, IC 1396" aria-controls="deep-targets"/><button id="deep-search-clear" type="button" disabled>Clear deep-sky search</button></div><p id="deep-search-count" class="connection" role="status" aria-atomic="true"></p><p id="deep-search-empty" class="empty" hidden>No saved deep-sky objects match this search.</p></div><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><div id="diary-search-tools" hidden><label for="diary-search">Find a saved observation</label><div class="diary-search-fields"><input id="diary-search" type="search" maxlength="100" placeholder="Target, notes, site or equipment" aria-controls="diary"/><button id="diary-search-clear" type="button" disabled>Clear search</button></div><p id="diary-search-count" class="connection" role="status" aria-atomic="true"></p><p id="diary-search-empty" class="empty" hidden>No saved observations match this search.</p></div><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
@@ -55,7 +55,7 @@
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
     </div>
 
-    <footer>Offline details are stored only in this browser. The darkness check uses the saved site and time; it is not a live forecast. Positions, visibility and weather are not updated here; weather, location search and aurora forecasts require internet.</footer>
+    <footer>Offline details are stored only in this browser. Darkness checks use the saved site and either the saved observing time or this device’s current clock; they are not weather forecasts. Positions, visibility and weather are not updated here; weather, location search and aurora forecasts require internet.</footer>
   </main>
   <script>
     (() => {
@@ -119,14 +119,17 @@
       }else if(selectedTime!==null){unavailable.add('nightjar-observing-time');document.getElementById('storage-warning').hidden=false;}
       showEmpty('session','nightjar-observing-time');
       // Calculate only on explicit request, using this page's saved snapshot.
-      const darknessButton=document.getElementById('check-offline-darkness'),darknessStatus=document.getElementById('offline-darkness-status');
-      document.getElementById('offline-darkness-tools').hidden=!(instant&&validContextPlace(currentPlace));
-      darknessButton.addEventListener('click',async()=>{
-        darknessButton.disabled=true;darknessStatus.textContent='Checking the saved time and site…';
-        try{const {offlineDarkness}=await import('/offline-darkness.mjs');darknessStatus.textContent=offlineDarkness(selectedTime,contextPlace(currentPlace)).join(' ')}
+      const darknessButton=document.getElementById('check-offline-darkness'),darknessNow=document.getElementById('check-offline-now'),darknessStatus=document.getElementById('offline-darkness-status');
+      document.getElementById('offline-darkness-tools').hidden=!validContextPlace(currentPlace);
+      darknessButton.hidden=!instant;
+      const checkDarkness=async(time,label)=>{
+        darknessButton.disabled=true;darknessNow.disabled=true;darknessStatus.textContent='Checking the site and time…';
+        try{const {offlineDarkness}=await import('/offline-darkness.mjs');darknessStatus.textContent=label+' '+time+' · '+offlineDarkness(time,contextPlace(currentPlace)).join(' ')}
         catch{darknessStatus.textContent='Darkness could not be calculated here. Reconnect and open the planner to retry.'}
-        finally{darknessButton.disabled=false}
-      });
+        finally{darknessButton.disabled=false;darknessNow.disabled=false}
+      };
+      darknessButton.addEventListener('click',()=>checkDarkness(selectedTime,'Saved observing time:'));
+      darknessNow.addEventListener('click',()=>checkDarkness(new Date().toISOString(),'Device time:'));
 
       const targets = read('nightjar-targets-v1', [], Array.isArray);
       const notes = read('nightjar-target-notes-v1', {}, value=>typeof value==='object'&&!Array.isArray(value));
