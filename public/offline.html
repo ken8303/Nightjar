@@ -48,7 +48,7 @@
     <div class="grid">
       <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
-      <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
+      <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><div id="deep-search-tools" hidden><label for="deep-search">Find a saved deep-sky object</label><div class="diary-search-fields"><input id="deep-search" type="search" maxlength="100" placeholder="M31, NGC 7000, IC 1396" aria-controls="deep-targets"/><button id="deep-search-clear" type="button" disabled>Clear deep-sky search</button></div><p id="deep-search-count" class="connection" role="status" aria-atomic="true"></p><p id="deep-search-empty" class="empty" hidden>No saved deep-sky objects match this search.</p></div><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><div id="diary-search-tools" hidden><label for="diary-search">Find a saved observation</label><div class="diary-search-fields"><input id="diary-search" type="search" maxlength="100" placeholder="Target, notes, site or equipment" aria-controls="diary"/><button id="diary-search-clear" type="button" disabled>Clear search</button></div><p id="diary-search-count" class="connection" role="status" aria-atomic="true"></p><p id="diary-search-empty" class="empty" hidden>No saved observations match this search.</p></div><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
       <section class="targets-card" id="other-notes-card" aria-labelledby="other-notes-title" hidden><h2 id="other-notes-title">Notes for other targets</h2><ul id="other-notes"></ul></section>
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
@@ -136,6 +136,22 @@
       if(deepTargets.length>deepSkyLimit||deepRows.length<deepPrefix.length)markPartial('nightjar-deep-targets-v1','Saved deep-sky list');
       for(const id of Array.from(new Set(deepRows)).slice(0,deepSkyLimit))add('deep-targets',id,'Reconnect for object details and positions.');
       showEmpty('deep-targets','nightjar-deep-targets-v1');
+      // Search the already rendered snapshot without touching storage or network.
+      const deepItems=Array.from(document.getElementById('deep-targets').children);
+      const deepSearch=document.getElementById('deep-search'),deepClear=document.getElementById('deep-search-clear');
+      const normalizeDeep=value=>value.normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/^messier(?=\d)/,'m').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
+      const deepSearchRows=deepItems.map(item=>({item,id:normalizeDeep(item.children[0].textContent)}));
+      document.getElementById('deep-search-tools').hidden=!deepItems.length;
+      const filterDeep=()=>{
+        const query=normalizeDeep((deepSearch.value||'').slice(0,100).trim());let shown=0;
+        for(const row of deepSearchRows){row.item.hidden=Boolean(query&&!row.id.includes(query));if(!row.item.hidden)shown++}
+        deepClear.disabled=!(deepSearch.value||'');
+        document.getElementById('deep-search-count').textContent=shown+' of '+deepItems.length+' saved deep-sky objects shown.';
+        document.getElementById('deep-search-empty').hidden=shown!==0;
+      };
+      deepSearch.addEventListener('input',filterDeep);
+      deepClear.addEventListener('click',()=>{deepSearch.value='';filterDeep();deepSearch.focus()});
+      filterDeep();
 
       const diary=read('nightjar-observing-diary-v1',[],Array.isArray);
       const diaryPrefix=diary.slice(0,200),diaryRows=diaryPrefix.filter(entry=>entry&&typeof entry==='object'&&validDeepSkyId(entry.target)&&canonicalInstant(entry.observedAt)&&['seen','not-seen','imaged'].includes(entry.outcome)&&entry.place&&safeText(entry.place.name)&&validCoordinate(entry.place.latitude,90)&&validCoordinate(entry.place.longitude,180));

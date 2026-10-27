@@ -282,3 +282,13 @@ test('offline recovery recognizes every curated NGC/IC identity in lists and dia
   assert.equal(page.elements.get('deep-targets').children.length,extra.length);assert.equal(page.elements.get('diary').children.length,batch.length);assert.equal(page.elements.get('coverage-warning').hidden,true);
  }
 });
+
+test('offline deep-sky search filters the snapshot without storage reads or writes',()=>{
+ const page=load({'nightjar-deep-targets-v1':['M31','NGC7000','IC1396']});
+ const search=page.elements.get('deep-search'),clear=page.elements.get('deep-search-clear'),rows=page.elements.get('deep-targets').children,before=[...page.reads],raw=[...page.raw];
+ const find=query=>{search.value=query;search.listeners.get('input')()};
+ assert.equal(page.elements.get('deep-search-tools').hidden,false);find('ＮＧＣ ０７０００');assert.deepEqual(rows.map(row=>row.hidden),[true,false,true]);assert.equal(page.elements.get('deep-search-count').textContent,'1 of 3 saved deep-sky objects shown.');
+ find('Messier 31');assert.deepEqual(rows.map(row=>row.hidden),[false,true,true]);find('NGC9999');assert.equal(page.elements.get('deep-search-empty').hidden,false);
+ clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert(search.focused);assert(clear.disabled);assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
+ for(const empty of [load(),load({},true),load({'nightjar-deep-targets-v1':[{}]})])assert.equal(empty.elements.get('deep-search-tools').hidden,true);
+});
