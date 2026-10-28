@@ -9,6 +9,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 Completed locally:
 
 - [x] New NGC/IC objects work through search, saves, diary/drafts, backups, plans, comparison calendars and offline recovery. Four new-object and eight night-only browser journeys pass.
+- [x] Deep-sky comparison supports an optional manually entered eight-direction horizon for the selected site. Linear interpolation and 15-minute sampling are approximations; other views retain a flat horizon.
 - [x] Offline target planning can find the highest 15-minute sample for supported saved stars, solar-system objects and deep-sky objects above 30° during full astronomical darkness over the next 24 hours at a saved site, without changing saved plans. Weather and terrain are excluded.
 - [x] Offline diary search filters the saved snapshot without network/storage writes; Unicode, clear, empty results and changed-data warnings pass unit and four responsive browser checks.
 - [x] Validation workflow triggers include mobile-planner branch pushes; workflow syntax and branch matching are checked locally. Hosted run status remains unverified because the GitHub Actions API returned Forbidden.
