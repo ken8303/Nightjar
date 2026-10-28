@@ -1,13 +1,8 @@
 import {json2satrec,propagate,eciToEcf,ecfToLookAngles,gstime} from 'satellite.js';
 import {parseOrbitalEpoch,satelliteEpochWindowMs,type OrbitElements,type SatelliteFeed} from './satellite-elements';
+import {satelliteFreshnessIssue} from './satellite-validity';
 export function satelliteDataIssue(feed:SatelliteFeed,date:Date,now=Date.now()){
- const fetched=Date.parse(feed.fetchedAt),epoch=parseOrbitalEpoch(feed.elements.EPOCH);
- if(!Number.isFinite(now)||!Number.isFinite(+date)||!epoch)return 'Choose a valid observing instant.';
- if(fetched>now+5*60000)return 'The feed time is ahead of this device. Check your clock before using satellite directions.';
- if(now-fetched>6*60*60*1000)return 'Cached orbital data is more than six hours old. Refresh it before using satellite directions.';
- if(Math.abs(now-+epoch)>satelliteEpochWindowMs)return 'The orbital epoch is outside the supported three-day window around now.';
- if(Math.abs(+date-+epoch)>satelliteEpochWindowMs)return 'Choose an observing time within three days of the orbital epoch. Current elements cannot describe distant dates.';
- return '';
+ return satelliteFreshnessIssue({fetchedAt:feed.fetchedAt,epoch:feed.elements.EPOCH},date,now);
 }
 // TEME/SGP4 state stays separate from the J2000 catalogue projector.
 export function satelliteState(elements:OrbitElements,date:Date){

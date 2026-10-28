@@ -45,6 +45,7 @@ import ForecastBestHour from '@/components/forecast-best-hour';
 import HourlyForecast from '@/components/hourly-forecast';
 import ObservingSummaryDownload from '@/components/observing-summary-download';
 import {forecastFreshness} from '@/lib/forecast-freshness';
+import {satelliteFreshnessIssue,type SatelliteFreshness} from '@/lib/satellite-validity';
 import {createDeepSkyBrowsing,createBrightTargetBrowsing} from '@/lib/target-browsing';
 import SiteDarkness from '@/components/site-darkness';
 import {rateObservingSite,SiteRatingReadError} from '@/lib/site-rating';
@@ -167,9 +168,9 @@ function Planner(){
  const pendingDestination=pendingIntent?.section||'';
  const [navigation]=useState(()=>createPlannerNavigation({onPending:setPendingIntent}));
  const sectionPendingText=usePendingEdits(tab),contextPendingText=usePendingEdits(tab,true),allPendingText=usePendingEdits(),pendingText=pendingIntent?.kind==='time'?[...new Set([...allPendingText.split(', ').filter(label=>label===observingTimeEditLabel),...(pendingIntent.section!==tab?sectionPendingText.split(', ').filter(Boolean):[])])].join(', '):pendingIntent?.kind==='imaging'?allPendingText:pendingIntent?.kind==='context'?contextPendingText:sectionPendingText,pendingHeading=useRef<HTMLHeadingElement>(null);
- const setDate=useCallback((next:Date,section=tab,target?:PlannerTimeTarget,forecastFetchedAt?:number,forecastMayHaveStarted?:boolean)=>{
+ const setDate=useCallback((next:Date,section=tab,target?:PlannerTimeTarget,forecastFetchedAt?:number,forecastMayHaveStarted?:boolean,satelliteFreshness?:SatelliteFreshness)=>{
   if(!validObservingDate(next)){applyDate(next);return false}
-  return navigation.request({kind:'time',section,date:next,forecastFetchedAt,forecastMayHaveStarted,...(target?{target}:{})},+next!==+date&&pendingEdits.hasSection('observing-time')||section!==tab&&Boolean(pendingEdits.snapshot(tab)),applyNavigation);
+  return navigation.request({kind:'time',section,date:next,forecastFetchedAt,forecastMayHaveStarted,...(target?{target}:{}),...(satelliteFreshness?{satelliteFreshness}:{})},+next!==+date&&pendingEdits.hasSection('observing-time')||section!==tab&&Boolean(pendingEdits.snapshot(tab)),applyNavigation);
  },[applyDate,applyNavigation,date,navigation,tab]);
  function chooseNextDarkness(){
   const next=nextAstronomicalDarkness(date,place);
@@ -180,9 +181,11 @@ function Planner(){
   const owner=document.activeElement;
   if(setDate(next,'sky',target))deferFocusAndScroll(()=>document.getElementById(target.catalogue==='deep'?'deep-sky-object-details':'target-details'),{owner});
  }
- function chooseSatelliteTime(next:Date){
+ function chooseSatelliteTime(next:Date,freshness:SatelliteFreshness){
+  const issue=satelliteFreshnessIssue(freshness,next,Date.now());
+  if(issue){setNotice(`${issue} Your observing time was kept.`);return}
   const owner=document.activeElement;
-  if(setDate(next))deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner});
+  if(setDate(next,tab,undefined,undefined,undefined,freshness))deferFocusAndScroll(()=>document.getElementById('planner-heading'),{owner});
  }
  const setTab=useCallback((next:string)=>{
   if(next!=='sky')setCameraOpen(false);
@@ -284,7 +287,7 @@ function Planner(){
  }
  function leaveView(){
   const owner=document.activeElement,target=pendingIntent?.kind==='time'&&pendingIntent.target,ownsFocus=pendingIntent?.kind==='imaging'||pendingIntent?.kind==='sky-anchor';
-  if(!navigation.continue(applyNavigation)){setNotice('This forecast recommendation expired while awaiting confirmation. Your site, observing time and unfinished edits were kept. Refresh the forecast and choose a new window.');return}
+  if(!navigation.continue(applyNavigation)){setNotice(pendingIntent?.satelliteFreshness?'This ISS recommendation expired while awaiting confirmation. Your site, observing time and unfinished edits were kept. Refresh satellite data and recalculate passes.':'This forecast recommendation expired while awaiting confirmation. Your site, observing time and unfinished edits were kept. Refresh the forecast and choose a new window.');return}
   if(ownsFocus)return;
   const destination=target?(target.catalogue==='deep'?'deep-sky-object-details':'target-details'):'planner-heading';
   deferFocusAndScroll(()=>document.getElementById(destination),{owner});

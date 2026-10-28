@@ -10,17 +10,21 @@ import {satellitePassSummary} from '@/lib/satellite-pass-summary';
 import SatelliteWindowActions from './satellite-window-actions';
 import SatelliteWindowWeather from './satellite-window-weather';
 import type {SatelliteWeather} from '@/lib/satellite-weather';
+import {satelliteFreshnessIssue,type SatelliteFreshness} from '@/lib/satellite-validity';
 
 const utc=(time:number)=>new Date(time).toISOString().replace('T',' ').replace(/\.\d{3}Z$/,' UTC');
 type State={loading:boolean;result:SatellitePassResult|null;message:string};
-export default function SatellitePasses({feed,start,place,onDate,weather,now}:{feed:SatelliteFeed;start:number;place:Place;onDate:(date:Date)=>void;weather:SatelliteWeather;now:number}){
+export default function SatellitePasses({feed,start,place,onDate,weather,now}:{feed:SatelliteFeed;start:number;place:Place;onDate:(date:Date,freshness:SatelliteFreshness)=>void;weather:SatelliteWeather;now:number}){
  const elements=feed.elements,{latitude,longitude}=place;
+ const freshness={fetchedAt:feed.fetchedAt,epoch:elements.EPOCH};
  const active=useRef<{worker:Worker;timer:ReturnType<typeof setTimeout>}|null>(null);
  const [state,setState]=useState<State>({loading:false,result:null,message:''});
  const stop=()=>{const current=active.current;if(current){clearTimeout(current.timer);current.worker.terminate();active.current=null}};
  useEffect(()=>()=>{const current=active.current;if(current){clearTimeout(current.timer);current.worker.terminate();active.current=null}},[]);
  const search=()=>{
   if(active.current){stop();setState(previous=>({...previous,loading:false,message:'Pass search cancelled.'}));return}
+  const issue=satelliteFreshnessIssue(freshness,new Date(start),Date.now());
+  if(issue){setState(previous=>({...previous,loading:false,result:null,message:issue}));return}
   setState(previous=>({...previous,loading:true,message:''}));
   try{
    const worker=new PassWorker();
@@ -30,6 +34,8 @@ export default function SatellitePasses({feed,start,place,onDate,weather,now}:{f
    worker.onmessage=({data}:{data:{result?:SatellitePassResult;error?:string}})=>{
     if(active.current?.worker!==worker)return;
     if(!data.result){fail(data.error||'Pass calculations are unavailable.');return}
+    const issue=satelliteFreshnessIssue(freshness,new Date(start),Date.now());
+    if(issue){fail(issue);return}
     const result=fullDarknessPasses(data.result,place);
     stop();setState({loading:false,result,message:satellitePassSummary(result)});
    };
@@ -50,7 +56,7 @@ export default function SatellitePasses({feed,start,place,onDate,weather,now}:{f
     <dl><div><dt>{pass.alreadyUp?'Bearing at start':'Rise bearing'}</dt><dd>{pass.riseAzimuth.toFixed(1)}°</dd></div><div><dt>Highest in window</dt><dd>{utc(pass.peak)} · {pass.peakAzimuth.toFixed(1)}° bearing</dd></div><div><dt>{pass.continues?'Still above horizon at end':'Horizon set'}</dt><dd>{utc(pass.set)} · {pass.setAzimuth.toFixed(1)}° bearing</dd></div></dl>
     {pass.lighting?<dl className="satellite-pass-lighting"><div><dt>ISS lighting at highest point</dt><dd>{pass.lighting.sunlight==='sunlit'?'Sunlit':pass.lighting.sunlight==='earth-shadow'?'In Earth’s shadow':`Partly shadowed · ${Math.round(pass.lighting.shadow*100)}% of Sun obscured`}</dd></div><div><dt>Sun centre at highest point</dt><dd>{pass.lighting.sunAltitude.toFixed(1)}° altitude</dd></div></dl>:<p className="footnote">Lighting at the highest point is unavailable. The horizon times above remain geometric.</p>}
     <div className={`satellite-viewing-windows${pass.viewing?.length?' has-window':''}`}><strong>Sunlit windows above {satelliteViewingAltitude}° · full astronomical darkness</strong>{pass.viewing===null?<p>Window calculation unavailable. Horizon times and available peak facts remain usable.</p>:pass.viewing.length?<><p>Select a window’s midpoint to plan within its modelled conditions.</p><ul>{pass.viewing.map(window=><li key={window.start}>{utc(window.start)} – {utc(window.end)}{window.startsAtBoundary?' · begins at search boundary':''}{window.endsAtBoundary?' · ends at search boundary':''}<SatelliteWindowWeather start={window.start} end={window.end} weather={weather} now={now}/><SatelliteWindowActions window={window} feed={feed} place={place} onDate={onDate}/></li>)}</ul></>:<p>No window meeting these criteria in this pass.</p>}</div>
-    <button type="button" className="button satellite-peak-time" aria-label={`Set observing time to ISS peak at ${utc(pass.peak)}`} onClick={()=>onDate(new Date(pass.peak))}>Set observing time to this peak</button>
+    <button type="button" className="button satellite-peak-time" aria-label={`Set observing time to ISS peak at ${utc(pass.peak)}`} onClick={()=>onDate(new Date(pass.peak),freshness)}>Set observing time to this peak</button>
    </li>)}</ol>}
    {state.result.passes.some(pass=>pass.viewing?.length)&&<p className="footnote">Calendar files include this site’s name and coordinates, the orbital epoch and retrieval time. Import them into your calendar app to keep a fixed snapshot. Calendar apps display UTC events in their own time zone; recheck Nightjar before observing.</p>}
    <p className="footnote">Modelled windows require ISS above {satelliteViewingAltitude}°, its whole solar disc clear of Earth’s shadow and the Sun centre below {satelliteViewingSunAltitude}°. Only overlaps lasting at least {satelliteViewingMinimumMs/1000} seconds are shown. The model uses a spherical Earth shadow and an approximate Sun position. Weather, brightness, obstructions, source uncertainty and manoeuvres still affect whether and when you can see ISS.</p>

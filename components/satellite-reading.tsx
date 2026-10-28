@@ -5,9 +5,10 @@ import {satelliteDataIssue,satelliteHorizontal} from '@/lib/satellite-position';
 import type {Place} from '@/lib/sky';
 import SatellitePasses from './satellite-passes';
 import type {SatelliteWeather} from '@/lib/satellite-weather';
+import type {SatelliteFreshness} from '@/lib/satellite-validity';
 
 type State={status:'idle'|'loading'|'error'|'ready';feed:SatelliteFeed|null;error:string};
-export default function SatelliteReading({date,place,onDate,weather,onRefreshWeather}:{date:Date;place:Place;onDate:(date:Date)=>void;weather:SatelliteWeather;onRefreshWeather:()=>void}){
+export default function SatelliteReading({date,place,onDate,weather,onRefreshWeather}:{date:Date;place:Place;onDate:(date:Date,freshness:SatelliteFreshness)=>void;weather:SatelliteWeather;onRefreshWeather:()=>void}){
  const request=useRef<AbortController|null>(null);
  const [now,setNow]=useState(()=>Date.now());
  useEffect(()=>{const sync=()=>{if(!document.hidden)setNow(Date.now())};const timer=setInterval(sync,60000);document.addEventListener('visibilitychange',sync);window.addEventListener('pageshow',sync);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',sync);window.removeEventListener('pageshow',sync)}},[]);
