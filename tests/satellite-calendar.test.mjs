@@ -10,8 +10,8 @@ const {findSatellitePasses:find}=await vite.ssrLoadModule('/lib/satellite-passes
 const [elements]=JSON.parse(await readFile(new URL('fixtures/iss-2026-10-19.json',import.meta.url),'utf8'));
 const created=new Date('2026-10-19T12:00:00Z');
 const feed=parse({version:1,elements,fetchedAt:'2026-10-19T11:00:00.000Z',nextRefreshAt:'2026-10-19T13:00:00.000Z',refreshPaused:false,issue:''});
-const place={name:'London test site',latitude:51.5,longitude:-.1257,timezone:'Europe/London'};
-const window=find(feed.elements,+created,place.latitude,place.longitude).passes[2].viewing[0];assert(window);
+const place={name:'Dark sky test site',latitude:50,longitude:30,timezone:'Europe/Kyiv'};
+const window=find(feed.elements,+created,place.latitude,place.longitude).passes.flatMap(pass=>pass.viewing||[]).find(value=>Math.floor(value.start)===Date.parse('2026-10-20T02:12:31.353Z'));assert(window);
 const input={window,feed,place};
 const unfold=value=>value.replace(/\r\n[ \t]/g,'');
 const property=(text,name)=>unfold(text).split('\r\n').find(line=>line.startsWith(name+':'))?.slice(name.length+1);
@@ -19,11 +19,11 @@ const textProperty=(text,name)=>property(text,name)?.replace(/\\([n\\;,])/g,(_,c
 
 test('a real modelled window becomes a single UTC event rounded inside its interval',()=>{
  const original=structuredClone(input),text=calendar(input,created);
- assert.equal(property(text,'DTSTART'),'20261020T051925Z');assert.equal(property(text,'DTEND'),'20261020T052220Z');
+ assert.equal(property(text,'DTSTART'),'20261020T021232Z');assert.equal(property(text,'DTEND'),'20261020T021259Z');
  assert.equal(property(text,'DTSTAMP'),'20261019T120000Z');assert.equal(property(text,'STATUS'),'TENTATIVE');assert.equal(property(text,'TRANSP'),'TRANSPARENT');
- assert.equal(property(text,'SUMMARY'),'ISS observing window at London test site');assert.equal(property(text,'GEO'),'51.5;-0.1257');
+ assert.equal(property(text,'SUMMARY'),'ISS observing window at Dark sky test site');assert.equal(property(text,'GEO'),'50;30');
  const description=textProperty(text,'DESCRIPTION');
- for(const detail of ['above 30 degrees','below -6 degrees','2026-10-19T04:14:45.011040','2026-10-19T11:00:00.000Z','fixed planning snapshot','Weather, terrain, brightness','does not refresh'])assert(description.includes(detail),detail);
+ for(const detail of ['above 30 degrees','below -6 degrees','below -18 degrees throughout','2026-10-19T04:14:45.011040','2026-10-19T11:00:00.000Z','fixed planning snapshot','Weather, terrain, brightness','does not refresh'])assert(description.includes(detail),detail);
  assert.equal((text.match(/BEGIN:VEVENT/g)||[]).length,1);assert.equal((text.match(/END:VEVENT/g)||[]).length,1);assert(text.endsWith('END:VCALENDAR\r\n'));
  assert(!/VALARM|ATTENDEE|ORGANIZER|RRULE/.test(text));assert.deepEqual(input,original);
 });
@@ -65,4 +65,12 @@ test('search boundary clipping is retained in the file and missing time zones re
  const text=calendar({...input,window:{...window,startsAtBoundary:true,endsAtBoundary:true},place:{name:place.name,latitude:place.latitude,longitude:place.longitude}},created),description=textProperty(text,'DESCRIPTION');
  assert(description.includes('begins at the search boundary'));assert(description.includes('ends at the search boundary'));assert(description.includes('Site time zone unavailable; event times use UTC.'));
  const ordinary=textProperty(calendar(input,created),'DESCRIPTION');assert(!ordinary.includes('begins at the search boundary'));assert(!ordinary.includes('ends at the search boundary'));
+});
+
+test('calendar refuses daylight, twilight and an interval crossing astronomical dawn',async()=>{
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const london={name:'London',latitude:51.5,longitude:0},dawn=A.SearchAltitude(A.Body.Sun,observer(london),1,new Date('2026-10-20T00:00:00Z'),1,-18).date;
+ const crossing={...window,start:+dawn-60000,end:+dawn+60000};assert(sunAltitude(new Date(crossing.start),london)<-18);assert(sunAltitude(new Date(crossing.end),london)>-18);
+ assert.throws(()=>calendar({...input,window:crossing,place:london},created),/leaves full astronomical darkness/);
+ const twilight={...window,start:Date.parse('2026-10-20T05:19:24Z'),end:Date.parse('2026-10-20T05:22:20Z')};assert.throws(()=>calendar({...input,window:twilight,place:london},created),/leaves full astronomical darkness/);
 });

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
 import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -61,4 +63,16 @@ test('refined fractional-millisecond boundaries select covering hours without Da
  const crossing=read(-.5,.5,source,now);
  assert.equal(crossing.status,'available');assert.equal(crossing.hours,2);assert.equal(crossing.minimum,20);assert.equal(crossing.maximum,80);
  const endAtBoundary=read(-10000.5,0,source,now);assert.equal(endAtBoundary.status,'available');assert.equal(endAtBoundary.hours,1);
+});
+
+test('cloud context does not display a twilight forecast-hour timestamp for a dark window',async()=>{
+ const {default:SatelliteWindowWeather}=await vite.ssrLoadModule('/components/satellite-window-weather.tsx');
+ const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
+ const place={name:'London',latitude:51.5,longitude:0};
+ const dusk=A.SearchAltitude(A.Body.Sun,observer(place),-1,new Date('2026-10-24T12:00:00Z'),1,-18).date;
+ const start=+dusk+60000,end=start+60000,forecastHour=Math.floor(start/hour)*hour;
+ assert(sunAltitude(new Date(start),place)<-18);assert(sunAltitude(new Date(end),place)<-18);assert(sunAltitude(new Date(forecastHour),place)>=-18);
+ const input={forecast:{hourly:{time:[forecastHour/1000],cloud_cover:[45]}},fetchedAt:start,loading:false,error:false};
+ const html=renderToStaticMarkup(createElement(SatelliteWindowWeather,{start,end,weather:input,now:start}));
+ assert.match(html,/Hourly cloud cover: about 45%/);assert.match(html,/may extend beyond it/);assert(!html.includes(new Date(forecastHour).toISOString()));
 });

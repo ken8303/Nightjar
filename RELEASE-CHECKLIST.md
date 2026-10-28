@@ -9,6 +9,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 Completed locally:
 
 - [x] New NGC/IC objects work through search, saves, diary/drafts, backups, plans, comparison calendars and offline recovery. Four new-object and eight night-only browser journeys pass.
+- [x] ISS calendar export independently rejects twilight or dawn-crossing windows; cloud context avoids displaying forecast-hour timestamps outside full darkness.
 - [x] Meteor Moon illumination is tied to a remaining fully dark observing hour and is unavailable when no complete dark hour remains.
 - [x] An opt-in cloud comparison displays GFS and ICON global cloud-cover estimates for the selected fully dark time. Missing models remain unavailable; site/time changes retire the previous result.
 - [x] Deep-sky comparison supports an optional manually entered eight-direction horizon for the selected site. The applied horizon remains active while its draft is edited and across planner section changes; it is temporary and is not saved after reload. Linear interpolation and 15-minute sampling are approximations; other views retain a flat horizon.
