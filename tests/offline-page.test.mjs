@@ -264,12 +264,23 @@ test('offline diary search filters the rendered snapshot across Unicode, notes a
  const find=query=>{search.value=query;search.listeners.get('input')()};
  assert.equal(page.elements.get('diary-search-tools').hidden,false);
  find('Ｍ３１');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ find('Andromeda');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ find('NGC 0224');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
  assert.equal(page.elements.get('diary-search-count').textContent,'1 of 2 saved observations shown.');
  find('星空');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
  find('<NIGHT>');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
  find('no matching note');assert(rows.every(row=>row.hidden));assert.equal(page.elements.get('diary-search-empty').hidden,false);
  clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert.equal(search.value,'');assert(search.focused);assert(clear.disabled);
  assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
+});
+test('offline diary catalogue index stays in sync with all bundled names and cross-references',()=>{
+ const index=JSON.parse(html.match(/const diaryCatalogueNames=([^\n]*);/)[1]);
+ const catalogues=['../data/messier.json','../data/additional-deep-sky.json'].flatMap(name=>JSON.parse(readFileSync(new URL(name,import.meta.url),'utf8')));
+ assert.deepEqual(index,Object.fromEntries(catalogues.map(target=>[target.id,[target.name,target.catalogue,...(target.crossReferences??[])].join(' ')])));
+ const entry={target:'NGC253',observedAt:'2026-10-08T20:00:00.000Z',place:{name:'Site',latitude:51.5,longitude:0},outcome:'seen'};
+ const page=load({'nightjar-observing-diary-v1':[entry,{...entry,target:'NGC281'}]});
+ const search=page.elements.get('diary-search'),rows=page.elements.get('diary').children;
+ for(const [query,expected] of [['Silver Coin',[false,true]],['IC 0011',[true,false]],['NGC 0253',[false,true]]]){search.value=query;search.listeners.get('input')();assert.deepEqual(rows.map(row=>row.hidden),expected)}
 });
 test('offline diary search stays hidden for empty or unreadable observations',()=>{
  for(const page of [load(),load({},true),load({'nightjar-observing-diary-v1':[{}]})])assert.equal(page.elements.get('diary-search-tools').hidden,true);

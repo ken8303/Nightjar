@@ -11,15 +11,17 @@ try{
   await page.addInitScript(()=>{
    const place={name:'Hill 星空',latitude:51.5,longitude:0,timezone:'UTC'},entry={id:'one',target:'M31',observedAt:'2026-10-08T20:00:00.000Z',place,outcome:'seen',equipment:'Binoculars',notes:'Clear <night>'};
    localStorage.setItem('nightjar-deep-targets-v1',JSON.stringify(['M31','NGC7000','IC1396']));
-   localStorage.setItem('nightjar-observing-diary-v1',JSON.stringify([entry,{...entry,id:'two',target:'M45',notes:'Faint cluster',place:{...place,name:'Garden'}}]));
+   localStorage.setItem('nightjar-observing-diary-v1',JSON.stringify([entry,{...entry,id:'two',target:'M45',notes:'Faint cluster',place:{...place,name:'Garden'}},{...entry,id:'three',target:'NGC253',notes:'Distant galaxy'},{...entry,id:'four',target:'NGC281',notes:'Diffuse nebula'}]));
   });
   await page.goto(new URL('/offline',base).href,{waitUntil:'load'});await page.context().setOffline(true);
   const stored=await page.evaluate(()=>localStorage.getItem('nightjar-observing-diary-v1')),before=requests.length,search=page.getByRole('searchbox',{name:'Find a saved observation'});
   const deep=page.getByRole('searchbox',{name:'Find a saved deep-sky object'});await deep.fill('ＮＧＣ ０７０００');assert.equal(await page.locator('#deep-targets > li:visible').count(),1);assert.match(await page.locator('#deep-targets > li:visible').textContent(),/NGC7000/);await deep.fill('missing');await page.getByText('No saved deep-sky objects match this search.',{exact:true}).waitFor();await page.getByRole('button',{name:'Clear deep-sky search'}).click();assert.equal(await page.locator('#deep-targets > li:visible').count(),3);
   await search.fill('Ｍ３１');assert.equal(await page.locator('#diary > li:visible').count(),1);assert.match(await page.locator('#diary > li:visible').textContent(),/M31/);
+  await search.fill('Silver Coin');assert.equal(await page.locator('#diary > li:visible').count(),1);assert.match(await page.locator('#diary > li:visible').textContent(),/NGC253/);
+  await search.fill('IC 0011');assert.equal(await page.locator('#diary > li:visible').count(),1);assert.match(await page.locator('#diary > li:visible').textContent(),/NGC281/);
   await search.fill('<NIGHT>');assert.equal(await page.locator('#diary > li:visible').count(),1);assert.equal(await page.locator('#diary img').count(),0);
   await search.fill('no matching observation');await page.getByText('No saved observations match this search.',{exact:true}).waitFor();assert.equal(await page.locator('#diary > li:visible').count(),0);
-  await page.getByRole('button',{name:'Clear search',exact:true}).click();assert.equal(await search.inputValue(),'');assert.equal(await page.locator('#diary > li:visible').count(),2);
+  await page.getByRole('button',{name:'Clear search',exact:true}).click();assert.equal(await search.inputValue(),'');assert.equal(await page.locator('#diary > li:visible').count(),4);
   assert.equal(await page.evaluate(()=>document.activeElement?.id),'diary-search');
   assert.equal(await page.evaluate(()=>localStorage.getItem('nightjar-observing-diary-v1')),stored);assert.equal(requests.length,before);
   await page.evaluate(()=>{localStorage.setItem('nightjar-observing-diary-v1','[]');dispatchEvent(new StorageEvent('storage',{key:'nightjar-observing-diary-v1',storageArea:localStorage}))});
