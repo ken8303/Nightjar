@@ -58,3 +58,10 @@ test('manual local horizons interpolate through north and filter samples and int
  const result=deepSkyOpportunity(rows,false,()=>true,profile);assert.equal(result.minutes,15);assert.equal(+result.best.time,+rows[1].time);assert.equal(result.windows.length,1);
  assert.throws(()=>localHorizonAltitude([0],0),/eight horizon heights/);assert.throws(()=>localHorizonAltitude(Array(8),0),/eight horizon heights/);assert.throws(()=>compareDeepSky([findDeepSky('M31','')[0]],date,place,false,[91,0,0,0,0,0,0,0]),/eight horizon heights/);
 });
+test('manual horizon drafts accept locale decimals without accepting incomplete or malformed values',async()=>{
+ const {parseLocalHorizonDraft}=await vite.ssrLoadModule('/lib/local-horizon.ts');
+ const draft=['12,5','0','９０','0.25','0','0','0','0'],before=[...draft];
+ assert.deepEqual(parseLocalHorizonDraft(draft),[12.5,0,90,.25,0,0,0,0]);assert.deepEqual(draft,before);
+ for(const invalid of ['',',','-','91','-0,1','0x10','1,2,3'])assert.equal(parseLocalHorizonDraft([invalid,...Array(7).fill('0')]),null);
+ assert.equal(parseLocalHorizonDraft(Array(7).fill('0')),null);
+});
