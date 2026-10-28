@@ -14,7 +14,7 @@ A responsive stargazing planner built with React, TypeScript, Vinext and Astrono
 - Search the 42 existing sky targets by name, including Unicode-compatible and spaced text. Filter by horizon visibility or a strict altitude above 30°, inspect altitude/azimuth, and highlight a target in the atlas.
 - Twelve-hour Moon/planet altitude table: only objects with a sample above 30° are shown, ordered by peak altitude. Peak-hour jumps, daylight context and above-30° shortcuts after civil twilight share target selection with the atlas. Mobile controls browse the same order; chart/details links preserve the selected object and time.
 - Moon phase, illumination and horizon position; next Sun/Moon rise/set and astronomical darkness crossings.
-- Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps and stale-data warnings.
+- Latest NOAA OVATION aurora outlook, hemisphere grid, local model estimate, timestamps, stale-data warnings and separate cloud context at the actual fully dark NOAA forecast time.
 - Typical annual meteor peak windows with calculated Moon illumination and downloadable all-day calendar events. Recommendations include only complete hours remaining after the selected time, and move to the next annual occurrence when the site-local window has ended. Occurrences beyond supported UTC years 1–9999 are omitted with a boundary notice.
 - Golden-hour and blue-hour windows for morning/evening, based on Sun altitude and the shared observing time. The Milky Way direction marker uses galactic longitude/latitude zero in a defined J2000 frame, transformed to the observing date; it marks a regional sightline.
 - Camera field-of-view, 35 mm equivalent focal length, image scale and guiding RMS conversion.
