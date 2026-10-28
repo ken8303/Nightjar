@@ -180,3 +180,5 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .cloud-model-comparison h2{font-size:20px;margin:0 0 10px}.cloud-model-comparison dl{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}.cloud-model-comparison dl div{min-width:140px;padding:12px;border:1px solid #49616a;border-radius:8px}.cloud-model-comparison dt{font-size:13px;color:#a9bdc6}.cloud-model-comparison dd{margin:5px 0 0;font-size:22px;color:#c1df93}.cloud-model-comparison time{overflow-wrap:anywhere}
 
 .target-constellation-filter{display:flex;flex-direction:column;gap:10px;font-size:14px;min-width:0}.target-constellation-filter select{min-height:44px;width:100%;padding:10px;border:1px solid #36505d;background:#0b1921;border-radius:6px;color:#d5e1e7}
+
+.light-pollution-saved-toggle{display:flex;align-items:center;gap:10px;min-height:44px;margin:10px 0;color:#d5e1e7}.light-pollution-saved-toggle input{width:20px;height:20px;accent-color:#c9e289}

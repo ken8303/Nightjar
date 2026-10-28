@@ -12,6 +12,20 @@ export function hasLightPollutionCoverage(latitude:number,longitude:number){
  return Number.isFinite(latitude)&&Number.isFinite(longitude)&&latitude>=lightPollutionAtlas.south&&latitude<lightPollutionAtlas.north&&longitude>=-180&&longitude<=180;
 }
 
+// Group exact coordinate aliases so overlapping saved names remain readable.
+// The map's Mercator view is bounded at ±85°; do not move polar sites.
+export function savedMapMarkers(sites:readonly {name:string;latitude:number;longitude:number}[],current:{latitude:number;longitude:number}){
+ const groups=new Map<string,{latitude:number;longitude:number;names:string[];omittedNames:number}>();let outside=0,selected=0;
+ for(const site of sites){
+  if(!Number.isFinite(site.latitude)||Math.abs(site.latitude)>85||!Number.isFinite(site.longitude)||Math.abs(site.longitude)>180){outside++;continue}
+  const lon=site.longitude===180?-180:site.longitude,currentLon=current.longitude===180?-180:current.longitude;
+  if(site.latitude===current.latitude&&lon===currentLon){selected++;continue}
+  const key=`${site.latitude},${lon}`,group=groups.get(key);
+  if(group){if(group.names.length<20)group.names.push(site.name);else group.omittedNames++}else groups.set(key,{latitude:site.latitude,longitude:lon,names:[site.name],omittedNames:0});
+ }
+ const all=[...groups.values()];return {markers:all.slice(0,200),omitted:Math.max(0,all.length-200),outside,selected};
+}
+
 // Provider's expanded colour scale. Ratios are artificial / assumed natural
 // zenith brightness; the natural reference is 22.0 mag/arcsec². The upper
 // latitude is exclusive, matching the provider's numeric tile domain.

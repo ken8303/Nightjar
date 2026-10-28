@@ -1,9 +1,9 @@
 "use client";
 
-import {useEffect,useId,useRef,useState} from 'react';
+import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import type {Map as LeafletMap,TileLayer} from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import {lightPollutionAtlas,mapTileHealth,createMapTileTracker,mapCentreSite} from '@/lib/light-pollution';
+import {lightPollutionAtlas,mapTileHealth,createMapTileTracker,mapCentreSite,savedMapMarkers} from '@/lib/light-pollution';
 import type {Place} from '@/lib/sky';
 import {deferFocusAndScroll} from '@/lib/deferred-focus';
 import LightPollutionReading from './light-pollution-sample';
@@ -12,11 +12,13 @@ import {watchForegroundDelay} from '@/lib/foreground-delay';
 
 type Health=ReturnType<typeof mapTileHealth>;
 const emptyHealth=():Health=>({loading:0,loaded:0,failed:0});
-export default function LightPollutionMap({latitude,longitude,name,onChoose}:{latitude:number;longitude:number;name:string;onChoose:(place:Place)=>void}){
+export default function LightPollutionMap({latitude,longitude,name,onChoose,savedSites,savedUnavailable}:{latitude:number;longitude:number;name:string;onChoose:(place:Place)=>void;savedSites:Place[];savedUnavailable:boolean}){
  const host=useRef<HTMLDivElement>(null),map=useRef<LeafletMap|null>(null),overlay=useRef<TileLayer|null>(null);
  const [opacity,setOpacity]=useState(60),[attempt,setAttempt]=useState(0),[error,setError]=useState(''),[ready,setReady]=useState(false),[slow,setSlow]=useState(false);
  const [baseHealth,setBaseHealth]=useState(emptyHealth),[modelHealth,setModelHealth]=useState(emptyHealth);
  const [moving,setMoving]=useState(false),[selectionError,setSelectionError]=useState('');
+ const [showSaved,setShowSaved]=useState(false),[markerError,setMarkerError]=useState(false);
+ const savedMarkers=useMemo(()=>savedMapMarkers(savedSites,{latitude,longitude}),[savedSites,latitude,longitude]);
  const [centre,setCentre]=useState({latitude,longitude,zoom:7});
  const instructions=useId(),status=useId(),opacityId=useId();
  useEffect(()=>{
@@ -55,6 +57,19 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose}:{la
   return()=>{disposed=true;stopDelay();resize?.disconnect();trackers.forEach(tracker=>tracker.dispose());instance?.remove();map.current=null;overlay.current=null};
  },[latitude,longitude,attempt]);
  useEffect(()=>{overlay.current?.setOpacity(opacity/100)},[opacity,ready,attempt]);
+ useEffect(()=>{
+  if(!ready||!showSaved||!map.current)return;
+  let disposed=false,layer:import('leaflet').LayerGroup|null=null;
+  import('leaflet').then(L=>{
+   if(disposed||!map.current)return;
+   layer=L.layerGroup().addTo(map.current);
+   for(const marker of savedMarkers.markers){
+    const label=document.createElement('div');label.textContent=[...marker.names,...(marker.omittedNames?[`${marker.omittedNames} additional names at this location; see Saved places.`]:[])].join('\n');label.style.whiteSpace='pre-line';
+    L.circleMarker([marker.latitude,marker.longitude],{radius:9,color:'#fff',weight:2,fillColor:'#f5ad69',fillOpacity:1}).bindPopup(label).addTo(layer);
+   }
+  }).catch(()=>{if(!disposed)setMarkerError(true)});
+  return()=>{disposed=true;layer?.remove()};
+ },[ready,showSaved,savedMarkers,attempt]);
  const retry=(owner:Element)=>{setMoving(false);setSelectionError('');setCentre({latitude,longitude,zoom:7});setError('');setReady(false);setSlow(false);setBaseHealth(emptyHealth());setModelHealth(emptyHealth());setAttempt(value=>value+1);deferFocusAndScroll(()=>host.current,{owner})};
  const cell=lightPollutionCell(centre.latitude,centre.longitude);
  const candidate=mapCentreSite(centre.latitude,centre.longitude);
@@ -69,6 +84,9 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose}:{la
    <button type="button" className="button" disabled={!ready||centre.zoom<=2} onClick={()=>map.current?.zoomOut()}>Zoom out</button>
    <button type="button" className="button" disabled={!ready} onClick={()=>map.current?.setView([latitude,longitude===180?-180:longitude],7)}>Return to selected site</button>
   </div>
+  <label className="light-pollution-saved-toggle"><input type="checkbox" checked={showSaved} onChange={event=>{setMarkerError(false);setShowSaved(event.target.checked)}}/> Show saved observing sites</label>
+  {showSaved&&!markerError&&<p className="footnote" role="status">Orange dots mark {savedMarkers.markers.length} saved {savedMarkers.markers.length===1?'location':'locations'}; tap a dot for its saved names. The outlined dot is the selected site. {savedMarkers.outside?`${savedMarkers.outside} saved ${savedMarkers.outside===1?'site is':'sites are'} outside the map’s latitude limits. `:''}{savedMarkers.omitted?`${savedMarkers.omitted} additional locations are omitted. `:''}{savedUnavailable?'Saved sites could not be refreshed; markers use the last readable list. ':''}Overlapping nearby dots may need zooming in. Tapping a dot does not change the selected site.</p>}
+  {showSaved&&markerError&&<p className="error" role="status">Saved-site markers could not be displayed. Close and reopen the map to retry.</p>}
   <div className="light-pollution-map-frame"><div ref={host} tabIndex={0} role="region" aria-label={`Light-pollution map around ${name}`} aria-describedby={instructions} className="light-pollution-map-canvas"/><span className="light-pollution-crosshair" aria-hidden="true"/></div>
   <p className="light-pollution-attribution">Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors<span className="sr-only"> (opens in a new tab)</span></a> · Sky brightness © <a href={lightPollutionAtlas.source} target="_blank" rel="noreferrer">David Lorenz<span className="sr-only"> (opens in a new tab)</span></a>, 2025 · <a href="/licenses/leaflet.txt" target="_blank" rel="noreferrer">Leaflet licence<span className="sr-only"> (opens in a new tab)</span></a></p>
   <label className="light-pollution-opacity" htmlFor={opacityId}>Model opacity: {opacity}%<input id={opacityId} type="range" min="0" max="100" step="10" value={opacity} onChange={event=>setOpacity(Number(event.target.value))}/></label>
