@@ -50,10 +50,10 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
   if(!night.best)return;
   try{
    const best=night.best;
-   const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone:place.timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination,weather:{fetchedAt,refreshing:loading,refreshFailed:Boolean(error)}});
+   const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone:place.timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination,nightOnly:true,weather:{fetchedAt,refreshing:loading,refreshFailed:Boolean(error)}});
    downloadFile(new Blob([data],{type:'text/calendar;charset=utf-8'}),`nightjar-${night.key}.ics`);
    setDownloadStatus(`Calendar file prepared for ${windowLabel(best.date,best.hours)}. Check that it arrived before opening it in your calendar app.`);
-  }catch{setDownloadStatus('The calendar file could not be created. Please try again.')}
+  }catch(error){setDownloadStatus(error instanceof Error?error.message:'The calendar file could not be created. Please try again.')}
  }
  return <section className="panel seven-night-outlook" aria-labelledby="seven-night-title">
   <div className="section-label"><span id="seven-night-title">THE NEXT SEVEN NIGHTS</span><CalendarDays size={18}/></div>
