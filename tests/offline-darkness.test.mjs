@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 import {createServer} from './vite-test-server.mjs';
-import {offlineDarkness,offlineDeepSkyPosition,offlineBrightPosition} from '../public/offline-darkness.mjs';
+import {offlineDarkness,offlineDeepSkyPosition,offlineBrightPosition,offlineDeepSkyBest} from '../public/offline-darkness.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {darknessSummaryLines}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
@@ -48,4 +48,12 @@ test('offline bright-star and Moon positions match the planner and reject daylig
  const expectedMoon=sky.bodyPosition(sky.A.Body.Moon,date,site),actualMoon=offlineBrightPosition(time,site,'Moon');
  for(const [a,b] of [[actualStar,expectedStar],[actualMoon,expectedMoon]]){assert(Math.abs(a.altitude-b.altitude)<1e-9);assert(Math.abs(a.azimuth-b.azimuth)<1e-9)}
  assert.throws(()=>offlineBrightPosition('2026-10-27T12:00:00.000Z',site,'Moon'),/only during full astronomical darkness/);assert.throws(()=>offlineBrightPosition(time,site,'Legacy target'),/not in the offline catalogue/);
+});
+
+test('offline best deep-sky sample matches the planner and remains fully dark',async()=>{
+ const {deepSkyCatalogue,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const site={name:'London',latitude:51.5,longitude:0},time='2026-10-27T00:00:00.000Z';
+ for(const id of ['M31','NGC7000']){const expected=bestDeepSkyTime(deepSkyCatalogue.find(target=>target.id===id),new Date(time),site),actual=offlineDeepSkyBest(time,site,id);assert.equal(actual?.time,expected?.date.toISOString());if(actual){assert(sky.isAstronomicalNight(new Date(actual.time),site));assert(actual.altitude>30);assert(Math.abs(actual.altitude-expected.altitude)<1e-9)}}
+ assert.equal(offlineDeepSkyBest('2026-06-21T00:00:00.000Z',{name:'South Pole',latitude:-90,longitude:0},'M31'),null);
+ assert.throws(()=>offlineDeepSkyBest('2026-10-27T12:00:00.000Z',site,'M31'),/full astronomical darkness/);assert.throws(()=>offlineDeepSkyBest(time,site,'NGC99999'),/not in the offline catalogue/);
 });

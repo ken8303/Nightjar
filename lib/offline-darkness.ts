@@ -1,5 +1,6 @@
 /*! Deep-sky coordinates adapted from OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0: https://github.com/mattiaverga/OpenNGC ; https://creativecommons.org/licenses/by-sa/4.0/ */
 import {darknessSummaryLines} from './darkness-remaining';
+import {bestDeepSkyTime} from './deep-sky';
 import {validObservingDate} from './observing-time';
 import {A,bodyPosition,isAstronomicalNight,j2000Position,nextAstronomicalDarkness,skyBodies,stars,type Place} from './sky';
 import messier from '../data/messier.json';
@@ -37,4 +38,14 @@ export function offlineBrightPosition(time:string,place:Place,name:string){
  if(!body)throw Error('This target is not in the offline catalogue.');
  const position=bodyPosition(body as A.Body,new Date(time),place);
  return {altitude:position.altitude,azimuth:position.azimuth};
+}
+
+// Match the planner's 15-minute samples and its strict darkness/altitude criteria.
+export function offlineDeepSkyBest(time:string,place:Place,id:string){
+ const {dark}=offlineDarknessDetails(time,place);
+ if(!dark)throw Error('Start from a time during full astronomical darkness.');
+ const target=[...messier,...additional].find(item=>item.id===id);
+ if(!target)throw Error('This target is not in the offline catalogue.');
+ const best=bestDeepSkyTime(target,new Date(time),place);
+ return best?{time:best.date.toISOString(),altitude:best.altitude,azimuth:best.azimuth}:null;
 }
