@@ -29,8 +29,9 @@ test('early supported years remain intact and unsupported inputs are rejected',(
   assert.throws(()=>nextLunarPhases(new Date(value)),/UTC years 1–9999/);assert.throws(()=>nextLunarEclipses(new Date(value)),/UTC years 1–9999/);
  }
 });
-test('an eclipse stays available within its peak minute and expires just beyond that tolerance',()=>{
+test('an ongoing eclipse stays available through its final contact and expires after its minute',()=>{
  const first=nextLunarEclipses(new Date('2026-10-11T20:00:00Z'))[0];
- for(const elapsed of [0,59999,60000])assert.equal(+nextLunarEclipses(new Date(+first.peak.date+elapsed))[0].peak.date,+first.peak.date);
- assert(+nextLunarEclipses(new Date(+first.peak.date+60001))[0].peak.date>+first.peak.date);
+ const end=+first.peak.date+first.sd_penum*60000;
+ for(const instant of [+first.peak.date,+first.peak.date+60001,Math.floor(end),Math.floor(end)+59999])assert.equal(+nextLunarEclipses(new Date(instant))[0].peak.date,+first.peak.date);
+ assert(+nextLunarEclipses(new Date(Math.ceil(end)+60001))[0].peak.date>+first.peak.date);
 });
