@@ -67,8 +67,11 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
   const cloud=index>=0?hourly?.cloud_cover?.[index]:null;
   return typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?[cloud]:[];
  });
- const moon=moonInfo(utcDate(year,event.month,event.day,12),place);
- return {darkHours:dark.length,moonFreeHours:moonFree.length,window:longest,moonIllumination:moon.illumination,cloudCover:cloudValues.length?Math.round(cloudValues.reduce((sum,n)=>sum+n,0)/cloudValues.length):null,cloudForecastHours:cloudValues.length,cloudSampleHours:sampleForWeather.length,cloudUsesMoonFreeHours:moonFree.length>0};
+ // Show Moon illumination only at a remaining fully dark observing time.
+ // Prefer the proposed Moon-free window, then the first remaining dark hour.
+ const moonIlluminationTime=longest?.start??dark[0]?.date??null;
+ const moonIllumination=moonIlluminationTime?moonInfo(moonIlluminationTime,place).illumination:null;
+ return {darkHours:dark.length,moonFreeHours:moonFree.length,window:longest,moonIllumination,moonIlluminationTime,cloudCover:cloudValues.length?Math.round(cloudValues.reduce((sum,n)=>sum+n,0)/cloudValues.length):null,cloudForecastHours:cloudValues.length,cloudSampleHours:sampleForWeather.length,cloudUsesMoonFreeHours:moonFree.length>0};
 }
 
 export function meteorCloudSummary(conditions:ReturnType<typeof meteorConditions>){
