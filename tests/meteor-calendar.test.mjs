@@ -6,7 +6,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {utcDate}=await vite.ssrLoadModule('/lib/utc-date.ts');
 const {meteorCalendar}=await vite.ssrLoadModule('/lib/calendar.ts');
-const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary,upcomingMeteorOccurrences}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
+const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary,meteorHourCloud,upcomingMeteorOccurrences}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
 test('meteor dates and next-year selection preserve early years rather than adding 1900',()=>{
  for(const year of [1,99,100,2026]){
   const padded=String(year).padStart(4,'0');
@@ -76,6 +76,18 @@ test('meteor cloud estimates report complete, partial and missing coverage witho
  const elapsed=meteorConditions(event,2026,place,hourly,new Date('2026-12-14T12:00:00Z'));
  assert.equal(elapsed.cloudSampleHours,0);assert.equal(elapsed.cloudForecastHours,0);assert.equal(meteorCloudSummary(elapsed),'No remaining dark hours to check against the cloud forecast.');
  assert.deepEqual(hourly,original);
+});
+test('meteor cloud hours require complete coverage and weight fractional-offset forecast intervals',()=>{
+ const start=new Date('2026-12-14T00:00:00Z'),seconds=+start/1000;
+ assert.equal(meteorHourCloud({time:[seconds-1800,seconds+1800],cloud_cover:[10,90]},start),50);
+ assert.equal(meteorHourCloud({time:[seconds-900,seconds+2700],cloud_cover:[20,100]},start),40);
+ assert.equal(meteorHourCloud({time:[seconds],cloud_cover:[0]},start),0);
+ for(const hourly of [undefined,{time:[seconds-1800],cloud_cover:[10]},{time:[seconds-1800,seconds+1800],cloud_cover:[10,null]},{time:[seconds-1800,seconds+5400],cloud_cover:[10,90]},{time:[seconds-1800,seconds+1800],cloud_cover:[10,101]}])assert.equal(meteorHourCloud(hourly,start),null);
+ const event=meteorEvents.find(event=>event.name==='Geminids'),place={name:'Polar QA',latitude:90,longitude:0,timezone:'UTC'},baseline=meteorConditions(event,2026,place);
+ const first=baseline.window?.start??baseline.moonIlluminationTime;assert(first);
+ const t=+first/1000,conditions=meteorConditions(event,2026,place,{time:[t-1800,t+1800],cloud_cover:[10,90]});
+ assert.equal(conditions.cloudForecastHours,1);assert.equal(conditions.cloudCover,50);assert(conditions.cloudSampleHours>1);
+ assert.match(meteorCloudSummary(conditions),/Partial coverage/);
 });
 
 test('upcoming meteor cards contain no year-10000 occurrence at the final supported date',()=>{

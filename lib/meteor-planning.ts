@@ -14,6 +14,22 @@ export const meteorEvents=[
 ] as const;
 
 export type MeteorEvent=(typeof meteorEvents)[number];
+type HourlyCloud={time:number[];cloud_cover:(number|null)[]};
+
+// A UTC observing hour can overlap two site-local forecast hours. Require
+// coverage of the whole interval and weight each estimate by its overlap.
+export function meteorHourCloud(hourly:HourlyCloud|undefined,start:Date){
+ const first=+start,end=first+3600000;
+ if(!hourly||!validObservingDate(start)||!validObservingDate(new Date(end)))return null;
+ let index=forecastHourIndex(hourly.time,start),cursor=first,total=0,previous:number|null=null;
+ while(cursor<end){
+  if(index<0||index>=hourly.time.length)return null;
+  const hour=hourly.time[index]*1000,cloud=hourly.cloud_cover[index];
+  if(!Number.isFinite(hour)||hour>cursor||cursor>=hour+3600000||previous!==null&&hour!==previous+3600000||typeof cloud!=='number'||!Number.isFinite(cloud)||cloud<0||cloud>100)return null;
+  const next=Math.min(end,hour+3600000);total+=cloud*(next-cursor);cursor=next;previous=hour;index++;
+ }
+ return total/3600000;
+}
 export function nextMeteorYear(event:MeteorEvent,from:Date,timezone='UTC'){
  const year=from.getUTCFullYear();
  const noon=utcDate(year,event.month,event.day,12);
@@ -35,7 +51,7 @@ function localDateHour(date:Date,formatter:Intl.DateTimeFormat){
  const number=(type:string)=>Number(parts.find(part=>part.type===type)?.value);
  return {day:number('year')*10000+number('month')*100+number('day'),hour:number('hour'),minute:number('minute')};
 }
-export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourly?:{time:number[];cloud_cover:(number|null)[]},from?:Date){
+export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourly?:HourlyCloud,from?:Date){
  const timezone=place.timezone||'UTC';
  const dayFormatter=new Intl.DateTimeFormat('en-US',{timeZone:timezone,year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'});
  const firstLocal=utcDate(year,event.month,event.day-1);
@@ -63,9 +79,8 @@ export function meteorConditions(event:MeteorEvent,year:number,place:Place,hourl
  }
  const sampleForWeather=moonFree.length?moonFree:dark;
  const cloudValues=sampleForWeather.flatMap(sample=>{
-  const index=forecastHourIndex(hourly?.time,sample.date);
-  const cloud=index>=0?hourly?.cloud_cover?.[index]:null;
-  return typeof cloud==='number'&&Number.isFinite(cloud)&&cloud>=0&&cloud<=100?[cloud]:[];
+  const cloud=meteorHourCloud(hourly,sample.date);
+  return cloud===null?[]:[cloud];
  });
  // Show Moon illumination only at a remaining fully dark observing time.
  // Prefer the proposed Moon-free window, then the first remaining dark hour.
