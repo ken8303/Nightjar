@@ -30,7 +30,7 @@ function createVisibilityBrowsing(){
  return browsingStore<{body:string|null}>({body:null});
 }
 export function createBrightTargetBrowsing(){
- return {...browsingStore({query:'',aboveOnly:false,aboveThirty:false,savedOnly:false}),visibility:createVisibilityBrowsing()};
+ return {...browsingStore({query:'',constellation:'',aboveOnly:false,aboveThirty:false,savedOnly:false}),visibility:createVisibilityBrowsing()};
 }
 export type DeepSkyBrowsing=ReturnType<typeof createDeepSkyBrowsing>;
 export type BrightTargetBrowsing=ReturnType<typeof createBrightTargetBrowsing>;

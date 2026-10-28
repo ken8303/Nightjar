@@ -25,7 +25,7 @@ test('snapshots are stable until a meaningful change and redundant updates do no
  assert.equal(store.getSnapshot(),initial);store.update({});store.update({query:'',aboveOnly:false});assert.equal(calls,0);assert.equal(store.getSnapshot(),initial);
  store.update({query:'Vega',savedOnly:true});const changed=store.getSnapshot();assert.notEqual(changed,initial);assert.equal(calls,1);
  store.update({query:'Vega'});assert.equal(store.getSnapshot(),changed);assert.equal(calls,1);
- store.update({aboveThirty:true});assert.equal(store.getSnapshot().query,'Vega');assert.equal(store.getSnapshot().savedOnly,true);stop();
+ store.update({aboveThirty:true,constellation:'Lyra'});assert.equal(store.getSnapshot().query,'Vega');assert.equal(store.getSnapshot().savedOnly,true);assert.equal(store.getSnapshot().constellation,'Lyra');assert.equal(createBrightTargetBrowsing().getSnapshot().constellation,'');stop();
 });
 
 test('new planner sessions and the two catalogues keep independent browsing',()=>{
