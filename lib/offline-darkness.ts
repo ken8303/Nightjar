@@ -1,8 +1,8 @@
 /*! Deep-sky coordinates adapted from OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0: https://github.com/mattiaverga/OpenNGC ; https://creativecommons.org/licenses/by-sa/4.0/ */
 import {darknessSummaryLines} from './darkness-remaining';
-import {bestDeepSkyTime} from './deep-sky';
+import {bestDeepSkyTime,deepSkySampleTimes} from './deep-sky';
 import {validObservingDate} from './observing-time';
-import {A,bodyPosition,isAstronomicalNight,j2000Position,nextAstronomicalDarkness,skyBodies,stars,type Place} from './sky';
+import {A,bodyPosition,isAstronomicalNight,j2000Position,nextAstronomicalDarkness,skyBodies,stars,sunAltitude,type Place} from './sky';
 import messier from '../data/messier.json';
 import additional from '../data/additional-deep-sky.json';
 
@@ -48,4 +48,19 @@ export function offlineDeepSkyBest(time:string,place:Place,id:string){
  if(!target)throw Error('This target is not in the offline catalogue.');
  const best=bestDeepSkyTime(target,new Date(time),place);
  return best?{time:best.date.toISOString(),altitude:best.altitude,azimuth:best.azimuth}:null;
+}
+
+// Solar-system positions change with time; calculate them at every dark sample.
+export function offlineBrightBest(time:string,place:Place,name:string){
+ const {dark}=offlineDarknessDetails(time,place);
+ if(!dark)throw Error('Start from a time during full astronomical darkness.');
+ const star=stars.find(item=>item[0]===name),body=skyBodies.find(item=>String(item)===name);
+ if(!star&&!body)throw Error('This target is not in the offline catalogue.');
+ let best:{time:string;altitude:number;azimuth:number}|null=null;
+ for(const date of deepSkySampleTimes(new Date(time))){
+  if(!(sunAltitude(date,place)<-18))continue;
+  const position=star?j2000Position(star[1],star[2],date,place):bodyPosition(body as A.Body,date,place);
+  if(position.altitude>30&&(!best||position.altitude>best.altitude))best={time:date.toISOString(),altitude:position.altitude,azimuth:position.azimuth};
+ }
+ return best;
 }

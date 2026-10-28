@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 import {createServer} from './vite-test-server.mjs';
-import {offlineDarkness,offlineDeepSkyPosition,offlineBrightPosition,offlineDeepSkyBest} from '../public/offline-darkness.mjs';
+import {offlineDarkness,offlineDeepSkyPosition,offlineBrightPosition,offlineDeepSkyBest,offlineBrightBest} from '../public/offline-darkness.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {darknessSummaryLines}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
@@ -56,4 +56,17 @@ test('offline best deep-sky sample matches the planner and remains fully dark',a
  for(const id of ['M31','NGC7000']){const expected=bestDeepSkyTime(deepSkyCatalogue.find(target=>target.id===id),new Date(time),site),actual=offlineDeepSkyBest(time,site,id);assert.equal(actual?.time,expected?.date.toISOString());if(actual){assert(sky.isAstronomicalNight(new Date(actual.time),site));assert(actual.altitude>30);assert(Math.abs(actual.altitude-expected.altitude)<1e-9)}}
  assert.equal(offlineDeepSkyBest('2026-06-21T00:00:00.000Z',{name:'South Pole',latitude:-90,longitude:0},'M31'),null);
  assert.throws(()=>offlineDeepSkyBest('2026-10-27T12:00:00.000Z',site,'M31'),/full astronomical darkness/);assert.throws(()=>offlineDeepSkyBest(time,site,'NGC99999'),/not in the offline catalogue/);
+});
+
+test('offline bright-target opportunities recalculate moving bodies and use only fully dark samples',async()=>{
+ const {deepSkySampleTimes}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ const site={name:'London',latitude:51.5,longitude:0},time='2026-10-27T00:00:00.000Z';
+ for(const name of ['Polaris','Moon','Jupiter']){
+  const star=sky.stars.find(item=>item[0]===name),body=sky.skyBodies.find(item=>String(item)===name);
+  const samples=deepSkySampleTimes(new Date(time)).filter(date=>sky.isAstronomicalNight(date,site)).map(date=>({date,...(star?sky.j2000Position(star[1],star[2],date,site):sky.bodyPosition(body,date,site))})).filter(item=>item.altitude>30);
+  const expected=samples.reduce((best,item)=>!best||item.altitude>best.altitude?item:best,null),actual=offlineBrightBest(time,site,name);
+  assert.equal(actual?.time,expected?.date.toISOString());if(actual){assert(sky.isAstronomicalNight(new Date(actual.time),site));assert(Math.abs(actual.altitude-expected.altitude)<1e-9)}
+ }
+ assert.equal(offlineBrightBest('2026-06-21T00:00:00.000Z',{name:'South Pole',latitude:-90,longitude:0},'Polaris'),null);
+ assert.throws(()=>offlineBrightBest('2026-10-27T12:00:00.000Z',site,'Moon'),/full astronomical darkness/);assert.throws(()=>offlineBrightBest(time,site,'Unknown'),/not in the offline catalogue/);
 });
