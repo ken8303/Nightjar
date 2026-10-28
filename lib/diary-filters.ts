@@ -1,9 +1,10 @@
 import catalogue from '../data/messier.json';
+import additional from '../data/additional-deep-sky.json';
 import {type Observation} from './observing-diary';
 import {validObservingDate} from './observing-time';
 export type DiaryFilters={query:string;outcome:''|Observation['outcome'];from:string;through:string};
 export const emptyDiaryFilters:DiaryFilters={query:'',outcome:'',from:'',through:''};
-const names=new Map(catalogue.map(target=>[target.id,`${target.name} ${target.catalogue}`]));
+const names=new Map([...catalogue,...additional].map(target=>[target.id,[target.name,target.catalogue,...('crossReferences' in target?target.crossReferences??[]:[])].join(' ')]));
 const normalize=(text:string)=>text.normalize('NFKC').toLowerCase().replace(/[‘’]/g,"'").replace(/\bmessier(?=\s*\d)/g,'m').replace(/\b(m|ngc|ic)\s*0*(\d+)/g,'$1$2').replace(/\s+/g,' ').trim();
 export function diaryDateInput(value:string){return /^\d{8}$/.test(value)?`${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6)}`:value}
 function validDate(value:string){const date=new Date(value+'T00:00:00.000Z');return /^\d{4}-\d{2}-\d{2}$/.test(value)&&validObservingDate(date)&&date.toISOString().slice(0,10)===value}

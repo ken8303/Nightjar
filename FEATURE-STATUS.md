@@ -8,6 +8,8 @@ Current display policy, 24 October 2026: observing information is shown only wit
 
 Offline planning update: the saved-data fallback can calculate full darkness at a chosen saved site for the saved time, current device time or an entered UTC time without network access. It can also calculate supported saved-target positions and the best 15-minute sample for supported saved targets over the next 24 hours at a checked fully dark time; the full planner still cannot restart offline.
 
+Diary search covers names and listed cross-references across the curated deep-sky catalogue in the full planner. The offline recovery page searches the text shown in its saved-observation snapshot; it does not expand catalogue aliases.
+
 For exact test/build evidence and remaining release checks, use [BETA-HANDOFF.md](./BETA-HANDOFF.md) and [RELEASE-CHECKLIST.md](./RELEASE-CHECKLIST.md). Those records distinguish local work from the last successful GitHub validation and an actual Cloudflare deployment.
 
 ## Reference coverage
