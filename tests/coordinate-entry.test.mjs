@@ -50,9 +50,13 @@ test('pasted coordinate pairs preserve precision, explicit hemispheres and zero'
   ['-0, +0',{latitude:'-0',longitude:'+0'}],
   ['-90, 180',{latitude:'-90',longitude:'180'}],
   ['1e-5, -1.8e2',{latitude:'1e-5',longitude:'-1.8e2'}],
+  ['51.5,-0.1',{latitude:'51.5',longitude:'-0.1'}],
+  ['(−33.8,151.2)',{latitude:'-33.8',longitude:'151.2'}],
+  ['51,-1',{latitude:'51',longitude:'-1'}],
+  ['51,0.5',{latitude:'51',longitude:'0.5'}],
  ])assert.deepEqual(coordinatePairDraft(text),expected,text);
 });
 test('single decimal commas and malformed or out-of-bounds pairs cannot replace both fields',()=>{
- for(const text of ['51,5','51.5,-0.1','51.5,','51.5, ','(51.5, -0.1','51.5, -0.1)','91, 0','0, 181','51.5, -0.1, 3','51.5 N, 0.1 W','NaN, 0','Infinity, 0','51,5, -0,1','+-33.8, 151.2','0x10, 0','1e, 0','1'.repeat(201)+', 0','0'.repeat(81)+', 0','0, '+'0'.repeat(81)])assert.equal(coordinatePairDraft(text),null,text);
+ for(const text of ['51,5','-51,5','51,5e-1','51.5,','51.5, ','(51.5, -0.1','51.5, -0.1)','91, 0','0, 181','91.1,0','0,181.1','51.5, -0.1, 3','51.5 N, 0.1 W','NaN, 0','Infinity, 0','51,5, -0,1','+-33.8, 151.2','0x10, 0','1e, 0','1'.repeat(201)+', 0','0'.repeat(81)+', 0','0, '+'0'.repeat(81)])assert.equal(coordinatePairDraft(text),null,text);
  assert.equal(coordinateEntryValue('51,5','latitude'),51.5);
 });

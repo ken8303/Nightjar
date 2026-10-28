@@ -57,7 +57,7 @@ try{
   const stored=()=>page.evaluate(()=>({site:localStorage.getItem('nightjar-place'),saved:localStorage.getItem('nightjar-places'),notes:localStorage.getItem('nightjar-target-notes-v1')}));
   const original=await stored(),instant=await exact();await time.fill('');
   await activate(page.getByRole('button',{name:'Use my current location',exact:true}));
-  assert.equal(await paste(lat,' (−33.812345678, 151.209312345) '),false);
+  assert.equal(await paste(lat,' (−33.812345678,151.209312345) '),false);
   await page.waitForFunction(()=>document.querySelector('#manual-latitude')?.value==='33.812345678');
   assert.equal(await lon.inputValue(),'151.209312345');
   assert.equal(await page.getByRole('radio',{name:'South latitude',exact:true}).getAttribute('aria-checked'),'true');
@@ -70,7 +70,7 @@ try{
   assert.equal(await paste(lat,'51,5'),true);assert.equal(await paste(lon,'91, 0'),true);
   assert.equal(await lon.inputValue(),'151.209312345');
   await lat.fill('51,5');assert.equal(await lon.inputValue(),'151.209312345');
-  assert.equal(await paste(lon,'12.3456789, -179.987654321'),false);
+  assert.equal(await paste(lon,'12.3456789,-179.987654321'),false);
   await page.waitForFunction(()=>document.querySelector('#manual-longitude')?.value==='179.987654321');
   assert.equal(await lat.inputValue(),'12.3456789');
   assert.equal(await page.getByRole('radio',{name:'North latitude',exact:true}).getAttribute('aria-checked'),'true');

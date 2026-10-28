@@ -35,6 +35,6 @@ export default function CoordinateEntry({latitude,longitude,onLatitude,onLongitu
     <FieldDescription id={`${id}-help`}>0–{field.limit} decimal degrees. Signed values may also be pasted.</FieldDescription>
     {error&&<FieldError id={`${id}-error`} role="status">{error}</FieldError>}
    </Field>;
-  })}<p id="coordinate-pair-help" className="footnote">Paste a signed latitude, longitude pair into either field, using decimal points and a comma-space separator (for example, −33.8, 151.2). Review the fields before using them.</p>{pasteNotice&&<p className="muted" role="status">{pasteNotice}</p>}<Field orientation="horizontal" className="flex-wrap"><Button type="submit" className="min-h-11">Use coordinates</Button><Button type="button" variant="outline" className="min-h-11" onClick={()=>{setAttempted(false);setPasteNotice('');onClear();latitudeInput.current?.focus()}}>Clear coordinates</Button></Field></FieldGroup>
+  })}<p id="coordinate-pair-help" className="footnote">Paste a latitude, longitude pair into either field, using decimal points (for example, −33.8,151.2). For whole numbers, put a space after the comma. Review the fields before using them.</p>{pasteNotice&&<p className="muted" role="status">{pasteNotice}</p>}<Field orientation="horizontal" className="flex-wrap"><Button type="submit" className="min-h-11">Use coordinates</Button><Button type="button" variant="outline" className="min-h-11" onClick={()=>{setAttempted(false);setPasteNotice('');onClear();latitudeInput.current?.focus()}}>Clear coordinates</Button></Field></FieldGroup>
  </form>;
 }
