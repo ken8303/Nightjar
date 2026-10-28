@@ -9,6 +9,7 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 Completed locally:
 
 - [x] New NGC/IC objects work through search, saves, diary/drafts, backups, plans, comparison calendars and offline recovery. Four new-object and eight night-only browser journeys pass.
+- [x] Selected bright targets identify their IAU constellation during full darkness. Solar-system positions use the selected site/time; stellar positions use catalogue coordinates.
 - [x] ISS calendar export independently rejects twilight or dawn-crossing windows; cloud context avoids displaying forecast-hour timestamps outside full darkness.
 - [x] Meteor Moon illumination is tied to a remaining fully dark observing hour and is unavailable when no complete dark hour remains.
 - [x] An opt-in cloud comparison displays GFS and ICON global cloud-cover estimates for the selected fully dark time. Missing models remain unavailable; site/time changes retire the previous result.
