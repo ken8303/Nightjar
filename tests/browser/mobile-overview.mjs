@@ -23,7 +23,7 @@ try{
   const hours=page.locator('.next-panel .hour');await hours.nth(1).tap();
   assert.equal(await page.locator('#observing-time').inputValue(),'2026-10-27T01:00');
   assert.equal(await glance.locator('.mobile-night-glance-score strong').textContent(),`${await outlook.locator('.score-ring strong').textContent()} / 100`);
-  await outlook.getByRole('button',{name:/Plan best hour/}).tap();
+  const bestAction=glance.getByRole('button',{name:/Plan best hour/});assert((await bestAction.boundingBox()).height>=44);await bestAction.tap();
   assert.equal(await page.locator('#observing-time').inputValue(),'2026-10-27T03:00');
   fail=true;await outlook.getByRole('button',{name:'Refresh weather',exact:true}).tap();
   await page.waitForFunction(()=>document.querySelector('.mobile-night-glance-freshness')?.textContent?.includes('Refresh failed'));

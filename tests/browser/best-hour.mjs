@@ -20,7 +20,7 @@ try{
   ['desktop',{width:1365,height:1000}],['phone',{width:390,height:844}],
   ['narrow',{width:320,height:740}],['landscape',{width:640,height:320}],
   ['tablet-portrait',{width:820,height:1180}],['tablet-landscape',{width:1180,height:820}],
- ])for(const [kind,changed] of [
+ ])for(const surface of viewport.width<=700?['outlook','summary']:['outlook'])for(const [kind,changed] of [
   ['stale','2026-10-20T19:00:00.000Z'],['clock','2026-10-20T18:28:59.999Z'],['fresh','2026-10-20T18:59:59.999Z'],
  ]){
   const touch=name!=='desktop',page=await browser.newPage({viewport,hasTouch:touch,isMobile:touch});
@@ -49,7 +49,7 @@ try{
   await page.clock.setFixedTime(new Date('2026-10-20T18:30:00.000Z'));
   await page.goto(base.href,{waitUntil:'domcontentloaded'});
   assert.match(await page.title(),/Nightjar/);assert.equal(new URL(page.url()).origin,base.origin);
-  const panel=page.locator('.outlook'),action=panel.getByRole('button',{name:/^Plan best hour:/});
+  const outlook=page.locator('.outlook'),panel=surface==='summary'?page.locator('.mobile-night-glance'):outlook,action=panel.getByRole('button',{name:/^Plan best hour:/});
   const time=page.locator('#observing-time'),exact=()=>page.locator('.time-entry [aria-atomic=true]').textContent();
   const stored=()=>page.evaluate(()=>({site:localStorage.getItem('nightjar-place'),notes:localStorage.getItem('nightjar-target-notes-v1'),deep:localStorage.getItem('nightjar-deep-targets-v1')}));
   async function activate(control){if(touch)await control.tap();else await control.click()}
@@ -57,7 +57,7 @@ try{
   await action.scrollIntoViewIfNeeded();assert((await action.boundingBox()).height>=44);
   await page.clock.setFixedTime(new Date(changed));await activate(action);
   if(kind!=='fresh'){
-   const status=panel.locator('#best-hour-planning-status');await status.waitFor();
+   const status=panel.locator(surface==='summary'?'#mobile-best-hour-planning-status':'#best-hour-planning-status');await status.waitFor();
    assert((await status.textContent()).includes('Forecast freshness has changed'));
    assert.equal(await action.count(),0);assert.equal(await page.locator('.unsaved-view-warning').count(),0);
    assert.equal(await time.inputValue(),'');assert.equal(await exact(),before);assert.deepEqual(await stored(),saved);
@@ -65,8 +65,8 @@ try{
    assert((await recovery.boundingBox()).height>=44);
    if(evidence)await panel.screenshot({path:`${evidence}/best-hour-${name}-${kind}.png`});
    response='failed';await activate(recovery);
-   const retry=panel.getByRole('button',{name:'Retry forecast',exact:true});await retry.waitFor();
-   assert((await panel.locator('.forecast-freshness').textContent()).includes('Refresh failed'));
+   const retry=outlook.getByRole('button',{name:'Retry forecast',exact:true});await retry.waitFor();
+   assert((await outlook.locator('.forecast-freshness').textContent()).includes('Refresh failed'));
    assert.equal(await action.count(),0);assert.equal(await time.inputValue(),'');assert.equal(await exact(),before);assert.deepEqual(await stored(),saved);
    response='refreshed';await activate(retry);await action.waitFor();assert.equal(await status.count(),0);
    await activate(action);
@@ -85,7 +85,7 @@ try{
    assert.equal(await page.locator('.unsaved-view-warning').count(),0);assert.deepEqual(await stored(),saved);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
    assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
-   console.log(`${name}/${kind}: expired confirmation preserves edits and permits explicit historical time recovery PASS`);
+   console.log(`${name}/${surface}/${kind}: expired confirmation preserves edits and permits explicit historical time recovery PASS`);
    await page.close();continue;
   }
   const expected=kind==='fresh'?'2026-10-20T20:00':'2026-10-20T21:00';
@@ -93,7 +93,7 @@ try{
   assert((await exact()).includes(`${expected.replace('T',' ')}:00.000 UTC`));assert.deepEqual(await stored(),saved);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   assert.equal(await page.locator('vite-error-overlay,nextjs-portal').count(),0);assert.deepEqual(errors,[]);assert.deepEqual(logs,[]);
-  console.log(`${name}/${kind}: exact-tap best-hour eligibility, failed-refresh retry, edit review and saved-data retention PASS`);
+  console.log(`${name}/${surface}/${kind}: exact-tap best-hour eligibility, failed-refresh retry, edit review and saved-data retention PASS`);
   await page.close();
  }
 }finally{await browser.close()}

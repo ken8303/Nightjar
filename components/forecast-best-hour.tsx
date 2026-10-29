@@ -5,12 +5,12 @@ import {CalendarDays} from 'lucide-react';
 import {forecastFreshness} from '@/lib/forecast-freshness';
 import {forecastHourLabel} from '@/lib/weather-planning';
 
-type Props={best:{date:Date;score:number|null}|null;timezone:string;fetchedAt?:number;loading:boolean;error:string;stale:boolean;clockChanged:boolean;contextKey:string;onDate:(date:Date,fetchedAt:number)=>void;onRefresh:()=>void};
+type Props={best:{date:Date;score:number|null}|null;timezone:string;fetchedAt?:number;loading:boolean;error:string;stale:boolean;clockChanged:boolean;contextKey:string;onDate:(date:Date,fetchedAt:number)=>void;onRefresh:()=>void;statusId?:string};
 
-export default function ForecastBestHour({best,timezone,fetchedAt,loading,error,stale,clockChanged,contextKey,onDate,onRefresh}:Props){
+export default function ForecastBestHour({best,timezone,fetchedAt,loading,error,stale,clockChanged,contextKey,onDate,onRefresh,statusId='best-hour-planning-status'}:Props){
  const context=JSON.stringify([contextKey,best?+best.date:null,best?.score,fetchedAt,loading,error]);
  const [issue,setIssue]=useState<string|null>(null);
- if(issue===context)return <div className="notice best-hour-recovery"><p id="best-hour-planning-status" role="status">Forecast freshness has changed. Your observing time was kept. Refresh the forecast before planning the best hour.</p><button type="button" className="button" onClick={onRefresh} disabled={loading}>Refresh and review best hour</button></div>;
+ if(issue===context)return <div className="notice best-hour-recovery"><p id={statusId} role="status">Forecast freshness has changed. Your observing time was kept. Refresh the forecast before planning the best hour.</p><button type="button" className="button" onClick={onRefresh} disabled={loading}>Refresh and review best hour</button></div>;
  if(loading||error||stale||clockChanged||typeof fetchedAt!=='number'||!Number.isFinite(fetchedAt)||!best||best.score===null||best.score<=0)return null;
  const chosenDate=best.date;
  function plan(){
