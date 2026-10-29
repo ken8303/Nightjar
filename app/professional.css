@@ -361,6 +361,9 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .mobile-night-glance{display:none}
 .hourly-scroll-controls{display:none}
 .deep-sky-matches-shortcut{display:none}
+.search-results button>span{min-width:0;overflow-wrap:anywhere}
+.search-results button>svg{flex:none}
+.location-result-coordinates{font-variant-numeric:tabular-nums;line-height:1.5}
 .dashboard>.atlas-preview{grid-column:2;grid-row:1}
 .dashboard>.next-panel{grid-column:1/-1;grid-row:2;margin-top:0;min-width:0}
 
