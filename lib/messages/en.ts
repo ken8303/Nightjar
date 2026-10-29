@@ -1,7 +1,8 @@
 import {englishConstellationMessages} from './constellations/en';
 
 // Canonical messages. Placeholder names are shared across translations.
-export const englishMessages={
+// The pure initializer lets non-UI bundles omit the message catalogue.
+export const englishMessages=/* @__PURE__ */(()=>({
  ...englishConstellationMessages,
  'language.label':'Language',
  'language.storageError':'Language preference could not be saved; it applies for this visit.',
@@ -126,5 +127,26 @@ export const englishMessages={
  "pending.targetNotes":"target note edits",
  "pending.siteName":"site name edits",
  "pending.separator":", ",
-} as const;
+ "bestHour.freshnessChanged":"Forecast freshness has changed. Your observing time was kept. Refresh the forecast before planning the best hour.",
+ "bestHour.refresh":"Refresh and review best hour",
+ "bestHour.planLabel":"Plan best hour: {time}",
+ "bestHour.plan":"Plan best hour",
+ "hourly.key":"Score bars show the observing score out of 100; dashed means unavailable. A star indicates 0% forecast cloud; a cloud icon indicates some cloud.",
+ "hourly.keyboardHelp":"Use Left/Right or Home/End to browse hours, then Enter or Space to select.",
+ "hourly.swipe":"Swipe for more dark hours",
+ "hourly.earlierLabel":"Show earlier forecast hours",
+ "hourly.earlier":"Earlier",
+ "hourly.laterLabel":"Show later forecast hours",
+ "hourly.later":"Later",
+ "hourly.group":"Hourly forecast times",
+ "hourly.select":"Select {time}, score {score}, {cloud}, {temperature}",
+ "hourly.scoreUnavailable":"unavailable",
+ "hourly.score":"{score} out of 100",
+ "hourly.cloudUnavailable":"cloud cover unavailable",
+ "hourly.cloud":"{cloud}% cloud cover",
+ "hourly.temperatureUnavailable":"temperature unavailable",
+ "hourly.temperature":"{temperature} degrees Celsius",
+ "hourly.cloudShortUnavailable":"Cloud unavailable",
+ "hourly.cloudShort":"{cloud}% cloud",
+} as const))();
 export type MessageKey=keyof typeof englishMessages;

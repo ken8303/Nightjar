@@ -42,6 +42,8 @@ test('message catalogues retain matching placeholders and support safe increment
  const en=createTranslator('en'),zh=createTranslator('zh-Hant');
  assert.equal(en('siteDarkness.class',{class:3}),'Bortle class 3');assert.equal(zh('siteDarkness.class',{class:3}),'Bortle 3 級');
  assert.equal(zh('weather.failed',{error:'{stamp} <b>Cloud</b>'}),'無法取得預報：{stamp} <b>Cloud</b>');
+ assert.equal(en('hourly.select',{time:'01:00 GMT',score:en('hourly.score',{score:0}),cloud:en('hourly.cloud',{cloud:0}),temperature:en('hourly.temperatureUnavailable')}),'Select 01:00 GMT, score 0 out of 100, 0% cloud cover, temperature unavailable');
+ assert.equal(zh('hourly.select',{time:'01:00 GMT',score:zh('hourly.score',{score:0}),cloud:zh('hourly.cloud',{cloud:0}),temperature:zh('hourly.temperatureUnavailable')}),'選擇 01:00 GMT，評分 0／100，雲量 0%，氣溫無資料');
  const zones={original:'Europe/London',current:'UTC',range:''};assert.match(en('time.zoneChanged',zones),/still uses Europe\/London.*now UTC/);assert.match(zh('time.zoneChanged',zones),/仍使用 Europe\/London.*目前為 UTC/);
  const original=traditionalChineseMessages['siteDarkness.unrated'];
  try{delete traditionalChineseMessages['siteDarkness.unrated'];assert.equal(zh('siteDarkness.unrated'),'Not rated')}finally{traditionalChineseMessages['siteDarkness.unrated']=original}

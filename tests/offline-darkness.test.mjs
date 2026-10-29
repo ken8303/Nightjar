@@ -20,6 +20,14 @@ test('checked-in offline calculator is reproducible from the locked astronomy de
  const result=await build({absWorkingDir:root,entryPoints:['lib/offline-darkness.ts'],bundle:true,format:'esm',platform:'browser',alias:{'@':root},minify:true,legalComments:'inline',outfile:'public/offline-darkness.mjs',write:false});
  assert.deepEqual(Buffer.from(result.outputFiles[0].contents),await readFile(new URL('../public/offline-darkness.mjs',import.meta.url)));
 });
+test('adding interface messages does not change the offline calculator bundle',async()=>{
+ let injected=false;
+ const result=await build({absWorkingDir:root,entryPoints:['lib/offline-darkness.ts'],bundle:true,format:'esm',platform:'browser',alias:{'@':root},minify:true,legalComments:'inline',outfile:'public/offline-darkness.mjs',write:false,plugins:[{name:'extra-interface-message',setup(builder){builder.onLoad({filter:/[/\\]lib[/\\]messages[/\\]en\.ts$/},async({path})=>{
+  const contents=await readFile(path,'utf8'),needle=" 'language.label':'Language',";assert(contents.includes(needle));injected=true;
+  return {contents:contents.replace(needle," 'extra.message':'Additional interface message',\n"+needle),loader:'ts'};
+ })}}]});
+ assert(injected);assert.deepEqual(Buffer.from(result.outputFiles[0].contents),await readFile(new URL('../public/offline-darkness.mjs',import.meta.url)));
+});
 test('offline calculation excludes times at and after astronomical dawn',async()=>{
  const {A,observer,sunAltitude}=await vite.ssrLoadModule('/lib/sky.ts');
  const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'};

@@ -2,7 +2,8 @@ import type {MessageKey} from './en';
 import {traditionalChineseConstellationMessages} from './constellations/zh-hant';
 
 // Missing translations fall back to English; placeholder names must match English.
-export const traditionalChineseMessages={
+// The pure initializer lets non-UI bundles omit the message catalogue.
+export const traditionalChineseMessages=/* @__PURE__ */(()=>({
  ...traditionalChineseConstellationMessages,
  'language.label':'語言',
  'language.storageError':'無法儲存語言設定；本次使用期間仍會套用。',
@@ -127,4 +128,25 @@ export const traditionalChineseMessages={
  "pending.targetNotes":"目標筆記",
  "pending.siteName":"地點名稱",
  "pending.separator":"、",
-} satisfies Partial<Record<MessageKey,string>>;
+ "bestHour.freshnessChanged":"預報的時效已變更，觀測時間保持不變。請更新預報後再選擇最佳時間。",
+ "bestHour.refresh":"更新並重新查看最佳時間",
+ "bestHour.planLabel":"使用最佳時間：{time}",
+ "bestHour.plan":"使用最佳時間",
+ "hourly.key":"長條顯示滿分 100 的觀測評分；虛線表示資料不足。星號表示預報雲量為 0%，雲朵圖示表示有雲。",
+ "hourly.keyboardHelp":"使用方向鍵或 Home／End 瀏覽時段，再按 Enter 或空白鍵選擇。",
+ "hourly.swipe":"滑動查看更多黑夜時段",
+ "hourly.earlierLabel":"顯示較早的預報時段",
+ "hourly.earlier":"較早",
+ "hourly.laterLabel":"顯示較晚的預報時段",
+ "hourly.later":"較晚",
+ "hourly.group":"逐時預報",
+ "hourly.select":"選擇 {time}，評分 {score}，{cloud}，{temperature}",
+ "hourly.scoreUnavailable":"無資料",
+ "hourly.score":"{score}／100",
+ "hourly.cloudUnavailable":"雲量無資料",
+ "hourly.cloud":"雲量 {cloud}%",
+ "hourly.temperatureUnavailable":"氣溫無資料",
+ "hourly.temperature":"氣溫攝氏 {temperature} 度",
+ "hourly.cloudShortUnavailable":"雲量無資料",
+ "hourly.cloudShort":"雲量 {cloud}%",
+} satisfies Partial<Record<MessageKey,string>>))();
