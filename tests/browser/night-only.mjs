@@ -115,7 +115,7 @@ try{
     const dawn=A.SearchAltitude(A.Body.Sun,new A.Observer(place.latitude,place.longitude,0),1,new Date('2026-10-25T00:00Z'),1,-18).date;
     const beforeDawn=new Date(Math.floor((+dawn-120000)/60000)*60000);
     await page.locator('#observing-time').fill(beforeDawn.toISOString().slice(0,16));
-    const timeline=page.locator('.deep-sky-timeline');await timeline.locator('svg circle').first().waitFor();
+    const timeline=page.locator('.deep-sky-timeline');await timeline.locator('.deep-sky-isolated-marker').first().waitFor();
     assert.match(await timeline.textContent(),/Dots mark isolated dark samples/);
     await timeline.locator('.deep-sky-plot').screenshot({path:`/tmp/nightjar-isolated-dark-${name}.png`});
    }

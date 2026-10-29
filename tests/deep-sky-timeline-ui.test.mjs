@@ -9,19 +9,20 @@ const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},
 const {default:Timeline}=await vite.ssrLoadModule('/components/deep-sky-timeline.tsx');
 const render=suns=>renderToStaticMarkup(createElement(Timeline,{name:'M31',place:{name:'Fixture',latitude:51.5,longitude:0,timezone:'UTC'},onDate:()=>{},samples:suns.map((sun,index)=>({time:new Date(Date.parse('2026-10-24T00:00Z')+index*900000),sun,altitude:30+index,azimuth:180,ra:0,dec:0}))}));
 const count=(html,tag)=>(html.match(new RegExp(`<${tag}\\b`,'g'))||[]).length;
+const isolated=html=>(html.match(/class="deep-sky-isolated-marker"/g)||[]).length;
 test('isolated dark samples remain visible without joining across bright gaps',()=>{
  const html=render([-19,0,-19]);
- assert.equal(count(html,'circle'),2);assert.equal(count(html,'rect'),0);
+ assert.equal(isolated(html),2);assert.equal(count(html,'rect'),0);
  const path=html.match(/<path d="([^"]*)"/)[1];assert.equal((path.match(/M/g)||[]).length,2);assert(!path.includes('L'));
 });
 test('shading only joins adjacent dark samples and does not extend into twilight',()=>{
  const html=render([-19,-19,-18,0,-19]);
- assert.equal(count(html,'rect'),1);assert.equal(count(html,'circle'),1);
+ assert.equal(count(html,'rect'),1);assert.equal(isolated(html),1);
 });
 test('single dark samples render as points; exact -18 and brighter samples stay omitted',()=>{
- assert.equal(count(render([-19]),'circle'),1);
+ assert.equal(isolated(render([-19])),1);
  for(const suns of [[-18],[0],[-18,0,-6]]){
-  const html=render(suns);assert.equal(count(html,'circle'),0);assert.equal(count(html,'rect'),0);
+  const html=render(suns);assert.equal(isolated(html),0);assert.equal(count(html,'rect'),0);
   assert(!html.includes('aria-label="View M31 at'));
  }
 });
@@ -34,7 +35,7 @@ test('polar twilight between dark samples breaks both curve and shading',async()
  assert(samples.every(sample=>sample.sun<-18));assert(sunAltitude(transit,place)>-18);
  const html=renderToStaticMarkup(createElement(Timeline,{name:'M81',place,samples,onDate:()=>{}}));
  assert.equal(count(html,'rect'),0,'shading must not bridge the twilight crossing');
- assert.equal(count(html,'circle'),2,'both remaining dark samples must stay visible');
+ assert.equal(isolated(html),2,'both remaining dark samples must stay visible');
  assert(!html.match(/<path d="([^"]*)"/)[1].includes('L'));
 });
 

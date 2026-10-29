@@ -337,3 +337,21 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .lunar-phase-symbol{display:block;width:32px;height:32px;flex:none}.lunar-phase-note{margin:10px 0 0}
 
 .lunar-facts>div.lunar-illumination-fact{display:grid;grid-template-columns:1fr auto;gap:8px 14px}.lunar-illumination-track{grid-column:1/-1;height:8px;background:#34454a;border-radius:4px;overflow:hidden}.lunar-illumination-track i{display:block;height:100%;background:#c1df93;border-radius:4px}
+
+/* Consistent feedback for selectable visualizations; reduced motion stays static. */
+.aurora-legend{flex-wrap:wrap;gap:8px 16px;color:var(--text-secondary);font-size:12px}
+.aurora-legend span{display:inline-flex;align-items:center;gap:6px}
+.aurora-legend i{width:10px;height:10px;border-radius:50%;background:none;flex:none}
+.aurora-legend .aurora-key-low{background:#64baad}.aurora-legend .aurora-key-mid{background:#c9e289}.aurora-legend .aurora-key-high{background:#f5ad69}
+.hour.selected,.mobile-altitude-grid button[aria-pressed="true"],.deep-sky-hours button[aria-pressed="true"]{box-shadow:inset 0 0 0 1px #d4ee91}
+@media(prefers-reduced-motion:no-preference){
+ .hour,.mobile-altitude-grid button,.deep-sky-hours button,.quarter-grid button{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .12s ease}
+ .hour:active,.mobile-altitude-grid button:active,.deep-sky-hours button:active,.quarter-grid button:active{transform:scale(.98)}
+ .night-coverage-track i,.mobile-altitude-bar i,.lunar-illumination-track i{transition:width .25s ease}
+ .deep-compare-window-track i{transition:left .25s ease,width .25s ease}
+ .hour .bar i{transition:height .25s ease}
+ .sky-selection-ring{transform-box:fill-box;transform-origin:center;animation:sky-selection-reveal .22s ease-out}
+}
+@keyframes sky-selection-reveal{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.hour,.mobile-altitude-grid button,.deep-sky-hours button,.quarter-grid button,.night-coverage-track i,.mobile-altitude-bar i,.lunar-illumination-track i,.deep-compare-window-track i,.hour .bar i{transition:none!important}.sky-selection-ring{animation:none!important}}
+.deep-sky-isolated-marker{position:absolute;width:8px;height:8px;border-radius:50%;background:#c1df93;transform:translate(-50%,-50%)}
