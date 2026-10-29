@@ -15,6 +15,11 @@ try{
   await page.goto(base.href,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.documentElement.lang==='zh-Hant');
   await page.getByRole('button',{name:'開啟導覽選單'}).tap();await page.getByRole('dialog').getByRole('button',{name:'星空圖',exact:true}).tap();
   await page.getByRole('button',{name:'選擇已儲存的 M31',exact:true}).tap();
+  const search=page.locator('#deep-sky-browsing input[type=search]'),constellation=page.locator('#deep-sky-browsing select').nth(2);
+  assert.match(await constellation.locator('option[value=And]').textContent(),/仙女座/);await constellation.selectOption('And');await search.fill('仙女座');
+  assert.match(await page.locator('#deep-sky-results').innerText(),/M31/);assert.match(await page.locator('#deep-sky-object-details').innerText(),/仙女座 \(And\)/);
+  await page.locator('#planner-language').selectOption('en');assert.equal(await constellation.inputValue(),'And');assert.equal(await search.inputValue(),'仙女座');assert.match(await constellation.locator('option[value=And]').textContent(),/Andromeda/);assert.match(await page.locator('#deep-sky-results').innerText(),/M31/);
+  await page.locator('#planner-language').selectOption('zh-Hant');assert.equal(await constellation.inputValue(),'And');await search.fill('');await constellation.selectOption('');
   const timeline=page.locator('.deep-sky-timeline');assert.match(await timeline.locator('.deep-sky-plot-key').innerText(),/高度角.*30° 參考線.*連續完全天文黑夜/s);
   assert.match(await page.locator('#deep-sky-object-details').innerText(),/所選時間的月球/);assert.match(await page.locator('.catalogue-coordinates').innerText(),/赤經.*赤緯/s);
   const peak=await timeline.locator('.deep-sky-plot-summary time').getAttribute('datetime'),observer=new A.Observer(place.latitude,place.longitude,0),sun=A.Equator(A.Body.Sun,new Date(peak),observer,true,true);
