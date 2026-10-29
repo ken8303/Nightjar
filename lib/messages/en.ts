@@ -1,0 +1,27 @@
+// Canonical messages. Placeholder names are shared across translations.
+export const englishMessages={
+ 'language.label':'Language',
+ 'language.storageError':'Language preference could not be saved; it applies for this visit.',
+ 'siteDarkness.label':'Your sky darkness rating',
+ 'siteDarkness.unrated':'Not rated',
+ 'siteDarkness.class':'Bortle class {class}',
+ 'siteDarkness.darkest':' · darkest',
+ 'siteDarkness.brightest':' · brightest',
+ 'siteDarkness.help':'Rate a site from your own observations: class 1 is the darkest sky, class 9 is a bright inner-city sky. This stays on this device and does not change the weather score. ',
+ 'siteDarkness.link':'How to rate a sky ↗',
+ 'weather.refreshingPrevious':'Refreshing weather; previous forecast shown.',
+ 'weather.fetching':'Fetching weather…',
+ 'weather.failedPrevious':'Refresh failed; previous forecast shown. Retry to update it.',
+ 'weather.failed':'{error}',
+ 'weather.fetched':'Weather fetched {stamp}{age}.',
+ 'weather.staleAge':' · over 30 minutes ago',
+ 'weather.lastUpdate':' Last successful update: {stamp}.',
+ 'weather.retrySevenNights':'Retry seven-night forecast',
+ 'weather.refreshSevenNights':'Refresh seven-night forecast',
+ 'weather.retry':'Retry forecast',
+ 'weather.refresh':'Refresh weather',
+ 'weather.refreshing':'Refreshing…',
+ 'weather.staleNotice':'This weather was fetched over 30 minutes ago. Refresh before relying on its planning scores or cloud averages.',
+ 'weather.clockNotice':'The weather update time is ahead of your device clock. Its age cannot be confirmed; check your clock and refresh before relying on this forecast.',
+} as const;
+export type MessageKey=keyof typeof englishMessages;

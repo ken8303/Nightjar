@@ -8,8 +8,8 @@ const {parseLanguage,sectionLabel,moonPhaseLabel,deepSkyTypeLabel,pendingEditLab
 const {forecastHourLabel}=await vite.ssrLoadModule('/lib/weather-planning.ts');
 test('language preference accepts only supported values and keeps data identifiers stable',()=>{
  assert.equal(parseLanguage('zh-Hant'),'zh-Hant');for(const value of [null,'zh','zh-Hans',{},'en'])assert.equal(parseLanguage(value),'en');
- assert.equal(sectionLabel('sky','zh-Hant','Sky atlas'),'星空圖');assert.equal(sectionLabel('sky','en','Sky atlas'),'Sky atlas');assert.equal(sectionLabel('unknown','zh-Hant','Unknown'),'Unknown');
- assert.equal(moonPhaseLabel('Full Moon','zh-Hant'),'滿月');assert.equal(deepSkyTypeLabel('Galaxy','zh-Hant'),'星系');assert.equal(deepSkyTypeLabel('Unknown','zh-Hant'),'Unknown');
+ assert.equal(sectionLabel('sky','zh-Hant','Sky atlas'),'星空圖');assert.equal(sectionLabel('sky','en','Sky atlas'),'Sky atlas');assert.equal(sectionLabel('unknown','zh-Hant','Unknown'),'Unknown');assert.equal(sectionLabel('sky','future-language','Sky atlas'),'Sky atlas');
+ assert.equal(moonPhaseLabel('Full Moon','zh-Hant'),'滿月');assert.equal(moonPhaseLabel('Full Moon','future-language'),'Full Moon');assert.equal(deepSkyTypeLabel('Galaxy','zh-Hant'),'星系');assert.equal(deepSkyTypeLabel('Unknown','zh-Hant'),'Unknown');
  assert.equal(skyTargetLabel('Vega','zh-Hant'),'織女星 (Vega)');assert.equal(skyTargetLabel('Vega','en'),'Vega');
  assert.equal(pendingEditLabel('observing-time changes, coordinate entry','zh-Hant'),'觀測時間、座標輸入');
 });
@@ -26,4 +26,19 @@ test('catalogue constellation names support Traditional Chinese search without c
  assert(findDeepSky('仙女座','').some(target=>target.id==='M31'));assert(findDeepSky('Andromeda','').some(target=>target.id==='M31'));
  const serpens=findDeepSky('巨蛇座','');assert(serpens.some(target=>target.constellation==='Se1'));assert(serpens.some(target=>target.constellation==='Se2'));
  assert(findDeepSky('仙女座','',{constellation:'And'}).every(target=>target.constellation==='And'));
+});
+test('message catalogues retain matching placeholders and support safe incremental fallback',async()=>{
+ const {englishMessages}=await vite.ssrLoadModule('/lib/messages/en.ts');
+ const {traditionalChineseMessages}=await vite.ssrLoadModule('/lib/messages/zh-hant.ts');
+ const {createTranslator,messageCatalogues}=await vite.ssrLoadModule('/lib/messages/index.ts');
+ const placeholders=text=>[...new Set([...text.matchAll(/\{([a-zA-Z][a-zA-Z0-9_]*)\}/g)].map(match=>match[1]))].sort();
+ for(const [language,catalogue] of Object.entries(messageCatalogues))for(const [key,value] of Object.entries(catalogue)){
+  assert(Object.hasOwn(englishMessages,key),`Unknown message ${language}:${key}`);
+  assert.deepEqual(placeholders(value),placeholders(englishMessages[key]),`Placeholder mismatch for ${language}:${key}`);
+ }
+ const en=createTranslator('en'),zh=createTranslator('zh-Hant');
+ assert.equal(en('siteDarkness.class',{class:3}),'Bortle class 3');assert.equal(zh('siteDarkness.class',{class:3}),'Bortle 3 級');
+ assert.equal(zh('weather.failed',{error:'{stamp} <b>Cloud</b>'}),'無法取得預報：{stamp} <b>Cloud</b>');
+ const original=traditionalChineseMessages['siteDarkness.unrated'];
+ try{delete traditionalChineseMessages['siteDarkness.unrated'];assert.equal(zh('siteDarkness.unrated'),'Not rated')}finally{traditionalChineseMessages['siteDarkness.unrated']=original}
 });
