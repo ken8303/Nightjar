@@ -359,6 +359,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .deep-compare-window-scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .deep-compare-window-track b{position:absolute;top:0;bottom:0;width:1px;background:#e9f0f0;opacity:.65}
 .mobile-night-glance{display:none}
+.hourly-scroll-controls{display:none}
 .dashboard>.atlas-preview{grid-column:2;grid-row:1}
 .dashboard>.next-panel{grid-column:1/-1;grid-row:2;margin-top:0;min-width:0}
 
@@ -394,6 +395,9 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
  .dashboard>.next-panel .hour{min-width:86px;background:#14242a;border-color:#30454c;gap:8px}
  .dashboard>.next-panel .hour.selected{background:#20362d;border-color:#a8cb83}
  .dashboard>.next-panel .hour strong{font-size:20px}
+ .hourly-scroll-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;color:var(--text-secondary);font-size:12px}
+ .hourly-scroll-controls>div{display:flex;gap:6px}
+ .hourly-scroll-controls .button{min-height:44px;padding:8px 10px;font-size:12px}
 }
 
 /* Give observing windows enough room to read on narrow phones. */
