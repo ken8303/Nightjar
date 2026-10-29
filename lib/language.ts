@@ -1,12 +1,13 @@
+import {createTranslator} from './messages';
 export type Language='en'|'zh-Hant';
 export const languageKey='nightjar-language-v1';
 export const supportedLanguages:ReadonlyArray<{id:Language;label:string}>=[{id:'en',label:'English'},{id:'zh-Hant',label:'繁體中文'}];
 export function parseLanguage(value:unknown):Language{return supportedLanguages.find(item=>item.id===value)?.id??'en'}
 export function languageLocale(language:Language){return language==='en'?'en-GB':language}
+const sectionKeys={tonight:'nav.tonight',sky:'nav.sky',moon:'nav.moon',places:'nav.places',aurora:'nav.aurora',events:'nav.events',tools:'nav.tools'} as const;
 export function sectionLabel(key:string,language:Language,fallback:string){
- if(language!=='zh-Hant')return fallback;
- const names:Record<string,string>={tonight:'今晚',sky:'星空圖',moon:'月球',places:'觀測地點',aurora:'極光',events:'天象日曆',tools:'攝影工具'};
- return names[key]??fallback;
+ if(!Object.prototype.hasOwnProperty.call(sectionKeys,key))return fallback;
+ return createTranslator(language)(sectionKeys[key as keyof typeof sectionKeys]);
 }
 export function moonPhaseLabel(name:string,language:Language){
  if(language!=='zh-Hant')return name;

@@ -8,7 +8,7 @@ const {parseLanguage,sectionLabel,moonPhaseLabel,deepSkyTypeLabel,pendingEditLab
 const {forecastHourLabel}=await vite.ssrLoadModule('/lib/weather-planning.ts');
 test('language preference accepts only supported values and keeps data identifiers stable',()=>{
  assert.equal(parseLanguage('zh-Hant'),'zh-Hant');for(const value of [null,'zh','zh-Hans',{},'en'])assert.equal(parseLanguage(value),'en');
- assert.equal(sectionLabel('sky','zh-Hant','Sky atlas'),'星空圖');assert.equal(sectionLabel('sky','en','Sky atlas'),'Sky atlas');assert.equal(sectionLabel('unknown','zh-Hant','Unknown'),'Unknown');assert.equal(sectionLabel('sky','future-language','Sky atlas'),'Sky atlas');
+ assert.equal(sectionLabel('sky','zh-Hant','Sky atlas'),'星空圖');assert.equal(sectionLabel('sky','en','Sky atlas'),'Sky atlas');assert.equal(sectionLabel('unknown','zh-Hant','Unknown'),'Unknown');assert.equal(sectionLabel('toString','zh-Hant','Unknown'),'Unknown');assert.equal(sectionLabel('sky','future-language','Sky atlas'),'Sky atlas');
  assert.equal(moonPhaseLabel('Full Moon','zh-Hant'),'滿月');assert.equal(moonPhaseLabel('Full Moon','future-language'),'Full Moon');assert.equal(deepSkyTypeLabel('Galaxy','zh-Hant'),'星系');assert.equal(deepSkyTypeLabel('Unknown','zh-Hant'),'Unknown');
  assert.equal(skyTargetLabel('Vega','zh-Hant'),'織女星 (Vega)');assert.equal(skyTargetLabel('Vega','en'),'Vega');
  assert.equal(pendingEditLabel('observing-time changes, coordinate entry','zh-Hant'),'觀測時間、座標輸入');
@@ -39,6 +39,7 @@ test('message catalogues retain matching placeholders and support safe increment
  const en=createTranslator('en'),zh=createTranslator('zh-Hant');
  assert.equal(en('siteDarkness.class',{class:3}),'Bortle class 3');assert.equal(zh('siteDarkness.class',{class:3}),'Bortle 3 級');
  assert.equal(zh('weather.failed',{error:'{stamp} <b>Cloud</b>'}),'無法取得預報：{stamp} <b>Cloud</b>');
+ const zones={original:'Europe/London',current:'UTC',range:''};assert.match(en('time.zoneChanged',zones),/still uses Europe\/London.*now UTC/);assert.match(zh('time.zoneChanged',zones),/仍使用 Europe\/London.*目前為 UTC/);
  const original=traditionalChineseMessages['siteDarkness.unrated'];
  try{delete traditionalChineseMessages['siteDarkness.unrated'];assert.equal(zh('siteDarkness.unrated'),'Not rated')}finally{traditionalChineseMessages['siteDarkness.unrated']=original}
 });
