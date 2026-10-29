@@ -224,7 +224,9 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 #install-app:focus-visible{outline:2px solid var(--accent-soft);outline-offset:4px}
 
 /* Keep altitude/timeline labels readable instead of scaling SVG text down. */
+.deep-sky-plot-summary{margin:14px 0 8px;color:var(--text-secondary);font-size:14px}.deep-sky-plot-summary strong{color:#e9f0f0}.deep-sky-peak-action{margin:8px 0 0;min-height:44px}.deep-sky-plot-key{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--text-secondary);font-size:12px}.deep-sky-plot-key span{display:inline-flex;align-items:center;gap:6px}.deep-sky-plot-key i{display:inline-block;width:20px;flex:none}.deep-sky-key-curve{border-top:3px solid #c1df93}.deep-sky-key-threshold{border-top:2px dashed #c1df93}.deep-sky-key-peak{height:9px!important;width:9px!important;background:#f5e8c8;transform:rotate(45deg);margin:0 5px}.deep-sky-key-selected{height:12px;border-left:2px solid #f2cd84;margin-left:9px;width:11px!important}.deep-sky-key-darkness{height:10px;background:rgba(193,223,147,.18);border:1px solid #72846a}
 .deep-sky-plot{display:grid;grid-template-columns:36px minmax(0,1fr);grid-template-rows:180px 22px;column-gap:4px;row-gap:8px;margin:24px 0;min-width:0}
+.deep-sky-plot-overlay{grid-column:2;grid-row:1;position:relative;pointer-events:none}.deep-sky-peak-marker{position:absolute;width:9px;height:9px;background:#f5e8c8;border:1px solid #172a32;transform:translate(-50%,-50%) rotate(45deg)}
 .deep-sky-plot>svg{grid-column:2;grid-row:1;width:100%;height:100%;display:block;overflow:visible}
 .deep-sky-plot-altitudes{grid-column:1;grid-row:1;position:relative;color:var(--text-secondary);font-size:12px;line-height:1.2}
 .deep-sky-plot-altitudes span{position:absolute;right:0;transform:translateY(-50%)}
@@ -321,3 +323,113 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .night-outlook-recommendation .footnote{margin-top:6px}
 .night-outlook-recommendation .button{min-height:44px;flex-shrink:0;max-width:100%;white-space:normal;text-align:center}
 @media(max-width:800px){.night-outlook-recommendation{flex-direction:column;align-items:stretch}}
+
+.hourly-score-key{margin:12px 0 0;color:var(--text-secondary);font-size:12px}.hour .bar{width:9px}.hour .bar.unavailable{background:transparent;border:1px dashed #a9bdc6}.hour .forecast-cloud-label{white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+
+.cloud-layer-description{margin:0 0 8px;color:var(--text-secondary);font-size:12px}.cloud-layer-scale{display:flex;justify-content:space-between;color:var(--text-secondary);font-size:11px}.cloud-layer-bar{height:8px}.cloud-layer-bar.unavailable{background:transparent;border:1px dashed #a9bdc6}
+
+.night-outlook-select .night-coverage-track{display:block;width:100%;height:6px;background:#34454a;border-radius:3px;overflow:hidden}.night-coverage-track i{display:block;height:100%;background:#b2cf8a;border-radius:3px}
+
+.mobile-altitude-grid .mobile-altitude-bar{display:block;position:relative;width:80%;height:6px;background:#34454a;border-radius:3px}.mobile-altitude-bar i{display:block;height:100%;background:#b2cf8a;border-radius:3px}.mobile-altitude-bar::after{content:"";position:absolute;left:33.333%;top:-2px;height:10px;border-left:1px solid #e9f0f0}
+
+.deep-compare-window-visual{margin:12px 0}.deep-compare-window-visual p{margin:0 0 6px;color:var(--text-secondary);font-size:12px}.deep-compare-window-track{position:relative;width:100%;height:9px;border-radius:5px;background:#34454a;overflow:hidden}.deep-compare-window-track i{position:absolute;top:0;height:100%;background:#b2cf8a}.deep-compare-window-axis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px;color:var(--text-secondary);font-size:10px}.deep-compare-window-axis span{min-width:0;overflow-wrap:anywhere}.deep-compare-window-axis span:last-child{text-align:right}.deep-compare-window-axis time{display:block}
+
+.lunar-phase-symbol{display:block;width:32px;height:32px;flex:none}.lunar-phase-note{margin:10px 0 0}
+
+.lunar-facts>div.lunar-illumination-fact{display:grid;grid-template-columns:1fr auto;gap:8px 14px}.lunar-illumination-track{grid-column:1/-1;height:8px;background:#34454a;border-radius:4px;overflow:hidden}.lunar-illumination-track i{display:block;height:100%;background:#c1df93;border-radius:4px}
+
+/* Consistent feedback for selectable visualizations; reduced motion stays static. */
+.aurora-legend{flex-wrap:wrap;gap:8px 16px;color:var(--text-secondary);font-size:12px}
+.aurora-legend span{display:inline-flex;align-items:center;gap:6px}
+.aurora-legend i{width:10px;height:10px;border-radius:50%;background:none;flex:none}
+.aurora-legend .aurora-key-low{background:#64baad}.aurora-legend .aurora-key-mid{background:#c9e289}.aurora-legend .aurora-key-high{background:#f5ad69}
+.hour.selected,.mobile-altitude-grid button[aria-pressed="true"],.deep-sky-hours button[aria-pressed="true"]{box-shadow:inset 0 0 0 1px #d4ee91}
+@media(prefers-reduced-motion:no-preference){
+ .hour,.mobile-altitude-grid button,.deep-sky-hours button,.quarter-grid button{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .12s ease}
+ .hour:active,.mobile-altitude-grid button:active,.deep-sky-hours button:active,.quarter-grid button:active{transform:scale(.98)}
+ .night-coverage-track i,.mobile-altitude-bar i,.lunar-illumination-track i{transition:width .25s ease}
+ .deep-compare-window-track i{transition:left .25s ease,width .25s ease}
+ .hour .bar i{transition:height .25s ease}
+ .sky-selection-ring{transform-box:fill-box;transform-origin:center;animation:sky-selection-reveal .22s ease-out}
+}
+@keyframes sky-selection-reveal{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.hour,.mobile-altitude-grid button,.deep-sky-hours button,.quarter-grid button,.night-coverage-track i,.mobile-altitude-bar i,.lunar-illumination-track i,.deep-compare-window-track i,.hour .bar i{transition:none!important}.sky-selection-ring{animation:none!important}}
+.deep-sky-isolated-marker{position:absolute;width:8px;height:8px;border-radius:50%;background:#c1df93;transform:translate(-50%,-50%)}
+.deep-compare-window-scale{position:relative;height:17px;color:var(--text-secondary);font-size:10px}
+.deep-compare-window-scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.deep-compare-window-track b{position:absolute;top:0;bottom:0;width:1px;background:#e9f0f0;opacity:.65}
+.mobile-night-glance{display:none}
+.language-control{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--text-secondary);font-size:12px}
+.language-control select{min-height:44px;max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface-raised);color:#e9eeef;font-size:16px}
+.language-control p{flex-basis:100%;margin:0;line-height:1.5}
+.language-coverage{margin:0 0 12px;color:var(--text-secondary);font-size:12px;line-height:1.5}
+.hourly-scroll-controls{display:none}
+.deep-sky-matches-shortcut{display:none}
+.search-results button>span{min-width:0;overflow-wrap:anywhere}
+.search-results button>svg{flex:none}
+.location-result-coordinates{font-variant-numeric:tabular-nums;line-height:1.5}
+.cloud-model-comparison>button{min-height:44px}
+.cloud-model-stamps{margin:14px 0 0;color:var(--text-secondary);font-size:12px;line-height:1.6}
+.cloud-model-bar{display:block;width:100%;height:8px;margin-top:8px;border-radius:4px;background:#34454a;overflow:hidden}
+.cloud-model-bar>span{display:block;height:100%;background:#b2cf8a;border-radius:4px}
+.cloud-model-bar.unavailable{background:transparent;border:1px dashed #a9bdc6}
+@media(max-width:700px){.cloud-model-comparison dl{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}.cloud-model-comparison dl div{min-width:0}}
+.moon-globe-loading,.moon-globe-static{touch-action:pan-y}
+.lunar-touch-guidance{display:none}
+@media(any-pointer:coarse){
+ .lunar-marker{min-width:44px;min-height:44px;padding:8px 10px}
+ .globe-controls .button{min-height:44px}
+ .lunar-touch-guidance{display:block;margin:12px 0 0;color:var(--text-secondary);font-size:12px;line-height:1.5}
+}
+.dashboard>.atlas-preview{grid-column:2;grid-row:1}
+.dashboard>.next-panel{grid-column:1/-1;grid-row:2;margin-top:0;min-width:0}
+
+/* A compact phone overview keeps the current score, Moon and dark hours together. */
+@media(max-width:700px){
+ .deep-sky-matches-shortcut{display:flex;justify-content:center;min-height:44px}
+ #deep-sky-match-summary{scroll-margin-top:96px}
+ .mobile-night-glance{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0 0 14px;padding:16px 18px;border:1px solid #38504b;border-radius:8px;background:linear-gradient(135deg,#1b3030,#111e23)}
+ .mobile-night-glance-score,.mobile-night-glance-best{display:flex;flex-direction:column;gap:4px;min-width:0}
+ .mobile-night-glance-score>span,.mobile-night-glance-best>span{font-size:10px;letter-spacing:.7px;color:#acc2bb}
+ .mobile-night-glance-score>strong{font-size:38px;line-height:1;color:#d1eba9}
+ .mobile-night-glance-score small{font-size:13px;font-weight:400;color:#aec0bd}
+ .mobile-night-glance-best{padding-left:14px;border-left:1px solid #3d504d}
+ .mobile-night-glance-best>strong{font-size:23px;line-height:1.1;color:#e5eee4}
+ .mobile-night-glance-best small{font-size:11px;line-height:1.4;color:#bdcdc6}
+ .mobile-night-glance>.forecast-best-hour-action{grid-column:1/-1;justify-content:center;min-height:44px;padding:10px 14px;border-radius:6px;background:#c1df93;color:#142017;font-size:13px;font-weight:650}
+ .mobile-night-glance>.best-hour-recovery{grid-column:1/-1;display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0}
+ .mobile-night-glance>.best-hour-recovery p{margin:0}
+ .mobile-night-glance-moon{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12px;color:#dce8d6}
+ .mobile-night-glance-moon svg{flex:none;color:#d1eba9}
+ .mobile-night-glance-freshness{grid-column:1/-1;margin:0;color:#b6c9c4;font-size:11px;line-height:1.45}
+ .time-entry{gap:8px;padding:10px 12px}
+ .time-entry .control-bar{padding-top:8px}
+ .dashboard>.atlas-preview,.dashboard>.next-panel{grid-column:auto;grid-row:auto}
+ .dashboard>.next-panel{margin-top:0}
+ .tonight-outlook{background:linear-gradient(145deg,#192d31,#101b21 78%)}
+ .tonight-outlook .score-row{grid-template-columns:minmax(100px,1fr) minmax(0,1fr);gap:16px;margin-top:14px}
+ .tonight-outlook .outlook-summary h2{font-size:24px;line-height:1.18;margin-bottom:8px}
+ .tonight-outlook .score-ring{width:auto;height:auto;padding:0;border-radius:0;background:none;align-self:center}
+ .tonight-outlook .score-ring>div{align-items:flex-start;background:none}
+ .tonight-outlook .score-ring strong{font-size:48px;line-height:1;letter-spacing:-1px;color:#d1eba9}
+ .tonight-outlook .score-ring span{font-size:10px;line-height:1.4;letter-spacing:.4px;margin-top:5px}
+ .tonight-outlook .best-window{padding-left:14px}
+ .tonight-outlook .best-window>strong{font-size:25px}
+ .dashboard>.next-panel .hour{min-width:86px;background:#14242a;border-color:#30454c;gap:8px}
+ .dashboard>.next-panel .hour.selected{background:#20362d;border-color:#a8cb83}
+ .dashboard>.next-panel .hour strong{font-size:20px}
+ .hourly-scroll-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;color:var(--text-secondary);font-size:12px}
+ .hourly-scroll-controls>div{display:flex;gap:6px}
+ .hourly-scroll-controls .button{min-height:44px;padding:8px 10px;font-size:12px}
+}
+
+/* Give observing windows enough room to read on narrow phones. */
+@media(max-width:430px){
+ .night-outlook-grid{grid-template-columns:minmax(0,1fr)}
+ .night-outlook-select{min-height:0;padding:14px 16px;gap:8px}
+ .night-outlook-select .night-date{min-height:46px;padding-right:64px;font-size:14px}
+ .night-score{left:auto;right:16px;top:12px;width:46px;height:46px}
+ .night-outlook-select>span:not(.night-score):not(.night-date){font-size:12px}
+ .night-outlook-download{font-size:12px;padding:10px 16px}
+ .night-outlook-card.unavailable{min-height:0}
+}

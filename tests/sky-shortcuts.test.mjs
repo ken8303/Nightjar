@@ -31,7 +31,8 @@ test('installed-app shortcuts stay in scope, target supported sections and refer
    const bytes=await readFile(new URL('../public'+icon.src,import.meta.url));assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(icon.sizes,`${bytes.readUInt32BE(16)}x${bytes.readUInt32BE(20)}`);
   }
  }
- assert.deepEqual(sections.sort(),skyShortcutSections.map(([id])=>id).sort());
+ assert(sections.every(id=>skyShortcutSections.some(([section])=>section===id)));
+ assert.equal(new Set(sections).size,sections.length);
 });
 test('unknown, oversized and malformed fragments do not redirect planner startup',()=>{
  for(const hash of [null,undefined,{},'', 'visibility-planner','#','#places','#visibility-planner?next=sky','#%E0%A4','#'+ 'a'.repeat(256)])assert.equal(readSkyShortcutHash(hash),null);

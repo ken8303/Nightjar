@@ -16,6 +16,7 @@ test('saved bright-target scope composes with text and altitude without dropping
 });
 test('target search matches mobile Unicode and spacing while retaining original records and order',()=>{
  assert.deepEqual(findSkyTargets(targets,'Ｖ ｅ Ｇ Ａ'),[targets[0]]);assert.equal(findSkyTargets(targets,'alpha\ncentauri')[0],targets[1]);assert.equal(findSkyTargets(targets,'Re\u0301fe\u0301rence')[0],targets[2]);assert.deepEqual(findSkyTargets(targets,'  '),targets);assert.deepEqual(findSkyTargets(targets,'missing'),[]);assert(targets[0].selected);
+ assert.deepEqual(findSkyTargets(targets,'織女星'),[targets[0]]);assert.deepEqual(findSkyTargets(targets,'織女星',null,['Alpha Centauri']),[]);
 });
 test('strict horizon and 30-degree filters compose with names and leave selection data unchanged',()=>{
  assert.deepEqual(findSkyTargets(targets,'',0),[targets[0],targets[2],targets[4]]);assert.deepEqual(findSkyTargets(targets,'',30),[targets[0],targets[4]]);assert.deepEqual(findSkyTargets(targets,'Référence',30),[]);assert.deepEqual(findSkyTargets(targets,'Vega',30),[targets[0]]);assert.equal(targets[2].altitude,30);

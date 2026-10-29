@@ -21,7 +21,8 @@
     "test": "node --test tests/*.test.mjs",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:satellite-worker && npm run deploy:check",
     "test:satellite-worker": "node scripts/check-satellite-worker.mjs",
-    "test:release-assets": "node scripts/check-release-assets.mjs"
+    "test:release-assets": "node scripts/check-release-assets.mjs",
+    "build:offline-darkness": "node scripts/build-offline-darkness.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -65,6 +66,7 @@
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
     "drizzle-kit": "0.31.10",
+    "esbuild": "0.28.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
     "react-server-dom-webpack": "19.2.6",

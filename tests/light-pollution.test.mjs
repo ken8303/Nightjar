@@ -5,7 +5,15 @@ import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
-const {lightPollutionAtlas,hasLightPollutionCoverage,lightPollutionZones,lightPollutionZone,mapTileHealth,createMapTileTracker}=await vite.ssrLoadModule('/lib/light-pollution.ts');
+const {lightPollutionAtlas,hasLightPollutionCoverage,lightPollutionZones,lightPollutionZone,mapTileHealth,createMapTileTracker,savedMapMarkers}=await vite.ssrLoadModule('/lib/light-pollution.ts');
+
+test('saved map markers group date-line aliases, preserve names and omit unprojectable sites',()=>{
+ const sites=[{name:'Current',latitude:51,longitude:0},{name:'East',latitude:1,longitude:180},{name:'West alias',latitude:1,longitude:-180},{name:'Near',latitude:1.00001,longitude:-180},{name:'Pole',latitude:90,longitude:0}],before=structuredClone(sites);
+ assert.deepEqual(savedMapMarkers(sites,{latitude:51,longitude:0}),{markers:[{latitude:1,longitude:-180,names:['East','West alias'],omittedNames:0},{latitude:1.00001,longitude:-180,names:['Near'],omittedNames:0}],omitted:0,outside:1,selected:1});
+ const many=Array.from({length:205},(_,i)=>({name:String(i),latitude:0,longitude:i/10}));
+ const limited=savedMapMarkers(many,{latitude:10,longitude:0});assert.equal(limited.markers.length,200);assert.equal(limited.omitted,5);assert.deepEqual(sites,before);
+ const aliases=Array.from({length:25},(_,i)=>({name:String(i),latitude:1,longitude:2}));assert.equal(savedMapMarkers(aliases,{latitude:0,longitude:0}).markers[0].omittedNames,5);
+});
 
 test('atlas coverage respects the provider domain and keeps either date-line spelling valid',()=>{
  for(const lat of [-65,0,74.999999])for(const lon of [-180,0,180])assert.equal(hasLightPollutionCoverage(lat,lon),true);

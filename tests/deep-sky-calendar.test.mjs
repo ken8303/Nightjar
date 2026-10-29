@@ -49,3 +49,11 @@ test('calendar rejects a polar twilight excursion hidden between qualifying samp
  assert(samples.every(sample=>sample.sun<-18));assert(sunAltitude(transit,site)>-18);
  assert.throws(()=>deepSkyWindowCalendar({target,place:site,start:times[0],end:times[1],samples,moonBelowOnly:false},created),/leaves full astronomical darkness/);
 });
+
+test('calendar respects the manual horizon and records its sampled limitations',()=>{
+ const f=fixture(),profile=[0,0,35,0,0,0,0,0],text=unfold(deepSkyWindowCalendar({...f,horizon:profile},created));
+ assert(text.includes('Manual horizon heights'));assert(text.includes('checked at 15-minute samples only'));
+ assert.throws(()=>deepSkyWindowCalendar({...f,horizon:[0,0,45,0,0,0,0,0]},created),/qualifying/);
+ assert.throws(()=>deepSkyWindowCalendar({...f,horizon:[0,0,100,0,0,0,0,0]},created),/Invalid/);
+ const uid=text=>text.split('\r\n').find(line=>line.startsWith('UID:'));assert.notEqual(uid(text),uid(unfold(deepSkyWindowCalendar(f,created))));
+});

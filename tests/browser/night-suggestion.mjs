@@ -58,6 +58,7 @@ try{
    const panel=page.locator('.seven-night-outlook'),action=control==='card'?panel.locator('.night-outlook-select').first():panel.getByRole('button',{name:'Use suggested window',exact:true});
    const time=page.locator('#observing-time'),exact=()=>page.locator('.time-entry [aria-atomic=true]').textContent();
    await action.waitFor();
+   const card=panel.locator('.night-outlook-select').first();assert.match(await card.getAttribute('aria-label'),/2 of 2 dark samples scored/);assert.equal(await card.locator('.night-coverage-track i').evaluate(node=>node.style.width),'100%');
    const before=await exact(),saved=await page.evaluate(()=>({notes:localStorage.getItem('nightjar-target-notes-v1'),deep:localStorage.getItem('nightjar-deep-targets-v1'),site:localStorage.getItem('nightjar-place')}));
    await time.fill('');
    await action.scrollIntoViewIfNeeded();

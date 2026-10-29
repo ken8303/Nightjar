@@ -1,14 +1,15 @@
 import {validPlace} from './planner-state';
 import {type Place} from './sky';
+import {type Language} from './language';
 export type LocationResult=Place&{id:number;admin1?:string};
-export async function searchLocations(query:string,{signal,fetcher=fetch,timeoutMs=15000}:{signal:AbortSignal;fetcher?:typeof fetch;timeoutMs?:number}):Promise<LocationResult[]>{
+export async function searchLocations(query:string,{signal,fetcher=fetch,timeoutMs=15000,language='en'}:{signal:AbortSignal;fetcher?:typeof fetch;timeoutMs?:number;language?:Language}):Promise<LocationResult[]>{
  const text=query.trim();if(text.length<2||text.length>100)throw Error('Enter a town or city name from 2 to 100 characters.');
  if(signal.aborted)throw new DOMException('Location search cancelled.','AbortError');
  const controller=new AbortController();let timedOut=false;
  const cancel=()=>controller.abort();signal.addEventListener('abort',cancel,{once:true});
  const timeout=setTimeout(()=>{timedOut=true;controller.abort()},timeoutMs);
  try{
-  const response=await fetcher(`/api/locations?q=${encodeURIComponent(text)}`,{signal:controller.signal});
+  const response=await fetcher(`/api/locations?q=${encodeURIComponent(text)}${language==='zh-Hant'?'&lang=zh-Hant':''}`,{signal:controller.signal});
   let raw:unknown;
   try{raw=await response.json()}catch(error){
    if(error instanceof Error&&error.name==='AbortError')throw error;

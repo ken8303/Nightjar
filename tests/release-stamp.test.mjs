@@ -27,7 +27,7 @@ test('offline-page changes and worker changes both produce a release update',()=
 test('real workers namespace offline files by the same stable release hash as their built assets',()=>{
  const source=readFileSync(new URL('../public/sw.js',import.meta.url),'utf8'),files=[['offline.html','old'],['planner-recovery.mjs','module'],['app.js','app']];
  const first=stampServiceWorker(source,files),release=first.match(/^\/\/ Nightjar release: ([a-f0-9]{64})/)[1],cache=first.match(/const CACHE = '([^']+)';/)[1];
- assert.equal(cache,'nightjar-offline-v20-'+release);assert.equal(first,stampServiceWorker(source,[...files].reverse()));
+ assert.equal(cache,'nightjar-offline-v33-'+release);assert.equal(first,stampServiceWorker(source,[...files].reverse()));
  for(const changed of [[['offline.html','new'],files[1],files[2]],[files[0],['planner-recovery.mjs','new'],files[2]],[files[0],files[1],['app.js','new']]])assert.notEqual(cache,stampServiceWorker(source,changed).match(/const CACHE = '([^']+)';/)[1]);
  assert.match(first,/const STATIC_CACHE = 'nightjar-static-v1'/);
 });
@@ -40,6 +40,7 @@ test('the client build hook stamps chunks, CSS and hidden emitted assets togethe
   await writeFile(join(root,'public/sw.js'),source);
   await writeFile(join(root,'public/offline.html'),'offline');
   await writeFile(join(root,'public/planner-recovery.mjs'),'recovery');
+  await writeFile(join(root,'public/offline-darkness.mjs'),'darkness');
   const plugin=nightjarRelease();plugin.configResolved({root});
   assert.equal(plugin.applyToEnvironment({name:'client'}),true);
   assert.equal(plugin.applyToEnvironment({name:'rsc'}),false);
@@ -50,7 +51,7 @@ test('the client build hook stamps chunks, CSS and hidden emitted assets togethe
   };
   const build=async()=>{await plugin.writeBundle({dir:'client'},bundle);return readFile(join(root,'client/sw.js'),'utf8')};
   const original=await build();
-  assert.equal(original,stampServiceWorker(source,[['offline.html','offline'],['planner-recovery.mjs','recovery'],['app.js','app'],['app.css','css'],['.assetsignore','ignored']]));
+  assert.equal(original,stampServiceWorker(source,[['offline.html','offline'],['planner-recovery.mjs','recovery'],['offline-darkness.mjs','darkness'],['app.js','app'],['app.css','css'],['.assetsignore','ignored']]));
   for(const [name,key] of [['app.js','code'],['app.css','source'],['.assetsignore','source']]){
    const before=bundle[name][key];bundle[name][key]='changed';assert.notEqual(await build(),original);bundle[name][key]=before;
   }

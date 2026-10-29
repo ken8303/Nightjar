@@ -25,24 +25,31 @@ try{
   if(await mobile.isVisible()){await mobile.click();await page.locator('.mobile-navigation-options').getByRole('button',{name:'Sky atlas',exact:true}).click()}
   else await page.getByRole('tab',{name:'Sky atlas',exact:true}).click();
   await page.getByRole('button',{name:'Select saved M81',exact:true}).click();
-  const plot=page.locator('.deep-sky-timeline svg');await plot.waitFor();
+  const timeline=page.locator('.deep-sky-timeline');assert.match(await timeline.locator('.deep-sky-plot-summary').textContent(),/Highest dark sample:/);assert.match(await timeline.locator('.deep-sky-plot-key').textContent(),/Altitude.*30° guide.*Continuous darkness/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  const plot=timeline.locator('svg');await plot.waitFor();
   const path=await plot.locator('path').getAttribute('d');
   assert.match(path,/^M40\.00,[\d.]+ M49\.58,/,'the curve must restart after the twilight interval');
-  assert.equal(await plot.locator('circle[cx="40"]').count(),1,'the isolated starting sample stays visible');
+  assert.equal(await timeline.locator('.deep-sky-isolated-marker').count(),1,'the isolated starting sample stays visible');
   for(const x of await plot.locator('rect').evaluateAll(nodes=>nodes.map(node=>Number(node.getAttribute('x')))))assert(x>40,'no shading over the first interval');
   if(name==='narrow')await page.locator('.deep-sky-plot').screenshot({path:'/tmp/nightjar-polar-timeline-narrow.png'});
   await page.locator('.deep-sky-comparison summary').click();
   const buttons=page.locator('.deep-compare-window button');await buttons.first().waitFor();
-  const count=await buttons.count();assert(count>0);
+  const axis=page.locator('.deep-compare-window-axis').first(),end=new Date(+new Date(time)+86400000).toISOString();assert.deepEqual(await axis.locator('time').evaluateAll(nodes=>nodes.map(node=>node.dateTime)),[time,end]);
+  const guides=page.locator('.deep-compare-window-visual').first();assert.deepEqual(await guides.locator('.deep-compare-window-scale span').allTextContents(),['+6h','+12h','+18h']);assert.deepEqual(await guides.locator('.deep-compare-window-track b').evaluateAll(nodes=>nodes.map(node=>node.style.left)),['25%','50%','75%']);
+  if(name==='narrow')await guides.screenshot({path:'/tmp/nightjar-polar-comparison-narrow.png'});
+  const count=await buttons.count();assert(count>0);const segments=page.locator('.deep-compare-window-track i');assert.equal(await segments.count(),count);for(const item of await segments.all()){const position=await item.evaluate(node=>({left:parseFloat(node.style.left),width:parseFloat(node.style.width)}));assert(position.left>=0&&position.width>0&&position.left+position.width<=100.001)}
   for(let index=0;index<count;index++){
    const pending=page.waitForEvent('download');await buttons.nth(index).click();
    const file=await pending,text=(await readFile(await file.path(),'utf8')).replace(/\r\n /g,'');
    const parse=key=>{const value=text.match(new RegExp(`${key}:(\\d{8}T\\d{6}Z)`))[1];return new Date(value.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/,'$1-$2-$3T$4:$5:$6Z'))};
    const start=parse('DTSTART'),end=parse('DTEND');assert(+end>+start);
+   const segment=await segments.nth(index).evaluate(node=>({left:parseFloat(node.style.left),width:parseFloat(node.style.width)}));assert(Math.abs(segment.left-(+start-+new Date(time))/86400000*100)<0.003);assert(Math.abs(segment.width-(+end-+start)/86400000*100)<0.003);
    assert(!(+start<+transit&&+end>+transit),'export must not bridge the bright transit');
    assert.equal(A.SearchAltitude(A.Body.Sun,observer,1,start,(+end-+start)/86400000,-18),null);
    assert(text.includes('strictly below -18 degrees throughout this interval'));
   }
+  const peakTime=await timeline.locator('.deep-sky-plot-summary time').getAttribute('datetime');assert(A.Equator(A.Body.Sun,new Date(peakTime),observer,true,true).dec!==undefined);assert(A.Horizon(new Date(peakTime),observer,A.Equator(A.Body.Sun,new Date(peakTime),observer,true,true).ra,A.Equator(A.Body.Sun,new Date(peakTime),observer,true,true).dec,'normal').altitude< -18);
+  await timeline.getByRole('button',{name:'Use this sampled time',exact:true}).click();await page.waitForFunction(expected=>JSON.parse(sessionStorage.getItem('nightjar-current-time-v1')||'null')===expected,peakTime);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
   await page.close();console.log(`${name}: polar timeline, comparison and ${count} calendar downloads passed`);
  }

@@ -75,6 +75,14 @@ try{
      const date=new Date(label.match(/^Select (.*), score /)[1]);assert(sun(date,place)<-18,label);
     }
     await section('Sky atlas');await page.locator('#visibility-planner').waitFor();
+    // Full darkness starts partway through this hour. The heading must not
+    // print its brighter beginning as an observing time.
+    const hourStart=new Date(Math.floor(Date.parse(preview)/3600000)*3600000);
+    assert(sun(hourStart,place)>=-18);assert(sun(new Date(preview),place)<-18);
+    const introduction=page.locator('#visibility-planner > p').first();
+    assert.match(await introduction.textContent(),/first sample can precede the selected time/i);
+    assert.doesNotMatch(await introduction.textContent(),/starting at/i);
+    await introduction.screenshot({path:`/tmp/nightjar-visibility-dusk-${name}.png`});
     const textDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download observing list',exact:true}).click();
     const textFile=await textDownload;assert(textFile.suggestedFilename().includes(`-london-${preview.replace(/[:.]/g,'-')}.txt`));const text=await readFile(await textFile.path(),'utf8');
     assert(text.includes(`Full darkness remaining: ${duration} after the selected observing time.`));
@@ -90,10 +98,14 @@ try{
      await report.close();
     }
     for(const label of await page.locator('.deep-sky-hours button').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('aria-label')))){const date=new Date(label.match(/ at (.*), altitude /)[1]);assert(sun(date,place)<-18,label)}
+    const mobileBars=page.locator('.mobile-altitude-grid button');for(const card of await mobileBars.all()){const label=await card.getAttribute('aria-label'),degrees=Number(label.match(/altitude (-?[\d.]+) degrees/)[1]);assert.equal((await card.locator('span').first().textContent()).trim(),`${degrees.toFixed(1)}°`);if(degrees>30.1)assert.match(await card.textContent(),/Above 30°/);const width=await card.locator('.mobile-altitude-bar i').evaluate(node=>parseFloat(node.style.width));assert(Math.abs(width-Math.max(0,Math.min(90,degrees))/90*100)<0.12);}
     const buttons=page.locator('#visibility-planner button[aria-label^="View "][aria-label*="altitude"]');
     for(const label of await buttons.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('aria-label')))){
      const date=new Date(label.match(/ at (.*), altitude /)[1]);assert(sun(date,place)<-18,label);
     }
+    const visibleSample=page.locator('.mobile-altitude-grid button:visible, .desktop-visibility button[aria-label^="View "][aria-label*="altitude"]:visible').first();
+    const chosen=new Date((await visibleSample.getAttribute('aria-label')).match(/ at (.*), altitude /)[1]);
+    await visibleSample.click();assert.equal(await page.locator('#observing-time').inputValue(),chosen.toISOString().slice(0,16));
     // A bright-time edit hides the view; returning to night restores it.
     await page.locator('#observing-time').fill('2026-10-25T12:00');await warning.waitFor();
     assert.equal(await page.locator('#visibility-planner').isVisible(),false);
@@ -103,7 +115,7 @@ try{
     const dawn=A.SearchAltitude(A.Body.Sun,new A.Observer(place.latitude,place.longitude,0),1,new Date('2026-10-25T00:00Z'),1,-18).date;
     const beforeDawn=new Date(Math.floor((+dawn-120000)/60000)*60000);
     await page.locator('#observing-time').fill(beforeDawn.toISOString().slice(0,16));
-    const timeline=page.locator('.deep-sky-timeline');await timeline.locator('svg circle').first().waitFor();
+    const timeline=page.locator('.deep-sky-timeline');await timeline.locator('.deep-sky-isolated-marker').first().waitFor();
     assert.match(await timeline.textContent(),/Dots mark isolated dark samples/);
     await timeline.locator('.deep-sky-plot').screenshot({path:`/tmp/nightjar-isolated-dark-${name}.png`});
    }

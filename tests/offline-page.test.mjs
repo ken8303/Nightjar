@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {makePlannerRecovery} from '../public/planner-recovery.mjs';
+import {offlineDarknessDetails,offlineDeepSkyPosition,offlineBrightPosition,offlineBrightTargetNames,offlineDeepSkyBest,offlineBrightBest} from '../public/offline-darkness.mjs';
 const html=readFileSync(new URL('../public/offline.html',import.meta.url),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match=>match[1]);
 class Element{
@@ -21,10 +22,10 @@ function load(data={},blocked=false,{rawOverrides={},sessionBlocked=false,sessio
  const raw=new Map(Object.entries(data).map(([key,value])=>[key,key==='nightjar-red-light'?value:JSON.stringify(value)]));
  for(const [key,value] of Object.entries(rawOverrides))raw.set(key,value);
  const session=new Map(Object.entries(sessionOverrides)),listeners=new Map(),visibilityListeners=new Map(),navigator={onLine:false},root=new Element(),body=new Element(),blobs=[],timers=[],revoked=[],reads=[],parseSizes=[];
- const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
+ const context={document:{hidden:false,addEventListener:(name,callback)=>visibilityListeners.set(name,callback),documentElement:root,body,getElementById:id=>{assert(elements.has(id));return elements.get(id)},createElement:()=>new Element()},localStorage:{getItem:key=>{reads.push(key);if(blocked)throw Error('Storage denied');return raw.get(key)??null}},sessionStorage:{getItem:key=>{if(sessionBlocked)throw Error('Session denied');return session.get(key)??null},setItem:(key,value)=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.set(key,value)},removeItem:key=>{if(sessionWriteBlocked)throw Error('Session writes denied');session.delete(key)}},navigator,window:{addEventListener:(name,callback)=>listeners.set(name,callback)},Error,Blob,URL:{createObjectURL:blob=>{blobs.push(blob);return 'blob:qa-recovery'},revokeObjectURL:url=>revoked.push(url)},setTimeout:(callback,delay)=>timers.push({callback,delay}),JSON:{parse:value=>{parseSizes.push(value.length);return JSON.parse(value)},stringify:JSON.stringify},loadDarkness:async()=>({offlineDarknessDetails,offlineDeepSkyPosition,offlineBrightPosition,offlineBrightTargetNames,offlineDeepSkyBest,offlineBrightBest}),loadRecovery:async()=>{if(importFailed)throw Error('Module unavailable');return recoveryLoader?recoveryLoader():{makePlannerRecovery}}};
  // vm scripts cannot load browser URL modules. Supply the real shipped module
  // through a loader while exercising the actual offline click handler.
- for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()'),context);
+ for(const script of scripts)vm.runInNewContext(script.replace("import('/planner-recovery.mjs')",'loadRecovery()').replaceAll("import('/offline-darkness.mjs')",'loadDarkness()'),context);
  return {allowSessionWrites:()=>{sessionWriteBlocked=false},storage:context.localStorage,document:context.document,elements,raw,session,listeners,visibilityListeners,navigator,root,body,blobs,timers,revoked,reads,parseSizes};
 }
 test('offline notes retain 2,000 characters, newlines and text markup without interpreting HTML',()=>{
@@ -72,9 +73,9 @@ test('unavailable storage leaves a warning and usable retry control',()=>{
  const invalid=load({'nightjar-observing-time':'bad date'});invalid.elements.get('retry').listeners.get('click')();assert.equal(invalid.session.size,0);
 });
 
-test('offline deep-sky lists show only distinct catalogue identifiers without making position claims',()=>{
+test('offline deep-sky lists show only distinct catalogue identifiers with calculation guidance',()=>{
  const page=load({'nightjar-deep-targets-v1':['M31','M45','M31','M102','<script>','M110']});
- assert.equal(page.elements.get('deep-targets').children.length,3);assert(page.elements.get('deep-targets').textContent.includes('M45'));assert(!page.elements.get('deep-targets').textContent.includes('<script>'));assert(page.elements.get('deep-targets').textContent.includes('Reconnect for object details and positions.'));assert.equal(page.elements.get('deep-targets-empty').hidden,true);
+ assert.equal(page.elements.get('deep-targets').children.length,3);assert(page.elements.get('deep-targets').textContent.includes('M45'));assert(!page.elements.get('deep-targets').textContent.includes('<script>'));assert(page.elements.get('deep-targets').textContent.includes('Check a fully dark time above to calculate this target’s position offline.'));assert.equal(page.elements.get('deep-targets-empty').hidden,true);
 });
 
 test('offline diary renders snapshot notes as text and skips malformed observations',()=>{
@@ -136,7 +137,7 @@ test('offline missing collections remain empty but present empty/null/wrong-shap
 
 test('offline bounded and filtered views identify omitted collections without treating duplicates as missing identities',()=>{
  const site={name:'Site QA',latitude:51,longitude:0},setup={name:'Setup QA',focal:400,width:36,height:24,pixel:3.76};
- const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(460).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
+ const page=load({'nightjar-targets-v1':Array.from({length:43},(_,i)=>'Target '+i),'nightjar-deep-targets-v1':Array(470).fill('M31'),'nightjar-target-notes-v1':Object.fromEntries(Array.from({length:101},(_,i)=>['Note '+i,'Text QA'])),'nightjar-places':Array(101).fill(site),'nightjar-equipment':Array(101).fill(setup)}),before=structuredClone(page.raw);
  const coverage=page.elements.get('coverage-warning');assert.equal(coverage.hidden,false);
  for(const name of ['Saved targets','Saved deep-sky list','Target notes','Your places','Imaging setups'])assert(coverage.textContent.includes(name));
  assert.equal(page.elements.get('targets').children.length,42);assert.equal(page.elements.get('places').children.length,100);assert.equal(page.elements.get('equipment').children.length,100);assert.deepEqual(page.raw,before);assert.equal(page.session.size,0);
@@ -263,12 +264,23 @@ test('offline diary search filters the rendered snapshot across Unicode, notes a
  const find=query=>{search.value=query;search.listeners.get('input')()};
  assert.equal(page.elements.get('diary-search-tools').hidden,false);
  find('Ｍ３１');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ find('Andromeda');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
+ find('NGC 0224');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
  assert.equal(page.elements.get('diary-search-count').textContent,'1 of 2 saved observations shown.');
  find('星空');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
  find('<NIGHT>');assert.deepEqual(rows.map(row=>row.hidden),[false,true]);
  find('no matching note');assert(rows.every(row=>row.hidden));assert.equal(page.elements.get('diary-search-empty').hidden,false);
  clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert.equal(search.value,'');assert(search.focused);assert(clear.disabled);
  assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
+});
+test('offline diary catalogue index stays in sync with all bundled names and cross-references',()=>{
+ const index=JSON.parse(html.match(/const diaryCatalogueNames=([^\n]*);/)[1]);
+ const catalogues=['../data/messier.json','../data/additional-deep-sky.json'].flatMap(name=>JSON.parse(readFileSync(new URL(name,import.meta.url),'utf8')));
+ assert.deepEqual(index,Object.fromEntries(catalogues.map(target=>[target.id,[target.name,target.catalogue,...(target.crossReferences??[])].join(' ')])));
+ const entry={target:'NGC253',observedAt:'2026-10-08T20:00:00.000Z',place:{name:'Site',latitude:51.5,longitude:0},outcome:'seen'};
+ const page=load({'nightjar-observing-diary-v1':[entry,{...entry,target:'NGC281'}]});
+ const search=page.elements.get('diary-search'),rows=page.elements.get('diary').children;
+ for(const [query,expected] of [['Silver Coin',[false,true]],['IC 0011',[true,false]],['NGC 0253',[false,true]]]){search.value=query;search.listeners.get('input')();assert.deepEqual(rows.map(row=>row.hidden),expected)}
 });
 test('offline diary search stays hidden for empty or unreadable observations',()=>{
  for(const page of [load(),load({},true),load({'nightjar-observing-diary-v1':[{}]})])assert.equal(page.elements.get('diary-search-tools').hidden,true);
@@ -281,4 +293,68 @@ test('offline recovery recognizes every curated NGC/IC identity in lists and dia
   const batch=entries.slice(offset,offset+200),page=load({'nightjar-deep-targets-v1':extra.map(target=>target.id),'nightjar-observing-diary-v1':batch});
   assert.equal(page.elements.get('deep-targets').children.length,extra.length);assert.equal(page.elements.get('diary').children.length,batch.length);assert.equal(page.elements.get('coverage-warning').hidden,true);
  }
+});
+
+test('offline deep-sky search filters the snapshot without storage reads or writes',()=>{
+ const page=load({'nightjar-deep-targets-v1':['M31','NGC7000','IC1396']});
+ const search=page.elements.get('deep-search'),clear=page.elements.get('deep-search-clear'),rows=page.elements.get('deep-targets').children,before=[...page.reads],raw=[...page.raw];
+ const find=query=>{search.value=query;search.listeners.get('input')()};
+ assert.equal(page.elements.get('deep-search-tools').hidden,false);find('ＮＧＣ ０７０００');assert.deepEqual(rows.map(row=>row.hidden),[true,false,true]);assert.equal(page.elements.get('deep-search-count').textContent,'1 of 3 saved deep-sky objects shown.');
+ find('Messier 31');assert.deepEqual(rows.map(row=>row.hidden),[false,true,true]);find('NGC9999');assert.equal(page.elements.get('deep-search-empty').hidden,false);
+ clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert(search.focused);assert(clear.disabled);assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
+ for(const empty of [load(),load({},true),load({'nightjar-deep-targets-v1':[{}]})])assert.equal(empty.elements.get('deep-search-tools').hidden,true);
+});
+
+test('offline darkness uses the saved site and time without changing stored plans',async()=>{
+ const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},time='2026-10-27T00:00:00.000Z',page=load({'nightjar-place':site,'nightjar-observing-time':time}),before=[...page.raw];
+ assert.equal(page.elements.get('offline-darkness-tools').hidden,false);await page.elements.get('check-offline-darkness').listeners.get('click')();
+ assert.match(page.elements.get('offline-darkness-status').textContent,/Full darkness remaining:/);assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+ const day=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T12:00:00.000Z'});await day.elements.get('check-offline-darkness').listeners.get('click')();assert.match(day.elements.get('offline-darkness-status').textContent,/outside full astronomical darkness/);
+ assert.equal(load().elements.get('offline-darkness-tools').hidden,true);
+ const nowOnly=load({'nightjar-place':site});assert.equal(nowOnly.elements.get('offline-darkness-tools').hidden,false);assert.equal(nowOnly.elements.get('check-offline-darkness').hidden,true);await nowOnly.elements.get('check-offline-now').listeners.get('click')();assert.match(nowOnly.elements.get('offline-darkness-status').textContent,/Device time: \d{4}-/);assert.equal(nowOnly.raw.has('nightjar-observing-time'),false);
+});
+
+test('offline darkness can compare saved sites without replacing the plan',async()=>{
+ const london={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},sydney={name:'Sydney',latitude:-33.86,longitude:151.2,timezone:'Australia/Sydney'},time='2026-10-27T12:00:00.000Z';
+ const page=load({'nightjar-place':london,'nightjar-places':[london,sydney],'nightjar-observing-time':time}),before=[...page.raw];
+ const select=page.elements.get('offline-darkness-site');assert.equal(select.children.length,2);
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/At London.*outside full astronomical darkness/);
+ select.value='1';select.listeners.get('change')();assert.equal(page.elements.get('offline-darkness-status').textContent,'');
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/At Sydney.*Full darkness remaining: [0-9]/);
+ assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+});
+
+test('offline darkness accepts a validated UTC time without changing saved data',async()=>{
+ const site={name:'Sydney',latitude:-33.86,longitude:151.2,timezone:'Australia/Sydney'},page=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T00:00:00.000Z'}),before=[...page.raw],input=page.elements.get('offline-darkness-time');
+ input.value='2026-10-27T12:00';await page.elements.get('check-offline-entered').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/Entered UTC time: 2026-10-27T12:00:00.000Z.*Full darkness remaining: [0-9]/);
+ for(const bad of ['2026-02-30T12:00','0000-01-01T00:00','2026-10-27T24:00','not-a-date']){input.value=bad;await page.elements.get('check-offline-entered').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/Enter a valid UTC/)}
+ assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+});
+
+test('offline next-darkness preview checks the preview without saving or retaining stale results',async()=>{
+ const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},page=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T12:00:00.000Z'}),before=[...page.raw];
+ await page.elements.get('check-offline-darkness').listeners.get('click')();const preview=page.elements.get('check-offline-preview');assert.equal(preview.hidden,false);
+ await preview.listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/Previewed fully dark time: .*Full darkness remaining: [0-9]/);assert.equal(preview.hidden,true);assert.deepEqual([...page.raw],before);
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.equal(preview.hidden,false);page.elements.get('offline-darkness-site').listeners.get('change')();assert.equal(preview.hidden,true);
+});
+
+test('offline target calculation requires a checked dark time and clears on site or time changes',async()=>{
+ const london={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},time='2026-10-27T00:00:00.000Z';
+ const page=load({'nightjar-place':london,'nightjar-observing-time':time,'nightjar-deep-targets-v1':['M31','NGC7000']}),before=[...page.raw];
+ assert.equal(page.elements.get('offline-target-tools').hidden,true);await page.elements.get('check-offline-darkness').listeners.get('click')();assert.equal(page.elements.get('offline-target-tools').hidden,false);
+ await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/M31 at London.*Altitude.*Azimuth/);
+ page.elements.get('offline-darkness-site').listeners.get('change')();assert.equal(page.elements.get('offline-target-tools').hidden,true);assert.equal(page.elements.get('offline-target-status').textContent,'');assert.deepEqual([...page.raw],before);
+});
+
+test('offline positions include supported saved bright targets but skip legacy names',async()=>{
+ const site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},page=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T00:00:00.000Z','nightjar-targets-v1':['Polaris','Moon','Legacy target']}),before=[...page.raw];
+ await page.elements.get('check-offline-darkness').listeners.get('click')();const select=page.elements.get('offline-target-select');assert.deepEqual(select.children.map(item=>item.value),['bright:Polaris','bright:Moon']);
+ select.value='bright:Polaris';await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/Polaris at London.*Altitude.*Azimuth/);
+ select.value='bright:Moon';await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/Moon at London.*Altitude.*Azimuth/);assert.deepEqual([...page.raw],before);
+});
+
+test('offline deep-sky best sample is temporary and clears when the target or site changes',async()=>{
+ const site={name:'London',latitude:51.5,longitude:0},page=load({'nightjar-place':site,'nightjar-observing-time':'2026-10-27T00:00:00.000Z','nightjar-deep-targets-v1':['M31'],'nightjar-targets-v1':['Polaris']}),before=[...page.raw];
+ await page.elements.get('check-offline-darkness').listeners.get('click')();await page.elements.get('check-offline-best').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/M31 at London · Best 15-minute sample: .*Full astronomical darkness/);
+ const select=page.elements.get('offline-target-select');select.value='bright:Polaris';select.listeners.get('change')();assert.equal(page.elements.get('offline-target-status').textContent,'');await page.elements.get('check-offline-best').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/Polaris at London · Best 15-minute sample:/);page.elements.get('offline-darkness-site').listeners.get('change')();assert.equal(page.elements.get('offline-target-tools').hidden,true);assert.deepEqual([...page.raw],before);
 });

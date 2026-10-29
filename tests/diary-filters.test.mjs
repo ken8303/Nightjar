@@ -10,6 +10,15 @@ test('diary search handles names, identifiers, multiline notes, Unicode and equi
  for(const query of ['Andromeda','M 31','M031','NGC0224','NGC 224','OVAL GLOW','星空'])assert.deepEqual(filterDiary(entries,{...emptyDiaryFilters,query}).entries,[first]);
  assert.equal(filterDiary(entries,{...emptyDiaryFilters,query:'BINOCULARS'}).entries.length,2);assert.equal(filterDiary(entries,{...emptyDiaryFilters,query:'pleiades'}).entries[0].id,'night-2');assert.equal(filterDiary(entries,{...emptyDiaryFilters,query:'<script>'}).entries.length,0);assert.deepEqual(entries,[first,second]);assert.deepEqual(filterDiary(entries,emptyDiaryFilters).entries,[second,first]);
 });
+test('diary search finds additional NGC and IC objects by names, aliases and catalogue cross-references',()=>{
+ const galaxy={...first,id:'galaxy',target:'NGC253',notes:'Faint edge-on galaxy'},nebula={...first,id:'nebula',target:'NGC281',outcome:'not-seen',notes:''},california={...first,id:'california',target:'NGC1499',notes:''};
+ const records=[galaxy,nebula,california],before=structuredClone(records);
+ for(const query of ['Sculptor Filament','Silver Coin','ＮＧＣ ００２５３'])assert.deepEqual(filterDiary(records,{...emptyDiaryFilters,query}).entries,[galaxy]);
+ for(const query of ['IC11','ic 0011'])assert.deepEqual(filterDiary(records,{...emptyDiaryFilters,query}).entries,[nebula]);
+ assert.deepEqual(filterDiary(records,{...emptyDiaryFilters,query:'California Nebula'}).entries,[california]);
+ assert.deepEqual(filterDiary(records,{...emptyDiaryFilters,query:'IC11',outcome:'seen'}).entries,[]);
+ assert.deepEqual(records,before);
+});
 test('inclusive UTC date filters distinguish site-local next-day observations and combine with results',()=>{
  assert.deepEqual(filterDiary(entries,{...emptyDiaryFilters,from:'2026-10-05',through:'2026-10-05'}).entries,[first]);
  assert.equal(filterDiary(entries,{...emptyDiaryFilters,from:'2026-10-05',through:'2026-10-06',outcome:'not-seen'}).entries[0].id,'night-2');

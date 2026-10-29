@@ -27,3 +27,12 @@ test('unsupported comparison dates and invalid time zones are rejected before fo
  for(const value of ['invalid','0000-12-31T23:59:59Z','+010000-01-01T00:00:00Z'])assert.throws(()=>deepSkyTimestampFormatter(new Date(value),'UTC'),/Invalid deep-sky planning date/);
  assert.throws(()=>deepSkyTimestampFormatter(new Date('2026-10-13T20:00:00Z'),'Unknown/Zone'),RangeError);
 });
+test('Traditional Chinese dates preserve distinct offsets and eras',()=>{
+ const repeated=deepSkyTimestampFormatter(new Date('2026-10-25T00:30:00Z'),'Europe/London','zh-Hant');
+ const parts=date=>Object.fromEntries(repeated.formatToParts(new Date(date)).filter(part=>['hour','minute','timeZoneName'].includes(part.type)).map(part=>[part.type,part.value]));
+ const first=parts('2026-10-25T00:30:00Z'),second=parts('2026-10-25T01:30:00Z');
+ assert.equal(first.hour,second.hour);assert.equal(first.minute,second.minute);assert.notEqual(first.timeZoneName,second.timeZoneName);
+ const ancient=deepSkyTimestampFormatter(new Date('0001-01-01T02:00:00Z'),'America/New_York','zh-Hant');
+ const era=date=>ancient.formatToParts(new Date(date)).find(part=>part.type==='era').value;
+ assert.notEqual(era('0001-01-01T02:00:00Z'),era('0001-01-01T06:00:00Z'));
+});

@@ -1,9 +1,10 @@
 // Cache the public offline page and immutable app files, never HTML or live forecasts.
-const CACHE = 'nightjar-offline-v20';
+const CACHE = 'nightjar-offline-v33';
 const STATIC_CACHE = 'nightjar-static-v1';
 const MAX_STATIC_FILES = 80;
 const OFFLINE = '/offline';
 const RECOVERY = '/planner-recovery.mjs';
+const DARKNESS = '/offline-darkness.mjs';
 const NAVIGATION_TIMEOUT_MS = 8000;
 async function offlineResponse() {
   try { const cache = await caches.open(CACHE); const cached = await cache.match(OFFLINE); if (cached) return cached; } catch { /* Storage can be unavailable. */ }
@@ -24,11 +25,13 @@ self.addEventListener('message', event => {
 });
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(async cache => {
-    const [response,recovery] = await Promise.all([fetch(OFFLINE, { cache: 'reload', redirect: 'error' }),fetch(RECOVERY, { cache: 'reload', redirect: 'error' })]);
+    const [response,recovery,darkness] = await Promise.all([fetch(OFFLINE, { cache: 'reload', redirect: 'error' }),fetch(RECOVERY, { cache: 'reload', redirect: 'error' }),fetch(DARKNESS, { cache: 'reload', redirect: 'error' })]);
     if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) throw new Error('Offline page unavailable');
     if (!recovery.ok || !/javascript/i.test(recovery.headers.get('content-type') || '')) throw new Error('Recovery tools unavailable');
+    if (!darkness.ok || !/javascript/i.test(darkness.headers.get('content-type') || '')) throw new Error('Offline darkness calculator unavailable');
     await cache.put(OFFLINE, response);
     await cache.put(RECOVERY, recovery);
+    await cache.put(DARKNESS, darkness);
   }));
 });
 self.addEventListener('activate', event => {
@@ -47,8 +50,8 @@ self.addEventListener('fetch', event => {
     event.respondWith(navigate(request));
     return;
   }
-  if (url.pathname === RECOVERY && !url.search && !request.headers.has('authorization')) {
-    event.respondWith((async () => {try {const cache=await caches.open(CACHE);const cached=await cache.match(RECOVERY);if(cached)return cached}catch{}return fetch(request)})());
+  if ((url.pathname === RECOVERY || url.pathname === DARKNESS) && !url.search && !request.headers.has('authorization')) {
+    event.respondWith((async () => {try {const cache=await caches.open(CACHE);const cached=await cache.match(url.pathname);if(cached)return cached}catch{}return fetch(request)})());
     return;
   }
   if (!url.pathname.startsWith('/_next/static/') || url.search || request.headers.has('authorization')) return;

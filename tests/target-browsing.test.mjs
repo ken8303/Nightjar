@@ -25,7 +25,7 @@ test('snapshots are stable until a meaningful change and redundant updates do no
  assert.equal(store.getSnapshot(),initial);store.update({});store.update({query:'',aboveOnly:false});assert.equal(calls,0);assert.equal(store.getSnapshot(),initial);
  store.update({query:'Vega',savedOnly:true});const changed=store.getSnapshot();assert.notEqual(changed,initial);assert.equal(calls,1);
  store.update({query:'Vega'});assert.equal(store.getSnapshot(),changed);assert.equal(calls,1);
- store.update({aboveThirty:true});assert.equal(store.getSnapshot().query,'Vega');assert.equal(store.getSnapshot().savedOnly,true);stop();
+ store.update({aboveThirty:true,constellation:'Lyra'});assert.equal(store.getSnapshot().query,'Vega');assert.equal(store.getSnapshot().savedOnly,true);assert.equal(store.getSnapshot().constellation,'Lyra');assert.equal(createBrightTargetBrowsing().getSnapshot().constellation,'');stop();
 });
 
 test('new planner sessions and the two catalogues keep independent browsing',()=>{
@@ -51,11 +51,11 @@ test('diary filters have an independent subscription and survive diary view remo
 test('deep-sky comparison retains explicit choices without notifying catalogue or diary subscribers',()=>{
  const deep=createDeepSkyBrowsing(),comparison=deep.comparison;let catalogueCalls=0,diaryCalls=0,comparisonCalls=0;
  const stopCatalogue=deep.subscribe(()=>catalogueCalls++),stopDiary=deep.diary.subscribe(()=>diaryCalls++),stopComparison=comparison.subscribe(()=>comparisonCalls++);
- assert.deepEqual(comparison.getSnapshot(),{open:false,moonBelowOnly:false,chosen:null});
+ assert.deepEqual(comparison.getSnapshot(),{open:false,moonBelowOnly:false,chosen:null,horizon:null});
  comparison.update({open:true,chosen:'M31,M45',moonBelowOnly:true});assert.equal(comparisonCalls,1);assert.equal(catalogueCalls,0);assert.equal(diaryCalls,0);
  stopComparison();comparison.update({chosen:''});assert.equal(comparisonCalls,1);assert.equal(comparison.getSnapshot().chosen,'','an intentional empty selection must not become automatic defaults');
  assert.equal(comparison.getSnapshot().open,true);assert.equal(comparison.getSnapshot().moonBelowOnly,true);
- assert.deepEqual(createDeepSkyBrowsing().comparison.getSnapshot(),{open:false,moonBelowOnly:false,chosen:null},'another planner visit starts with automatic choices and a closed comparison');
+ assert.deepEqual(createDeepSkyBrowsing().comparison.getSnapshot(),{open:false,moonBelowOnly:false,chosen:null,horizon:null},'another planner visit starts with automatic choices and a closed comparison');
  stopCatalogue();stopDiary();
 });
 
@@ -66,4 +66,9 @@ test('planet browsing survives view remounts while finder searches and other vis
  finder.update({query:'Vega',savedOnly:true});visibility.update({body:'Saturn'});assert.equal(finderCalls,1);assert.equal(visibilityCalls,1);
  stopVisibility();visibility.update({body:'Jupiter'});assert.equal(visibilityCalls,1);assert.equal(visibility.getSnapshot().body,'Jupiter');assert.equal(finder.getSnapshot().query,'Vega');assert.equal(finder.getSnapshot().savedOnly,true);
  assert.equal(createBrightTargetBrowsing().visibility.getSnapshot().body,null,'a new visit starts with automatic altitude ranking');stopFinder();
+});
+
+test('comparison horizon draft and applied profile survive unmounts but stay in the planner instance',()=>{
+ const planner=createDeepSkyBrowsing(),comparison=planner.comparison,profile={site:'London',draft:['45','0','0','0','0','0','0','0'],applied:'45,0,0,0,0,0,0,0'};
+ comparison.update({horizon:profile});const unsubscribe=comparison.subscribe(()=>{});unsubscribe();assert.deepEqual(comparison.getSnapshot().horizon,profile);assert.equal(createDeepSkyBrowsing().comparison.getSnapshot().horizon,null);
 });

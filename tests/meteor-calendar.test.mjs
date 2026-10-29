@@ -6,7 +6,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {utcDate}=await vite.ssrLoadModule('/lib/utc-date.ts');
 const {meteorCalendar}=await vite.ssrLoadModule('/lib/calendar.ts');
-const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary,upcomingMeteorOccurrences}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
+const {nextMeteorYear,meteorEvents,meteorConditions,meteorCloudSummary,meteorHourCloud,upcomingMeteorOccurrences}=await vite.ssrLoadModule('/lib/meteor-planning.ts');
 test('meteor dates and next-year selection preserve early years rather than adding 1900',()=>{
  for(const year of [1,99,100,2026]){
   const padded=String(year).padStart(4,'0');
@@ -36,14 +36,16 @@ test('the upcoming meteor year advances at local noon when its typical night end
  assert.equal(nextMeteorYear(orionids,new Date('2026-10-22T18:00:00Z'),'America/Los_Angeles'),2026);
  assert.equal(nextMeteorYear(orionids,new Date('2026-10-22T19:00:00Z'),'America/Los_Angeles'),2027);
 });
-test('remaining meteor windows exclude elapsed and partial hours without modifying full-window calculations',()=>{
+test('remaining meteor windows exclude elapsed and partial hours without modifying full-window calculations',async()=>{
  const event=meteorEvents.find(event=>event.name==='Orionids'),place={name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'};
  const full=meteorConditions(event,2026,place),from=new Date('2026-10-22T01:15:00Z'),remaining=meteorConditions(event,2026,place,undefined,from);
  assert(full.darkHours>remaining.darkHours);assert(remaining.darkHours>0);
  if(remaining.window)assert(+remaining.window.start>=+from);
- assert.equal(remaining.moonIllumination,full.moonIllumination);
+ const {isAstronomicalNight,moonInfo}=await vite.ssrLoadModule('/lib/sky.ts');
+ assert(remaining.moonIlluminationTime);assert(isAstronomicalNight(remaining.moonIlluminationTime,place));assert(+remaining.moonIlluminationTime>=+from);assert.equal(remaining.moonIllumination,moonInfo(remaining.moonIlluminationTime,place).illumination);
+ assert.equal(+remaining.moonIlluminationTime,+(remaining.window?.start??remaining.moonIlluminationTime));
  const expired=meteorConditions(event,2026,place,undefined,new Date('2026-10-23T00:00Z'));
- assert.equal(expired.darkHours,0);assert.equal(expired.moonFreeHours,0);assert.equal(expired.window,null);assert.equal(expired.cloudCover,null);
+ assert.equal(expired.darkHours,0);assert.equal(expired.moonFreeHours,0);assert.equal(expired.window,null);assert.equal(expired.cloudCover,null);assert.equal(expired.moonIllumination,null);assert.equal(expired.moonIlluminationTime,null);
 });
 test('a complete sampled meteor hour cannot extend beyond local noon in a fractional-offset zone',()=>{
  const event=meteorEvents.find(event=>event.name==='Geminids'),place={name:'Polar clock QA',latitude:90,longitude:0,timezone:'Asia/Kathmandu'};
@@ -75,6 +77,18 @@ test('meteor cloud estimates report complete, partial and missing coverage witho
  assert.equal(elapsed.cloudSampleHours,0);assert.equal(elapsed.cloudForecastHours,0);assert.equal(meteorCloudSummary(elapsed),'No remaining dark hours to check against the cloud forecast.');
  assert.deepEqual(hourly,original);
 });
+test('meteor cloud hours require complete coverage and weight fractional-offset forecast intervals',()=>{
+ const start=new Date('2026-12-14T00:00:00Z'),seconds=+start/1000;
+ assert.equal(meteorHourCloud({time:[seconds-1800,seconds+1800],cloud_cover:[10,90]},start),50);
+ assert.equal(meteorHourCloud({time:[seconds-900,seconds+2700],cloud_cover:[20,100]},start),40);
+ assert.equal(meteorHourCloud({time:[seconds],cloud_cover:[0]},start),0);
+ for(const hourly of [undefined,{time:[seconds-1800],cloud_cover:[10]},{time:[seconds-1800,seconds+1800],cloud_cover:[10,null]},{time:[seconds-1800,seconds+5400],cloud_cover:[10,90]},{time:[seconds-1800,seconds+1800],cloud_cover:[10,101]}])assert.equal(meteorHourCloud(hourly,start),null);
+ const event=meteorEvents.find(event=>event.name==='Geminids'),place={name:'Polar QA',latitude:90,longitude:0,timezone:'UTC'},baseline=meteorConditions(event,2026,place);
+ const first=baseline.window?.start??baseline.moonIlluminationTime;assert(first);
+ const t=+first/1000,conditions=meteorConditions(event,2026,place,{time:[t-1800,t+1800],cloud_cover:[10,90]});
+ assert.equal(conditions.cloudForecastHours,1);assert.equal(conditions.cloudCover,50);assert(conditions.cloudSampleHours>1);
+ assert.match(meteorCloudSummary(conditions),/Partial coverage/);
+});
 
 test('upcoming meteor cards contain no year-10000 occurrence at the final supported date',()=>{
  assert.deepEqual(upcomingMeteorOccurrences(utcDate(9999,11,31,12),'UTC'),[]);
@@ -90,4 +104,11 @@ test('ordinary upcoming meteor ordering and year rollover remain available',()=>
 test('supported early meteor occurrences preserve year one and reject invalid planner dates',()=>{
  const plans=upcomingMeteorOccurrences(utcDate(1,0,1),'UTC');assert.equal(plans.length,7);assert.equal(plans[0].peak.toISOString(),'0001-01-04T00:00:00.000Z');
  for(const date of [new Date(NaN),utcDate(0,0,1),utcDate(10000,0,1)])assert.throws(()=>upcomingMeteorOccurrences(date),/UTC years 1–9999/);
+});
+
+test('meteor illumination is tied to a remaining dark hour, including Moon-up and polar daylight cases',async()=>{
+ const {isAstronomicalNight,moonInfo}=await vite.ssrLoadModule('/lib/sky.ts');
+ const london={name:'London',latitude:51.5,longitude:0,timezone:'UTC'},quadrantids=meteorEvents.find(event=>event.name==='Quadrantids');
+ const moonUp=meteorConditions(quadrantids,2026,london);assert(moonUp.darkHours>0);assert.equal(moonUp.moonFreeHours,0);assert.equal(moonUp.window,null);assert(moonUp.moonIlluminationTime);assert(isAstronomicalNight(moonUp.moonIlluminationTime,london));assert.equal(moonUp.moonIllumination,moonInfo(moonUp.moonIlluminationTime,london).illumination);
+ const polar={name:'North Pole',latitude:90,longitude:0,timezone:'UTC'},perseids=meteorEvents.find(event=>event.name==='Perseids'),day=meteorConditions(perseids,2026,polar);assert.equal(day.darkHours,0);assert.equal(day.moonIllumination,null);assert.equal(day.moonIlluminationTime,null);
 });

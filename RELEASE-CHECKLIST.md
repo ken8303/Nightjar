@@ -9,6 +9,14 @@ The mobile-planner review branch integrates GitHub `main` at `ae53bc8`, preservi
 Completed locally:
 
 - [x] New NGC/IC objects work through search, saves, diary/drafts, backups, plans, comparison calendars and offline recovery. Four new-object and eight night-only browser journeys pass.
+- [x] Lunar eclipse planning retains dark contacts even when the peak is outside full darkness; brighter contacts and peak shortcuts remain hidden, and full-event exports require continuous darkness.
+- [x] Aurora outlook shows separate, freshness-checked cloud context at NOAA’s fully dark forecast time, using the existing site weather forecast.
+- [x] Selected bright targets identify their IAU constellation during full darkness. Solar-system positions use the selected site/time; stellar positions use catalogue coordinates.
+- [x] ISS calendar export independently rejects twilight or dawn-crossing windows; cloud context avoids displaying forecast-hour timestamps outside full darkness.
+- [x] Meteor Moon illumination is tied to a remaining fully dark observing hour and is unavailable when no complete dark hour remains.
+- [x] An opt-in cloud comparison displays GFS and ICON global cloud-cover estimates for the selected fully dark time. Missing models remain unavailable; site/time changes retire the previous result.
+- [x] Deep-sky comparison supports an optional manually entered eight-direction horizon for the selected site. The applied horizon remains active while its draft is edited and across planner section changes; it is temporary and is not saved after reload. Linear interpolation and 15-minute sampling are approximations; other views retain a flat horizon.
+- [x] Offline target planning can find the highest 15-minute sample for supported saved stars, solar-system objects and deep-sky objects above 30° during full astronomical darkness over the next 24 hours at a saved site, without changing saved plans. Weather and terrain are excluded.
 - [x] Offline diary search filters the saved snapshot without network/storage writes; Unicode, clear, empty results and changed-data warnings pass unit and four responsive browser checks.
 - [x] Validation workflow triggers include mobile-planner branch pushes; workflow syntax and branch matching are checked locally. Hosted run status remains unverified because the GitHub Actions API returned Forbidden.
 - [x] Observing-list and printable-plan filenames include the site and precise UTC instant; eight night-only and 12 summary browser journeys pass.
@@ -78,11 +86,11 @@ Required release acceptance, still pending:
 
 Additional functions outside the current beta implementation:
 
-- [ ] Full planner startup and fresh sky calculations when reopening offline.
+- [ ] Full planner startup and fresh sky calculations when reopening offline. The saved-data fallback can calculate full darkness at a chosen saved site for the saved time, current device time or an entered UTC time, and compute supported saved-target positions for checked fully dark times.
 - [ ] Cloud accounts and automatic cross-device synchronization.
 - [ ] Push notifications and automatic aurora alerts.
 - [ ] Multiple weather-model comparison.
-- [x] Deep-sky catalogue expansion: 459 objects, comprising the original 109 Messier objects plus 350 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
+- [x] Deep-sky catalogue expansion: 469 objects, comprising the original 109 Messier objects plus 360 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
 
 These additional functions are scope choices rather than required first-release acceptance gates. Keyboard-control and photo enhancements remain paused at the user’s request. Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record physical-device results; unrun checks must stay pending.
 

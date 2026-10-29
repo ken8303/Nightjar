@@ -4,6 +4,14 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const vite=await createServer({configFile:false,root:fileURLToPath(new URL('../',import.meta.url)),server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {GET}=await vite.ssrLoadModule('/app/api/locations/route.ts');
+test('location provider language is restricted to supported planner languages',async()=>{
+ const original=globalThis.fetch,seen=[];
+ try{globalThis.fetch=async url=>{seen.push(new URL(url).searchParams.get('language'));return Response.json({results:[]})};
+  await GET(new Request('https://nightjar.test/api/locations?q=Taipei&lang=zh-Hant'));
+  await GET(new Request('https://nightjar.test/api/locations?q=Taipei&lang=unknown'));
+  assert.deepEqual(seen,['zh-TW','en']);
+ }finally{globalThis.fetch=original}
+});
 test('invalid town searches do not contact the provider and names retain literal punctuation',async()=>{
  const original=globalThis.fetch;let calls=0;
  globalThis.fetch=async(url,options)=>{calls++;assert.equal(new URL(url).searchParams.get('name'),'A&B + village');assert(options.signal);return Response.json({results:[]})};

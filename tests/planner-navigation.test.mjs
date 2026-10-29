@@ -98,3 +98,15 @@ test('best-hour snapshots allow an in-progress hour but still expire when their 
   assert.equal(h.navigation.continue(h.apply,now),expected);assert.equal(h.applied.length,expected?1:0);
  }
 });
+
+test('ISS shortcuts recheck orbital freshness after a pending edit and snapshot their timestamps',()=>{
+ const now=Date.parse('2026-10-20T20:00:00Z'),date=new Date(now+3600000);
+ const freshness={fetchedAt:new Date(now).toISOString(),epoch:'2026-10-20T20:00:00Z'};
+ for(const later of [now+6*3600000+1,now-5*60000-1,now+4*86400000]){
+  const h=harness();h.navigation.request({kind:'time',section:'sky',date,satelliteFreshness:freshness},true,h.apply);
+  assert.equal(h.navigation.continue(h.apply,later),false);assert.deepEqual(h.applied,[]);assert.equal(h.pending.at(-1),null);
+ }
+ const h=harness(),snapshot={...freshness};h.navigation.request({kind:'time',section:'sky',date,satelliteFreshness:snapshot},true,h.apply);
+ snapshot.fetchedAt='2020-01-01T00:00:00Z';snapshot.epoch='2020-01-01T00:00:00Z';
+ assert.equal(h.navigation.continue(h.apply,now+6*3600000),true);assert.deepEqual(h.applied[0].satelliteFreshness,freshness);
+});

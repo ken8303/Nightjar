@@ -17,6 +17,12 @@ test('forecast UTC durations survive clock changes and milliseconds stay within 
  const precise=unfold(observingWindowCalendar({...forecast,start:new Date('2026-10-25T00:30:00.987Z')},created));assert(precise.includes('DTSTART:20261025T003001Z'));assert(precise.includes('DTEND:20261025T023000Z'));
  assert.throws(()=>observingWindowCalendar({...forecast,start:new Date('9999-12-31T23:30Z')},created),/supported calendar years/);assert.throws(()=>observingWindowCalendar({...forecast,start:new Date('0000-01-01T00:00Z')},created),/Invalid/);
 });
+test('night-only forecast exports reject daylight, dawn crossings and missing coordinates',()=>{
+ assert.doesNotThrow(()=>observingWindowCalendar({...forecast,nightOnly:true},created));
+ for(const start of ['2026-10-25T12:00:00Z','2026-10-25T04:30:00Z'])assert.throws(()=>observingWindowCalendar({...forecast,start:new Date(start),nightOnly:true},created),/full astronomical darkness/);
+ const noSite={...forecast,nightOnly:true};delete noSite.latitude;delete noSite.longitude;
+ assert.throws(()=>observingWindowCalendar(noSite,created),/full astronomical darkness/);
+});
 test('eclipse event seconds enclose all fractional contacts and notes preserve the original instants',()=>{
  const text=unfold(lunarEclipseCalendar(eclipse,created));assert(text.includes('DTSTART:20261025T000000Z'));assert(text.includes('DTEND:20261025T020001Z'));assert(text.includes('2026-10-25T02:00:00.123Z'));assert(text.includes('TRANSP:TRANSPARENT'));
 });
