@@ -72,3 +72,12 @@ test('comparison horizon draft and applied profile survive unmounts but stay in 
  const planner=createDeepSkyBrowsing(),comparison=planner.comparison,profile={site:'London',draft:['45','0','0','0','0','0','0','0'],applied:'45,0,0,0,0,0,0,0'};
  comparison.update({horizon:profile});const unsubscribe=comparison.subscribe(()=>{});unsubscribe();assert.deepEqual(comparison.getSnapshot().horizon,profile);assert.equal(createDeepSkyBrowsing().comparison.getSnapshot().horizon,null);
 });
+
+test('bright constellation identity survives time changes and deferred view remounts',()=>{
+ const store=createBrightTargetBrowsing();
+ store.update({constellation:'Lyra',constellationSymbol:{name:'Lyra',symbol:'Lyr'}});
+ const unsubscribe=store.subscribe(()=>{});unsubscribe();store.update({query:'Vega'});
+ assert.equal(store.getSnapshot().constellation,'Lyra');assert.deepEqual(store.getSnapshot().constellationSymbol,{name:'Lyra',symbol:'Lyr'});
+ store.update({constellation:'',constellationSymbol:null});assert.equal(store.getSnapshot().constellationSymbol,null);
+ assert.equal(createBrightTargetBrowsing().getSnapshot().constellationSymbol,null);
+});

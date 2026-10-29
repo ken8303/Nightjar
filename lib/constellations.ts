@@ -20,7 +20,8 @@ export function traditionalChineseConstellationName(code:string){
  const key=constellationKey(code);
  return key?(traditionalChineseConstellationMessages as Partial<Record<ConstellationKey,string>>)[key]??'':'';
 }
-export function constellationLabel(code:string,language:Language){
+export function constellationLabel(code:string,language:Language,fallback=constellationName(code)){
  const key=constellationKey(code);
- return key?messageCatalogues[language]?.[key]??englishConstellationMessages[key]:code;
+ if(!key||language==='en')return fallback;
+ return messageCatalogues[language]?.[key]??fallback;
 }
