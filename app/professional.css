@@ -358,6 +358,40 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .deep-compare-window-scale{position:relative;height:17px;color:var(--text-secondary);font-size:10px}
 .deep-compare-window-scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .deep-compare-window-track b{position:absolute;top:0;bottom:0;width:1px;background:#e9f0f0;opacity:.65}
+.mobile-night-glance{display:none}
+.dashboard>.atlas-preview{grid-column:2;grid-row:1}
+.dashboard>.next-panel{grid-column:1/-1;grid-row:2;margin-top:0;min-width:0}
+
+/* A compact phone overview keeps the current score, Moon and dark hours together. */
+@media(max-width:700px){
+ .mobile-night-glance{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0 0 14px;padding:16px 18px;border:1px solid #38504b;border-radius:8px;background:linear-gradient(135deg,#1b3030,#111e23)}
+ .mobile-night-glance-score,.mobile-night-glance-best{display:flex;flex-direction:column;gap:4px;min-width:0}
+ .mobile-night-glance-score>span,.mobile-night-glance-best>span{font-size:10px;letter-spacing:.7px;color:#acc2bb}
+ .mobile-night-glance-score>strong{font-size:38px;line-height:1;color:#d1eba9}
+ .mobile-night-glance-score small{font-size:13px;font-weight:400;color:#aec0bd}
+ .mobile-night-glance-best{padding-left:14px;border-left:1px solid #3d504d}
+ .mobile-night-glance-best>strong{font-size:23px;line-height:1.1;color:#e5eee4}
+ .mobile-night-glance-best small{font-size:11px;line-height:1.4;color:#bdcdc6}
+ .mobile-night-glance-moon{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12px;color:#dce8d6}
+ .mobile-night-glance-moon svg{flex:none;color:#d1eba9}
+ .mobile-night-glance-freshness{grid-column:1/-1;margin:0;color:#b6c9c4;font-size:11px;line-height:1.45}
+ .time-entry{gap:8px;padding:10px 12px}
+ .time-entry .control-bar{padding-top:8px}
+ .dashboard>.atlas-preview,.dashboard>.next-panel{grid-column:auto;grid-row:auto}
+ .dashboard>.next-panel{margin-top:0}
+ .tonight-outlook{background:linear-gradient(145deg,#192d31,#101b21 78%)}
+ .tonight-outlook .score-row{grid-template-columns:minmax(100px,1fr) minmax(0,1fr);gap:16px;margin-top:14px}
+ .tonight-outlook .outlook-summary h2{font-size:24px;line-height:1.18;margin-bottom:8px}
+ .tonight-outlook .score-ring{width:auto;height:auto;padding:0;border-radius:0;background:none;align-self:center}
+ .tonight-outlook .score-ring>div{align-items:flex-start;background:none}
+ .tonight-outlook .score-ring strong{font-size:48px;line-height:1;letter-spacing:-1px;color:#d1eba9}
+ .tonight-outlook .score-ring span{font-size:10px;line-height:1.4;letter-spacing:.4px;margin-top:5px}
+ .tonight-outlook .best-window{padding-left:14px}
+ .tonight-outlook .best-window>strong{font-size:25px}
+ .dashboard>.next-panel .hour{min-width:86px;background:#14242a;border-color:#30454c;gap:8px}
+ .dashboard>.next-panel .hour.selected{background:#20362d;border-color:#a8cb83}
+ .dashboard>.next-panel .hour strong{font-size:20px}
+}
 
 /* Give observing windows enough room to read on narrow phones. */
 @media(max-width:430px){
