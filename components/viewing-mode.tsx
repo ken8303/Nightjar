@@ -1,12 +1,14 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {readViewingModeChange,viewingModeKey as key} from '@/lib/viewing-mode';
+import {useLanguage} from '@/components/language-provider';
 
 const changeEvent='nightjar-viewing-mode-change';
 function currentMode(){
  try{const current=document.documentElement.dataset.redLight;if(current)return current==='on';return localStorage.getItem(key)==='on'}catch{return false}
 }
 export default function ViewingMode({inline=false}:{inline?:boolean}){
+ const {tr}=useLanguage();
  const [enabled,setEnabled]=useState(currentMode);
  const [storageError,setStorageError]=useState(false);
  useEffect(()=>{
@@ -27,5 +29,5 @@ export default function ViewingMode({inline=false}:{inline?:boolean}){
   setStorageError(!saved);
   window.dispatchEvent(new CustomEvent(changeEvent,{detail:{saved}}));
  }
- return <div className={`viewing-mode${inline?' viewing-mode-inline':''}`}><button className="button" aria-pressed={enabled} onClick={toggle}>Red light: {enabled?'on':'off'}</button>{enabled&&<p role="status">Red-light display enabled. Lower your device brightness too. Browser controls and other apps are unaffected.</p>}{storageError&&<p role="status">This preference could not be saved; it will apply for this visit.</p>}</div>;
+ return <div className={`viewing-mode${inline?' viewing-mode-inline':''}`}><button className="button" aria-pressed={enabled} onClick={toggle}>{tr('Red light: ','紅光模式：')}{enabled?tr('on','開啟'):tr('off','關閉')}</button>{enabled&&<p role="status">{tr('Red-light display enabled. Lower your device brightness too. Browser controls and other apps are unaffected.','已啟用紅光顯示。也請降低裝置亮度；瀏覽器控制項與其他應用程式不受影響。')}</p>}{storageError&&<p role="status">{tr('This preference could not be saved; it will apply for this visit.','無法儲存此設定；本次使用期間仍會套用。')}</p>}</div>;
 }

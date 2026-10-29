@@ -1,4 +1,5 @@
 'use client';
+import {useLanguage} from '@/components/language-provider';
 export type SkyLayerSettings={
  showLines:boolean;
  showLabels:boolean;
@@ -8,9 +9,10 @@ export type SkyLayerSettings={
  onCoreChange:(shown:boolean)=>void;
 };
 export default function SkyLayerControls(props:SkyLayerSettings){
- return <div className="chart-layer-controls" role="group" aria-label="Sky chart display">
-  <button type="button" aria-pressed={props.showLines} onClick={()=>props.onLinesChange(!props.showLines)}>Star pattern lines</button>
-  <button type="button" aria-pressed={props.showLabels} onClick={()=>props.onLabelsChange(!props.showLabels)}>Object labels</button>
-  <button type="button" aria-pressed={props.showMilkyWay} onClick={()=>props.onCoreChange(!props.showMilkyWay)}>Core direction</button>
+ const {tr}=useLanguage();
+ return <div className="chart-layer-controls" role="group" aria-label={tr('Sky chart display','星空圖顯示')}>
+  <button type="button" aria-pressed={props.showLines} onClick={()=>props.onLinesChange(!props.showLines)}>{tr('Star pattern lines','星圖連線')}</button>
+  <button type="button" aria-pressed={props.showLabels} onClick={()=>props.onLabelsChange(!props.showLabels)}>{tr('Object labels','天體標籤')}</button>
+  <button type="button" aria-pressed={props.showMilkyWay} onClick={()=>props.onCoreChange(!props.showMilkyWay)}>{tr('Core direction','銀心方向')}</button>
  </div>;
 }

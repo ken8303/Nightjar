@@ -359,6 +359,10 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .deep-compare-window-scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .deep-compare-window-track b{position:absolute;top:0;bottom:0;width:1px;background:#e9f0f0;opacity:.65}
 .mobile-night-glance{display:none}
+.language-control{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--text-secondary);font-size:12px}
+.language-control select{min-height:44px;max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface-raised);color:#e9eeef;font-size:16px}
+.language-control p{flex-basis:100%;margin:0;line-height:1.5}
+.language-coverage{margin:0 0 12px;color:var(--text-secondary);font-size:12px;line-height:1.5}
 .hourly-scroll-controls{display:none}
 .deep-sky-matches-shortcut{display:none}
 .search-results button>span{min-width:0;overflow-wrap:anywhere}

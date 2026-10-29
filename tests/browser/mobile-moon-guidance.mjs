@@ -14,6 +14,7 @@ try{
   const card=page.locator('.moon-card');await card.waitFor();assert.match(await card.textContent(),/73% illuminated · Below the horizon/);assert.match(await card.textContent(),/Moon is at or below your ideal horizon/);assert.doesNotMatch(await card.textContent(),/bright Moon above the horizon/);
   await page.locator('#observing-time').fill('2026-10-30T20:00');await page.waitForFunction(()=>document.querySelector('.moon-card')?.textContent.includes('bright Moon above the horizon'));
   assert.match(await card.textContent(),/72% illuminated · 2° above the horizon/);assert.equal(await page.locator('[data-night-content="tonight"]').isVisible(),true);
+  await page.locator('#planner-language').selectOption('zh-Hant');assert.match(await card.textContent(),/地平線上的明亮月球/);await page.locator('#observing-time').fill('2026-10-30T19:00');await page.waitForFunction(()=>document.querySelector('.moon-card')?.textContent.includes('月球位於理想地平線或其下方'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);await page.close();console.log(`${width}: bright Moon advice follows horizon crossing in full darkness`);
  }
 }finally{await browser.close()}

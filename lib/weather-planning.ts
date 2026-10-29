@@ -33,8 +33,10 @@ export function forecastPlanning(hours:readonly Hour[],date:Date,place:Place){
  }
  return {current,score,best,total:hours.length,scored,missing:hours.length-scored};
 }
-export function forecastHourLabel(date:Date,timezone:string){
- const formatter=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset',...(date.getUTCFullYear()<=1?{era:'short' as const}:{})});
+export function forecastHourLabel(date:Date,timezone:string,locale='en-GB'){
+ const formatter=new Intl.DateTimeFormat(locale,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset',...(date.getUTCFullYear()<=1?{era:'short' as const}:{})});
  const parts=formatter.formatToParts(date),part=(type:string)=>parts.find(value=>value.type===type)?.value||'';
- return {time:`${part('hour')}:${part('minute')}`,detail:`${part('day')} ${part('month')}${part('era')?` ${part('year')} ${part('era')}`:''} · ${part('timeZoneName')}`,full:formatter.format(date)};
+ const month=part('month');
+ const detail=locale.startsWith('zh')?`${part('era')?`${part('era')}${part('year')}年`:''}${month}${month.endsWith('月')?'':'月'}${part('day')}日 · ${part('timeZoneName')}`:`${part('day')} ${month}${part('era')?` ${part('year')} ${part('era')}`:''} · ${part('timeZoneName')}`;
+ return {time:`${part('hour')}:${part('minute')}`,detail,full:formatter.format(date)};
 }

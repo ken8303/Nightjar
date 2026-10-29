@@ -11,6 +11,7 @@ test('location search encodes trimmed names and validates bounded provider resul
  const results=await searchLocations('  São Paulo  ',{signal:controller.signal,fetcher:async(url,options)=>{captured={url,options};return Response.json({results:[{...place,id:null},{...place,id:Infinity},{...place,admin1:{}},...Array.from({length:8},(_,id)=>({...place,id}))]})}});
  assert(captured.url.includes('S%C3%A3o%20Paulo'));assert.equal(results.length,6);assert.equal(results[0].id,0);assert(!controller.signal.aborted);assert(!captured.options.signal.aborted);
  assert.deepEqual(await searchLocations('London',{signal:controller.signal,fetcher:async()=>Response.json({generationtime_ms:1})}),[]);
+ await searchLocations('Taipei',{signal:controller.signal,language:'zh-Hant',fetcher:async url=>{assert.equal(url,'/api/locations?q=Taipei&lang=zh-Hant');return Response.json({results:[]})}});
 });
 test('a stalled search times out without cancelling the caller or leaving it permanently busy',async()=>{
  const controller=new AbortController();await assert.rejects(searchLocations('London',{signal:controller.signal,fetcher:waiting,timeoutMs:5}),/timed out/);assert(!controller.signal.aborted);
