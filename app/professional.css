@@ -360,11 +360,14 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 .deep-compare-window-track b{position:absolute;top:0;bottom:0;width:1px;background:#e9f0f0;opacity:.65}
 .mobile-night-glance{display:none}
 .hourly-scroll-controls{display:none}
+.deep-sky-matches-shortcut{display:none}
 .dashboard>.atlas-preview{grid-column:2;grid-row:1}
 .dashboard>.next-panel{grid-column:1/-1;grid-row:2;margin-top:0;min-width:0}
 
 /* A compact phone overview keeps the current score, Moon and dark hours together. */
 @media(max-width:700px){
+ .deep-sky-matches-shortcut{display:flex;justify-content:center;min-height:44px}
+ #deep-sky-match-summary{scroll-margin-top:96px}
  .mobile-night-glance{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0 0 14px;padding:16px 18px;border:1px solid #38504b;border-radius:8px;background:linear-gradient(135deg,#1b3030,#111e23)}
  .mobile-night-glance-score,.mobile-night-glance-best{display:flex;flex-direction:column;gap:4px;min-width:0}
  .mobile-night-glance-score>span,.mobile-night-glance-best>span{font-size:10px;letter-spacing:.7px;color:#acc2bb}
