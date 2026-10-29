@@ -31,8 +31,8 @@ export function pendingEditLabel(value:string,language:Language){
 export function skyShortcutLabel(id:string,language:Language,fallback:string){return labelFor(shortcutKeys,id,language,fallback)}
 export function deepSkyTypeLabel(value:string,language:Language){return labelFor(deepSkyTypeKeys,value,language,value)}
 // Chinese aliases stay searchable independently of the active interface language.
-export function skyTargetAlias(name:string){
- const translated=labelFor(skyTargetKeys,name,'zh-Hant',name);
+export function skyTargetAlias(name:string,language:Language='zh-Hant'){
+ const translated=labelFor(skyTargetKeys,name,language,name);
  return translated===name?'':translated;
 }
 export function skyTargetLabel(name:string,language:Language){

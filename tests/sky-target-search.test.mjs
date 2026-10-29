@@ -21,3 +21,16 @@ test('target search matches mobile Unicode and spacing while retaining original 
 test('strict horizon and 30-degree filters compose with names and leave selection data unchanged',()=>{
  assert.deepEqual(findSkyTargets(targets,'',0),[targets[0],targets[2],targets[4]]);assert.deepEqual(findSkyTargets(targets,'',30),[targets[0],targets[4]]);assert.deepEqual(findSkyTargets(targets,'Référence',30),[]);assert.deepEqual(findSkyTargets(targets,'Vega',30),[targets[0]]);assert.equal(targets[2].altitude,30);
 });
+
+test('searches the active language as well as Chinese aliases without changing saved identities',async()=>{
+ const {messageCatalogues}=await vite.ssrLoadModule('/lib/messages/index.ts');
+ messageCatalogues['test-language']={'target.Vega':'Vega translated'};
+ try{
+  const saved=['Vega'],before=[...saved];
+  assert.deepEqual(findSkyTargets(targets,'Vega translated',30,saved,'test-language'),[targets[0]]);
+  assert.deepEqual(findSkyTargets(targets,'織女星',30,saved,'test-language'),[targets[0]]);
+  assert.deepEqual(findSkyTargets(targets,'Vega',30,saved,'test-language'),[targets[0]]);
+  assert.deepEqual(findSkyTargets(targets,'Vega translated',30,['Alpha Centauri'],'test-language'),[]);
+  assert.deepEqual(saved,before);assert.equal(targets[0].name,'Vega');
+ }finally{delete messageCatalogues['test-language']}
+});

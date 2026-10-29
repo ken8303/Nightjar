@@ -133,7 +133,7 @@ export default function TargetFinder({date,place,selected,onSelect,browsing}:{br
  const targets=useMemo(()=>skyTargets(date,place).sort((a,b)=>b.altitude-a.altitude),[date,place]);
  const memberships=useMemo(()=>new Map(targets.map(target=>[target.name,targetConstellation(target.name,date,place)])),[targets,date,place]);
  const constellationOptions=useMemo(()=>[...new Set([...Array.from(memberships.values()).flatMap(item=>item?[item.name]:[]),...(constellationFilter?[constellationFilter]:[])])].sort((a,b)=>a.localeCompare(b)),[memberships,constellationFilter]);
- const matches=findSkyTargets(targets,query,aboveThirty?30:aboveOnly?0:null,savedOnly?saved:null).filter(target=>!constellationFilter||memberships.get(target.name)?.name===constellationFilter);
+ const matches=findSkyTargets(targets,query,aboveThirty?30:aboveOnly?0:null,savedOnly?saved:null,language).filter(target=>!constellationFilter||memberships.get(target.name)?.name===constellationFilter);
  const savedNames=useMemo(()=>new Set(saved),[saved]);
  const savedTargets=useMemo(()=>targets.filter(t=>savedNames.has(t.name)),[targets,savedNames]);
  const otherSaved=useMemo(()=>{const names=new Set(targets.map(target=>target.name));return saved.filter(name=>!names.has(name))},[saved,targets]);
