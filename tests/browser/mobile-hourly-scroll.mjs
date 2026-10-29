@@ -16,6 +16,7 @@ try{
   await page.goto(base.href,{waitUntil:'domcontentloaded'});assert.match(await page.title(),/Nightjar/);
   const panel=page.locator('.next-panel'),earlier=panel.getByRole('button',{name:'Show earlier forecast hours'}),later=panel.getByRole('button',{name:'Show later forecast hours'});
   await later.waitFor();assert(await earlier.isDisabled());assert((await later.boundingBox()).height>=44);assert.match(await panel.locator('.hourly-scroll-controls').textContent(),/Swipe for more dark hours/);
+  assert.equal(await panel.locator('.hour').nth(0).locator('svg.lucide-star').count(),1);assert.equal(await panel.locator('.hour').nth(1).locator('svg.lucide-cloud').count(),1);
   await later.tap();await page.waitForFunction(()=>document.querySelector('.next-panel .hourly').scrollLeft>5);assert(await earlier.isEnabled());
   await panel.locator('.hour').nth(4).tap();await page.waitForFunction(()=>document.querySelector('#observing-time')?.value==='2026-12-21T04:00');
   await page.waitForFunction(()=>document.querySelector('.next-panel .hourly')?.scrollLeft===0);assert.equal(await panel.locator('.hour').first().getAttribute('aria-pressed'),'true');assert(await earlier.isDisabled());

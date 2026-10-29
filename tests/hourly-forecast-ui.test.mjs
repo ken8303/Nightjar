@@ -14,3 +14,9 @@ test('forecast bars distinguish a zero score from unavailable data',()=>{
  assert(html.includes('score unavailable, cloud cover unavailable, temperature unavailable'));
  assert(html.includes('class="bar unavailable"'));assert(html.includes('class="bar"'));assert(html.includes('Cloud unavailable'));assert(!html.includes('—% cloud'));
 });
+test('forecast cloud symbols distinguish zero cloud, partial cloud and missing data',()=>{
+ const render=cloud=>renderToStaticMarkup(createElement(HourlyForecast,{hours:[{date:new Date('2026-10-27T00:00Z'),score:cloud===null?null:70,cloud,temp:10}],timezone:'UTC',onDate:()=>{}}));
+ const clear=render(0);assert.match(clear,/lucide-star/);assert.doesNotMatch(clear,/lucide-cloud/);assert.match(clear,/0% cloud/);
+ for(const cloud of [1,50,100]){const html=render(cloud);assert.match(html,/lucide-cloud/);assert.doesNotMatch(html,/lucide-star/);assert(html.includes(`${cloud}% cloud`))}
+ const missing=render(null);assert.doesNotMatch(missing,/lucide-(?:star|cloud)/);assert.match(missing,/Cloud unavailable/);
+});
