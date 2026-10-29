@@ -1,6 +1,6 @@
 import {forecastHourIndex,parseWeatherForecast} from './weather-hours';
 
-export type CloudModels={time:number[];gfs:(number|null)[];icon:(number|null)[]};
+export type CloudModels={time:number[];gfs:(number|null)[];icon:(number|null)[];ecmwf:(number|null)[]};
 // Validate timestamps and values with the same rules as the main forecast.
 // A missing model stays unavailable; it is never replaced with another model.
 export function parseCloudModels(value:unknown):CloudModels{
@@ -17,13 +17,13 @@ export function parseCloudModels(value:unknown):CloudModels{
   if(unit[key]!=='%'||!Array.isArray(values)||values.length!==times.length)throw Error('Cloud model samples are unavailable.');
   return parseWeatherForecast({hourly:{time:times,cloud_cover:values}}).hourly.cloud_cover;
  };
- // Validate timestamps even if both models are absent.
+ // Validate timestamps even if every model is absent.
  const time=parseWeatherForecast({hourly:{time:times,cloud_cover:times.map(()=>null)}}).hourly.time;
- return {time,gfs:normalize('cloud_cover_gfs_global'),icon:normalize('cloud_cover_icon_global')};
+ return {time,gfs:normalize('cloud_cover_gfs_global'),icon:normalize('cloud_cover_icon_global'),ecmwf:normalize('cloud_cover_ecmwf_ifs025')};
 }
 export function cloudModelsAt(data:CloudModels,date:Date){
  const index=forecastHourIndex(data.time,date);
- return index<0?null:{gfs:data.gfs[index],icon:data.icon[index]};
+ return index<0?null:{gfs:data.gfs[index],icon:data.icon[index],ecmwf:data.ecmwf[index]};
 }
 
 // Revalidate the normalized response at the browser boundary too.
@@ -31,5 +31,5 @@ export function parseCloudModelResponse(value:unknown):CloudModels{
  if(!value||typeof value!=='object')throw Error('Cloud model data is unavailable.');
  const raw=value as Record<string,unknown>;
  if(!Array.isArray(raw.gfs)||!Array.isArray(raw.icon))throw Error('Cloud model samples are unavailable.');
- return parseCloudModels({hourly:{time:raw.time,cloud_cover_gfs_global:raw.gfs,cloud_cover_icon_global:raw.icon},hourly_units:{time:'unixtime',cloud_cover_gfs_global:'%',cloud_cover_icon_global:'%'}});
+ return parseCloudModels({hourly:{time:raw.time,cloud_cover_gfs_global:raw.gfs,cloud_cover_icon_global:raw.icon,cloud_cover_ecmwf_ifs025:raw.ecmwf},hourly_units:{time:'unixtime',cloud_cover_gfs_global:'%',cloud_cover_icon_global:'%',cloud_cover_ecmwf_ifs025:'%'}});
 }

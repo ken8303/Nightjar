@@ -2,8 +2,14 @@
 import {useEffect,useRef,useState} from 'react';
 import {cloudModelsAt,parseCloudModelResponse,type CloudModels} from '@/lib/cloud-models';
 import {isAstronomicalNight,type Place} from '@/lib/sky';
+import {forecastHourLabel} from '@/lib/weather-planning';
 
 type Result={key:string;kind:'loading'|'error'|'ready';data?:CloudModels;fetchedAt?:string};
+function CloudModelRow({name,value}:{name:string;value:number|null|undefined}){
+ const available=typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100;
+ const amount=available?Math.round(value):null;
+ return <div><dt>{name}</dt><dd>{amount===null?'Unavailable':`${amount}%`}<span className={`cloud-model-bar${amount===null?' unavailable':''}`} aria-hidden="true">{amount!==null&&<span style={{width:`${amount}%`}}/>}</span></dd></div>;
+}
 export default function CloudModelComparison({place,date}:{place:Place;date:Date}){
  const key=JSON.stringify([place.latitude,place.longitude,+date]);
  const [result,setResult]=useState<Result|null>(null),pending=useRef<AbortController|null>(null);
@@ -28,6 +34,5 @@ export default function CloudModelComparison({place,date}:{place:Place;date:Date
  }
  if(!dark)return null;
  const values=active?.kind==='ready'&&active.data?cloudModelsAt(active.data,date):null;
- const label=(value:number|null|undefined)=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=100?`${Math.round(value)}%`:'Unavailable';
- return <section className="panel cloud-model-comparison" aria-labelledby="cloud-model-heading"><h2 id="cloud-model-heading">Compare cloud forecasts</h2><p className="muted">Check two global model estimates for {place.name} at your selected fully dark time. The comparison is requested only when you choose it.</p><button className="button" type="button" onClick={compare} disabled={active?.kind==='loading'}>{active?.kind==='loading'?'Checking cloud models…':active?'Refresh cloud models':'Compare cloud models'}</button>{active?.kind==='error'&&<p role="status">Cloud model comparison is unavailable. Try again.</p>}{active?.kind==='ready'&&<div role="status"><p>Selected time: <time dateTime={date.toISOString()}>{date.toISOString()}</time> · retrieved {active.fetchedAt}</p>{values?<dl><div><dt>NOAA GFS global</dt><dd>{label(values.gfs)}</dd></div><div><dt>DWD ICON global</dt><dd>{label(values.icon)}</dd></div></dl>:<p>No model forecast covers this selected time.</p>}</div>}<p className="footnote">Total cloud cover from Open-Meteo; each model is an estimate for the forecast hour covering the selected time. Differences do not measure confidence or astronomical seeing. Cloud forecasts do not include local obstructions; check current conditions before observing.</p></section>;
+ return <section className="panel cloud-model-comparison" aria-labelledby="cloud-model-heading"><h2 id="cloud-model-heading">Compare cloud forecasts</h2><p className="muted">Check three global model estimates for {place.name} at your selected fully dark time. The comparison is requested only when you choose it.</p><button className="button" type="button" onClick={compare} disabled={active?.kind==='loading'}>{active?.kind==='loading'?'Checking cloud models…':active?'Refresh cloud models':'Compare cloud models'}</button>{active?.kind==='error'&&<p role="status">Cloud model comparison is unavailable. Try again.</p>}{active?.kind==='ready'&&<div role="status"><p className="cloud-model-stamps">Selected time: <time dateTime={date.toISOString()}>{forecastHourLabel(date,place.timezone||'UTC').full}</time>{place.timezone?'':' · site time zone unavailable'}<br/>Retrieved: {active.fetchedAt&&<time dateTime={active.fetchedAt}>{forecastHourLabel(new Date(active.fetchedAt),place.timezone||'UTC').full}</time>}</p>{values?<dl><CloudModelRow name="ECMWF IFS 0.25°" value={values.ecmwf}/><CloudModelRow name="DWD ICON global" value={values.icon}/><CloudModelRow name="NOAA GFS global" value={values.gfs}/></dl>:<p>No model forecast covers this selected time.</p>}</div>}<p className="footnote">Total cloud cover from Open-Meteo; bars run from 0% to 100%, and dashed bars mark unavailable values. Each model is an estimate for the forecast hour covering the selected time. Model run times are not shown. Differences do not measure confidence or astronomical seeing. Cloud forecasts do not include local obstructions; check current conditions before observing.</p></section>;
 }
