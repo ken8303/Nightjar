@@ -21,8 +21,11 @@ test('Traditional Chinese forecast labels distinguish repeated local hours',()=>
 test('catalogue constellation names support Traditional Chinese search without changing codes',async()=>{
  const {deepSkyCatalogue,findDeepSky}=await vite.ssrLoadModule('/lib/deep-sky.ts');
  const {constellationLabel,traditionalChineseConstellationName}=await vite.ssrLoadModule('/lib/constellations.ts');
+ const {englishConstellationMessages}=await vite.ssrLoadModule('/lib/messages/constellations/en.ts');
+ const {traditionalChineseConstellationMessages}=await vite.ssrLoadModule('/lib/messages/constellations/zh-hant.ts');
+ assert.equal(Object.keys(englishConstellationMessages).length,90);assert.deepEqual(Object.keys(traditionalChineseConstellationMessages).sort(),Object.keys(englishConstellationMessages).sort());
  for(const code of new Set(deepSkyCatalogue.map(target=>target.constellation)))assert(traditionalChineseConstellationName(code),`missing translation for ${code}`);
- assert.equal(constellationLabel('And','zh-Hant'),'仙女座');assert.equal(constellationLabel('And','en'),'Andromeda');assert.equal(constellationLabel('unknown','zh-Hant'),'unknown');
+ assert.equal(constellationLabel('And','zh-Hant'),'仙女座');assert.equal(constellationLabel('And','en'),'Andromeda');assert.equal(constellationLabel('unknown','zh-Hant'),'unknown');assert.equal(constellationLabel('toString','zh-Hant'),'toString');assert.equal(constellationLabel('Se1','zh-Hant'),'巨蛇座（蛇首）');assert.equal(constellationLabel('Se2','zh-Hant'),'巨蛇座（蛇尾）');
  assert(findDeepSky('仙女座','').some(target=>target.id==='M31'));assert(findDeepSky('Andromeda','').some(target=>target.id==='M31'));
  const serpens=findDeepSky('巨蛇座','');assert(serpens.some(target=>target.constellation==='Se1'));assert(serpens.some(target=>target.constellation==='Se2'));
  assert(findDeepSky('仙女座','',{constellation:'And'}).every(target=>target.constellation==='And'));
@@ -46,8 +49,11 @@ test('message catalogues retain matching placeholders and support safe increment
 
 test('a new catalogue can translate shared astronomy labels and fall back without changing identifiers',async()=>{
  const {messageCatalogues}=await vite.ssrLoadModule('/lib/messages/index.ts');
- messageCatalogues['test-language']={'phase.full':'Full phase test','deepSkyType.galaxy':'Galaxy test','target.Vega':'Vega test','shortcut.visibility':'Visibility test','pending.time':'Time test','pending.separator':' / '};
+ messageCatalogues['test-language']={'phase.full':'Full phase test','deepSkyType.galaxy':'Galaxy test','target.Vega':'Vega test','shortcut.visibility':'Visibility test','pending.time':'Time test','pending.separator':' / ','constellation.And':'Andromeda test'};
  try{
+  const {constellationLabel,traditionalChineseConstellationName}=await vite.ssrLoadModule('/lib/constellations.ts');
+  assert.equal(constellationLabel('And','test-language'),'Andromeda test');assert.equal(constellationLabel('Ori','test-language'),'Orion');assert.equal(traditionalChineseConstellationName('And'),'仙女座');
+  const {findDeepSky}=await vite.ssrLoadModule('/lib/deep-sky.ts');assert(findDeepSky('Andromeda test','',{language:'test-language'}).some(target=>target.id==='M31'));assert(findDeepSky('仙女座','',{language:'test-language'}).some(target=>target.id==='M31'));
   assert.equal(moonPhaseLabel('Full Moon','test-language'),'Full phase test');
   assert.equal(moonPhaseLabel('New Moon','test-language'),'New Moon');
   assert.equal(deepSkyTypeLabel('Galaxy','test-language'),'Galaxy test');

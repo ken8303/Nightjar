@@ -26,12 +26,12 @@ import {deepSkyTimestampFormatter} from '@/lib/deep-sky-time';
 import {type Place} from '@/lib/sky';
 import type {DeepSkyBrowsing} from '@/lib/target-browsing';
 import {useLanguage} from '@/components/language-provider';
-import {deepSkyTypeLabel} from '@/lib/language';
+import {deepSkyTypeLabel,languageLocale} from '@/lib/language';
 const constellations=Array.from(new Set(deepSkyCatalogue.map(target=>target.constellation))).sort((a,b)=>constellationName(a).localeCompare(constellationName(b)));
 const types=Array.from(new Set(deepSkyCatalogue.map(target=>target.type))).sort();
 export default function DeepSkyFinder({date,place,onPlan,onFrame,onCamera,request,onRequestHandled,browsing}:{browsing:DeepSkyBrowsing;date:Date;place:Place;onPlan:(id:string,date:Date)=>void;onFrame:(target:DeepSkyObject)=>void;onCamera:(target:DeepSkyObject,launcher:HTMLButtonElement)=>void;request?:{id:string;revision:number};onRequestHandled?:()=>void}){
  const {language,tr}=useLanguage();
- const constellationOptions=useMemo(()=>language==='zh-Hant'?[...constellations].sort((a,b)=>constellationLabel(a,language).localeCompare(constellationLabel(b,language),'zh-Hant')):constellations,[language]);
+ const constellationOptions=useMemo(()=>language==='en'?constellations:[...constellations].sort((a,b)=>constellationLabel(a,language).localeCompare(constellationLabel(b,language),languageLocale(language))),[language]);
  const {query,type,constellation,catalogue,magnitude,above,darkOnly,savedOnly,selected:retainedSelection}=useSyncExternalStore(browsing.subscribe,browsing.getSnapshot,browsing.getSnapshot);
  const setQuery=(query:string)=>browsing.update({query}),setType=(type:string)=>browsing.update({type}),setConstellation=(constellation:string)=>browsing.update({constellation}),setMagnitude=(magnitude:string)=>browsing.update({magnitude}),setCatalogue=(catalogue:''|'messier'|'ngc'|'ic')=>browsing.update({catalogue});
  const setAbove=(above:boolean)=>browsing.update({above}),setDarkOnly=(darkOnly:boolean)=>browsing.update({darkOnly}),setSavedOnly=(savedOnly:boolean)=>browsing.update({savedOnly}),setSelected=(selected:string)=>browsing.update({selected});
@@ -45,7 +45,7 @@ export default function DeepSkyFinder({date,place,onPlan,onFrame,onCamera,reques
  const [saved,setSaved]=useState<string[]>([]),[listReady,setListReady]=useState(false),[listStatus,setListStatus]=useState(''),[listReadError,setListReadError]=useState(false);
  const [removed,setRemoved]=useState<{name:string}|null>(null),[undoStatus,setUndoStatus]=useState('');
  const savedHeading=useRef<HTMLHeadingElement>(null),searchInput=useRef<HTMLInputElement>(null);
- const results=useMemo(()=>findDeepSky(query,type,{constellation,catalogue,maximumMagnitude:magnitude&&magnitude!=='unknown'?Number(magnitude):undefined,unknownMagnitudeOnly:magnitude==='unknown',savedIds:savedOnly?saved:undefined}).map(target=>positions.get(target.id)!).filter(target=>(!above||target.altitude>30)&&(!recommendations||recommendations.has(target.id))).sort((a,b)=>Number(exactDeepSkyIdentifier(b,query))-Number(exactDeepSkyIdentifier(a,query))||(recommendations?recommendations.get(b.id)!.altitude-recommendations.get(a.id)!.altitude:b.altitude-a.altitude)||a.id.localeCompare(b.id)),[query,type,constellation,catalogue,magnitude,positions,above,recommendations,savedOnly,saved]);
+ const results=useMemo(()=>findDeepSky(query,type,{constellation,catalogue,maximumMagnitude:magnitude&&magnitude!=='unknown'?Number(magnitude):undefined,unknownMagnitudeOnly:magnitude==='unknown',savedIds:savedOnly?saved:undefined,language}).map(target=>positions.get(target.id)!).filter(target=>(!above||target.altitude>30)&&(!recommendations||recommendations.has(target.id))).sort((a,b)=>Number(exactDeepSkyIdentifier(b,query))-Number(exactDeepSkyIdentifier(a,query))||(recommendations?recommendations.get(b.id)!.altitude-recommendations.get(a.id)!.altitude:b.altitude-a.altitude)||a.id.localeCompare(b.id)),[query,type,constellation,catalogue,magnitude,positions,above,recommendations,savedOnly,saved,language]);
  useEffect(()=>{
   const read=()=>{try{setSaved(readDeepSkyList(localStorage));setListReadError(false);setListStatus('')}catch{setListReadError(true);setListStatus('Saved deep-sky targets could not be loaded. The stored list and any previously loaded names were kept.')}setListReady(true)};
   read();return watchSavedDataRefresh(read,window,document,{storage:()=>localStorage,key:deepSkyListKey,hidden:()=>document.hidden});

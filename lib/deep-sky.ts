@@ -1,7 +1,8 @@
 import catalogue from '@/data/messier.json';
 import additional from '@/data/additional-deep-sky.json';
 import {validObservingDate} from './observing-time';
-import {constellationName,traditionalChineseConstellationName} from './constellations';
+import {constellationName,constellationLabel,traditionalChineseConstellationName} from './constellations';
+import type {Language} from './language';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
 import {j2000Position,j2000Projector,type Place,sunAltitude} from '@/lib/sky';
@@ -27,11 +28,11 @@ export function exactDeepSkyIdentifier(target:DeepSkyObject,query:string){
  const normalized=normalizeDeepSkySearch(query.trim());
  return Boolean(normalized)&&[target.id,target.catalogue,...(target.crossReferences??[])].some(value=>normalizeDeepSkySearch(value)===normalized);
 }
-export function findDeepSky(query:string,type:string,{constellation='',catalogue='',maximumMagnitude,unknownMagnitudeOnly=false,savedIds}:{constellation?:string;catalogue?:DeepSkyCatalogueFilter;maximumMagnitude?:number;unknownMagnitudeOnly?:boolean;savedIds?:readonly string[]}={}){
+export function findDeepSky(query:string,type:string,{constellation='',catalogue='',maximumMagnitude,unknownMagnitudeOnly=false,savedIds,language}:{constellation?:string;catalogue?:DeepSkyCatalogueFilter;maximumMagnitude?:number;unknownMagnitudeOnly?:boolean;savedIds?:readonly string[];language?:Language}={}){
  const normalize=normalizeDeepSkySearch;
  const normalized=normalize(query.trim());
  const subset=savedIds===undefined?null:new Set(savedIds);
- return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation),traditionalChineseConstellationName(target.constellation),...(target.crossReferences??[])].some(value=>normalize(value).includes(normalized)));
+ return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation),traditionalChineseConstellationName(target.constellation),language?constellationLabel(target.constellation,language):'',...(target.crossReferences??[])].some(value=>normalize(value).includes(normalized)));
 }
 export function deepSkySampleTimes(date:Date){
  if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');

@@ -1,7 +1,9 @@
 import type {MessageKey} from './en';
+import {traditionalChineseConstellationMessages} from './constellations/zh-hant';
 
 // Missing translations fall back to English; placeholder names must match English.
 export const traditionalChineseMessages={
+ ...traditionalChineseConstellationMessages,
  'language.label':'語言',
  'language.storageError':'無法儲存語言設定；本次使用期間仍會套用。',
  'siteDarkness.label':'你的天空黑暗度評級',

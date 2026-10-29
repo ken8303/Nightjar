@@ -1,5 +1,8 @@
+import {englishConstellationMessages} from './constellations/en';
+
 // Canonical messages. Placeholder names are shared across translations.
 export const englishMessages={
+ ...englishConstellationMessages,
  'language.label':'Language',
  'language.storageError':'Language preference could not be saved; it applies for this visit.',
  'siteDarkness.label':'Your sky darkness rating',
