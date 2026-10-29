@@ -11,6 +11,7 @@
     "build": "node scripts/run-framework.mjs build",
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "i18n:check": "node scripts/check-translations.mjs",
     "db:generate": "drizzle-kit generate",
     "deploy": "node scripts/run-cloudflare.mjs deploy",
     "deploy:check": "node scripts/run-cloudflare.mjs check",
@@ -19,7 +20,7 @@
     "test:offline": "node --test tests/offline-page.test.mjs",
     "test:plan": "node --test tests/observing-plan.test.mjs",
     "test": "node --test tests/*.test.mjs",
-    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run test:satellite-worker && npm run deploy:check",
+    "verify": "npm run typecheck && npm run lint && npm run i18n:check && npm test && npm run build && npm run test:satellite-worker && npm run deploy:check",
     "test:satellite-worker": "node scripts/check-satellite-worker.mjs",
     "test:release-assets": "node scripts/check-release-assets.mjs",
     "build:offline-darkness": "node scripts/build-offline-darkness.mjs"
