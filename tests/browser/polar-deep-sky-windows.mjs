@@ -29,12 +29,14 @@ try{
   const plot=timeline.locator('svg');await plot.waitFor();
   const path=await plot.locator('path').getAttribute('d');
   assert.match(path,/^M40\.00,[\d.]+ M49\.58,/,'the curve must restart after the twilight interval');
-  assert.equal(await plot.locator('circle[cx="40"]').count(),1,'the isolated starting sample stays visible');
+  assert.equal(await timeline.locator('.deep-sky-isolated-marker').count(),1,'the isolated starting sample stays visible');
   for(const x of await plot.locator('rect').evaluateAll(nodes=>nodes.map(node=>Number(node.getAttribute('x')))))assert(x>40,'no shading over the first interval');
   if(name==='narrow')await page.locator('.deep-sky-plot').screenshot({path:'/tmp/nightjar-polar-timeline-narrow.png'});
   await page.locator('.deep-sky-comparison summary').click();
   const buttons=page.locator('.deep-compare-window button');await buttons.first().waitFor();
   const axis=page.locator('.deep-compare-window-axis').first(),end=new Date(+new Date(time)+86400000).toISOString();assert.deepEqual(await axis.locator('time').evaluateAll(nodes=>nodes.map(node=>node.dateTime)),[time,end]);
+  const guides=page.locator('.deep-compare-window-visual').first();assert.deepEqual(await guides.locator('.deep-compare-window-scale span').allTextContents(),['+6h','+12h','+18h']);assert.deepEqual(await guides.locator('.deep-compare-window-track b').evaluateAll(nodes=>nodes.map(node=>node.style.left)),['25%','50%','75%']);
+  if(name==='narrow')await guides.screenshot({path:'/tmp/nightjar-polar-comparison-narrow.png'});
   const count=await buttons.count();assert(count>0);const segments=page.locator('.deep-compare-window-track i');assert.equal(await segments.count(),count);for(const item of await segments.all()){const position=await item.evaluate(node=>({left:parseFloat(node.style.left),width:parseFloat(node.style.width)}));assert(position.left>=0&&position.width>0&&position.left+position.width<=100.001)}
   for(let index=0;index<count;index++){
    const pending=page.waitForEvent('download');await buttons.nth(index).click();
