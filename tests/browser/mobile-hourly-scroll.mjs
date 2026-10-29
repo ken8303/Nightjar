@@ -14,7 +14,7 @@ try{
   await page.route('**/api/weather?*',route=>route.fulfill({json:{hourly:{time:Array.from({length:24},(_,i)=>start+i*3600),cloud_cover:Array.from({length:24},(_,i)=>i*4),temperature_2m:Array(24).fill(-10)}}}));
   await page.route('**/*',route=>new URL(route.request().url()).origin!==base.origin?route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg"/>'}):route.fallback());
   await page.goto(base.href,{waitUntil:'domcontentloaded'});assert.match(await page.title(),/Nightjar/);
-  const panel=page.locator('.next-panel'),track=panel.locator('.hourly'),earlier=panel.getByRole('button',{name:'Show earlier forecast hours'}),later=panel.getByRole('button',{name:'Show later forecast hours'});
+  const panel=page.locator('.next-panel'),earlier=panel.getByRole('button',{name:'Show earlier forecast hours'}),later=panel.getByRole('button',{name:'Show later forecast hours'});
   await later.waitFor();assert(await earlier.isDisabled());assert((await later.boundingBox()).height>=44);assert.match(await panel.locator('.hourly-scroll-controls').textContent(),/Swipe for more dark hours/);
   await later.tap();await page.waitForFunction(()=>document.querySelector('.next-panel .hourly').scrollLeft>5);assert(await earlier.isEnabled());
   await panel.locator('.hour').nth(4).tap();await page.waitForFunction(()=>document.querySelector('#observing-time')?.value==='2026-12-21T04:00');
