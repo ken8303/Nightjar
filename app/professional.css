@@ -355,3 +355,14 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
 @keyframes sky-selection-reveal{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.hour,.mobile-altitude-grid button,.deep-sky-hours button,.quarter-grid button,.night-coverage-track i,.mobile-altitude-bar i,.lunar-illumination-track i,.deep-compare-window-track i,.hour .bar i{transition:none!important}.sky-selection-ring{animation:none!important}}
 .deep-sky-isolated-marker{position:absolute;width:8px;height:8px;border-radius:50%;background:#c1df93;transform:translate(-50%,-50%)}
+
+/* Give observing windows enough room to read on narrow phones. */
+@media(max-width:430px){
+ .night-outlook-grid{grid-template-columns:minmax(0,1fr)}
+ .night-outlook-select{min-height:0;padding:14px 16px;gap:8px}
+ .night-outlook-select .night-date{min-height:46px;padding-right:64px;font-size:14px}
+ .night-score{left:auto;right:16px;top:12px;width:46px;height:46px}
+ .night-outlook-select>span:not(.night-score):not(.night-date){font-size:12px}
+ .night-outlook-download{font-size:12px;padding:10px 16px}
+ .night-outlook-card.unavailable{min-height:0}
+}
