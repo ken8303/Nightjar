@@ -182,3 +182,15 @@ main{overflow-wrap:anywhere}.page-heading>div{min-width:0}.page-heading .locatio
 .target-constellation-filter{display:flex;flex-direction:column;gap:10px;font-size:14px;min-width:0}.target-constellation-filter select{min-height:44px;width:100%;padding:10px;border:1px solid #36505d;background:#0b1921;border-radius:6px;color:#d5e1e7}
 
 .light-pollution-saved-toggle{display:flex;align-items:center;gap:10px;min-height:44px;margin:10px 0;color:#d5e1e7}.light-pollution-saved-toggle input{width:20px;height:20px;accent-color:#c9e289}
+
+.deep-sky-image-option{margin:14px 0}.deep-sky-image-option .button{min-height:44px}.deep-sky-image-option p{margin:8px 0}.deep-sky-results button .deep-sky-result-main{display:flex;align-items:center;gap:10px}.deep-sky-results button .deep-sky-result-main .deep-sky-result-name{flex:1;min-width:0;max-width:none;text-align:left}.deep-sky-results button .deep-sky-result-main .deep-sky-thumbnail{position:relative;display:block;flex:0 0 64px;width:64px;height:64px;max-width:none;border-radius:5px;background:#0a141b;overflow:hidden;text-align:center;line-height:64px;color:#a9bdc6}.deep-sky-thumbnail img{width:100%;height:100%;object-fit:cover}
+
+/* Keep server-rendered loading text stable while choosing the saved language before paint. */
+[data-initial-language="zh-Hant"]{display:none}html[lang="zh-Hant"] [data-initial-language="en"]{display:none}html[lang="zh-Hant"] [data-initial-language="zh-Hant"]{display:inline}
+
+.astronomy-forecast-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin:1rem 0}
+.astronomy-forecast-values div{padding:.75rem;border:1px solid var(--border, #44445d);border-radius:.75rem}
+.astronomy-forecast-values dt{font-size:.85rem}.astronomy-forecast-values dd{margin:.4rem 0 0;font-weight:700}
+.astronomy-forecast-timeline{display:flex;gap:.6rem;overflow-x:auto;padding:.2rem 0 .7rem;overscroll-behavior-x:contain}
+.astronomy-forecast-sample{display:grid;gap:.4rem;min-width:13rem;text-align:left;padding:.75rem;border:1px solid var(--border, #44445d);border-radius:.75rem;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.astronomy-forecast-sample time{font-weight:700}.astronomy-forecast-sample span{font-size:.85rem}

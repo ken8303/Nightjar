@@ -1,12 +1,12 @@
 import type {Observation} from './observing-diary';
 const formatters=new Map<string,Intl.DateTimeFormat>();
 export function diarySiteLabel(place:Observation['place']){return place.country?`${place.name} · ${place.country}`:place.name}
-export function diaryLocalTime(entry:Pick<Observation,'observedAt'|'place'>){
+export function diaryLocalTime(entry:Pick<Observation,'observedAt'|'place'>,locale='en-GB'){
  const instant=new Date(entry.observedAt),timezone=entry.place.timezone||'UTC',fraction=instant.getUTCMilliseconds()!==0,era=instant.getUTCFullYear()<=1;
- const key=JSON.stringify([timezone,fraction,era]);
+ const key=JSON.stringify([locale,timezone,fraction,era]);
  let format=formatters.get(key);
  if(!format){
-  format=new Intl.DateTimeFormat('en-GB',{calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset',...(fraction?{fractionalSecondDigits:3 as const}:{}),...(era?{era:'short' as const}:{})});
+  format=new Intl.DateTimeFormat(locale,{calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset',...(fraction?{fractionalSecondDigits:3 as const}:{}),...(era?{era:'short' as const}:{})});
   if(formatters.size>=32)formatters.delete(formatters.keys().next().value!);
   formatters.set(key,format);
  }

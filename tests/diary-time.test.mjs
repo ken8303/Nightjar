@@ -18,3 +18,9 @@ test('local labels include historical second offsets and era at the UTC-year bou
  assert(diaryLocalTime({...entry,observedAt:'0001-01-01T00:00:00.000Z',place:{...entry.place,timezone:'America/New_York'}}).includes('BC'));
  assert(diaryLocalTime({...entry,place:{...entry.place,timezone:undefined}}).includes('00:30:00 GMT'));
 });
+test('Traditional Chinese local labels retain distinct offsets while exports keep their default language',()=>{
+ const later={...entry,observedAt:'2026-10-25T01:30:00.000Z'};
+ const chinese=diaryLocalTime(entry,'zh-Hant'),chineseLater=diaryLocalTime(later,'zh-Hant');
+ assert.match(chinese,/2026/);assert.match(chinese,/01:30:00/);assert.notEqual(chinese,chineseLater);
+ assert(diaryReport([entry]).includes(diaryLocalTime(entry)));
+});

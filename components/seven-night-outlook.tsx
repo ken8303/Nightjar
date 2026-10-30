@@ -12,10 +12,11 @@ import {usePlanningClock} from '@/hooks/use-planning-clock';
 import WeatherFreshness from '@/components/weather-freshness';
 import {forecastFreshness} from '@/lib/forecast-freshness';
 import {useLanguage} from '@/components/language-provider';
+import {calendarFeedback} from '@/lib/calendar-feedback-language';
 
 type Hourly={time:number[];cloud_cover:(number|null)[]};
 export default function SevenNightOutlook({hourly,place,loading,selectedDate,onDate,fetchedAt,error,onRefresh,requestKey}:{hourly?:Hourly;place:Place;loading:boolean;selectedDate:Date|null;onDate:(date:Date,forecastFetchedAt?:number)=>void;fetchedAt?:number;error:string;onRefresh:()=>void;requestKey:string}){
- const {language,tr}=useLanguage();
+ const {language,tr,t}=useLanguage();
  const now=usePlanningClock();
  const {stale,clockChanged}=forecastFreshness(hourly?fetchedAt:undefined,now);
  const nights=useMemo(()=>hourly?.time?.length?sevenNightOutlook(hourly,place,new Date(now)):[],[hourly,place,now]);
@@ -23,15 +24,15 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
  const candidate=!loading&&!error&&typeof fetchedAt==='number'&&Number.isFinite(fetchedAt)&&!stale&&!clockChanged?bestWindow:null;
  const suggested=candidate&&candidate.score>0?candidate:null;
  const [planningIssue,setPlanningIssue]=useState<{context:string;kind:'stale'|'started'}|null>(null);
- const planningContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone,requestKey,fetchedAt,loading,error,bestWindow]);
+ const planningContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone,requestKey,fetchedAt,loading,Boolean(error),bestWindow]);
  const planningStatus=planningIssue?.context!==planningContext?'':planningIssue.kind==='stale'?tr('Forecast freshness has changed. Your observing time was kept. Refresh the forecast before planning a window.','預報的時效已變更，觀測時間保持不變。請更新預報後再選擇觀測時段。'):tr('This observing window has already started. Your observing time was kept. Choose a later window or refresh the forecast.','此觀測時段已開始，觀測時間保持不變。請選擇較晚的時段或更新預報。');
- const [downloadResult,setDownloadResult]=useState<{context:string;text:string}|null>(null);
- const downloadContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone,requestKey,fetchedAt,loading,error,stale,clockChanged,nights.map(night=>[night.key,night.best])]);
- const downloadStatus=downloadResult?.context===downloadContext?downloadResult.text:'';
- const setDownloadStatus=(text:string)=>setDownloadResult({context:downloadContext,text});
+ const [downloadResult,setDownloadResult]=useState<{context:string;result:{kind:'ready';start:number;hours:number}|{kind:'error';message:string}}|null>(null);
+ const downloadContext=JSON.stringify([place.name,place.latitude,place.longitude,place.timezone,requestKey,fetchedAt,loading,Boolean(error),stale,clockChanged,nights.map(night=>[night.key,night.best])]);
+ const currentDownload=downloadResult?.context===downloadContext?downloadResult.result:null;
  const timezone=place.timezone||'UTC';
  const dateLabel=(key:string)=>new Intl.DateTimeFormat(language==='zh-Hant'?'zh-Hant':'en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(`${key}T12:00:00Z`));
  const windowLabel=(start:Date,hours:number)=>observingWindowLabel(start,hours,timezone,language==='zh-Hant'?'zh-Hant':'en-GB');
+ const downloadStatus=!currentDownload?'':currentDownload.kind==='ready'?t('calendar.windowReady',{window:windowLabel(new Date(currentDownload.start),currentDownload.hours)}):calendarFeedback(currentDownload.message,t);
  function reportPlanningIssue(kind:'stale'|'started'){
   setPlanningIssue({context:planningContext,kind});
   deferFocusAndScroll(()=>document.getElementById('night-outlook-planning-status'));
@@ -52,10 +53,10 @@ export default function SevenNightOutlook({hourly,place,loading,selectedDate,onD
   if(!night.best)return;
   try{
    const best=night.best;
-   const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone:place.timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination,nightOnly:true,weather:{fetchedAt,refreshing:loading,refreshFailed:Boolean(error)}});
+   const data=observingWindowCalendar({start:best.date,hours:best.hours,place:place.name,latitude:place.latitude,longitude:place.longitude,timezone:place.timezone,score:best.score,cloud:best.cloud,moonAbove:best.moonAbove,moonIllumination:best.moonIllumination,nightOnly:true,weather:{fetchedAt,refreshing:loading,refreshFailed:Boolean(error)},language});
    downloadFile(new Blob([data],{type:'text/calendar;charset=utf-8'}),`nightjar-${night.key}.ics`);
-   setDownloadStatus(tr(`Calendar file prepared for ${windowLabel(best.date,best.hours)}. Check that it arrived before opening it in your calendar app.`,`已準備 ${windowLabel(best.date,best.hours)} 的行事曆檔案。請確認檔案已儲存，再用行事曆應用程式開啟。`));
-  }catch(error){setDownloadStatus(error instanceof Error?error.message:'The calendar file could not be created. Please try again.')}
+   setDownloadResult({context:downloadContext,result:{kind:'ready',start:+best.date,hours:best.hours}});
+  }catch(error){setDownloadResult({context:downloadContext,result:{kind:'error',message:error instanceof Error?error.message:'The calendar file could not be created. Please try again.'}})}
  }
  return <section className="panel seven-night-outlook" aria-labelledby="seven-night-title">
   <div className="section-label"><span id="seven-night-title">{tr('THE NEXT SEVEN NIGHTS','未來七個夜晚')}</span><CalendarDays size={18}/></div>

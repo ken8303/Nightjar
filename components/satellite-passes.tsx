@@ -11,10 +11,13 @@ import SatelliteWindowActions from './satellite-window-actions';
 import SatelliteWindowWeather from './satellite-window-weather';
 import type {SatelliteWeather} from '@/lib/satellite-weather';
 import {satelliteFreshnessIssue,type SatelliteFreshness} from '@/lib/satellite-validity';
+import {useLanguage} from '@/components/language-provider';
+import {satelliteStatusLabel} from '@/lib/satellite-language';
 
 const utc=(time:number)=>new Date(time).toISOString().replace('T',' ').replace(/\.\d{3}Z$/,' UTC');
 type State={loading:boolean;result:SatellitePassResult|null;message:string};
 export default function SatellitePasses({feed,start,place,onDate,weather,now}:{feed:SatelliteFeed;start:number;place:Place;onDate:(date:Date,freshness:SatelliteFreshness)=>void;weather:SatelliteWeather;now:number}){
+ const {language,t}=useLanguage();
  const elements=feed.elements,{latitude,longitude}=place;
  const freshness={fetchedAt:feed.fetchedAt,epoch:elements.EPOCH};
  const active=useRef<{worker:Worker;timer:ReturnType<typeof setTimeout>}|null>(null);
@@ -44,23 +47,24 @@ export default function SatellitePasses({feed,start,place,onDate,weather,now}:{f
    worker.postMessage({elements,start,latitude,longitude});
   }catch{stop();setState(previous=>({...previous,loading:false,message:'Background calculations are unavailable in this browser. Selected-time directions remain available.'}))}
  };
- return <section className="satellite-passes" aria-label="Upcoming ISS passes">
-  <h3>Upcoming horizon passes</h3><p className="muted">Search the 24 hours after your selected instant, using the orbital data already loaded. Only passes remaining in full astronomical darkness from rise to set are shown. Displayed window endpoints and midpoints are checked too. All times below are UTC.</p>
-  <button className="button" type="button" onClick={search}>{state.loading?'Cancel pass search':state.result?'Recalculate ISS passes':'Find next 24 hours of ISS passes'}</button>
-  <p role="status" aria-atomic="true">{state.loading?'Calculating horizon crossings in the background…':state.message}</p>
+ const resultSummary=()=>{if(!state.result||language==='en'||state.message!==satellitePassSummary(state.result))return satelliteStatusLabel(state.message,language,t);const passes=state.result.passes.length,windows=state.result.passes.reduce((sum,pass)=>sum+(pass.viewing?.length??0),0),unavailable=state.result.passes.filter(pass=>pass.viewing===null).length;return t('iss.passSummary',{passes,windows})+(unavailable?t('iss.passSummaryUnavailable',{count:unavailable}):'')};
+ return <section className="satellite-passes" aria-label={t('iss.passesLabel')}>
+  <h3>{t('iss.passesTitle')}</h3><p className="muted">{t('iss.passesIntro')}</p>
+  <button className="button" type="button" onClick={search}>{t(state.loading?'iss.cancelPasses':state.result?'iss.recalculate':'iss.findPasses')}</button>
+  <p role="status" aria-atomic="true">{state.loading?t('iss.calculating'):resultSummary()}</p>
   {state.result&&<>
-   {state.result.epochLimited&&<p className="footnote">This search stops at the supported three-day orbital limit.</p>}
-   <p className="footnote">Window criteria: above {satelliteViewingAltitude}°, fully sunlit, and in full astronomical darkness (Sun below −18°), lasting at least {satelliteViewingMinimumMs/1000} seconds. The initial orbital model uses Sun below {satelliteViewingSunAltitude}°; Nightjar then keeps only fully dark passes. Weather and object brightness are not included.</p>
-   {state.result.passes.length===0?<p>No full-darkness horizon pass was found for this site in this window. This says nothing about other dates or sites.</p>:<ol className="satellite-pass-list">{state.result.passes.map(pass=><li key={pass.peak}>
-    <div className="satellite-pass-heading"><strong>{pass.maximumAltitude.toFixed(1)}° highest altitude</strong><span>{pass.alreadyUp?'Already above horizon at start':'Horizon rise'} · {utc(pass.rise)}</span></div>
-    <dl><div><dt>{pass.alreadyUp?'Bearing at start':'Rise bearing'}</dt><dd>{pass.riseAzimuth.toFixed(1)}°</dd></div><div><dt>Highest in window</dt><dd>{utc(pass.peak)} · {pass.peakAzimuth.toFixed(1)}° bearing</dd></div><div><dt>{pass.continues?'Still above horizon at end':'Horizon set'}</dt><dd>{utc(pass.set)} · {pass.setAzimuth.toFixed(1)}° bearing</dd></div></dl>
-    {pass.lighting?<dl className="satellite-pass-lighting"><div><dt>ISS lighting at highest point</dt><dd>{pass.lighting.sunlight==='sunlit'?'Sunlit':pass.lighting.sunlight==='earth-shadow'?'In Earth’s shadow':`Partly shadowed · ${Math.round(pass.lighting.shadow*100)}% of Sun obscured`}</dd></div><div><dt>Sun centre at highest point</dt><dd>{pass.lighting.sunAltitude.toFixed(1)}° altitude</dd></div></dl>:<p className="footnote">Lighting at the highest point is unavailable. The horizon times above remain geometric.</p>}
-    <div className={`satellite-viewing-windows${pass.viewing?.length?' has-window':''}`}><strong>Sunlit windows above {satelliteViewingAltitude}° · full astronomical darkness</strong>{pass.viewing===null?<p>Window calculation unavailable. Horizon times and available peak facts remain usable.</p>:pass.viewing.length?<><p>Select a window’s midpoint to plan within its modelled conditions.</p><ul>{pass.viewing.map(window=><li key={window.start}>{utc(window.start)} – {utc(window.end)}{window.startsAtBoundary?' · begins at search boundary':''}{window.endsAtBoundary?' · ends at search boundary':''}<SatelliteWindowWeather start={window.start} end={window.end} weather={weather} now={now}/><SatelliteWindowActions window={window} feed={feed} place={place} onDate={onDate}/></li>)}</ul></>:<p>No window meeting these criteria in this pass.</p>}</div>
-    <button type="button" className="button satellite-peak-time" aria-label={`Set observing time to ISS peak at ${utc(pass.peak)}`} onClick={()=>onDate(new Date(pass.peak),freshness)}>Set observing time to this peak</button>
+   {state.result.epochLimited&&<p className="footnote">{t('iss.epochLimited')}</p>}
+   <p className="footnote">{t('iss.windowCriteria',{altitude:satelliteViewingAltitude,seconds:satelliteViewingMinimumMs/1000,sun:satelliteViewingSunAltitude})}</p>
+   {state.result.passes.length===0?<p>{t('iss.noPasses')}</p>:<ol className="satellite-pass-list">{state.result.passes.map(pass=><li key={pass.peak}>
+    <div className="satellite-pass-heading"><strong>{t('iss.highest',{altitude:pass.maximumAltitude.toFixed(1)})}</strong><span>{t(pass.alreadyUp?'iss.alreadyUp':'iss.rise')} · {utc(pass.rise)}</span></div>
+    <dl><div><dt>{t(pass.alreadyUp?'iss.bearingStart':'iss.riseBearing')}</dt><dd>{pass.riseAzimuth.toFixed(1)}°</dd></div><div><dt>{t('iss.highestWindow')}</dt><dd>{t('iss.bearingValue',{time:utc(pass.peak),bearing:pass.peakAzimuth.toFixed(1)})}</dd></div><div><dt>{t(pass.continues?'iss.stillAbove':'iss.set')}</dt><dd>{t('iss.bearingValue',{time:utc(pass.set),bearing:pass.setAzimuth.toFixed(1)})}</dd></div></dl>
+    {pass.lighting?<dl className="satellite-pass-lighting"><div><dt>{t('iss.peakLighting')}</dt><dd>{pass.lighting.sunlight==='sunlit'?t('iss.sunlit'):pass.lighting.sunlight==='earth-shadow'?t('iss.shadow'):t('iss.partialShadow',{percent:Math.round(pass.lighting.shadow*100)})}</dd></div><div><dt>{t('iss.sunPeak')}</dt><dd>{t('iss.altitudeValue',{altitude:pass.lighting.sunAltitude.toFixed(1)})}</dd></div></dl>:<p className="footnote">{t('iss.noLighting')}</p>}
+    <div className={`satellite-viewing-windows${pass.viewing?.length?' has-window':''}`}><strong>{t('iss.sunlitWindows',{altitude:satelliteViewingAltitude})}</strong>{pass.viewing===null?<p>{t('iss.windowUnavailable')}</p>:pass.viewing.length?<><p>{t('iss.midpointHelp')}</p><ul>{pass.viewing.map(window=><li key={window.start}>{utc(window.start)} – {utc(window.end)}{window.startsAtBoundary?t('iss.startBoundary'):''}{window.endsAtBoundary?t('iss.endBoundary'):''}<SatelliteWindowWeather start={window.start} end={window.end} weather={weather} now={now}/><SatelliteWindowActions window={window} feed={feed} place={place} onDate={onDate}/></li>)}</ul></>:<p>{t('iss.noWindow')}</p>}</div>
+    <button type="button" className="button satellite-peak-time" aria-label={t('iss.setPeakLabel',{time:utc(pass.peak)})} onClick={()=>onDate(new Date(pass.peak),freshness)}>{t('iss.setPeak')}</button>
    </li>)}</ol>}
-   {state.result.passes.some(pass=>pass.viewing?.length)&&<p className="footnote">Calendar files include this site’s name and coordinates, the orbital epoch and retrieval time. Import them into your calendar app to keep a fixed snapshot. Calendar apps display UTC events in their own time zone; recheck Nightjar before observing.</p>}
-   <p className="footnote">Modelled windows require ISS above {satelliteViewingAltitude}°, its whole solar disc clear of Earth’s shadow and the Sun centre below {satelliteViewingSunAltitude}°. Only overlaps lasting at least {satelliteViewingMinimumMs/1000} seconds are shown. The model uses a spherical Earth shadow and an approximate Sun position. Weather, brightness, obstructions, source uncertainty and manoeuvres still affect whether and when you can see ISS.</p>
-   <p className="footnote">Models: <a href="https://shashwatak.github.io/satellite-js/docs/sun-and-shadow" target="_blank" rel="noreferrer">satellite.js Sun and shadow<span className="sr-only"> (opens in a new tab)</span></a> · <a href="https://aa.usno.navy.mil/faq/RST_defs" target="_blank" rel="noreferrer">USNO twilight definitions<span className="sr-only"> (opens in a new tab)</span></a>.</p>
+   {state.result.passes.some(pass=>pass.viewing?.length)&&<p className="footnote">{t('iss.calendarNote')}</p>}
+   <p className="footnote">{t('iss.modelNote',{altitude:satelliteViewingAltitude,sun:satelliteViewingSunAltitude,seconds:satelliteViewingMinimumMs/1000})}</p>
+   <p className="footnote">{t('iss.models')} <a href="https://shashwatak.github.io/satellite-js/docs/sun-and-shadow" target="_blank" rel="noreferrer">{t('iss.shadowLink')}<span className="sr-only">{t('iss.newTab')}</span></a> · <a href="https://aa.usno.navy.mil/faq/RST_defs" target="_blank" rel="noreferrer">{t('iss.twilightLink')}<span className="sr-only">{t('iss.newTab')}</span></a>.</p>
   </>}
  </section>;
 }

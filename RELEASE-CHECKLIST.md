@@ -77,6 +77,8 @@ Completed locally:
 
 Required release acceptance, still pending:
 
+- [ ] Verify the 7Timer! HTTPS response and UTC issue/timepoint semantics at representative sites, confirm deployment access and provider terms, and only then enable `ASTRONOMY_FORECAST_VERIFIED=true`. Until then the seeing/transparency panel reports unavailable.
+
 - [ ] Test touch navigation, rotation/split view, native form entry/coordinate-pair paste, Apple Maps handoff, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
 - [ ] Verify home-screen installation, standalone reopening, background/resume, reconnect and a real installed-app update without losing saved plans or unfinished text.
 - [ ] Verify the saved-data offline fallback and recovery downloads on a real device; full planner startup offline remains unsupported.
@@ -89,7 +91,7 @@ Additional functions outside the current beta implementation:
 - [ ] Full planner startup and fresh sky calculations when reopening offline. The saved-data fallback can calculate full darkness at a chosen saved site for the saved time, current device time or an entered UTC time, and compute supported saved-target positions for checked fully dark times.
 - [ ] Cloud accounts and automatic cross-device synchronization.
 - [ ] Push notifications and automatic aurora alerts.
-- [ ] Multiple weather-model comparison.
+- [x] Selected-time multi-model comparison for cloud cover, temperature and humidity. Astronomical seeing and transparency forecasts remain unavailable.
 - [x] Deep-sky catalogue expansion: 469 objects, comprising the original 109 Messier objects plus 360 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
 
 These additional functions are scope choices rather than required first-release acceptance gates. Keyboard-control and photo enhancements remain paused at the user’s request. Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record physical-device results; unrun checks must stay pending.

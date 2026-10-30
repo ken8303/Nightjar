@@ -7,14 +7,16 @@ import {objectPhoto,type ObjectPhoto as Photo} from '@/lib/object-photos';
 import {watchPhotoDelay} from '@/lib/photo-delay';
 import {photoRetrySource} from '@/lib/photo-retry';
 import {viewerZoomKey} from '@/lib/viewer-zoom';
+import {useLanguage} from '@/components/language-provider';
 
 function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
- const [failed,setFailed]=useState(false),[loaded,setLoaded]=useState(false),[retry,setRetry]=useState(0),[slow,setSlow]=useState(false);
+ const {language,t}=useLanguage();
+ const [failed,setFailed]=useState(false),[loaded,setLoaded]=useState(false),[retry,setRetry]=useState(0),[slow,setSlow]=useState(false),[usingArchive,setUsingArchive]=useState(false);
  const source=photo.previewSrc??photo.src;
  const [imageSource,setImageSource]=useState(source);
  const attempt=useRef(0),retryFocus=useRef(false),retryButton=useRef<HTMLButtonElement>(null),image=useRef<HTMLImageElement>(null);
  const frame=useRef<HTMLDivElement>(null);
- useEffect(()=>{if(loaded||failed||!frame.current)return;return watchPhotoDelay(frame.current,()=>setSlow(true))},[loaded,failed,retry]);
+ useEffect(()=>{if(loaded||failed||!frame.current)return;return watchPhotoDelay(frame.current,()=>setSlow(true))},[loaded,failed,retry,imageSource]);
  useEffect(()=>{
   if(!retryFocus.current||!loaded&&!failed&&!slow)return;
   retryFocus.current=false;
@@ -24,35 +26,38 @@ function PhotoImage({photo,enlarged=false}:{photo:Photo;enlarged?:boolean}){
  },[loaded,failed,slow,enlarged]);
  const retryPhoto=()=>{
   retryFocus.current=true;
-  setImageSource(photoRetrySource(source,`${Date.now()}-${++attempt.current}`,window.location.href));setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1);
+  setImageSource(photoRetrySource(source,`${Date.now()}-${++attempt.current}`,window.location.href));setUsingArchive(false);setFailed(false);setLoaded(false);setSlow(false);setRetry(value=>value+1);
  };
  return <div ref={frame} className={`${enlarged?'photo-enlarged-image':'object-photo-image'}${failed||(!loaded&&slow)?' photo-recovery-active':''}`}>
-  {failed?<div role="status"><p>The reference photo could not load. Check your connection or open the source below.</p><button ref={retryButton} className="button" onClick={retryPhoto}>Retry photo</button></div>:<>
-   <Image ref={image} tabIndex={-1} key={retry} unoptimized src={imageSource} alt={photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>
-   {!loaded&&(slow?<div className="photo-slow-message" role="status"><p>The reference photo is taking longer than expected. It may still load; you can retry or open the image source below.</p><button ref={retryButton} className="button" onClick={retryPhoto}>Retry photo</button></div>:<span role="status">Loading reference photo…</span>)}
+  {failed?<div role="status"><p>{t('image.failed')}</p><button ref={retryButton} className="button" onClick={retryPhoto}>{t('image.retry')}</button></div>:<>
+   <Image ref={image} tabIndex={-1} key={retry} unoptimized src={imageSource} alt={language==='zh-Hant'?photo.altZh??photo.alt:photo.alt} width={800} height={800} loading={enlarged?'eager':'lazy'} referrerPolicy="no-referrer" style={loaded?undefined:{visibility:'hidden'}} onLoad={()=>setLoaded(true)} onError={()=>{if(!usingArchive&&photo.previewSrc&&photo.previewSrc!==photo.src){setUsingArchive(true);setImageSource(photo.src);setSlow(false)}else setFailed(true)}}/>
+   {!loaded&&(slow?<div className="photo-slow-message" role="status"><p>{t('image.slow')}</p><button ref={retryButton} className="button" onClick={retryPhoto}>{t('image.retry')}</button></div>:<span role="status">{t('image.loading')}</span>)}
   </>}
  </div>;
 }
 function PhotoCaption({photo}:{photo:Photo}){
- return <><strong>{photo.title||(photo.survey?'Photographic star field':'Spacecraft reference photo')}</strong><p>{photo.caption}</p><p>{photo.credit} · <a href={photo.source} target="_blank" rel="noreferrer">Image source ↗</a>{photo.survey&&photo.previewSrc&&<> · <a href={photo.src} target="_blank" rel="noreferrer">Full survey image ↗</a></>}</p><small>Reference imagery does not represent today’s appearance, apparent size, or visibility. Internet access is required.</small></>;
+ const {language,t}=useLanguage();
+ const title=language==='zh-Hant'?photo.titleZh??photo.title:photo.title,caption=language==='zh-Hant'?photo.captionZh??photo.caption:photo.caption;
+ return <><strong>{title||t(photo.survey?'image.surveyTitle':'image.spacecraftTitle')}</strong><p>{caption}</p><p>{photo.credit} · <a href={photo.source} target="_blank" rel="noreferrer">{t('image.source')}</a>{photo.survey&&photo.previewSrc&&<> · <a href={photo.src} target="_blank" rel="noreferrer">{t('image.fullSurvey')}</a></>}</p><small>{t('image.caution')}</small></>;
 }
 export default function ObjectPhoto({name,reference}:{name:string;reference?:Photo}){
+ const {t}=useLanguage();
  const photo=reference??objectPhoto(name),[zoom,setZoom]=useState(1);
  if(!photo)return null;
  return <figure className="object-photo">
   <PhotoImage key={photo.previewSrc??photo.src} photo={photo}/>
   <figcaption><PhotoCaption photo={photo}/>
    <Dialog.Root onOpenChange={open=>{if(open)setZoom(1)}}>
-    <Dialog.Trigger className="button photo-expand-trigger"><Maximize2 size={16}/>View larger {name} photo</Dialog.Trigger>
+    <Dialog.Trigger className="button photo-expand-trigger"><Maximize2 size={16}/>{t('image.larger',{name})}</Dialog.Trigger>
     <Dialog.Portal><Dialog.Overlay className="expanded-atlas-overlay"/><Dialog.Content className="photo-viewer-dialog">
-     <div className="photo-viewer-header"><div><Dialog.Title>{name} reference photo</Dialog.Title><Dialog.Description>Zoom to inspect the image, then scroll inside it to move around. With the image area focused, + and − zoom; 0 resets. Enlargement uses the same reference image and adds no detail.</Dialog.Description></div><Dialog.Close className="button" aria-label="Close enlarged photo"><X size={20}/></Dialog.Close></div>
-     <div className="photo-viewer-controls" role="group" aria-label="Photo zoom controls">
-      <button className="button" disabled={zoom<=1} onClick={()=>setZoom(value=>Math.max(1,value-.5))} aria-label="Zoom out photo"><Minus size={18}/></button>
-      <output aria-live="polite" aria-label="Photo zoom">{Math.round(zoom*100)}%</output>
-      <button className="button" disabled={zoom>=3} onClick={()=>setZoom(value=>Math.min(3,value+.5))} aria-label="Zoom in photo"><Plus size={18}/></button>
-      <button className="button" onClick={()=>setZoom(1)}><RotateCcw size={16}/>Reset photo zoom</button>
+     <div className="photo-viewer-header"><div><Dialog.Title>{t('image.dialogTitle',{name})}</Dialog.Title><Dialog.Description>{t('image.dialogDescription')}</Dialog.Description></div><Dialog.Close className="button" aria-label={t('image.close')}><X size={20}/></Dialog.Close></div>
+     <div className="photo-viewer-controls" role="group" aria-label={t('image.controls')}>
+      <button className="button" disabled={zoom<=1} onClick={()=>setZoom(value=>Math.max(1,value-.5))} aria-label={t('image.zoomOut')}><Minus size={18}/></button>
+      <output aria-live="polite" aria-label={t('image.zoomValue')}>{Math.round(zoom*100)}%</output>
+      <button className="button" disabled={zoom>=3} onClick={()=>setZoom(value=>Math.min(3,value+.5))} aria-label={t('image.zoomIn')}><Plus size={18}/></button>
+      <button className="button" onClick={()=>setZoom(1)}><RotateCcw size={16}/>{t('image.reset')}</button>
      </div>
-     <div className="photo-viewer-viewport" tabIndex={0} role="region" aria-label={`Scrollable ${name} photo`} onKeyDown={event=>{if(event.target!==event.currentTarget||event.ctrlKey||event.metaKey||event.altKey)return;const next=viewerZoomKey(zoom,event.key);if(next!==undefined){event.preventDefault();setZoom(next)}}}><div className="photo-viewer-canvas" style={{'--photo-zoom':zoom} as CSSProperties}><PhotoImage key={photo.previewSrc??photo.src} photo={photo} enlarged/></div></div>
+     <div className="photo-viewer-viewport" tabIndex={0} role="region" aria-label={t('image.scrollRegion',{name})} onKeyDown={event=>{if(event.target!==event.currentTarget||event.ctrlKey||event.metaKey||event.altKey)return;const next=viewerZoomKey(zoom,event.key);if(next!==undefined){event.preventDefault();setZoom(next)}}}><div className="photo-viewer-canvas" style={{'--photo-zoom':zoom} as CSSProperties}><PhotoImage key={photo.previewSrc??photo.src} photo={photo} enlarged/></div></div>
      <div className="photo-viewer-caption"><PhotoCaption photo={photo}/></div>
     </Dialog.Content></Dialog.Portal>
    </Dialog.Root>

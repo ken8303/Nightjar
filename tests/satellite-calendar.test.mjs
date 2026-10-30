@@ -74,3 +74,8 @@ test('calendar refuses daylight, twilight and an interval crossing astronomical 
  assert.throws(()=>calendar({...input,window:crossing,place:london},created),/leaves full astronomical darkness/);
  const twilight={...window,start:Date.parse('2026-10-20T05:19:24Z'),end:Date.parse('2026-10-20T05:22:20Z')};assert.throws(()=>calendar({...input,window:twilight,place:london},created),/leaves full astronomical darkness/);
 });
+test('Traditional Chinese ISS event text preserves the orbital snapshot and UTC interval',()=>{
+ const en=calendar(input,created),zh=calendar({...input,language:'zh-Hant'},created);
+ for(const key of ['UID','DTSTART','DTEND','DTSTAMP','GEO'])assert.equal(property(en,key),property(zh,key));
+ const description=textProperty(zh,'DESCRIPTION');assert.match(textProperty(zh,'SUMMARY'),/國際太空站觀測時段/);assert.match(description,/太陽幾何中心持續低於 -18 度/);assert(description.includes(feed.elements.EPOCH));assert(description.includes(feed.fetchedAt));for(const line of zh.split('\r\n'))assert(Buffer.byteLength(line,'utf8')<=75);
+});

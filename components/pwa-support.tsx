@@ -8,10 +8,16 @@ import {applyPwaUpdate} from '@/lib/pwa-update';
 import {watchPwaUpdateChecks} from '@/lib/pwa-update-check';
 import {watchPwaRegistration} from '@/lib/pwa-registration';
 import {deferFocusAndScroll} from '@/lib/deferred-focus';
+import {useLanguage} from '@/components/language-provider';
+import {pendingEditLabel} from '@/lib/language';
+import {englishMessages} from '@/lib/messages/en';
 
+const statusKeys=['pwa.setupReady','pwa.setupFailed','pwa.setupSlow','pwa.installed','pwa.installRequested','pwa.installLater','pwa.installMenu','pwa.updatePending','pwa.updateStorage','pwa.updateStorageShort','pwa.updateFinishEdits','pwa.updateNoLongerWaiting','pwa.updateTimeout','pwa.updatePreserve','pwa.updateFailed'] as const;
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 export default function PwaSupport() {
+  const {language,t}=useLanguage();
   const pendingText=usePendingEdits();
+  const localizeStatus=(message:string)=>{const key=statusKeys.find(key=>englishMessages[key]===message);return key?t(key):message};
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [installed, setInstalled] = useState(false);
   const [installing,setInstalling]=useState(false);
@@ -95,13 +101,13 @@ export default function PwaSupport() {
       if(!document.hidden&&(document.activeElement===installButton.current||document.activeElement===document.body))installPanel.current?.focus({preventScroll:true});
     }
   }
-  return <aside ref={installPanel} id="install-app" className="pwa-support" aria-label="Nightjar app" tabIndex={-1}>
-    {offline && <p className="offline-notice" role="status">You’re offline. Live conditions cannot refresh; any displayed forecast may be out of date.</p>}
-    {pendingText&&<p className="muted">Reload is paused for unfinished edits: {pendingText}. Resolve or copy them before reloading.</p>}<PendingEditRecovery/>{updateWorker&&<div className="pwa-update" role="status"><p>A new Nightjar version is ready. Your saved places, targets and equipment stay on this device.</p><p>Save unfinished edits before updating. If saving fails, keep this view open and use its recovery tools first. Unsaved text can be lost on reload.</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{updating?'Updating Nightjar…':'Update and reload'}</button></div>}
-    {updateError&&<div className="pwa-update"><p role="status">{updateError}</p><button type="button" className="button" disabled={offline||Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setUpdateError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>Reload Nightjar</button></div>}
-    {!installed && <details open><summary>Take Nightjar with you · Install app</summary><p>Add Nightjar to your home screen for a standalone view.</p>{prompt && <button ref={installButton} type="button" className="button primary" disabled={installing} onClick={install}>{installing?'Waiting for browser installation…':'Install Nightjar'}</button>}<p>On iPhone or iPad, open this site in Safari, choose Share, then Add to Home Screen. On Android or desktop, look for Install app or Add to Home screen in your browser menu.</p><p className="muted">An internet connection is needed for live conditions and to reopen the full planner. Previously opened tab files may remain available during a connection drop; the offline page can show plans saved on this device while you reconnect. Installation availability depends on your browser.</p></details>}
-    {(setupIssue||setupStarting&&setupRevision>0)&&<div className="pwa-setup-recovery"><p ref={setupResult} role="status" tabIndex={-1}>{setupStarting?'Preparing offline fallback…':setupIssue}</p><button ref={setupButton} type="button" className="button" disabled={setupStarting||offline||updating} onClick={()=>{if(setupStarting||offline||updating)return;setupOwner.current=document.activeElement;setSetupStarting(true);setSetupIssue('');setSetupMessage('');setSetupRevision(value=>value+1)}}>{setupStarting?'Preparing offline fallback…':'Retry offline setup'}</button></div>}
-    {setupMessage&&<p ref={setupResult} role="status" tabIndex={-1}>{setupMessage}</p>}
-    {message && <p role="status">{message}</p>}
+  return <aside ref={installPanel} id="install-app" className="pwa-support" aria-label={t('pwa.label')} tabIndex={-1}>
+    {offline && <p className="offline-notice" role="status">{t('pwa.offline')}</p>}
+    {pendingText&&<p className="muted">{t('pwa.pending',{edits:pendingEditLabel(pendingText,language)})}</p>}<PendingEditRecovery/>{updateWorker&&<div className="pwa-update" role="status"><p>{t('pwa.ready')}</p><p>{t('pwa.saveFirst')}</p><button type="button" className="button primary" disabled={updating||offline||Boolean(pendingText)} onClick={applyUpdate}>{t(updating?'pwa.updating':'pwa.update')}</button></div>}
+    {updateError&&<div className="pwa-update"><p role="status">{localizeStatus(updateError)}</p><button type="button" className="button" disabled={offline||Boolean(pendingText)} onClick={()=>{if(!pendingEdits.snapshot()&&!reloadPlanner())setUpdateError('Your observing site and time could not be preserved. Keep Nightjar open, restore browser storage access and try again.')}}>{t('pwa.reload')}</button></div>}
+    {!installed && <details open><summary>{t('pwa.installHeading')}</summary><p>{t('pwa.installIntro')}</p>{prompt && <button ref={installButton} type="button" className="button primary" disabled={installing} onClick={install}>{t(installing?'pwa.installWaiting':'pwa.install')}</button>}<p>{t('pwa.installInstructions')}</p><p className="muted">{t('pwa.installNote')}</p></details>}
+    {(setupIssue||setupStarting&&setupRevision>0)&&<div className="pwa-setup-recovery"><p ref={setupResult} role="status" tabIndex={-1}>{setupStarting?t('pwa.setupPreparing'):localizeStatus(setupIssue)}</p><button ref={setupButton} type="button" className="button" disabled={setupStarting||offline||updating} onClick={()=>{if(setupStarting||offline||updating)return;setupOwner.current=document.activeElement;setSetupStarting(true);setSetupIssue('');setSetupMessage('');setSetupRevision(value=>value+1)}}>{t(setupStarting?'pwa.setupPreparing':'pwa.setupRetry')}</button></div>}
+    {setupMessage&&<p ref={setupResult} role="status" tabIndex={-1}>{localizeStatus(setupMessage)}</p>}
+    {message && <p role="status">{localizeStatus(message)}</p>}
   </aside>;
 }

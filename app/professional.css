@@ -433,3 +433,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #c1df93;outline-offset:3p
  .night-outlook-download{font-size:12px;padding:10px 16px}
  .night-outlook-card.unavailable{min-height:0}
 }
+.cloud-model-value-label{display:block;color:var(--text-secondary);font-size:12px;font-weight:400}
+.cloud-model-conditions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px;color:var(--text-secondary);font-size:12px;line-height:1.35}
+.cloud-model-conditions>span{min-width:0}
+.cloud-model-conditions strong{display:block;margin-top:3px;color:#e9eeef;font-size:15px;font-weight:600;overflow-wrap:anywhere}

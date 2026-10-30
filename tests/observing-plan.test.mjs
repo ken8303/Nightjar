@@ -9,6 +9,12 @@ test('plan records exact UTC and DST offset, horizon status, notes, Moon and equ
  assert(html.indexOf('<label for="target-0">Vega')<html.indexOf('>Below</label>'));assert.equal(plan.targets[0].name,'Below','export must not reorder app state');
  plan.date=new Date('2026-10-25T00:30:00Z');assert(printableObservingPlan(plan).includes('01:30:00 GMT+1'));
 });
+test('Traditional Chinese plans retain the observing snapshot, coverage warnings and escaped user text',()=>{
+ const plan={...input(),language:'zh-Hant',notesUnavailable:true,notesUnsaved:true,targetsOmitted:2};plan.place.name='Field <site>';plan.notes.Vega='Personal 星空 <script>';
+ const before=structuredClone(plan),html=printableObservingPlan(plan);
+ assert(html.includes('<html lang="zh-Hant">'));assert(html.includes('觀測計畫'));assert(html.includes('天體清單 · 2'));assert(html.includes('織女星 (Vega)'));assert(html.includes('地平線下'));assert(html.includes('個人筆記'));assert(html.includes('無法從瀏覽器儲存空間讀取個人筆記'));assert(html.includes('未儲存的筆記編輯'));assert(html.includes('省略 2 個較早儲存的名稱'));assert(html.includes('Field &lt;site&gt;'));assert(html.includes('Personal 星空 &lt;script&gt;'));assert(html.includes('2026-10-25 01:30:00.000 UTC'));assert(!/<[^>]+\b(?:src|href)\s*=/i.test(html));assert.deepEqual(plan,before);
+ const polar=printableObservingPlan({...plan,date:new Date('2026-12-21T12:00Z'),place:{name:'Pole',latitude:90,longitude:0}});assert(polar.includes('所選時間後 48 小時內未找到結束時間'));assert(!polar.includes('完全天文黑夜結束時間（UTC）'));
+});
 test('user-provided names and notes are escaped; output has no remote resource dependencies',()=>{
  const plan=input();plan.place.name='Field </title><img src=x onerror=alert(1)>';plan.notes.Vega='</script><script>alert(1)</script>\n& "quote"';plan.equipment[0].name='<b>Camera</b>';
  const html=printableObservingPlan(plan);assert(!html.includes('<img'));assert(!html.includes('<b>Camera'));assert(html.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));assert(html.includes('&lt;b&gt;Camera&lt;/b&gt;'));assert.equal([...html.matchAll(/<script>/g)].length,1);assert(!/<[^>]+\b(?:src|href)\s*=/i.test(html));

@@ -1,5 +1,5 @@
 /** Place chart labels without moving astronomical positions. Coordinates use the 440×390 SVG. */
-export type SkyLabelPoint={name:string;x:number;y:number;mag:number;planet?:boolean};
+export type SkyLabelPoint={name:string;label?:string;x:number;y:number;mag:number;planet?:boolean};
 export type SkyLabel={x:number;y:number;width:number;height:number};
 const bounds={left:24,right:416,top:32,bottom:358};
 function overlaps(a:SkyLabel,b:SkyLabel){
@@ -10,7 +10,9 @@ export function layoutSkyLabels(points:readonly SkyLabelPoint[],visibleNames:rea
  const labels=new Map<string,SkyLabel>();
  const candidates=points.filter(point=>visible.has(point.name)).sort((a,b)=>Number(b.name===selected)-Number(a.name===selected)||Number(Boolean(b.planet))-Number(Boolean(a.planet))||a.mag-b.mag||a.name.localeCompare(b.name));
  for(const point of candidates){
-  const width=Math.min(bounds.right-bounds.left,Math.max(16,point.name.length*6.3)),height=12;
+  // CJK characters occupy about a full em at the chart's 11px label size.
+  const label=point.label??point.name;
+  const width=Math.min(bounds.right-bounds.left,Math.max(16,Array.from(label).reduce((sum,char)=>sum+(/[\u2e80-\u9fff\uf900-\ufaff]/u.test(char)?11:6.3),0))),height=12;
   const offsets=[[8,-8],[8,18],[-width-8,-8],[-width-8,18],[-width/2,-14],[-width/2,24]];
   const options=offsets.map(([dx,dy])=>({x:point.x+dx,y:point.y+dy,width,height}));
   const fits=(label:SkyLabel)=>label.x>=bounds.left&&label.x+label.width<=bounds.right&&label.y-label.height>=bounds.top&&label.y<=bounds.bottom;
