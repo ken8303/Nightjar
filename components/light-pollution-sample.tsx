@@ -3,10 +3,14 @@
 import {useEffect,useRef,useState} from 'react';
 import {fetchLightPollutionSample,type LightPollutionCell,type LightPollutionSample} from '@/lib/light-pollution-sample';
 import {lightPollutionAtlas} from '@/lib/light-pollution';
+import {useLanguage} from '@/components/language-provider';
+import {englishMessages} from '@/lib/messages/en';
 
+const errors=['light.errorInvalid','light.errorNoValue','light.errorSize','light.errorDecode','light.errorProvider','light.errorNoData','light.errorTimeout','light.errorRead','light.errorUnavailable'] as const;
 type Result={state:'idle'}|{state:'loading'}|{state:'error';message:string}|{state:'ready';sample:LightPollutionSample};
 // Parent keys this component by grid cell; changing point retires its request.
 export default function LightPollutionReading({cell,disabled}:{cell:LightPollutionCell;disabled:boolean}){
+ const {language,t}=useLanguage();
  const [result,setResult]=useState<Result>({state:'idle'});
  const request=useRef<AbortController|null>(null);
  useEffect(()=>()=>{request.current?.abort();request.current=null},[]);
@@ -17,18 +21,19 @@ export default function LightPollutionReading({cell,disabled}:{cell:LightPolluti
   finally{if(request.current===controller)request.current=null}
  };
  const cancel=()=>{request.current?.abort();request.current=null;setResult({state:'idle'})};
+ const localizeError=(message:string)=>{if(language==='en')return message;const key=errors.find(key=>englishMessages[key]===message);return key?t(key):message};
  return <div className="light-pollution-reading">
-  <h4>Brightness at the map centre</h4>
-  <p className="footnote">Loads one {lightPollutionAtlas.year} model tile directly from David Lorenz. The request identifies a 5° area, without sending your exact coordinates. Internet access is required.</p>
-  <button type="button" className="button" disabled={disabled&&result.state!=='loading'} onClick={result.state==='loading'?cancel:read}>{result.state==='loading'?'Cancel brightness reading':result.state==='error'?'Retry brightness reading':result.state==='ready'?'Refresh brightness reading':'Read model brightness'}</button>
+  <h4>{t('light.brightnessHeading')}</h4>
+  <p className="footnote">{t('light.brightnessIntro',{year:lightPollutionAtlas.year})}</p>
+  <button type="button" className="button" disabled={disabled&&result.state!=='loading'} onClick={result.state==='loading'?cancel:read}>{t(result.state==='loading'?'light.cancelReading':result.state==='error'?'light.retryReading':result.state==='ready'?'light.refreshReading':'light.readBrightness')}</button>
   <div role="status" aria-atomic="true">
-   {result.state==='loading'&&<p>Loading brightness estimate… Moving to another grid cell cancels this reading.</p>}
-   {result.state==='error'&&<p className="error">{result.message} Missing data is not a darkness estimate.</p>}
+   {result.state==='loading'&&<p>{t('light.loadingBrightness')}</p>}
+   {result.state==='error'&&<p className="error">{localizeError(result.message)} {t('light.missing')}</p>}
    {result.state==='ready'&&<>
-    <dl className="light-pollution-values"><div><dt>Total model brightness</dt><dd>{result.sample.magnitude.toFixed(2)} mag/arcsec²</dd></div><div><dt>Artificial / natural light</dt><dd>{result.sample.ratio.toFixed(result.sample.ratio<.1?3:result.sample.ratio<3?2:1)} ×</dd></div><div><dt>Provider colour zone</dt><dd>{result.sample.zone}</dd></div></dl>
-    <p className="footnote">Sampled cell centre {result.sample.latitude.toFixed(4)}°, {result.sample.longitude.toFixed(4)}° · grid spacing 1/120° (about 0.93 km north–south). No interpolation. Higher magnitude means darker sky.</p>
+    <dl className="light-pollution-values"><div><dt>{t('light.total')}</dt><dd>{result.sample.magnitude.toFixed(2)} mag/arcsec²</dd></div><div><dt>{t('light.ratio')}</dt><dd>{result.sample.ratio.toFixed(result.sample.ratio<.1?3:result.sample.ratio<3?2:1)} ×</dd></div><div><dt>{t('light.colourZone')}</dt><dd>{result.sample.zone}</dd></div></dl>
+    <p className="footnote">{t('light.cellNote',{latitude:result.sample.latitude.toFixed(4),longitude:result.sample.longitude.toFixed(4)})}</p>
    </>}
   </div>
-  <p className="footnote">Annual artificial zenith model, with assumed natural brightness of 22.0 mag/arcsec². Not a measurement, live forecast or Bortle rating. <a href={lightPollutionAtlas.legend} target="_blank" rel="noreferrer">Model assumptions<span className="sr-only"> (opens in a new tab)</span></a>.</p>
+  <p className="footnote">{t('light.modelNote')} <a href={lightPollutionAtlas.legend} target="_blank" rel="noreferrer">{t('light.assumptions')}<span className="sr-only">{t('light.newTab')}</span></a>.</p>
  </div>;
 }

@@ -3,12 +3,17 @@ import {isFullDarknessInterval} from './darkness-remaining';
 import {utcDate} from './utc-date';
 import {validPlace} from './planner-state';
 import {validDeepSkyId} from './deep-sky-list';
-import {deepSkyName} from './deep-sky-names';
+import {deepSkyLabel} from './deep-sky-names';
 import type {DeepSkyObject,DeepSkySample} from './deep-sky';
 import type {Place} from './sky';
 import {calendarText,calendarTime,foldCalendarLine} from './calendar-format';
 import {forecastSnapshotNotes,type ForecastSnapshot} from './forecast-freshness';
-export function meteorCalendar(name:string,year:number,month:number,day:number){
+import {createTranslator,type Translator} from './messages';
+import type {Language} from './language';
+import {meteorNameLabel} from './meteor-language';
+import {lunarContactLabel} from './lunar-language';
+export function meteorCalendar(name:string,year:number,month:number,day:number,language:Language='en'){
+ const t=createTranslator(language);
  const peak=utcDate(year,month,day);
  if(year<1||year>9999||month<0||month>11||peak.getUTCFullYear()!==year||peak.getUTCMonth()!==month||peak.getUTCDate()!==day||!name.trim())throw Error('Invalid meteor calendar date.');
  const dayString=(date:Date)=>date.toISOString().slice(0,10).replaceAll('-','');
@@ -16,7 +21,7 @@ export function meteorCalendar(name:string,year:number,month:number,day:number){
  const start=utcDate(year,month,day-1),end=utcDate(year,month,day+1);
  const safe=name.replace(/[\\,;\r\n]/g,' ').trim();
  if(start.getUTCFullYear()<1||end.getUTCFullYear()>9999)throw Error('This meteor window is outside the calendar year range.');
- return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Meteor Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:${safe.toLowerCase().replaceAll(' ','-')}-${year}@nightjar.local`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}`,`DTSTART;VALUE=DATE:${dayString(start)}`,`DTEND;VALUE=DATE:${dayString(end)}`,`SUMMARY:${safe} - typical peak window`,'DESCRIPTION:Typical annual dates only. Check the current IMO calendar for exact timing.','URL:https://www.imo.net/resources/calendar/','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Meteor Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:${safe.toLowerCase().replaceAll(' ','-')}-${year}@nightjar.local`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}`,`DTSTART;VALUE=DATE:${dayString(start)}`,`DTEND;VALUE=DATE:${dayString(end)}`,`SUMMARY:${calendarText(t('calendar.meteorTitle',{name:meteorNameLabel(safe,language)}))}`,`DESCRIPTION:${calendarText(t('calendar.meteorDescription'))}`,'URL:https://www.imo.net/resources/calendar/','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
 
 type CalendarCoordinates={latitude?:number;longitude?:number};
@@ -26,35 +31,35 @@ function calendarSite(input:CalendarCoordinates){
  return {latitude:input.latitude,longitude:input.longitude};
 }
 const calendarDateValid=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
-const calendarZoneNote=(timezone?:string)=>timezone?`Site time zone: ${timezone}.`:'Site time zone unavailable; event times use UTC.';
+const calendarZoneNote=(timezone:string|undefined,t:Translator)=>timezone?t('calendar.zone',{zone:timezone}):t('calendar.noZone');
 function calendarIdentity(text:string){let hash=2166136261;for(const char of text)hash=Math.imul(hash^char.codePointAt(0)!,16777619)>>>0;return hash.toString(16)}
-export function lunarEclipseCalendar(input:{kind:string;peak:Date;place:string;timezone?:string;contacts:{label:string;time:Date;altitude:number}[];nightOnly?:boolean}&CalendarCoordinates,created=new Date()){
- const {contacts,peak,kind,place}=input,site=calendarSite(input);
+export function lunarEclipseCalendar(input:{kind:string;peak:Date;place:string;timezone?:string;contacts:{label:string;time:Date;altitude:number}[];nightOnly?:boolean;language?:Language}&CalendarCoordinates,created=new Date()){
+ const {contacts,peak,kind,place}=input,site=calendarSite(input),language=input.language==='zh-Hant'?'zh-Hant':'en',t=createTranslator(language);
  if(contacts.length<2||contacts.length>20)throw new Error('Eclipse contacts are required');
  const start=contacts[0].time,end=contacts[contacts.length-1].time;
  if(!calendarDateValid(peak)||!calendarDateValid(start)||!calendarDateValid(end)||!calendarDateValid(created)||+end<=+start||+peak<+start||+peak>+end||!['penumbral','partial','total'].includes(kind)||!place.trim()||place.length>=200||contacts.some((contact,index)=>!calendarDateValid(contact.time)||!Number.isFinite(contact.altitude)||Math.abs(contact.altitude)>90||!contact.label.trim()||contact.label.length>100||(index>0&&+contact.time<=+contacts[index-1].time)))throw new Error('Invalid eclipse interval');
  const eventStart=new Date(Math.floor(+start/1000)*1000),eventEnd=new Date(Math.ceil(+end/1000)*1000);
  if(!calendarDateValid(eventStart)||!calendarDateValid(eventEnd))throw Error('Eclipse interval exceeds the supported calendar years.');
  if(input.nightOnly&&(!site||!isFullDarknessInterval(eventStart,eventEnd,{name:place,...site})))throw Error('This eclipse interval leaves full astronomical darkness.');
- const description=[`Greatest eclipse: ${peak.toISOString()} (UTC).`,...contacts.map(c=>`${c.label}: ${c.time.toISOString()} (UTC); Moon altitude ${c.altitude.toFixed(1)} degrees, ${c.altitude>0?'above':'below'} horizon at ${place}.`),...(site?[`Observing coordinates: latitude ${site.latitude}, longitude ${site.longitude}.`]:[]),calendarZoneNote(input.timezone),'Times calculated by Astronomy Engine. Horizon visibility does not include weather, terrain or buildings.'].join('\n');
+ const description=[t('calendar.eclipseGreatest',{time:peak.toISOString()}),...contacts.map(c=>t('calendar.eclipseContact',{label:lunarContactLabel(c.label,t),time:c.time.toISOString(),altitude:c.altitude.toFixed(1),position:t(c.altitude>0?'calendar.above':'calendar.below'),place})),...(site?[t('calendar.siteCoordinates',{latitude:site.latitude,longitude:site.longitude})]:[]),calendarZoneNote(input.timezone,t),t('calendar.eclipseCaution')].join('\n');
  const identity=site?`-${calendarIdentity(`${place}|${site.latitude}|${site.longitude}`)}`:'';
- return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Lunar Eclipse Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:lunar-eclipse-${calendarTime(peak)}${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(`${kind[0].toUpperCase()+kind.slice(1)} lunar eclipse`)}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Lunar Eclipse Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:lunar-eclipse-${calendarTime(peak)}${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(t('eclipse.title',{kind:language==='en'?kind[0].toUpperCase()+kind.slice(1):t(kind==='penumbral'?'eclipse.kindPenumbral':kind==='partial'?'eclipse.kindPartial':'eclipse.kindTotal')}))}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:CONFIRMED','TRANSP:TRANSPARENT','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
 
-export function observingWindowCalendar(input:{start:Date;hours:number;place:string;timezone?:string;score:number;cloud:number;moonAbove:boolean;moonIllumination:number;weather?:ForecastSnapshot;nightOnly?:boolean}&CalendarCoordinates,created=new Date()){
- const {start,hours,place,timezone,score,cloud,moonAbove,moonIllumination}=input,site=calendarSite(input);
+export function observingWindowCalendar(input:{start:Date;hours:number;place:string;timezone?:string;score:number;cloud:number;moonAbove:boolean;moonIllumination:number;weather?:ForecastSnapshot;nightOnly?:boolean;language?:Language}&CalendarCoordinates,created=new Date()){
+ const {start,hours,place,timezone,score,cloud,moonAbove,moonIllumination}=input,site=calendarSite(input),language=input.language==='zh-Hant'?'zh-Hant':'en',t=createTranslator(language);
  if(!calendarDateValid(start)||!calendarDateValid(created)||!Number.isInteger(hours)||hours<1||hours>2||!Number.isFinite(score)||score<0||score>100||!Number.isFinite(cloud)||cloud<0||cloud>100||!Number.isFinite(moonIllumination)||moonIllumination<0||moonIllumination>1||!place.trim()||place.length>=200)throw new Error('Invalid observing window');
  const end=new Date(+start+hours*3600000);
  if(!calendarDateValid(end))throw Error('Observing interval exceeds the supported calendar years.');
  if(input.nightOnly&&(!site||!isFullDarknessInterval(start,end,{name:place,...site})))throw Error('This observing window leaves full astronomical darkness. Choose another window.');
  const eventStart=new Date(Math.ceil(+start/1000)*1000),eventEnd=new Date(Math.floor(+end/1000)*1000);
  const identity=calendarIdentity(`${place}|${timezone}${site?`|${site.latitude}|${site.longitude}`:''}`);
- const description=[`Planning score: ${score}/100; forecast cloud cover: ${cloud}%.`,moonAbove?`Moon above the horizon at the start, ${Math.round(moonIllumination*100)}% illuminated.`:'Moon below the horizon at the start.',`Observing site: ${place}.`,calendarZoneNote(timezone),...(site?[`Latitude ${site.latitude}, longitude ${site.longitude}.`]:[]),...forecastSnapshotNotes(input.weather||{},created),'Weather source: Open-Meteo. This calendar event is a saved forecast snapshot; it does not update automatically.','Forecast and Moon conditions are estimates. Check weather and local conditions before leaving.'].join('\n');
- return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Observing Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:observing-${calendarTime(start)}-${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText('Stargazing window at '+place)}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+ const description=[t('calendar.observingScore',{score,cloud}),moonAbove?t('calendar.moonAbove',{illumination:Math.round(moonIllumination*100)}):t('calendar.moonBelow'),t('calendar.site',{place}),calendarZoneNote(timezone,t),...(site?[t('calendar.coordinates',{latitude:site.latitude,longitude:site.longitude})]:[]),...forecastSnapshotNotes(input.weather||{},created,language),t('calendar.weatherSource'),t('calendar.weatherCaution')].join('\n');
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Observing Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:observing-${calendarTime(start)}-${identity}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(t('calendar.observingTitle',{place}))}`,`LOCATION:${calendarText(place)}`,...(site?[`GEO:${site.latitude};${site.longitude}`]:[]),`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }
 
-export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;start:Date;end:Date;samples:(DeepSkySample&{moonAltitude?:number})[];moonBelowOnly:boolean;horizon?:LocalHorizon},created=new Date()){
- const {target,place,start,end,samples,moonBelowOnly,horizon}=input;
+export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;start:Date;end:Date;samples:(DeepSkySample&{moonAltitude?:number})[];moonBelowOnly:boolean;horizon?:LocalHorizon;language?:Language},created=new Date()){
+ const {target,place,start,end,samples,moonBelowOnly,horizon}=input,language=input.language==='zh-Hant'?'zh-Hant':'en',t=createTranslator(language);
  const validTime=(date:Date)=>Number.isFinite(+date)&&date.getUTCFullYear()>=1&&date.getUTCFullYear()<=9999;
  const duration=+end-+start;
  if(!validTime(start)||!validTime(end)||!validTime(created)||duration<900000||duration>86400000||duration%900000!==0||!validPlace(place)||!validDeepSkyId(target.id)||!Number.isFinite(target.ra)||target.ra<0||target.ra>=24||!Number.isFinite(target.dec)||Math.abs(target.dec)>90||typeof target.name!=='string'||target.name.length>500||typeof target.catalogue!=='string'||target.catalogue.length>100||typeof moonBelowOnly!=='boolean'||(horizon&&!validLocalHorizon(horizon))||samples.length>97)throw Error('Invalid deep-sky calendar window.');
@@ -66,6 +71,6 @@ export function deepSkyWindowCalendar(input:{target:DeepSkyObject;place:Place;st
  // extends the event outside its sampled interval.
  const eventStart=new Date(Math.ceil(+start/1000)*1000),eventEnd=new Date(Math.floor(+end/1000)*1000);
  let hash=2166136261;for(const char of `${target.id}|${place.name}|${place.latitude}|${place.longitude}|${start.toISOString()}|${end.toISOString()}|${moonBelowOnly}${horizon?`|${horizon.join(",")}`:""}`)hash=Math.imul(hash^char.codePointAt(0)!,16777619)>>>0;
- const description=[`${target.id}: ${deepSkyName(target)}.`,`Highest qualifying sample in this interval: ${peak.time.toISOString()}, altitude ${peak.altitude.toFixed(1)} degrees.`,`Catalogue J2000 coordinates: RA ${target.ra.toFixed(5)} h, Dec ${target.dec.toFixed(5)} degrees.`,`Site: ${place.name}; latitude ${place.latitude}, longitude ${place.longitude}.`,calendarZoneNote(place.timezone),`Original sampled interval: ${start.toISOString()} to ${end.toISOString()}.`,moonBelowOnly?'Moon centre at or below the horizon at every qualifying sample.':'Moon-down filtering was not required.',...(horizon?[`Manual horizon heights (degrees, N through NW): ${horizon.join(', ')}. Linear interpolation between directions; checked at 15-minute samples only.`]:['Local terrain is not included.']),'Above 30 degrees at 15-minute samples. The Sun remains strictly below -18 degrees throughout this interval. Intervals are not exact rise/set/transit times; weather, light pollution and equipment are not included. Recheck conditions before observing.'].join('\n');
- return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Deep Sky Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:deep-sky-${target.id}-${hash.toString(16)}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(`Observe ${target.id} - ${deepSkyName(target)}`)}`,`LOCATION:${calendarText(place.name)}`,`GEO:${place.latitude};${place.longitude}`,`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
+ const description=[t('calendar.deepName',{id:target.id,name:deepSkyLabel(target,language)}),t('calendar.deepPeak',{time:peak.time.toISOString(),altitude:peak.altitude.toFixed(1)}),t('calendar.deepCoordinates',{ra:target.ra.toFixed(5),dec:target.dec.toFixed(5)}),t('calendar.deepSite',{place:place.name,latitude:place.latitude,longitude:place.longitude}),calendarZoneNote(place.timezone,t),t('calendar.deepInterval',{start:start.toISOString(),end:end.toISOString()}),t(moonBelowOnly?'calendar.deepMoonDown':'calendar.deepMoonAny'),...(horizon?[t('calendar.deepHorizon',{heights:horizon.join(', ')})]:[t('calendar.deepNoTerrain')]),t('calendar.deepCaution')].join('\n');
+ return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nightjar//Deep Sky Planner//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:deep-sky-${target.id}-${hash.toString(16)}@nightjar.local`,`DTSTAMP:${calendarTime(created)}`,`DTSTART:${calendarTime(eventStart)}`,`DTEND:${calendarTime(eventEnd)}`,`SUMMARY:${calendarText(t('calendar.deepTitle',{id:target.id,name:deepSkyLabel(target,language)}))}`,`LOCATION:${calendarText(place.name)}`,`GEO:${place.latitude};${place.longitude}`,`DESCRIPTION:${calendarText(description)}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',''].map(foldCalendarLine).join('\r\n');
 }

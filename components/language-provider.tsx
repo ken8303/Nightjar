@@ -10,7 +10,7 @@ function initialLanguage():Language{try{return parseLanguage(localStorage.getIte
 export function LanguageProvider({children}:{children:ReactNode}){
  const [language,setCurrent]=useState<Language>(initialLanguage),[storageError,setStorageError]=useState(false);
  const setLanguage=useCallback((value:Language)=>{const next=parseLanguage(value);setCurrent(next);try{localStorage.setItem(languageKey,next);setStorageError(false)}catch{setStorageError(true)}},[]);
- useEffect(()=>{document.documentElement.lang=language},[language]);
+ useEffect(()=>{const translate=createTranslator(language);document.documentElement.lang=language;document.title=translate('app.documentTitle');document.querySelector('meta[name=\"description\"]')?.setAttribute('content',translate('app.documentDescription'))},[language]);
  useEffect(()=>{const sync=(event:StorageEvent)=>{try{if(event.storageArea!==localStorage||event.key!==languageKey)return}catch{return}setCurrent(parseLanguage(event.newValue));setStorageError(false)};window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync)},[]);
  const value=useMemo(()=>({language,tr:(english:string,chinese:string)=>language==='zh-Hant'?chinese:english,t:createTranslator(language),setLanguage,storageError}),[language,setLanguage,storageError]);
  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

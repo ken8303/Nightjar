@@ -13,10 +13,16 @@ import {forecastHourIndex} from '@/lib/weather-hours';
 import {readForecastResponse,forecastFailureMessage} from '@/lib/forecast-response';
 import {storeSiteForecast,siteForecastState,siteForecastContext,compareSiteScores,siteForecastKey as key,type SiteForecast} from '@/lib/site-forecasts';
 import { moonInfo, Place, scoreAt, timeLabel, sunAltitude} from '@/lib/sky';
+import {useLanguage} from '@/components/language-provider';
+import {weatherFeedback} from '@/lib/weather-feedback-language';
+import {languageLocale} from '@/lib/language';
 
-const metric = (value: unknown, unit: string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : 'Unavailable';
+// Planning actions must check the real clock at the moment the user taps.
+const actionTime=()=>Date.now();
+const metric = (value: unknown, unit: string, unavailable:string) => typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}${unit}` : unavailable;
 
 export default function PlaceComparison({ places, current, date, onChoose, onPlan, selection, onSelectionChange:setSelection }: { places: Place[]; current: Place; date: Date; onChoose: (p: Place,comparisonFetchedAt?:number[]) => void; onPlan:(p:Place,date:Date,forecastFetchedAt?:number)=>void;selection:string[]|null;onSelectionChange:(selection:string[])=>void }) {
+ const {language,t}=useLanguage();
  const options = useMemo(()=>{const seen=new Set<string>();return [current,...places].filter(place=>{const id=key(place);if(seen.has(id))return false;seen.add(id);return true})},[current,places]);
  const [optionsShown,setOptionsShown]=useState(savedListPageSize);
  const heading=useRef<HTMLHeadingElement>(null),picker=useRef<HTMLDivElement>(null);
@@ -57,55 +63,59 @@ export default function PlaceComparison({ places, current, date, onChoose, onPla
  }),[selected,options,results,instant,requestKey,now]);
  const {best,leadingIds}=compareSiteScores(rows);
  const leaders=rows.filter(row=>leadingIds.includes(row.id));
- const [planningIssue,setPlanningIssue]=useState<{context:string;text:string}|null>(null);
+ const [planningIssue,setPlanningIssue]=useState<{context:string;kind:'windowStale'|'windowStarted'|'leaderStale'}|null>(null);
  const planningContext=JSON.stringify([requestKey,+date,rows.map(row=>[row.id,row.planningPlace.name,row.planningPlace.timezone,row.result?.fetchedAt,row.score])]);
- const planningStatus=planningIssue?.context===planningContext?planningIssue.text:'';
- function reportWindowIssue(text:string){
-  setPlanningIssue({context:planningContext,text});
+ const planningStatus=planningIssue?.context===planningContext?t(planningIssue.kind==='windowStale'?'comparison.windowStale':planningIssue.kind==='windowStarted'?'comparison.windowStarted':'comparison.leaderStale'):'';
+ function reportWindowIssue(kind:'windowStale'|'windowStarted'){
+  setPlanningIssue({context:planningContext,kind});
   deferFocusAndScroll(()=>document.getElementById('comparison-planning-status'));
  }
- function chooseUpcomingWindow(id:string,instant:number){
-  const row=rows.find(row=>row.id===id),window=row?.opportunity?.best;
+ function chooseUpcomingWindow(id:string){
+  const instant=actionTime(),row=rows.find(row=>row.id===id),window=row?.opportunity?.best;
   if(!row||!window)return;
   const state=siteForecastState(row.result,requestKey,instant),fetchedAt=row.result?.fetchedAt;
   if(state.loading||state.error||state.stale||state.clockChanged||typeof fetchedAt!=='number'||!Number.isFinite(fetchedAt)){
-   reportWindowIssue('This window’s forecast is no longer fresh enough. Your site and observing time were kept. Refresh forecasts before planning this window.');return;
+   reportWindowIssue('windowStale');return;
   }
   if(+window.date<instant){
-   reportWindowIssue('This observing window has already started. Your site and observing time were kept. Refresh forecasts and choose a later window.');return;
+   reportWindowIssue('windowStarted');return;
   }
   onPlan(row.planningPlace,window.date,fetchedAt);
  }
- function chooseFreshLeader(id:string,instant:number){
-  const currentRanking=compareSiteScores(rows.map(row=>({...row,...siteForecastState(row.result,requestKey,instant)})));
+ function chooseFreshLeader(id:string){
+  const instant=actionTime(),currentRanking=compareSiteScores(rows.map(row=>({...row,...siteForecastState(row.result,requestKey,instant)})));
   const leader=rows.find(row=>row.id===id);
   if(!leader||currentRanking.leadingIds.length!==1||currentRanking.leadingIds[0]!==id){
-   setPlanningIssue({context:planningContext,text:'The comparison forecasts are no longer fresh enough for this recommendation. Your site and observing time were kept. Refresh forecasts before planning the recommended site.'});return;
+   setPlanningIssue({context:planningContext,kind:'leaderStale'});return;
   }
   onChoose(leader.planningPlace,rows.map(row=>row.result!.fetchedAt!));
  }
 
+ function failure(error:string){
+  if(language==='en')return error;
+  const translated=weatherFeedback(error,t);return translated===error?t('comparison.forecastDetail',{detail:error}):translated;
+ }
  return <section className="panel place-comparison" aria-labelledby="comparison-heading">
-  <div className="comparison-heading"><div><h2 id="comparison-heading" ref={heading} tabIndex={-1}>Compare your observing sites</h2><p className="muted">Choose up to four places. Each site uses the hourly forecast covering your selected observing time; conditions are shown only during full darkness at that site.</p></div><button className="text-button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}><RefreshCw size={16}/>{rows.some(row=>row.loading)?'Refreshing forecasts…':rows.some(row=>row.error)?'Retry forecasts':'Refresh forecasts'}</button></div>
+  <div className="comparison-heading"><div><h2 id="comparison-heading" ref={heading} tabIndex={-1}>{t('comparison.heading')}</h2><p className="muted">{t('comparison.intro')}</p></div><button className="text-button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}><RefreshCw size={16}/>{t(rows.some(row=>row.loading)?'comparison.refreshing':rows.some(row=>row.error)?'comparison.retry':'comparison.refresh')}</button></div>
   <div ref={picker} id="comparison-site-list" className="comparison-picker">{options.slice(0,optionsShown).map((p,i)=><label key={key(p)} htmlFor={`compare-${i}`}><Checkbox data-comparison-site={key(p)} id={`compare-${i}`} checked={selected.includes(key(p))} disabled={!selected.includes(key(p))&&selected.length>=4} onCheckedChange={checked=>setSelection(checked?[...selected,key(p)]:selected.filter(id=>id!==key(p)))}/><span>{p.name}<small>{p.latitude.toFixed(2)}°, {p.longitude.toFixed(2)}°{p.bortle?` · Bortle ${p.bortle}`:''}</small></span></label>)}</div><SavedListControls count={options.length} shown={optionsShown} onChange={setOptionsShown} label="comparison sites" listId="comparison-site-list"/>
-  {options.length<2&&<p className="muted">Save another place above to compare conditions before choosing where to go.</p>}
-  {!selected.length&&<p className="muted">Select a place to see its forecast.</p>}
-  {!planningStatus&&leaders.length>0&&<div className="comparison-recommendation" role="status"><div><h3>{leaders.length===1?`${leaders[0].place.name} leads this comparison`:`${leaders.length} sites share the highest score`}</h3><p className="muted">{best}/100 at your selected observing time. {leaders.length===1?'All selected sites have fresh forecasts.':`${leaders.map(row=>row.place.name).join(', ')}. Choose a site below; the tied score does not identify a single best location.`}</p></div>{leaders.length===1&&<button type="button" className="button" onClick={()=>chooseFreshLeader(leaders[0].id,Date.now())}>Plan at {leaders[0].place.name}<ArrowUpRight size={16}/></button>}</div>}
-  {planningStatus&&<div className="notice comparison-window-recovery"><p id="comparison-planning-status" tabIndex={-1} role="status">{planningStatus}</p><button type="button" className="button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}>Refresh and review dark windows</button></div>}
+  {options.length<2&&<p className="muted">{t('comparison.saveAnother')}</p>}
+  {!selected.length&&<p className="muted">{t('comparison.select')}</p>}
+  {!planningStatus&&leaders.length>0&&<div className="comparison-recommendation" role="status"><div><h3>{leaders.length===1?t('comparison.leads',{place:leaders[0].place.name}):t('comparison.tied',{count:leaders.length})}</h3><p className="muted">{t('comparison.scoreTime',{score:best??'—'})} {leaders.length===1?t('comparison.allFresh'):t('comparison.tieDetail',{places:leaders.map(row=>row.place.name).join(', ')})}</p></div>{leaders.length===1&&<button type="button" className="button" onClick={()=>chooseFreshLeader(leaders[0].id)}>{t('comparison.planAt',{place:leaders[0].place.name})}<ArrowUpRight size={16}/></button>}</div>}
+  {planningStatus&&<div className="notice comparison-window-recovery"><p id="comparison-planning-status" tabIndex={-1} role="status">{planningStatus}</p><button type="button" className="button" onClick={refresh} disabled={!selected.length||rows.some(row=>row.loading)}>{t('comparison.refreshReview')}</button></div>}
   <ListFocusRecovery listId="comparison-card-list" fallback={heading} resolve={recoverSiteControl}><div id="comparison-card-list" className="comparison-grid">{rows.map(r=><article className="comparison-card" data-comparison-card={r.id} key={r.id}>
-   <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={`Stop comparing ${r.place.name}`}>Stop comparing this site</button>{r.sun<-18&&<p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}{!r.timezoneKnown?' · site time zone unavailable':''}</p>}
-   <p className="comparison-darkness">{r.place.bortle?`Your sky rating: Bortle ${r.place.bortle} / 9`:'Sky darkness: not rated'}</p>
-   {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?'Refreshing; previous forecast shown.':'Loading forecast…':r.error?r.result?.data?'Refresh failed; previous forecast shown. Retry forecasts to update it.':r.error:'This forecast was fetched over 30 minutes ago. Refresh before relying on it.'}</p>}
-   {r.clockChanged&&<p className="notice" role="status">The weather update time is ahead of your device clock. Its age cannot be confirmed; check your clock and refresh before relying on this forecast.</p>}
-   {r.result?.data&&r.result.fetchedAt!==undefined&&<p className="comparison-local">Last successful update: {new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:r.timezone,timeZoneName:'shortOffset'}).format(new Date(r.result.fetchedAt))}</p>}
-   {r.sun>=-18&&<p className="muted">Outside full astronomical darkness at this site. Selected-time conditions are hidden; choose a dark window below.</p>}{r.sun<-18&&r.result?.data&&(r.i<0?<p className="muted">This hour is outside the available forecast. Choose a time within the next seven days.</p>:<>
-    <div className="comparison-score"><strong>{r.score??'—'}</strong><span>/ 100<br/>planning score</span></div>
-    <p className="comparison-best">{best!==null&&r.score===best&&best>0?'Highest score among selected sites':r.sun>-6?'Daylight or civil twilight':r.sun>-18?'Twilight at this hour':'Astronomical darkness'}</p>
-    <dl><div><dt>Cloud cover</dt><dd>{metric(r.cloud,'%')}</dd></div><div><dt>Temperature</dt><dd>{metric(r.h?.temperature_2m?.[r.i],' °C')}</dd></div><div><dt>Wind</dt><dd>{metric(r.h?.wind_speed_10m?.[r.i],' km/h')}</dd></div><div><dt>Humidity</dt><dd>{metric(r.h?.relative_humidity_2m?.[r.i],'%')}</dd></div><div><dt>Moon</dt><dd>{Math.round(r.moon.illumination*100)}% · {r.moon.altitude>0?'above':'below'} horizon</dd></div></dl>
+   <h3>{r.place.name}</h3><button className="text-button" onClick={()=>setSelection(selected.filter(id=>id!==r.id))} aria-label={t('comparison.stopLabel',{place:r.place.name})}>{t('comparison.stop')}</button>{r.sun<-18&&<p className="comparison-local">{timeLabel(r.at,r.timezone)} · {r.timezone}{!r.timezoneKnown?t('comparison.zoneMissing'):''}</p>}
+   <p className="comparison-darkness">{r.place.bortle?t('comparison.rating',{rating:r.place.bortle}):t('comparison.unrated')}</p>
+   {(r.loading||r.error||r.stale)&&<p className={r.error?'error':'muted'} role="status">{r.loading?r.result?.data?t('comparison.refreshPrevious'):t('comparison.loading'):r.error?r.result?.data?t('comparison.failedPrevious'):failure(r.error):t('comparison.stale')}</p>}
+   {r.clockChanged&&<p className="notice" role="status">{t('comparison.clock')}</p>}
+   {r.result?.data&&r.result.fetchedAt!==undefined&&<p className="comparison-local">{t('comparison.updated',{time:new Intl.DateTimeFormat(languageLocale(language),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:r.timezone,timeZoneName:'shortOffset'}).format(new Date(r.result.fetchedAt))})}</p>}
+   {r.sun>=-18&&<p className="muted">{t('comparison.outside')}</p>}{r.sun<-18&&r.result?.data&&(r.i<0?<p className="muted">{t('comparison.outsideForecast')}</p>:<>
+    <div className="comparison-score"><strong>{r.score??'—'}</strong><span>/ 100<br/>{t('comparison.score')}</span></div>
+    <p className="comparison-best">{t(best!==null&&r.score===best&&best>0?'comparison.highest':r.sun>-6?'comparison.daylight':r.sun>-18?'comparison.twilight':'comparison.dark')}</p>
+    <dl><div><dt>{t('comparison.cloud')}</dt><dd>{metric(r.cloud,'%',t('comparison.unavailable'))}</dd></div><div><dt>{t('comparison.temperature')}</dt><dd>{metric(r.h?.temperature_2m?.[r.i],' °C',t('comparison.unavailable'))}</dd></div><div><dt>{t('comparison.wind')}</dt><dd>{metric(r.h?.wind_speed_10m?.[r.i],' km/h',t('comparison.unavailable'))}</dd></div><div><dt>{t('comparison.humidity')}</dt><dd>{metric(r.h?.relative_humidity_2m?.[r.i],'%',t('comparison.unavailable'))}</dd></div><div><dt>{t('comparison.moon')}</dt><dd>{Math.round(r.moon.illumination*100)}% · {t(r.moon.altitude>0?'comparison.above':'comparison.below')}</dd></div></dl>
    </>)}
-   {r.opportunity?.best?<div className="comparison-window"><small>BEST UPCOMING DARK WINDOW</small><strong>{r.opportunity.best.score}/100 · {observingWindowLabel(r.opportunity.best.date,r.opportunity.best.hours,r.timezone)}</strong><span>{r.opportunity.best.hours} {r.opportunity.best.hours===1?'hour':'hours'} · {r.opportunity.best.cloud}% cloud · {r.opportunity.forecastHours}/{r.opportunity.darkHours} dark samples scored</span><button className="text-button" onClick={()=>chooseUpcomingWindow(r.id,Date.now())}>Plan this window <ArrowUpRight size={16}/></button></div>:r.result?.data?<p className="comparison-no-window">No scored dark window in the remaining forecast.</p>:null}
-   <button className="text-button" onClick={()=>onChoose(r.planningPlace)}>{r.sun<-18?'Plan here at selected time':'Choose this site'} <ArrowUpRight size={16}/></button>
+   {r.opportunity?.best?<div className="comparison-window"><small>{t('comparison.bestWindow')}</small><strong>{r.opportunity.best.score}/100 · {observingWindowLabel(r.opportunity.best.date,r.opportunity.best.hours,r.timezone,languageLocale(language))}</strong><span>{t(r.opportunity.best.hours===1?'comparison.windowOne':'comparison.windowMany',{hours:r.opportunity.best.hours,cloud:r.opportunity.best.cloud,scored:r.opportunity.forecastHours,dark:r.opportunity.darkHours})}</span><button className="text-button" onClick={()=>chooseUpcomingWindow(r.id)}>{t('comparison.planWindow')} <ArrowUpRight size={16}/></button></div>:r.result?.data?<p className="comparison-no-window">{t('comparison.noWindow')}</p>:null}
+   <button className="text-button" onClick={()=>onChoose(r.planningPlace)}>{t(r.sun<-18?'comparison.planSelected':'comparison.chooseSite')} <ArrowUpRight size={16}/></button>
   </article>)}</div></ListFocusRecovery>
-  <p className="footnote">Same-hour scores and best upcoming windows use cloud cover, Sun altitude and moonlight. Each night prefers a complete two-hour window; a single hour is used when no pair is available. The best upcoming window is the highest-scoring of those nightly choices after now, with longer windows winning tied scores. It may be on a different night for each site. User-entered Bortle ratings are separate and are not map measurements. Scores do not measure seeing, transparency or light pollution. Weather: Open-Meteo. Missing data is never scored as clear skies.</p>
+  <p className="footnote">{t('comparison.note')}</p>
  </section>;
 }

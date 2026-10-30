@@ -24,6 +24,12 @@ test('selected target remains named in a dense cluster with ordinary labels disa
  const labels=layoutSkyLabels(points,[],'Object 29');assert.deepEqual([...labels.keys()],['Object 29']);
  assert.equal(layoutSkyLabels(points,[]).size,0);
 });
+test('translated labels retain catalogue identity and reserve room for wide characters',()=>{
+ const point={name:'Vega',label:'織女星',x:220,y:195,mag:0};
+ const label=layoutSkyLabels([point],[],'Vega').get('Vega');
+ assert(label);assert.equal(label.width,33);assert.equal(label.x,228);
+ assert.equal(layoutSkyLabels([point],[],'織女星').size,0,'selection uses the stable catalogue identifier');
+});
 test('pointer selection chooses the nearest object in overlapping tap areas',async()=>{
  const {nearestSkyPoint}=await vite.ssrLoadModule('/lib/sky-labels.ts');
  const points=[{name:'Mizar',x:250,y:125,mag:2},{name:'Alkaid',x:260,y:133,mag:1.8}];

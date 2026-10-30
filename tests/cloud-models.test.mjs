@@ -22,6 +22,12 @@ test('temperature and humidity retain each model, validate units and keep missin
  const legacy=parseCloudModelResponse({time:data.time,gfs:data.gfs,icon:data.icon});assert.deepEqual(legacy.temperature.gfs,[null,null]);assert.deepEqual(legacy.humidity.ecmwf,[null,null]);
  f.hourly_units.temperature_2m_gfs_global='°F';assert.throws(()=>parseCloudModels(f));f.hourly_units.temperature_2m_gfs_global='°C';f.hourly.relative_humidity_2m_icon_global=[1];assert.throws(()=>parseCloudModels(f));assert.throws(()=>parseCloudModelResponse({...data,temperature:{gfs:[1]}}));
 });
+test('temperatures below absolute zero are unavailable at both data boundaries',()=>{
+ const f=fixture();f.hourly_units.temperature_2m_gfs_global='°C';f.hourly.temperature_2m_gfs_global=[-9999,-273.15];
+ const data=parseCloudModels(f);assert.deepEqual(data.temperature.gfs,[null,-273.15]);
+ const response={...data,temperature:{...data.temperature,gfs:[-273.16,-4.2]}};
+ assert.deepEqual(parseCloudModelResponse(response).temperature.gfs,[null,-4.2]);
+});
 test('model endpoint validates site, uses named global models and hides upstream failures',async()=>{
  const original=globalThis.fetch;let calls=0;try{
   globalThis.fetch=async(url,options)=>{calls++;const endpoint=new URL(url);assert.equal(endpoint.searchParams.get('models'),'gfs_global,icon_global,ecmwf_ifs025');assert.equal(endpoint.searchParams.get('latitude'),'51.5');assert.equal(endpoint.searchParams.get('hourly'),'cloud_cover,temperature_2m,relative_humidity_2m');assert(options.signal);return Response.json(fixture())};

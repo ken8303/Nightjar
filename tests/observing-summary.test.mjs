@@ -17,6 +17,12 @@ test('summary preserves exact site/time and the covering forecast without mutati
  assert.match(summary.text,/Planning score: \d+\/100/);
  assert.deepEqual(input,before);
 });
+test('Traditional Chinese summaries retain measurements, age warnings and the original snapshot',()=>{
+ const value={...input,language:'zh-Hant',fetchedAt:+created-31*60000,refreshFailed:true},before=structuredClone(value),text=observingSummary(value,created).text;
+ for(const expected of ['NIGHTJAR 觀測摘要','地點：London','2026-10-20T19:30:12.345Z','波特爾 7/9 級','雲量：0%','氣溫：8 °C','風速：0 km/h','天氣資料更新失敗','警告：天氣資料取得時間已達 30 分鐘','太陽幾何中心低於 -18 度'])assert(text.includes(expected),expected);
+ assert.deepEqual(value,before);const future=observingSummary({...value,fetchedAt:+created+120000},created).text;assert(future.includes('比裝置時鐘還晚'));
+ const missing=observingSummary({date,place,language:'zh-Hant'},created).text;assert(missing.includes('無法取得天氣資料'));assert(missing.includes('規劃分數：無資料'));
+});
 test('missing cloud cover remains unavailable while other measurements survive',()=>{
  const text=observingSummary({...input,forecast:{hourly:{...forecast.hourly,cloud_cover:[null]}}},created).text;
  assert.match(text,/Cloud cover: Unavailable/);assert.match(text,/Planning score: Unavailable/);assert.match(text,/Temperature: 8 degrees C/);assert(!text.includes('NaN'));

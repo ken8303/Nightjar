@@ -77,6 +77,8 @@ Completed locally:
 
 Required release acceptance, still pending:
 
+- [ ] Verify the 7Timer! HTTPS response and UTC issue/timepoint semantics at representative sites, confirm deployment access and provider terms, and only then enable `ASTRONOMY_FORECAST_VERIFIED=true`. Until then the seeing/transparency panel reports unavailable.
+
 - [ ] Test touch navigation, rotation/split view, native form entry/coordinate-pair paste, Apple Maps handoff, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
 - [ ] Verify home-screen installation, standalone reopening, background/resume, reconnect and a real installed-app update without losing saved plans or unfinished text.
 - [ ] Verify the saved-data offline fallback and recovery downloads on a real device; full planner startup offline remains unsupported.

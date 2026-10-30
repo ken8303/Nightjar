@@ -1,5 +1,5 @@
 /*! Deep-sky coordinates adapted from OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0: https://github.com/mattiaverga/OpenNGC ; https://creativecommons.org/licenses/by-sa/4.0/ */
-import {darknessSummaryLines} from './darkness-remaining';
+import {darknessSummaryLines,remainingDarkness} from './darkness-remaining';
 import {bestDeepSkyTime,deepSkySampleTimes} from './deep-sky';
 import {validObservingDate} from './observing-time';
 import {A,bodyPosition,isAstronomicalNight,j2000Position,nextAstronomicalDarkness,skyBodies,stars,sunAltitude,type Place} from './sky';
@@ -10,13 +10,13 @@ import additional from '../data/additional-deep-sky.json';
 export function offlineDarknessDetails(time:string,place:Place){
  const date=new Date(time);
  if(!validObservingDate(date)||date.toISOString()!==time||!Number.isFinite(place.latitude)||Math.abs(place.latitude)>90||!Number.isFinite(place.longitude)||Math.abs(place.longitude)>180)throw Error('A valid saved time and site are required.');
- const lines=darknessSummaryLines(date,place),dark=isAstronomicalNight(date,place);
+ const remaining=remainingDarkness(date,place),lines=darknessSummaryLines(date,place,remaining),dark=isAstronomicalNight(date,place);
  let next:string|null=null;
  if(!dark){
   const candidate=nextAstronomicalDarkness(date,place);next=candidate?.toISOString()??null;
   lines.push(next?`Next fully dark time UTC: ${next}`:'No full darkness found within 48 hours or before the supported date limit.');
  }
- return {lines,next,dark};
+ return {lines,next,dark,remaining:remaining?{end:remaining.end?.toISOString()??null,dateLimited:remaining.dateLimited}:null};
 }
 export function offlineDarkness(time:string,place:Place){return offlineDarknessDetails(time,place).lines}
 

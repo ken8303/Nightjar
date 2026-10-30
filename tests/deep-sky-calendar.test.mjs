@@ -57,3 +57,8 @@ test('calendar respects the manual horizon and records its sampled limitations',
  assert.throws(()=>deepSkyWindowCalendar({...f,horizon:[0,0,100,0,0,0,0,0]},created),/Invalid/);
  const uid=text=>text.split('\r\n').find(line=>line.startsWith('UID:'));assert.notEqual(uid(text),uid(unfold(deepSkyWindowCalendar(f,created))));
 });
+test('Traditional Chinese deep-sky event text keeps the same dark interval and identity',()=>{
+ const f=fixture(),en=unfold(deepSkyWindowCalendar(f,created)),zhRaw=deepSkyWindowCalendar({...f,language:'zh-Hant'},created),zh=unfold(zhRaw);
+ for(const key of ['UID:','DTSTART:','DTEND:','GEO:'])assert.equal(en.split('\r\n').find(line=>line.startsWith(key)),zh.split('\r\n').find(line=>line.startsWith(key)));
+ assert(zh.includes('觀測 M31'));assert(zh.includes('赤經'));assert(zh.includes('太陽持續嚴格低於 -18 度'));for(const line of zhRaw.split('\r\n'))assert(Buffer.byteLength(line,'utf8')<=75);
+});

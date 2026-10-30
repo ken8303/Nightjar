@@ -91,6 +91,7 @@ test('offline plan notes preserve catalogue identity and aliases alongside angul
  assert(notes.includes('Perseus (Per)'));assert(notes.includes('Catalogue: NGC0650'));assert(notes.includes('Also known as: Cork Nebula, Little Dumbbell Nebula'));assert(notes.includes('J2000: RA'));assert(notes.includes('Visual magnitude: 10.1'));
  const {printableObservingPlan}=await vite.ssrLoadModule('/lib/observing-plan.ts');const html=printableObservingPlan({date:new Date('2026-10-06T20:00Z'),place,targets:[{name:'M76 · Barbell Nebula',altitude:45,azimuth:60}],notes:{'M76 · Barbell Nebula':notes},equipment:[]});assert(html.includes('Cork Nebula, Little Dumbbell Nebula'));assert(html.includes('Perseus (Per)'));assert(html.includes('NGC0650'));
  const missing=deepSkyPlanNotes({...target,name:'',major:null,magnitude:null});assert(missing.includes('Visual magnitude: not listed'));assert(missing.includes('Angular major axis: not listed'));assert(!missing.includes('Also known as:'));
+ const chinese=deepSkyPlanNotes(target,'zh-Hant');assert(chinese.includes('NGC0650'));assert(chinese.includes('赤經'));assert(chinese.includes('視星等：10.1'));assert(chinese.includes('Cork Nebula, Little Dumbbell Nebula'));assert(deepSkyPlanNotes({...target,major:null,magnitude:null},'zh-Hant').includes('角大小長軸：未列出'));
 });
 
 test('adding current horizontal positions preserves catalogue J2000 coordinates in saved plans and survey images',async()=>{
@@ -171,4 +172,28 @@ test('survey display previews bound decoded pixels while preserving fields, cent
  }
  for(const id of ['M13','M31'])assert.equal(deepSkyPhoto(messierCatalogue.find(target=>target.id===id)).previewSrc,undefined,'featured NASA references keep their existing image');
  assert.deepEqual(messierCatalogue,before);
+});
+test('all curated catalogue objects have bounded, correctly centred survey thumbnails',async()=>{
+ const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ assert.equal(deepSkyCatalogue.length,469);
+ for(const target of deepSkyCatalogue){
+  const photo=deepSkyPhoto(target,'survey'),url=new URL(photo.thumbnailSrc);
+  assert.equal(url.hostname,'alasky.cds.unistra.fr');assert.equal(url.searchParams.get('width'),'200');assert.equal(url.searchParams.get('height'),'200');
+  assert.equal(Number(url.searchParams.get('ra')),target.ra*15);assert.equal(Number(url.searchParams.get('dec')),target.dec);
+  assert(Number(url.searchParams.get('fov'))>=0.25&&Number(url.searchParams.get('fov'))<=1);
+ }
+});
+test('reference and survey captions include Traditional Chinese while keeping original sources',async()=>{
+ const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ for(const target of deepSkyCatalogue){const photo=deepSkyPhoto(target,'survey');assert.match(photo.altZh,new RegExp(target.id));assert.match(photo.captionZh,new RegExp(target.id));assert.match(photo.captionZh,/存檔紅光波段/)}
+ const featured=deepSkyPhoto(deepSkyCatalogue.find(target=>target.id==='M31'));assert.match(featured.captionZh,/紅外線/);assert.match(featured.altZh,/M31/);assert.equal(new URL(featured.src).hostname,'assets.science.nasa.gov');
+ const large=deepSkyPhoto(deepSkyCatalogue.find(target=>target.id==='M31'),'survey');assert.match(large.captionZh,/超出畫面/);
+});
+test('established Traditional Chinese deep-sky names remain searchable in both languages',async()=>{
+ const {deepSkyName,deepSkyLabel,deepSkyChineseName}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+ for(const [id,name] of [['M31','仙女座星系'],['M42','獵戶座大星雲'],['NGC7000','北美洲星雲']]){
+  const target=deepSkyCatalogue.find(item=>item.id===id),before=structuredClone(target);assert.equal(deepSkyChineseName(id),name);assert.match(deepSkyLabel(target,'zh-Hant'),new RegExp(name));assert.equal(deepSkyLabel(target,'en'),deepSkyName(target));
+  for(const language of ['en','zh-Hant'])assert(findDeepSky(name,'',{language}).some(item=>item.id===id));assert.deepEqual(target,before);
+ }
+ const unnamed=deepSkyCatalogue.find(item=>item.id==='M2');assert.equal(deepSkyLabel(unnamed,'zh-Hant'),deepSkyName(unnamed));
 });

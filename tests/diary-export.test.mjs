@@ -11,6 +11,12 @@ test('diary report escapes text, preserves all records and has no remote resourc
  assert.equal([...html.matchAll(/<article>/g)].length,200);assert(html.includes('200 saved observations'));assert(html.includes('London &lt;site&gt;'));assert(html.includes('星空 &lt;img'));assert(!html.includes('<img'));assert(!/<[^>]+\b(?:src|href)\s*=/i.test(html));assert(html.includes('Print or save as PDF'));assert(html.includes(entry.observedAt));assert.deepEqual(many[0],{...entry,id:'night-0'});
  assert(diaryReport([]).includes('No saved observations'));assert.throws(()=>diaryReport([{...entry,target:'M102'}]));
 });
+test('Traditional Chinese diary reports localize labels and dates while preserving escaped observations and CSV',()=>{
+ const before=structuredClone(entry),csv=diaryCSV([entry]),html=diaryReport([entry],'zh-Hant');
+ assert(html.includes('<html lang="zh-Hant">'));assert(html.includes('Nightjar 觀測日誌'));assert(html.includes('1 筆已儲存觀測紀錄'));assert(html.includes('觀測地點'));assert(html.includes('已看到'));assert(html.includes('2026年'));
+ assert(html.includes('London &lt;site&gt;'));assert(html.includes('星空 &lt;img'));assert(!html.includes('<img'));assert(html.includes(entry.observedAt));assert(!/<[^>]+\b(?:src|href)\s*=/i.test(html));
+ assert.equal(diaryCSV([entry]),csv);assert.deepEqual(entry,before);assert(diaryReport([],'zh-Hant').includes('此報告沒有已儲存的觀測紀錄。'));
+});
 test('CSV preserves Unicode, commas, quotes, multiline notes and clock-change offsets',()=>{
  const later={...entry,id:'night-2',observedAt:'2026-10-25T01:30:00.000Z',place:{...entry.place,name:'Dark field, London'}},csv=diaryCSV([entry,later]);
  assert(csv.startsWith('\uFEFF'));const rows=parseCSV(csv.slice(1));assert.equal(rows.length,3);assert.equal(rows[0].length,13);assert(rows.every(row=>row.length===13));assert.equal(rows[1][0],'night-2');assert.equal(rows[1][5],later.place.name);assert.equal(rows[1][10],entry.equipment);assert.equal(rows[1][11],entry.notes);assert(rows[1][3].includes('GMT'));assert(rows[2][3].includes('GMT+1'));assert.equal(rows[1][7],String(entry.place.longitude));assert.equal(rows[1][2],later.observedAt);

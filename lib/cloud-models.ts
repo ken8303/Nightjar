@@ -19,7 +19,7 @@ export function parseCloudModels(value:unknown):CloudModels{
   const values=fields[key];
   if(values===undefined)return time.map(()=>null);
   if(unit[key]!==expectedUnit||!Array.isArray(values)||values.length!==time.length)throw Error('Model samples are unavailable.');
-  return values.map(value=>typeof value==='number'&&Number.isFinite(value)&&(!percentage||value>=0&&value<=100)?value:null);
+  return values.map(value=>typeof value==='number'&&Number.isFinite(value)&&(percentage?value>=0&&value<=100:value>=-273.15)?value:null);
  };
  const series=(field:string,expectedUnit:string,percentage:boolean):ModelSeries=>({
   gfs:normalize(`${field}_${models.gfs}`,expectedUnit,percentage),

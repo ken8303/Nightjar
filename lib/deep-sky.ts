@@ -2,7 +2,8 @@ import catalogue from '@/data/messier.json';
 import additional from '@/data/additional-deep-sky.json';
 import {validObservingDate} from './observing-time';
 import {constellationName,constellationLabel,traditionalChineseConstellationName} from './constellations';
-import type {Language} from './language';
+import {deepSkyTypeLabel,type Language} from './language';
+import {createTranslator} from './messages';
 import {featuredDeepSkyPhoto} from './deep-sky-photos';
 import {skySurveyPhoto} from '@/lib/object-photos';
 import {j2000Position,j2000Projector,type Place,sunAltitude} from '@/lib/sky';
@@ -10,8 +11,8 @@ export type DeepSkyObject={id:string;catalogue:string;name:string;type:string;co
 export const messierCatalogue:DeepSkyObject[]=catalogue;
 export const deepSkyCatalogue:DeepSkyObject[]=[...catalogue,...additional];
 
-import {deepSkyName,deepSkyNames} from './deep-sky-names';
-export {deepSkyName,deepSkyNames};
+import {deepSkyName,deepSkyNames,deepSkyLabel,deepSkyChineseName} from './deep-sky-names';
+export {deepSkyName,deepSkyNames,deepSkyLabel,deepSkyChineseName};
 export function deepSkyPosition(target:DeepSkyObject,date:Date,place:Place){
  // Horizontal positions never overwrite the source catalogue's J2000 RA/Dec.
  return j2000Position(target.ra,target.dec,date,place);
@@ -32,7 +33,7 @@ export function findDeepSky(query:string,type:string,{constellation='',catalogue
  const normalize=normalizeDeepSkySearch;
  const normalized=normalize(query.trim());
  const subset=savedIds===undefined?null:new Set(savedIds);
- return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,target.constellation,constellationName(target.constellation),traditionalChineseConstellationName(target.constellation),language?constellationLabel(target.constellation,language):'',...(target.crossReferences??[])].some(value=>normalize(value).includes(normalized)));
+ return deepSkyCatalogue.filter(target=>(!subset||subset.has(target.id))&&(!catalogue||(catalogue==='messier'?target.id.startsWith('M'):target.id.startsWith(catalogue.toUpperCase())))&&(!type||target.type===type)&&(!constellation||target.constellation===constellation)&&(!unknownMagnitudeOnly||target.magnitude===null)&&(maximumMagnitude===undefined||Number.isFinite(maximumMagnitude)&&target.magnitude!==null&&target.magnitude<=maximumMagnitude)&&[target.id,target.catalogue,target.name,deepSkyChineseName(target.id),target.constellation,constellationName(target.constellation),traditionalChineseConstellationName(target.constellation),language?constellationLabel(target.constellation,language):'',...(target.crossReferences??[])].some(value=>normalize(value).includes(normalized)));
 }
 export function deepSkySampleTimes(date:Date){
  if(!validObservingDate(date))throw Error('Choose an observing time within UTC years 1–9999.');
@@ -55,7 +56,7 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
  const featured=mode==='reference'?featuredDeepSkyPhoto(target.id):undefined;if(featured)return featured;
  const field=Math.min(60,Math.max(15,Math.ceil((target.major??12)*1.25)));
  const photo=skySurveyPhoto(target.id,target.ra,target.dec,field);
- return {...photo,title:'Deep-sky survey field',caption:`Archival red-band photographic field, ${field} × ${field} arcminutes, centred on ${target.id}. ${target.major!==null&&target.major>field?'This shows the central region; the catalogue object extends beyond the frame.':'A survey reference, not a live view or a prediction of visual appearance.'}`};
+ return {...photo,title:'Deep-sky survey field',titleZh:'深空巡天影像區域',captionZh:`以 ${target.id} 為中心的存檔紅光波段攝影區域，範圍為 ${field} × ${field} 角分。${target.major!==null&&target.major>field?'此影像顯示中央區域；星表天體超出畫面範圍。':'這是巡天參考資料，並非即時畫面或視覺外觀預測。'}`,caption:`Archival red-band photographic field, ${field} × ${field} arcminutes, centred on ${target.id}. ${target.major!==null&&target.major>field?'This shows the central region; the catalogue object extends beyond the frame.':'A survey reference, not a live view or a prediction of visual appearance.'}`};
 }
 
 // Share the Sun samples across the catalogue; search text does not need to
@@ -73,7 +74,8 @@ export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:P
  return recommendations;
 }
 
-export function deepSkyPlanNotes(target:DeepSkyObject){
+export function deepSkyPlanNotes(target:DeepSkyObject,language:Language='en'){
  const aliases=deepSkyNames(target).aliases;
+ if(language==='zh-Hant'){const t=createTranslator(language),missing=t('plan.notListed');return [`${deepSkyTypeLabel(target.type,language)} · ${constellationLabel(target.constellation,language)} (${target.constellation})`,t('plan.catalogue',{catalogue:target.catalogue}),...(aliases.length?[t('plan.aliases',{aliases:aliases.join(', ')})]:[]),t('plan.coordinatesJ2000',{ra:target.ra.toFixed(5),dec:target.dec.toFixed(5)}),t('plan.magnitude',{value:target.magnitude??missing}),t('plan.major',{value:target.major===null?missing:t('plan.arcminutes',{value:target.major})})].join('\n')}
  return [`${target.type} · ${constellationName(target.constellation)} (${target.constellation})`,`Catalogue: ${target.catalogue}`,...(aliases.length?[`Also known as: ${aliases.join(', ')}`]:[]),`J2000: RA ${target.ra.toFixed(5)} h · Dec ${target.dec.toFixed(5)}°`,`Visual magnitude: ${target.magnitude??'not listed'}`,`Angular major axis: ${target.major===null?'not listed':`${target.major} arcminutes`}`].join('\n');
 }

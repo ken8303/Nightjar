@@ -37,28 +37,37 @@
 <body>
   <main>
     <div class="brand">✦ nightjar.</div>
-    <h1>A moment off the grid.</h1>
-    <p class="intro">Saved details are a snapshot from when this page opened. Your plans saved on this device are below. Reconnect to open the full sky planner and refresh live conditions.</p>
+    <h1 id="offline-heading">A moment off the grid.</h1>
+    <p class="intro" id="offline-intro">Saved details are a snapshot from when this page opened. Your plans saved on this device are below. Reconnect to open the full sky planner and refresh live conditions.</p>
     <p class="connection" id="connection" role="status">Reconnect, then try the planner again.</p>
     <a class="retry" id="retry" href="/">Try again online</a>
     <p id="storage-warning" class="connection" role="status" hidden>Some saved plans could not be read. Stored values are unchanged; a raw recovery copy can preserve unreadable data.</p>
     <div id="snapshot-warning" hidden><p id="snapshot-message" class="connection" role="status">Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.</p><a class="retry" id="refresh-details" href="/offline">Refresh saved details</a></div>
     <p id="coverage-warning" class="connection" role="status" hidden></p>
-    <details class="recovery"><summary>Copy saved plans for recovery</summary><p>Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><button type="button" id="cancel-recovery" hidden>Cancel preparing recovery copy</button><p id="recovery-status" role="status"></p><p>Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
+    <details class="recovery"><summary id="recovery-heading">Copy saved plans for recovery</summary><p id="recovery-description">Download Nightjar’s stored values from this browser, including unreadable JSON and stored unfinished forms. This manual recovery copy cannot be imported as a plan backup, and it cannot include unsaved text held only in another open view.</p><button type="button" id="download-recovery">Download raw recovery copy</button><button type="button" id="cancel-recovery" hidden>Cancel preparing recovery copy</button><p id="recovery-status" role="status"></p><p id="recovery-privacy">Files can contain private sites and notes. Verify the file is saved before leaving. This does not change stored data.</p></details>
     <div class="grid">
-      <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><div id="offline-darkness-tools" hidden><label for="offline-darkness-site">Site for darkness check</label><select id="offline-darkness-site"></select><button type="button" id="check-offline-darkness">Check darkness at saved time</button> <button type="button" id="check-offline-now">Check darkness now</button><label for="offline-darkness-time">Another date and time (UTC)</label><input id="offline-darkness-time" type="datetime-local" step="1"/><button type="button" id="check-offline-entered">Check entered UTC time</button><p id="offline-darkness-status" class="connection" role="status"></p><button type="button" id="check-offline-preview" hidden>Check the next fully dark time</button><div id="offline-target-tools" hidden><label for="offline-target-select">Saved target</label><select id="offline-target-select"></select><button type="button" id="check-offline-target">Calculate target position</button><button type="button" id="check-offline-best">Find best sampled time in 24 hours</button><p id="offline-target-status" class="connection" role="status"></p><p class="connection">Positions use astronomical calculations and an ideal horizon. Weather, terrain and Moon glare are not included. Deep-sky coordinates adapted from <a href="https://github.com/mattiaverga/OpenNGC">OpenNGC</a> by Mattia Verga and contributors under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.</p></div></div><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
+      <section class="session-card" aria-labelledby="session-title"><h2 id="session-title">Last observing time</h2><ul id="session"></ul><div id="offline-darkness-tools" hidden><label id="offline-site-label" for="offline-darkness-site">Site for darkness check</label><select id="offline-darkness-site"></select><button type="button" id="check-offline-darkness">Check darkness at saved time</button> <button type="button" id="check-offline-now">Check darkness now</button><label id="offline-time-label" for="offline-darkness-time">Another date and time (UTC)</label><input id="offline-darkness-time" type="datetime-local" step="1"/><button type="button" id="check-offline-entered">Check entered UTC time</button><p id="offline-darkness-status" class="connection" role="status"></p><button type="button" id="check-offline-preview" hidden>Check the next fully dark time</button><div id="offline-target-tools" hidden><label id="offline-target-label" for="offline-target-select">Saved target</label><select id="offline-target-select"></select><button type="button" id="check-offline-target">Calculate target position</button><button type="button" id="check-offline-best">Find best sampled time in 24 hours</button><p id="offline-target-status" class="connection" role="status"></p><p class="connection"><span id="offline-position-note">Positions use astronomical calculations and an ideal horizon. Weather, terrain and Moon glare are not included. Deep-sky coordinates adapted from </span><a href="https://github.com/mattiaverga/OpenNGC">OpenNGC</a><span id="offline-position-credit"> by Mattia Verga and contributors under </span><a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.</p></div></div><p class="empty" id="session-empty" hidden>No observing time saved on this device.</p></section>
       <section class="targets-card" aria-labelledby="targets-title"><h2 id="targets-title">Saved targets</h2><ul id="targets"></ul><p class="empty" id="targets-empty" hidden>No targets saved on this device.</p></section>
-      <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><div id="deep-search-tools" hidden><label for="deep-search">Find a saved deep-sky object</label><div class="diary-search-fields"><input id="deep-search" type="search" maxlength="100" placeholder="M31, NGC 7000, IC 1396" aria-controls="deep-targets"/><button id="deep-search-clear" type="button" disabled>Clear deep-sky search</button></div><p id="deep-search-count" class="connection" role="status" aria-atomic="true"></p><p id="deep-search-empty" class="empty" hidden>No saved deep-sky objects match this search.</p></div><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
-      <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><div id="diary-search-tools" hidden><label for="diary-search">Find a saved observation</label><div class="diary-search-fields"><input id="diary-search" type="search" maxlength="100" placeholder="Object name, ID, site or notes" aria-controls="diary"/><button id="diary-search-clear" type="button" disabled>Clear search</button></div><p id="diary-search-count" class="connection" role="status" aria-atomic="true"></p><p id="diary-search-empty" class="empty" hidden>No saved observations match this search.</p></div><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
+      <section class="targets-card" aria-labelledby="deep-targets-title"><h2 id="deep-targets-title">Saved deep-sky list</h2><div id="deep-search-tools" hidden><label id="deep-search-label" for="deep-search">Find a saved deep-sky object</label><div class="diary-search-fields"><input id="deep-search" type="search" maxlength="100" placeholder="M31, NGC 7000, IC 1396" aria-controls="deep-targets"/><button id="deep-search-clear" type="button" disabled>Clear deep-sky search</button></div><p id="deep-search-count" class="connection" role="status" aria-atomic="true"></p><p id="deep-search-empty" class="empty" hidden>No saved deep-sky objects match this search.</p></div><ul id="deep-targets"></ul><p class="empty" id="deep-targets-empty" hidden>No deep-sky targets saved on this device.</p></section>
+      <section class="targets-card" aria-labelledby="diary-title"><h2 id="diary-title">Observing diary</h2><div id="diary-search-tools" hidden><label id="diary-search-label" for="diary-search">Find a saved observation</label><div class="diary-search-fields"><input id="diary-search" type="search" maxlength="100" placeholder="Object name, ID, site or notes" aria-controls="diary"/><button id="diary-search-clear" type="button" disabled>Clear search</button></div><p id="diary-search-count" class="connection" role="status" aria-atomic="true"></p><p id="diary-search-empty" class="empty" hidden>No saved observations match this search.</p></div><ul id="diary"></ul><p class="empty" id="diary-empty" hidden>No observations saved on this device.</p></section>
       <section class="targets-card" id="other-notes-card" aria-labelledby="other-notes-title" hidden><h2 id="other-notes-title">Notes for other targets</h2><ul id="other-notes"></ul></section>
       <section aria-labelledby="places-title"><h2 id="places-title">Your places</h2><ul id="places"></ul><p class="empty" id="places-empty" hidden>No places saved on this device.</p></section>
       <section aria-labelledby="equipment-title"><h2 id="equipment-title">Imaging setups</h2><ul id="equipment"></ul><p class="empty" id="equipment-empty" hidden>No imaging setups saved on this device.</p></section>
     </div>
 
-    <footer>Offline details are stored only in this browser. Darkness checks use a saved site and the saved observing time, this device’s current clock, or an entered UTC time; they are not weather forecasts. Choosing a site here does not change the saved plan. Supported saved-target positions can be calculated for a checked fully dark time; weather, location search and aurora forecasts require internet.</footer>
+    <footer id="offline-footer">Offline details are stored only in this browser. Darkness checks use a saved site and the saved observing time, this device’s current clock, or an entered UTC time; they are not weather forecasts. Choosing a site here does not change the saved plan. Supported saved-target positions can be calculated for a checked fully dark time; weather, location search and aurora forecasts require internet.</footer>
   </main>
   <script>
     (() => {
+      // The recovery page is self-contained and follows the planner's saved language.
+      let zh=false;try{zh=localStorage.getItem('nightjar-language-v1')==='zh-Hant'}catch{}
+      const tr=(english,chinese)=>zh?chinese:english;
+      // Generated from the shared target-name catalogue.
+      const offlineSkyNames={"Moon":"月球","Mercury":"水星","Venus":"金星","Mars":"火星","Jupiter":"木星","Saturn":"土星","Uranus":"天王星","Neptune":"海王星","Sirius":"天狼星","Vega":"織女星","Polaris":"北極星","Arcturus":"大角星","Capella":"五車二","Rigel":"參宿七","Betelgeuse":"參宿四","Altair":"河鼓二","Deneb":"天津四"};
+      const offlineDeepSkyNames={"M1":"蟹狀星雲","M6":"蝴蝶星團","M7":"托勒密星團","M8":"礁湖星雲","M11":"野鴨星團","M13":"武仙座球狀星團","M16":"天鷹星雲","M17":"天鵝星雲","M20":"三裂星雲","M27":"啞鈴星雲","M31":"仙女座星系","M33":"三角座星系","M42":"獵戶座大星雲","M44":"蜂巢星團","M45":"昴宿星團","M51":"漩渦星系","M57":"環狀星雲","M63":"向日葵星系","M64":"黑眼星系","M81":"波德星系","M82":"雪茄星系","M101":"風車星系","M104":"草帽星系","NGC104":"杜鵑座 47 星團","NGC253":"玉夫座星系","NGC3372":"船底座星雲","NGC5139":"半人馬座 ω 星團","NGC6543":"貓眼星雲","NGC6960":"面紗星雲西部","NGC6992":"面紗星雲東部","NGC7000":"北美洲星雲","NGC7293":"螺旋星雲","IC5070":"鵜鶘星雲"};
+      const offlineTargetLabel=name=>zh&&Object.hasOwn(offlineSkyNames,name)?offlineSkyNames[name]+' ('+name+')':name;
+      const offlineDeepSkyLabel=id=>zh&&Object.hasOwn(offlineDeepSkyNames,id)?id+' · '+offlineDeepSkyNames[id]:id;
+      if(zh){document.documentElement.lang='zh-Hant';document.title='Nightjar · 離線';const labels={"offline-heading":"暫時離線","offline-intro":"以下是此頁面開啟時讀取的已儲存計畫快照。重新連線後，可開啟完整觀星規劃器並更新即時資料。","connection":"重新連線後，再試一次開啟規劃器。","retry":"重新連線並重試","storage-warning":"部分已儲存計畫無法讀取，儲存的資料未更改。原始復原副本可保留無法讀取的資料。","snapshot-message":"已儲存計畫已在其他視窗變更。此處顯示較早的快照，請重新整理以讀取目前儲存的資料。","refresh-details":"重新整理已儲存的詳細資料","recovery-heading":"複製已儲存計畫以便復原","recovery-description":"下載此瀏覽器中的 Nightjar 儲存資料，包括無法讀取的 JSON 與已儲存的未完成表單。此手動復原副本無法作為計畫備份匯入，也不包含僅存在其他開啟視窗中的未儲存文字。","download-recovery":"下載原始復原副本","cancel-recovery":"取消準備復原副本","recovery-privacy":"檔案可能包含私人地點與筆記。離開前請確認檔案已儲存，此操作不會更改已儲存的資料。","session-title":"上次觀測時間","offline-site-label":"檢查黑夜的地點","check-offline-darkness":"檢查已儲存時間的黑夜狀態","check-offline-now":"檢查目前的黑夜狀態","offline-time-label":"其他日期與時間（UTC）","check-offline-entered":"檢查輸入的 UTC 時間","check-offline-preview":"檢查下一個完全天文黑夜時間","offline-target-label":"已儲存天體","check-offline-target":"計算天體位置","check-offline-best":"尋找 24 小時內最佳樣本時間","session-empty":"此裝置沒有已儲存的觀測時間。","targets-title":"已儲存天體","targets-empty":"此裝置沒有已儲存的天體。","deep-targets-title":"已儲存的深空清單","deep-search-label":"搜尋已儲存的深空天體","deep-search-clear":"清除深空搜尋","deep-search-empty":"沒有符合搜尋條件的已儲存深空天體。","deep-targets-empty":"此裝置沒有已儲存的深空天體。","diary-title":"觀測日誌","diary-search-label":"搜尋已儲存觀測記錄","diary-search-clear":"清除搜尋","diary-search-empty":"沒有符合搜尋條件的已儲存觀測記錄。","diary-empty":"此裝置沒有已儲存的觀測記錄。","other-notes-title":"其他天體的筆記","places-title":"我的地點","places-empty":"此裝置沒有已儲存地點。","equipment-title":"攝影器材設定","equipment-empty":"此裝置沒有已儲存的攝影器材設定。","offline-position-note":"位置使用天文計算及理想地平線，不包含天氣、地形與月光眩光。深空座標改編自 ","offline-position-credit":"，由 Mattia Verga 與貢獻者提供，授權條款為 ","offline-footer":"離線詳細資料只儲存在此瀏覽器。黑夜檢查使用已儲存地點及已儲存觀測時間、裝置目前時間或輸入的 UTC 時間；這些結果不是天氣預報。在此選擇地點不會更改已儲存計畫。可在已檢查的完全天文黑夜時間計算受支援的已儲存天體位置；天氣、地點搜尋與極光預報需要網路連線。"};for(const [id,text] of Object.entries(labels))document.getElementById(id).textContent=text;document.getElementById('diary-search').placeholder='天體名稱、編號、地點或筆記'}
       const unavailable=new Set(),partial=new Set(),partialLabels=new Set();
       const markPartial=(key,label)=>{partial.add(key);partialLabels.add(label)};
       const read = (key, fallback, valid) => { try { const raw=localStorage.getItem(key);if(raw===null)return fallback;if(raw.length>5*1024*1024)throw Error('Oversized saved value');const value=JSON.parse(raw);if(value===null||valid&&!valid(value))throw Error('Invalid saved value');return value; } catch { unavailable.add(key);document.getElementById('storage-warning').hidden=false;return fallback; } };
@@ -101,7 +110,7 @@
         if (note) { const text = document.createElement('small'); text.className = 'note'; text.textContent = note; item.append(text); }
         document.getElementById(id).append(item);
       };
-      const showEmpty = (id,key) => { const empty=document.getElementById(id + '-empty');empty.hidden=Boolean(document.getElementById(id).children.length);if(!empty.hidden&&unavailable.has(key))empty.textContent='Saved data is unavailable in this offline view. Stored values are unchanged.';else if(!empty.hidden&&partial.has(key))empty.textContent='Some stored records are omitted from this offline view. Use a raw recovery copy to preserve them.'; };
+      const showEmpty = (id,key) => { const empty=document.getElementById(id + '-empty');empty.hidden=Boolean(document.getElementById(id).children.length);if(!empty.hidden&&unavailable.has(key))empty.textContent=tr("Saved data is unavailable in this offline view. Stored values are unchanged.","離線畫面無法取得已儲存資料，儲存的資料未更改。");else if(!empty.hidden&&partial.has(key))empty.textContent=tr("Some stored records are omitted from this offline view. Use a raw recovery copy to preserve them.","部分已儲存記錄未顯示於離線畫面。請使用原始復原副本保留資料。"); };
 
       const storedPlace=read('nightjar-place',null,value=>typeof value==='object'&&!Array.isArray(value));
       const currentPlace=pairedContext?.place??storedPlace;
@@ -113,9 +122,9 @@
         let zoneKnown = Boolean(currentPlace && typeof currentPlace === 'object' && safeText(currentPlace.timezone));
         let localTime;
         const options={calendar:'gregory',numberingSystem:'latn',weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',timeZoneName:'shortOffset',...(instant.getUTCMilliseconds()?{fractionalSecondDigits:3}:{}),...(instant.getUTCFullYear()<=1?{era:'short'}:{})};
-        try { localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
-        catch { zoneKnown = false; zone = 'UTC'; localTime = new Intl.DateTimeFormat('en-GB', {...options,timeZone:zone}).format(instant); }
-        add('session', siteName ? 'At ' + siteName : 'Selected time', localTime + ' · ' + (zoneKnown ? zone + ' · time at saved site' : 'UTC · site time zone unavailable'), utcTime(selectedTime) + ' · Times are a saved snapshot, not a live forecast.');
+        try { localTime = new Intl.DateTimeFormat(zh?'zh-Hant':'en-GB', {...options,timeZone:zone}).format(instant); }
+        catch { zoneKnown = false; zone = 'UTC'; localTime = new Intl.DateTimeFormat(zh?'zh-Hant':'en-GB', {...options,timeZone:zone}).format(instant); }
+        add('session', siteName ? tr('At ','地點：') + siteName : tr('Selected time','所選時間'), localTime + ' · ' + (zoneKnown ? zone + tr(' · time at saved site',' · 已儲存地點時間') : tr('UTC · site time zone unavailable','UTC · 無法取得地點時區')), utcTime(selectedTime) + tr(' · Times are a saved snapshot, not a live forecast.',' · 時間來自已儲存快照，並非即時預報。'));
       }else if(selectedTime!==null){unavailable.add('nightjar-observing-time');document.getElementById('storage-warning').hidden=false;}
       showEmpty('session','nightjar-observing-time');
 
@@ -126,27 +135,28 @@
       if(noteRows.length>100||noteEntries.length<notePrefix.length||noteEntries.some(([,text])=>text.length>2000))markPartial('nightjar-target-notes-v1','Target notes');
       const targetPrefix=targets.slice(0,200),targetRows=targetPrefix.filter(name=>typeof name==='string'&&name.trim()&&name.length<=100),distinctNames=Array.from(new Set(targetRows)),savedNames=distinctNames.slice(0,42);
       if(targets.length>200||targetRows.length<targetPrefix.length||distinctNames.length>42)markPartial('nightjar-targets-v1','Saved targets');
-      for (const name of savedNames) add('targets',safeText(name),'',safeNote(noteEntries.find(([key])=>key===name)?.[1]));
-      for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(name),'',safeNote(note));
+      for (const name of savedNames) add('targets',safeText(offlineTargetLabel(name)),'',safeNote(noteEntries.find(([key])=>key===name)?.[1]));
+      for (const [name,note] of noteEntries) if(!savedNames.includes(name)&&safeText(name)&&safeNote(note)) add('other-notes',safeText(offlineTargetLabel(name)),'',safeNote(note));
       document.getElementById('other-notes-card').hidden=!document.getElementById('other-notes').children.length;
       showEmpty('targets','nightjar-targets-v1');
 
       const deepTargets=read('nightjar-deep-targets-v1',[],Array.isArray);
       const deepPrefix=deepTargets.slice(0,deepSkyLimit),deepRows=deepPrefix.filter(id=>validDeepSkyId(id));
       if(deepTargets.length>deepSkyLimit||deepRows.length<deepPrefix.length)markPartial('nightjar-deep-targets-v1','Saved deep-sky list');
-      for(const id of Array.from(new Set(deepRows)).slice(0,deepSkyLimit))add('deep-targets',id,'Check a fully dark time above to calculate this target’s position offline.');
+      const savedDeepIds=Array.from(new Set(deepRows)).slice(0,deepSkyLimit);
+      for(const id of savedDeepIds)add('deep-targets',offlineDeepSkyLabel(id),tr("Check a fully dark time above to calculate this target’s position offline.","請先在上方檢查完全天文黑夜時間，再離線計算此天體的位置。"));
       showEmpty('deep-targets','nightjar-deep-targets-v1');
       // Search the already rendered snapshot without touching storage or network.
       const deepItems=Array.from(document.getElementById('deep-targets').children);
       const deepSearch=document.getElementById('deep-search'),deepClear=document.getElementById('deep-search-clear');
       const normalizeDeep=value=>value.normalize('NFKC').toLowerCase().replace(/\s+/g,'').replace(/^messier(?=\d)/,'m').replace(/^(m|ngc|ic)0+(?=\d)/,'$1');
-      const deepSearchRows=deepItems.map(item=>({item,id:normalizeDeep(item.children[0].textContent)}));
+      const deepSearchRows=deepItems.map((item,index)=>({item,id:normalizeDeep(item.children[0].textContent+' '+(offlineDeepSkyNames[savedDeepIds[index]]||''))}));
       document.getElementById('deep-search-tools').hidden=!deepItems.length;
       const filterDeep=()=>{
         const query=normalizeDeep((deepSearch.value||'').slice(0,100).trim());let shown=0;
         for(const row of deepSearchRows){row.item.hidden=Boolean(query&&!row.id.includes(query));if(!row.item.hidden)shown++}
         deepClear.disabled=!(deepSearch.value||'');
-        document.getElementById('deep-search-count').textContent=shown+' of '+deepItems.length+' saved deep-sky objects shown.';
+        document.getElementById('deep-search-count').textContent=zh?'顯示 '+shown+'／'+deepItems.length+' 個已儲存深空天體。':shown+' of '+deepItems.length+' saved deep-sky objects shown.';
         document.getElementById('deep-search-empty').hidden=shown!==0;
       };
       deepSearch.addEventListener('input',filterDeep);
@@ -160,8 +170,8 @@
       if(diary.length>200||diaryRows.length<diaryPrefix.length)markPartial('nightjar-observing-diary-v1','Observing diary');
       for(const entry of diaryRows.sort((a,b)=>b.observedAt.localeCompare(a.observedAt))){
         if(typeof entry.notes==='string'&&entry.notes.length>2000||entry.notes!=null&&typeof entry.notes!=='string'||typeof entry.equipment==='string'&&entry.equipment.trim().length>300||entry.equipment!=null&&typeof entry.equipment!=='string'||entry.place.name.trim().length>300||typeof entry.place.country==='string'&&entry.place.country.trim().length>300)markPartial('nightjar-observing-diary-v1','Observing diary');
-        const outcome={'seen':'Seen','not-seen':'Not seen','imaged':'Imaged'}[entry.outcome];
-        add('diary',entry.target+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.place.country)?' · '+safeText(entry.place.country):'')+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
+        const outcome={'seen':tr("Seen","已觀測"),'not-seen':tr("Not seen","未觀測到"),'imaged':tr("Imaged","已拍攝")}[entry.outcome];
+        add('diary',offlineDeepSkyLabel(entry.target)+' · '+outcome,utcTime(entry.observedAt)+' · '+safeText(entry.place.name)+(safeText(entry.place.country)?' · '+safeText(entry.place.country):'')+(safeText(entry.equipment)?' · '+safeText(entry.equipment):''),safeNote(entry.notes));
       }
       showEmpty('diary','nightjar-observing-diary-v1');
       // Filter only this already-rendered snapshot; never read or write stores
@@ -169,13 +179,13 @@
       const diaryItems=Array.from(document.getElementById('diary').children);
       const diarySearch=document.getElementById('diary-search'),clearSearch=document.getElementById('diary-search-clear');
       const searchText=value=>value.normalize('NFKC').toLowerCase().replace(/[‘’]/g,"'").replace(/\bmessier(?=\s*\d)/g,'m').replace(/\b(m|ngc|ic)\s*0*(\d+)/g,'$1$2').replace(/\s+/g,' ').trim();
-      const diarySearchRows=diaryItems.map((item,index)=>({item,text:searchText(item.textContent+' '+(diaryCatalogueNames[diaryRows[index].target]||''))}));
+      const diarySearchRows=diaryItems.map((item,index)=>({item,text:searchText(item.textContent+' '+(diaryCatalogueNames[diaryRows[index].target]||'')+' '+(offlineDeepSkyNames[diaryRows[index].target]||''))}));
       document.getElementById('diary-search-tools').hidden=!diaryItems.length;
       const filterDiary=()=>{
         const query=searchText((diarySearch.value||'').slice(0,100).trim());let shown=0;
         for(const row of diarySearchRows){row.item.hidden=Boolean(query&&!row.text.includes(query));if(!row.item.hidden)shown++}
         clearSearch.disabled=!(diarySearch.value||'');
-        document.getElementById('diary-search-count').textContent=shown+' of '+diaryItems.length+' saved observations shown.';
+        document.getElementById('diary-search-count').textContent=zh?'顯示 '+shown+'／'+diaryItems.length+' 筆已儲存觀測記錄。':shown+' of '+diaryItems.length+' saved observations shown.';
         document.getElementById('diary-search-empty').hidden=shown!==0;
       };
       diarySearch.addEventListener('input',filterDiary);
@@ -191,7 +201,7 @@
         if (!place || typeof place !== 'object') {markPartial('nightjar-places','Your places');continue}
         const name = safeText(place.name), lat = place.latitude, lon = place.longitude;
         if(typeof place.name==='string'&&place.name.trim().length>300)markPartial('nightjar-places','Your places');
-        const rating = Number.isInteger(place.bortle) && place.bortle >= 1 && place.bortle <= 9 ? ' · Bortle ' + place.bortle : '';
+        const rating = Number.isInteger(place.bortle) && place.bortle >= 1 && place.bortle <= 9 ? tr(' · Bortle ',' · 波特爾 ') + place.bortle + tr('',' 級') : '';
         if (name && validCoordinate(lat,90) && validCoordinate(lon,180)) add('places', name, lat.toFixed(3) + '°, ' + lon.toFixed(3) + '°' + rating);else markPartial('nightjar-places','Your places');
       }
       showEmpty('places','nightjar-places');
@@ -203,41 +213,43 @@
       darknessSite.value='0';document.getElementById('offline-darkness-tools').hidden=!darknessSites.length;darknessButton.hidden=!instant;
       let previewTime=null,darkSnapshot=null,brightTargetsAdded=false;
       const targetTools=document.getElementById('offline-target-tools'),targetSelect=document.getElementById('offline-target-select'),targetButton=document.getElementById('check-offline-target'),bestButton=document.getElementById('check-offline-best'),targetStatus=document.getElementById('offline-target-status');
-      for(const id of Array.from(new Set(deepRows)).slice(0,deepSkyLimit)){const option=document.createElement('option');option.value=id;option.textContent=id;targetSelect.append(option)}
+      for(const id of Array.from(new Set(deepRows)).slice(0,deepSkyLimit)){const option=document.createElement('option');option.value=id;option.textContent=offlineDeepSkyLabel(id);targetSelect.append(option)}
       targetSelect.value=deepRows[0]||'';
       const clearPosition=()=>{darkSnapshot=null;targetTools.hidden=true;targetStatus.textContent=''};
       const clearDarkness=()=>{darknessStatus.textContent='';previewTime=null;darknessPreview.hidden=true;clearPosition()};
       targetSelect.addEventListener('change',()=>{targetStatus.textContent=''});
       darknessSite.addEventListener('change',clearDarkness);darknessTime.addEventListener('input',clearDarkness);
       const checkDarkness=async(time,label)=>{
-        const site=darknessSites[Number(darknessSite.value)];if(!site){darknessStatus.textContent='Choose a saved site to check darkness.';return}
-        clearPosition();darknessSite.disabled=true;darknessButton.disabled=true;darknessNow.disabled=true;darknessTime.disabled=true;darknessEntered.disabled=true;darknessPreview.disabled=true;previewTime=null;darknessPreview.hidden=true;darknessStatus.textContent='Checking the site and time…';
-        try{const {offlineDarknessDetails,offlineBrightTargetNames}=await import('/offline-darkness.mjs');const result=offlineDarknessDetails(time,site);if(result.dark&&!brightTargetsAdded){const supported=new Set(offlineBrightTargetNames);for(const name of savedNames)if(supported.has(name)){const option=document.createElement('option');option.value='bright:'+name;option.textContent=name+' · bright target';targetSelect.append(option);if(!targetSelect.value)targetSelect.value=option.value}brightTargetsAdded=true}darknessStatus.textContent='At '+site.name+' · '+label+' '+time+' · '+result.lines.join(' ');previewTime=result.next;darknessPreview.hidden=!previewTime;if(result.dark&&targetSelect.value){darkSnapshot={time,site};targetTools.hidden=false}}
-        catch{darknessStatus.textContent='Darkness could not be calculated here. Reconnect and open the planner to retry.'}
+        const site=darknessSites[Number(darknessSite.value)];if(!site){darknessStatus.textContent=tr("Choose a saved site to check darkness.","請選擇已儲存地點以檢查黑夜狀態。");return}
+        clearPosition();darknessSite.disabled=true;darknessButton.disabled=true;darknessNow.disabled=true;darknessTime.disabled=true;darknessEntered.disabled=true;darknessPreview.disabled=true;previewTime=null;darknessPreview.hidden=true;darknessStatus.textContent=tr("Checking the site and time…","正在檢查地點與時間…");
+        try{const {offlineDarknessDetails,offlineBrightTargetNames}=await import('/offline-darkness.mjs');const result=offlineDarknessDetails(time,site);if(result.dark&&!brightTargetsAdded){const supported=new Set(offlineBrightTargetNames);for(const name of savedNames)if(supported.has(name)){const option=document.createElement('option');option.value='bright:'+name;option.textContent=offlineTargetLabel(name)+tr(' · bright target',' · 明亮天體');targetSelect.append(option);if(!targetSelect.value)targetSelect.value=option.value}brightTargetsAdded=true}let description=result.lines.join(' ');
+        if(zh&&'remaining' in result){const remaining=result.remaining;if(remaining?.end){const minutes=Math.floor((Date.parse(remaining.end)-Date.parse(time))/60000),hours=Math.floor(minutes/60),rest=minutes%60,duration=minutes<1?'不足 1 分鐘':(hours?hours+' 小時':'')+(rest?(hours?' ':'')+rest+' 分鐘':'');description='所選觀測時間後剩餘完全天文黑夜：'+duration+'。完全天文黑夜結束時間 UTC：'+remaining.end}else if(remaining)description='找不到完全天文黑夜結束時間：'+(remaining.dateLimited?'已到支援的 UTC 日期上限。':'所選觀測時間後 48 小時內無結果。');else description='所選時間不在完全天文黑夜。'+(result.next?'下一個完全天文黑夜時間 UTC：'+result.next:'在 48 小時內或支援的日期上限之前找不到完全天文黑夜。')}
+        darknessStatus.textContent=tr('At ','地點：')+site.name+' · '+label+' '+time+' · '+description;previewTime=result.next;darknessPreview.hidden=!previewTime;if(result.dark&&targetSelect.value){darkSnapshot={time,site};targetTools.hidden=false}}
+        catch{darknessStatus.textContent=tr("Darkness could not be calculated here. Reconnect and open the planner to retry.","無法在此計算黑夜狀態。請重新連線並開啟規劃器後重試。")}
         finally{darknessSite.disabled=false;darknessButton.disabled=false;darknessNow.disabled=false;darknessTime.disabled=false;darknessEntered.disabled=false;darknessPreview.disabled=false}
       };
       targetButton.addEventListener('click',async()=>{
         if(!darkSnapshot||!targetSelect.value)return;
-        const snapshot=darkSnapshot,value=targetSelect.value,bright=value.startsWith('bright:'),id=bright?value.slice(7):value;targetButton.disabled=true;bestButton.disabled=true;targetSelect.disabled=true;darknessSite.disabled=true;darknessButton.disabled=true;darknessNow.disabled=true;darknessTime.disabled=true;darknessEntered.disabled=true;darknessPreview.disabled=true;targetStatus.textContent='Calculating target position…';
-        try{const {offlineDeepSkyPosition,offlineBrightPosition}=await import('/offline-darkness.mjs');const position=bright?offlineBrightPosition(snapshot.time,snapshot.site,id):offlineDeepSkyPosition(snapshot.time,snapshot.site,id);targetStatus.textContent=id+' at '+snapshot.site.name+' · '+snapshot.time+' · Altitude '+position.altitude.toFixed(1)+'° · Azimuth '+position.azimuth.toFixed(1)+'° · '+(position.altitude>0?'Above ideal horizon':'Below ideal horizon')}
-        catch{targetStatus.textContent='Target position could not be calculated. Check darkness again or reconnect to the planner.'}
+        const snapshot=darkSnapshot,value=targetSelect.value,bright=value.startsWith('bright:'),id=bright?value.slice(7):value,displayId=bright?offlineTargetLabel(id):offlineDeepSkyLabel(id);targetButton.disabled=true;bestButton.disabled=true;targetSelect.disabled=true;darknessSite.disabled=true;darknessButton.disabled=true;darknessNow.disabled=true;darknessTime.disabled=true;darknessEntered.disabled=true;darknessPreview.disabled=true;targetStatus.textContent=tr("Calculating target position…","正在計算天體位置…");
+        try{const {offlineDeepSkyPosition,offlineBrightPosition}=await import('/offline-darkness.mjs');const position=bright?offlineBrightPosition(snapshot.time,snapshot.site,id):offlineDeepSkyPosition(snapshot.time,snapshot.site,id);targetStatus.textContent=displayId+tr(' at ',' 於 ')+snapshot.site.name+' · '+snapshot.time+tr(' · Altitude ',' · 高度角 ')+position.altitude.toFixed(1)+tr('° · Azimuth ','° · 方位角 ')+position.azimuth.toFixed(1)+'° · '+(position.altitude>0?tr('Above ideal horizon','理想地平線上'):tr('Below ideal horizon','理想地平線下'))}
+        catch{targetStatus.textContent=tr("Target position could not be calculated. Check darkness again or reconnect to the planner.","無法計算天體位置。請重新檢查黑夜狀態，或重新連線並開啟規劃器。")}
         finally{targetButton.disabled=false;bestButton.disabled=false;targetSelect.disabled=false;darknessSite.disabled=false;darknessButton.disabled=false;darknessNow.disabled=false;darknessTime.disabled=false;darknessEntered.disabled=false;darknessPreview.disabled=false}
       });
       bestButton.addEventListener('click',async()=>{
         if(!darkSnapshot||!targetSelect.value)return;
-        const snapshot=darkSnapshot,value=targetSelect.value,bright=value.startsWith('bright:'),id=bright?value.slice(7):value;targetButton.disabled=true;bestButton.disabled=true;targetSelect.disabled=true;darknessSite.disabled=true;darknessButton.disabled=true;darknessNow.disabled=true;darknessTime.disabled=true;darknessEntered.disabled=true;darknessPreview.disabled=true;targetStatus.textContent='Checking 15-minute samples…';
-        try{const {offlineDeepSkyBest,offlineBrightBest}=await import('/offline-darkness.mjs');const best=bright?offlineBrightBest(snapshot.time,snapshot.site,id):offlineDeepSkyBest(snapshot.time,snapshot.site,id);targetStatus.textContent=best?id+' at '+snapshot.site.name+' · Best 15-minute sample: '+best.time+' · Altitude '+best.altitude.toFixed(1)+'° · Azimuth '+best.azimuth.toFixed(1)+'° · Full astronomical darkness':id+' at '+snapshot.site.name+' · No sample above 30° during full darkness in the next 24 hours or before the supported date limit.'}
-        catch{targetStatus.textContent='The sampled time could not be calculated. Check darkness again or reconnect to the planner.'}
+        const snapshot=darkSnapshot,value=targetSelect.value,bright=value.startsWith('bright:'),id=bright?value.slice(7):value,displayId=bright?offlineTargetLabel(id):offlineDeepSkyLabel(id);targetButton.disabled=true;bestButton.disabled=true;targetSelect.disabled=true;darknessSite.disabled=true;darknessButton.disabled=true;darknessNow.disabled=true;darknessTime.disabled=true;darknessEntered.disabled=true;darknessPreview.disabled=true;targetStatus.textContent=tr("Checking 15-minute samples…","正在檢查每 15 分鐘的樣本…");
+        try{const {offlineDeepSkyBest,offlineBrightBest}=await import('/offline-darkness.mjs');const best=bright?offlineBrightBest(snapshot.time,snapshot.site,id):offlineDeepSkyBest(snapshot.time,snapshot.site,id);targetStatus.textContent=best?displayId+tr(' at ',' 於 ')+snapshot.site.name+tr(' · Best 15-minute sample: ',' · 最佳 15 分鐘樣本：')+best.time+tr(' · Altitude ',' · 高度角 ')+best.altitude.toFixed(1)+tr('° · Azimuth ','° · 方位角 ')+best.azimuth.toFixed(1)+tr('° · Full astronomical darkness','° · 完全天文黑夜'):displayId+tr(' at ',' 於 ')+snapshot.site.name+tr(' · No sample above 30° during full darkness in the next 24 hours or before the supported date limit.',' · 未來 24 小時內或支援日期上限之前，沒有完全天文黑夜中高度高於 30° 的樣本。')}
+        catch{targetStatus.textContent=tr("The sampled time could not be calculated. Check darkness again or reconnect to the planner.","無法計算樣本時間。請重新檢查黑夜狀態，或重新連線並開啟規劃器。")}
         finally{targetButton.disabled=false;bestButton.disabled=false;targetSelect.disabled=false;darknessSite.disabled=false;darknessButton.disabled=false;darknessNow.disabled=false;darknessTime.disabled=false;darknessEntered.disabled=false;darknessPreview.disabled=false}
       });
-      darknessPreview.addEventListener('click',()=>{if(previewTime)return checkDarkness(previewTime,'Previewed fully dark time:')});
-      darknessButton.addEventListener('click',()=>checkDarkness(selectedTime,'Saved observing time:'));
-      darknessNow.addEventListener('click',()=>checkDarkness(new Date().toISOString(),'Device time:'));
+      darknessPreview.addEventListener('click',()=>{if(previewTime)return checkDarkness(previewTime,tr("Previewed fully dark time:","預覽的完全天文黑夜時間："))});
+      darknessButton.addEventListener('click',()=>checkDarkness(selectedTime,tr("Saved observing time:","已儲存觀測時間：")));
+      darknessNow.addEventListener('click',()=>checkDarkness(new Date().toISOString(),tr("Device time:","裝置時間：")));
       darknessEntered.addEventListener('click',()=>{
         const match=/^(\d{4}-\d\d-\d\dT\d\d:\d\d)(?::(\d\d)(?:\.(\d{1,3}))?)?$/.exec(darknessTime.value||'');
         const time=match?match[1]+':'+(match[2]||'00')+'.'+(match[3]||'').padEnd(3,'0')+'Z':'';
-        if(!canonicalInstant(time)){clearDarkness();darknessStatus.textContent='Enter a valid UTC date and time, from year 0001 through 9999.';return}
-        return checkDarkness(time,'Entered UTC time:');
+        if(!canonicalInstant(time)){clearDarkness();darknessStatus.textContent=tr("Enter a valid UTC date and time, from year 0001 through 9999.","請輸入有效的 UTC 日期與時間，年份須介於 0001 至 9999。");return}
+        return checkDarkness(time,tr("Entered UTC time:","輸入的 UTC 時間："));
       });
 
       const equipment = read('nightjar-equipment', [], Array.isArray);
@@ -246,23 +258,23 @@
         if (!setup || typeof setup !== 'object') {markPartial('nightjar-equipment','Imaging setups');continue}
         const name = safeText(setup.name), focal = setup.focal, width = setup.width, height = setup.height, pixel = setup.pixel;
         if(typeof setup.name==='string'&&setup.name.trim().length>300)markPartial('nightjar-equipment','Imaging setups');
-        if (name && validDimension(focal,20000) && validDimension(width,100) && validDimension(height,100) && validDimension(pixel,100)) add('equipment', name, focal + ' mm focal length · ' + width + ' × ' + height + ' mm sensor · ' + pixel + ' µm pixels');else markPartial('nightjar-equipment','Imaging setups');
+        if (name && validDimension(focal,20000) && validDimension(width,100) && validDimension(height,100) && validDimension(pixel,100)) add('equipment', name, focal + tr(' mm focal length · ',' mm 焦距 · ') + width + ' × ' + height + tr(' mm sensor · ',' mm 感光元件 · ') + pixel + tr(' µm pixels',' µm 像素'));else markPartial('nightjar-equipment','Imaging setups');
       }
       showEmpty('equipment','nightjar-equipment');
-      if(partialLabels.size){const coverage=document.getElementById('coverage-warning');coverage.hidden=false;coverage.textContent='Partial offline view: '+Array.from(partialLabels).join(', ')+'. Some stored content is omitted because of display limits or unusable values. Use a raw recovery copy to preserve stored values.';}
+      if(partialLabels.size){const coverage=document.getElementById('coverage-warning'),labels={'Target notes':'天體筆記','Saved targets':'已儲存天體','Saved deep-sky list':'已儲存深空清單','Observing diary':'觀測日誌','Your places':'我的地點','Imaging setups':'攝影器材設定'};coverage.hidden=false;coverage.textContent=tr('Partial offline view: ','離線畫面顯示不完整：')+Array.from(partialLabels,label=>zh?(labels[label]||label):label).join(zh?'、':', ')+tr('. Some stored content is omitted because of display limits or unusable values. Use a raw recovery copy to preserve stored values.','。部分已儲存內容因顯示限制或資料無法使用而省略，請使用原始復原副本保留資料。');}
       const snapshotKeys=new Set(['nightjar-place','nightjar-places','nightjar-observing-time','nightjar-targets-v1','nightjar-target-notes-v1','nightjar-deep-targets-v1','nightjar-observing-diary-v1','nightjar-equipment']);
       const snapshotWarning=document.getElementById('snapshot-warning'),snapshotMessage=document.getElementById('snapshot-message');
       window.addEventListener('storage',event=>{
         try{if(event.storageArea!==localStorage)return}catch{return}
-        if(event.key===null||snapshotKeys.has(event.key)){snapshotMessage.textContent='Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.';snapshotWarning.hidden=false;}
+        if(event.key===null||snapshotKeys.has(event.key)){snapshotMessage.textContent=tr("Saved plans changed in another view. These details are an earlier snapshot; refresh them to see current stored values.","已儲存計畫已在其他視窗變更。此處顯示較早的快照，請重新整理以讀取目前儲存的資料。");snapshotWarning.hidden=false;}
       });
       const connection=document.getElementById('connection');
       let pageHidden=false,wasHidden=Boolean(document.hidden),preservationFailed=false;
-      const updateConnection=()=>{if(preservationFailed)return;connection.textContent=navigator.onLine===false?'You are offline. Your saved plans remain available below.':'A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.'};
+      const updateConnection=()=>{if(preservationFailed)return;connection.textContent=navigator.onLine===false?tr("You are offline. Your saved plans remain available below.","目前離線，以下仍可查看已儲存計畫。"):tr("A connection may be available. The planner may be slow or temporarily unavailable. Try again shortly.","可能已有網路連線。規劃器可能載入緩慢或暫時無法使用，請稍後重試。")};
       const resume=returned=>{
         if(pageHidden||document.hidden)return;
         updateConnection();
-        if(returned&&snapshotWarning.hidden){snapshotMessage.textContent='Saved details may have changed while this page was away. Refresh them to read current stored values; the displayed snapshot is kept until then.';snapshotWarning.hidden=false;}
+        if(returned&&snapshotWarning.hidden){snapshotMessage.textContent=tr("Saved details may have changed while this page was away. Refresh them to read current stored values; the displayed snapshot is kept until then.","此頁面離開前景時，已儲存資料可能已變更。請重新整理以讀取目前資料；在此之前保留顯示的快照。");snapshotWarning.hidden=false;}
       };
       updateConnection();window.addEventListener('online',()=>resume(false));window.addEventListener('offline',()=>resume(false));
       window.addEventListener('pagehide',()=>{pageHidden=true});
@@ -281,15 +293,15 @@
             }
           }
           preservationFailed=false;updateConnection();
-        }catch{preservationFailed=true;event?.preventDefault();connection.textContent='Your observing site and time could not be preserved. Keep this page open, restore browser storage access and try again.'}
+        }catch{preservationFailed=true;event?.preventDefault();connection.textContent=tr("Your observing site and time could not be preserved. Keep this page open, restore browser storage access and try again.","無法保留觀測地點與時間。請保持此頁面開啟，恢復瀏覽器儲存空間存取權限後重試。")}
       });
       const recoveryButton=document.getElementById('download-recovery'),recoveryStatus=document.getElementById('recovery-status'),cancelRecovery=document.getElementById('cancel-recovery');
       let recoveryRequest=0;
-      cancelRecovery.addEventListener('click',()=>{if(!recoveryButton.disabled)return;recoveryRequest++;recoveryButton.disabled=false;cancelRecovery.hidden=true;recoveryStatus.textContent='Recovery preparation cancelled. Your stored plans are unchanged; you can try again.';recoveryButton.focus({preventScroll:true})});
+      cancelRecovery.addEventListener('click',()=>{if(!recoveryButton.disabled)return;recoveryRequest++;recoveryButton.disabled=false;cancelRecovery.hidden=true;recoveryStatus.textContent=tr("Recovery preparation cancelled. Your stored plans are unchanged; you can try again.","已取消準備復原副本。已儲存計畫未更改，可以再次嘗試。");recoveryButton.focus({preventScroll:true})});
       recoveryButton.addEventListener('click',async()=>{
         if(recoveryButton.disabled)return;
         const request=++recoveryRequest;
-        recoveryButton.disabled=true;cancelRecovery.hidden=false;recoveryStatus.textContent='Preparing a recovery copy…';
+        recoveryButton.disabled=true;cancelRecovery.hidden=false;recoveryStatus.textContent=tr("Preparing a recovery copy…","正在準備復原副本…");
         try{
           const {makePlannerRecovery}=await import('/planner-recovery.mjs');
           if(request!==recoveryRequest)return;
@@ -297,8 +309,8 @@
           const url=URL.createObjectURL(new Blob([copy.text],{type:'application/json'}));
           try{const link=document.createElement('a');link.href=url;link.download='nightjar-raw-recovery-'+copy.exportedAt.slice(0,10)+'.json';document.body.append(link);try{link.click()}finally{link.remove()}}
           finally{setTimeout(()=>URL.revokeObjectURL(url),60000)}
-          recoveryStatus.textContent='Recovery copy prepared'+(copy.unreadable.length?' with '+copy.unreadable.length+' unreadable or oversized entries excluded and listed.':'.')+' Verify the file is saved before leaving; it cannot be imported as a plan backup.';
-        }catch(error){if(request!==recoveryRequest)return;recoveryStatus.textContent=error instanceof Error&&error.message.includes('storage')?error.message:'The recovery copy could not be prepared. Keep this page open and restore storage or connection access before retrying.'}
+          recoveryStatus.textContent=zh?('已準備復原副本'+(copy.unreadable.length?'，已排除並列出 '+copy.unreadable.length+' 筆無法讀取或過大的項目。':'。')+'離開前請確認檔案已儲存；此副本無法作為計畫備份匯入。'):('Recovery copy prepared'+(copy.unreadable.length?' with '+copy.unreadable.length+' unreadable or oversized entries excluded and listed.':'.')+' Verify the file is saved before leaving; it cannot be imported as a plan backup.');
+        }catch(error){if(request!==recoveryRequest)return;recoveryStatus.textContent=!zh&&error instanceof Error&&error.message.includes('storage')?error.message:tr("The recovery copy could not be prepared. Keep this page open and restore storage or connection access before retrying.","無法準備復原副本。請保持此頁面開啟，恢復儲存空間或網路連線後重試。")}
         finally{if(request===recoveryRequest){const returnFocus=document.activeElement===cancelRecovery;recoveryButton.disabled=false;cancelRecovery.hidden=true;if(returnFocus)recoveryButton.focus({preventScroll:true})}}
       });
     })();

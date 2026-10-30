@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./professional.css";
-import PwaSupport from "@/components/pwa-support";
 import {viewingModeBootstrap} from "@/lib/viewing-mode";
+import {languageBootstrap} from "@/lib/language-bootstrap";
+import InitialLanguageText from "@/components/initial-language-text";
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0b1115" };
 
@@ -28,8 +29,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head><script id="nightjar-viewing-mode" dangerouslySetInnerHTML={{__html:viewingModeBootstrap}}/></head>
-      <body className="antialiased"><a className="skip-link" href="#main-content">Skip to planner</a>{children}<PwaSupport /></body>
+      <head><script id="nightjar-language" dangerouslySetInnerHTML={{__html:languageBootstrap}}/><script id="nightjar-viewing-mode" dangerouslySetInnerHTML={{__html:viewingModeBootstrap}}/></head>
+      <body className="antialiased"><a className="skip-link" href="#main-content"><InitialLanguageText message="startup.skip"/></a>{children}</body>
     </html>
   );
 }

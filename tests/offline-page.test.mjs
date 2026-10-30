@@ -358,3 +358,18 @@ test('offline deep-sky best sample is temporary and clears when the target or si
  await page.elements.get('check-offline-darkness').listeners.get('click')();await page.elements.get('check-offline-best').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/M31 at London · Best 15-minute sample: .*Full astronomical darkness/);
  const select=page.elements.get('offline-target-select');select.value='bright:Polaris';select.listeners.get('change')();assert.equal(page.elements.get('offline-target-status').textContent,'');await page.elements.get('check-offline-best').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/Polaris at London · Best 15-minute sample:/);page.elements.get('offline-darkness-site').listeners.get('change')();assert.equal(page.elements.get('offline-target-tools').hidden,true);assert.deepEqual([...page.raw],before);
 });
+test('offline recovery honours Traditional Chinese without changing saved plans or identifiers',async()=>{
+ const time='2026-10-27T00:00:00.000Z',site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'};
+ const page=load({'nightjar-observing-time':time,'nightjar-place':site,'nightjar-deep-targets-v1':['M31'],'nightjar-targets-v1':['Vega'],'nightjar-target-notes-v1':{Vega:'Keep my note'}},false,{rawOverrides:{'nightjar-language-v1':'zh-Hant'}}),before=[...page.raw];
+ assert.equal(page.root.lang,'zh-Hant');assert.equal(page.elements.get('offline-heading').textContent,'暫時離線');assert.match(page.elements.get('connection').textContent,/目前離線/);
+ assert.match(page.elements.get('session').textContent,/地點：London/);assert.match(page.elements.get('deep-targets').textContent,/M31/);assert.match(page.elements.get('targets').textContent,/Keep my note/);
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/剩餘完全天文黑夜/);
+ await page.elements.get('check-offline-target').listeners.get('click')();assert.match(page.elements.get('offline-target-status').textContent,/M31.*高度角.*方位角/);
+ assert.deepEqual([...page.raw],before);assert.equal(page.session.size,0);
+});
+test('offline Chinese daylight preview reports the next dark time without exposing target positions',async()=>{
+ const time='2026-10-27T12:00:00.000Z',site={name:'London',latitude:51.5,longitude:0,timezone:'UTC'};
+ const page=load({'nightjar-observing-time':time,'nightjar-place':site,'nightjar-deep-targets-v1':['M31']},false,{rawOverrides:{'nightjar-language-v1':'zh-Hant'}});
+ await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/所選時間不在完全天文黑夜。下一個完全天文黑夜時間 UTC：/);assert.equal(page.elements.get('offline-target-tools').hidden,true);
+ await page.elements.get('check-offline-preview').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/預覽的完全天文黑夜時間：.*剩餘完全天文黑夜/);
+});

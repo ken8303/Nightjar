@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),{chromium}=require('playwright');
+const base=new URL(process.argv[2]||'http://127.0.0.1:8788/');
+if(!['localhost','127.0.0.1','[::1]'].includes(base.hostname))throw Error('Use a local Nightjar server.');
+const browser=await chromium.launch({headless:true,executablePath:process.env.NIGHTJAR_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:process.env.NIGHTJAR_CHROMIUM_NO_SANDBOX==='1'?['--no-sandbox']:[]});
+try{
+ for(const width of [320,390]){
+  const page=await browser.newPage({viewport:{width,height:844},hasTouch:true,isMobile:true}),errors=[];let previewFails=false,archiveFails=false;page.on('pageerror',error=>errors.push(error.message));page.setDefaultTimeout(20000);
+  const time='2026-10-27T00:00:00.000Z',start=Date.parse(time)/1000;await page.clock.setFixedTime(new Date(time));
+  await page.addInitScript(({origin,time})=>{if(location.origin!==origin)return;sessionStorage.setItem('nightjar-recovery-context-v1',JSON.stringify({version:1,time,place:{name:'London',latitude:51.5,longitude:0,timezone:'UTC'}}));localStorage.setItem('nightjar-language-v1','zh-Hant');localStorage.setItem('nightjar-sky-view-v1','2d');localStorage.setItem('nightjar-deep-targets-v1',JSON.stringify(['M31','M13','M42']));},{origin:base.origin,time});
+  await page.route('**/api/weather?*',route=>route.fulfill({json:{hourly:{time:[start],cloud_cover:[20]}}}));await page.route('**/*',route=>{const url=new URL(route.request().url());if(url.origin===base.origin)return route.fallback();if(previewFails&&url.hostname==='alasky.cds.unistra.fr'||archiveFails&&url.hostname==='archive.stsci.edu')return route.fulfill({status:503,body:'unavailable'});return route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"/>'})});
+  await page.goto(base.href,{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'開啟導覽選單'}).tap();await page.getByRole('dialog').getByRole('button',{name:'星空圖',exact:true}).tap();await page.getByRole('button',{name:'選擇已儲存的 M31'}).tap();
+  const detail=page.locator('#deep-sky-object-details'),photo=detail.locator('.deep-sky-photo');await photo.locator('summary').tap();await photo.getByText('WISE 紅外線星系參考影像').waitFor();assert.match(await photo.innerText(),/並非可見光或即時畫面/);assert.match(await photo.locator('img').getAttribute('alt'),/仙女座星系 M31/);
+  await photo.getByRole('button',{name:'巡天影像區域'}).tap();await photo.getByText('深空巡天影像區域').waitFor();assert.match(await photo.innerText(),/超出畫面範圍/);const source=await photo.locator('img').getAttribute('src');assert.match(source,/hips2fits/);
+  const language=page.locator('#planner-language');await language.selectOption('en');await photo.getByText('Deep-sky survey field').waitFor();assert.equal(await photo.locator('img').getAttribute('src'),source);await language.selectOption('zh-Hant');await photo.getByText('深空巡天影像區域').waitFor();assert.equal(await photo.locator('img').getAttribute('src'),source);
+  await photo.getByRole('button',{name:'放大查看 M31 影像'}).tap();const dialog=page.getByRole('dialog');await dialog.getByRole('heading',{name:'M31 參考影像'}).waitFor();await dialog.getByRole('button',{name:'關閉放大影像'}).tap();
+  previewFails=true;await page.getByRole('button',{name:'選擇已儲存的 M13'}).tap();await photo.locator('summary').tap();await photo.getByRole('button',{name:'巡天影像區域'}).tap();await photo.locator('img').scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('.deep-sky-photo img')?.src.includes('archive.stsci.edu'));await page.waitForFunction(()=>{const image=document.querySelector('.deep-sky-photo img');return image?.complete&&image.naturalWidth>0});
+  archiveFails=true;await page.getByRole('button',{name:'選擇已儲存的 M42'}).tap();await photo.locator('summary').tap();await photo.getByRole('button',{name:'重試載入影像'}).waitFor();previewFails=false;await photo.getByRole('button',{name:'重試載入影像'}).tap();await page.waitForFunction(()=>{const image=document.querySelector('.deep-sky-photo img');return image?.src.includes('hips2fits')&&image.complete&&image.naturalWidth>0});
+  assert.equal(await page.locator('#observing-time').inputValue(),'2026-10-27T00:00');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);await page.close();console.log(`${width}: localized references, archive fallback and retry passed`);
+ }
+}finally{await browser.close()}
