@@ -1,0 +1,10 @@
+import {readFile,writeFile} from 'node:fs/promises';
+const path=new URL('../public/offline.html',import.meta.url);
+const names=['../data/additional-deep-sky-ids.json','../data/opengc-planning-ids.json'];
+const ids=(await Promise.all(names.map(async name=>JSON.parse(await readFile(new URL(name,import.meta.url),'utf8'))))).flat();
+if(new Set(ids).size!==ids.length)throw Error('Duplicate offline deep-sky IDs');
+let html=await readFile(path,'utf8');const marker=/const extraDeepSkyIds=new Set\([^\n]*\);/;
+if(!marker.test(html))throw Error('Offline catalogue marker is missing');
+html=html.replace(marker,()=>`const extraDeepSkyIds=new Set(${JSON.stringify(ids).replace(/</g,'\\u003c')});`);
+html=html.replace('const deepSkyLimit=109+extraDeepSkyIds.size;','const deepSkyLimit=469;');
+await writeFile(path,html);

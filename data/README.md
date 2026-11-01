@@ -8,10 +8,22 @@ Source and adapted data are licensed under [Creative Commons Attribution-ShareAl
 
 ## Curated NGC/IC expansion
 
-`additional-deep-sky.json` adds 360 non-Messier objects, bringing the planning catalogue to 469. The original 109 Messier records and their IDs are unchanged. The expansion selects northern and southern galaxies, clusters, nebulae and remnants; it is a curated subset, not the full NGC/IC catalogue. Camera discovery remains on the original Messier selection.
+`additional-deep-sky.json` added 360 non-Messier objects to the original 109 Messier entries. The original 109 Messier records and their IDs are unchanged. The expansion selects northern and southern galaxies, clusters, nebulae and remnants; it is a curated subset, not the full NGC/IC catalogue. Camera discovery remains on the original Messier selection.
 
 Source: [OpenNGC NGC.csv at revision be3cd6c5498806a2fbb2f7e0452ef802dbb02be0](https://github.com/mattiaverga/OpenNGC/blob/be3cd6c5498806a2fbb2f7e0452ef802dbb02be0/database_files/NGC.csv), retrieved 27 October 2026. CSV SHA-256: `54abea0b57b0a103831bfc7a8e3a99a23acfbf4bb581fcf3d8af539cbb826c84`.
 
 Attribution: OpenNGC by Mattia Verga and contributors. Adapted data remain under CC BY-SA 4.0; a [local copy of the licence](./LICENSE-CC-BY-SA-4.0.txt) is included. Changes: selected 360 rows with no Messier cross-reference or duplicate type, retained source common names and NGC/IC cross-references, expanded type codes, converted J2000 sexagesimal positions to decimal hours/degrees and renamed fields. V-band magnitudes, major/minor dimensions (arcminutes) and position angles (degrees east of north) are retained from this pinned source; absent values remain null. Magnitude values are source estimates, not a guarantee of visual visibility or surface brightness.
 
 Regenerate with `python3 scripts/import-deep-sky-expansion.py /path/to/OpenNGC/database_files/NGC.csv`. The importer checks the pinned CSV hash, rejects duplicate/Messier records and writes the record file plus the lightweight `additional-deep-sky-ids.json` validation list. When changing the curated selection, also update the offline page's supported-ID set; the offline regression verifies that every expansion ID is retained in saved lists and diary records.
+
+## Complete OpenNGC source snapshot
+
+`opengc-complete.csv` is the unmodified `NGC.csv` from the pinned OpenNGC revision and hash listed above, by Mattia Verga and contributors under CC BY-SA 4.0. It contains 13,970 source rows, including duplicate, non-existent and component records. Seven records have no coordinates. Run `python3 scripts/audit-opengc.py` to verify the source hash, unique identifiers and record classifications.
+
+The on-demand `opengc-reference-index.json`, generated with `python3 scripts/build-opengc-index.py`, exposes all source rows as a searchable reference index. It retains source identifiers, types, coordinates, constellations, V magnitudes, common names and Messier/NGC/IC cross-references. Historical duplicates and unidentified entries are labelled, and blank coordinates remain blank. The index can preview observing positions and dark-sky timelines for source records with usable coordinates, excluding historical duplicate and unidentified entries. It respects an applied local horizon; source positions remain estimates. Positioned, non-historical records can also be opened in the full observing planner.
+
+### Prepared planning candidates
+
+`opengc-planning-candidates.json` is the adapted, deterministic expansion of the observing planner. Generate it with `python3 scripts/build-opengc-planning.py`. It contains 12,842 non-historical records not already represented by an existing curated identifier or cross-reference; the existing 469 records remain unchanged. Source coordinates are converted from J2000 sexagesimal to decimal, rounded 60-second fields are carried correctly, type codes are expanded, and the invalid position-angle sentinel is omitted. The OpenNGC source and adapted data remain under CC BY-SA 4.0.
+
+These entries are available in saved lists, diary records, backups, reference images, exports and offline planning. The saved-list and unfinished-draft limits remain 469 entries. The full-darkness filter processes the catalogue in cancellable batches, and the results list renders 50 entries at a time. The two generated offline indexes and offline darkness bundle must be rebuilt after changing the source data.

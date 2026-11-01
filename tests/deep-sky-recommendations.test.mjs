@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
-const {messierCatalogue,deepSkyRecommendations,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
+const {messierCatalogue,deepSkyCatalogue,deepSkyRecommendations,bestDeepSkyTime}=await vite.ssrLoadModule('/lib/deep-sky.ts');
 const {A,bodyPosition}=await vite.ssrLoadModule('/lib/sky.ts');
 const london={name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London'};
 test('shared catalogue recommendations agree with the independent per-object window',()=>{
@@ -16,7 +16,7 @@ test('shared catalogue recommendations agree with the independent per-object win
 });
 test('polar daylight produces no dark-sky suggestions and catalogue inputs are bounded',()=>{
  assert.equal(deepSkyRecommendations(messierCatalogue,new Date('2026-06-21T12:00Z'),{name:'Polar site',latitude:89,longitude:0}).size,0);
- assert.throws(()=>deepSkyRecommendations(Array(470).fill(messierCatalogue[0]),new Date(),london),/469/);
+ assert.throws(()=>deepSkyRecommendations(Array(deepSkyCatalogue.length+1).fill(messierCatalogue[0]),new Date(),london),/13311/);
 });
 test('recommendations remain on UTC sample boundaries during repeated local clock hours',()=>{
  const start=new Date('2026-10-25T00:00Z'),recommendations=deepSkyRecommendations(messierCatalogue,start,london);

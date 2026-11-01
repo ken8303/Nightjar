@@ -7,13 +7,13 @@ import {createServer} from './vite-test-server.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},esbuild:{jsx:'automatic'},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});after(()=>vite.close());
 const {default:Eclipses}=await vite.ssrLoadModule('/components/lunar-eclipses.tsx');
-const {nextLunarEclipses,lunarEclipseContacts}=await vite.ssrLoadModule('/lib/lunar-events.ts');
+const {nextLunarEclipses,lunarEclipseContacts,lunarEclipseDarkInstant}=await vite.ssrLoadModule('/lib/lunar-events.ts');
 const {isAstronomicalNight}=await vite.ssrLoadModule('/lib/sky.ts');
 const sites=[{name:'London',latitude:51.5,longitude:0,timezone:'Europe/London'},{name:'Equator',latitude:0,longitude:120,timezone:'UTC'},{name:'North Pole',latitude:90,longitude:0,timezone:'UTC'},{name:'South Pole',latitude:-90,longitude:0,timezone:'UTC'}];
 for(const place of sites)test(`eclipse contacts and shortcuts use actual dark event times at ${place.name}`,async()=>{
- const date=new Date('2026-10-25T00:00Z'),events=nextLunarEclipses(date),eligible=events.filter(event=>lunarEclipseContacts(event).some(contact=>+contact.time>=+date-60000&&isAstronomicalNight(contact.time,place)));
+ const date=new Date('2026-10-25T00:00Z'),events=nextLunarEclipses(date),eligible=events.filter(event=>lunarEclipseContacts(event).some(contact=>+contact.time>=+date-60000&&isAstronomicalNight(contact.time,place))||lunarEclipseDarkInstant(event,date,place));
  const html=renderToStaticMarkup(createElement(Eclipses,{date,place,onDate:()=>{}}));
- if(!eligible.length){assert(html.includes('None of the next supported lunar eclipses has a remaining contact in full astronomical darkness'));assert(!html.includes('Set observing time to peak'));return}
+ if(!eligible.length){assert(html.includes('None of the next supported lunar eclipses has a remaining interval in full astronomical darkness'));assert(!html.includes('Set observing time to peak'));return}
  assert.equal((html.match(/aria-pressed=/g)||[]).length,eligible.length);
  const event=eligible[0],offsets=[-event.sd_penum,...(event.sd_partial>0?[-event.sd_partial]:[]),...(event.sd_total>0?[-event.sd_total]:[]),0,...(event.sd_total>0?[event.sd_total]:[]),...(event.sd_partial>0?[event.sd_partial]:[]),event.sd_penum];
  const contacts=offsets.map(minutes=>new Date(+event.peak.date+minutes*60000));
@@ -23,6 +23,15 @@ for(const place of sites)test(`eclipse contacts and shortcuts use actual dark ev
  const {isFullDarknessInterval}=await vite.ssrLoadModule('/lib/darkness-remaining.ts');
  const allDark=contacts.every(time=>isAstronomicalNight(time,place))&&isFullDarknessInterval(new Date(Math.floor(+contacts[0]/1000)*1000),new Date(Math.ceil(+contacts.at(-1)/1000)*1000),place);
  assert.equal(download.includes('disabled=""'),!allDark);
+});
+test('an eclipse remains available when full darkness falls between bright contacts',()=>{
+ const place={name:'Northern site',latitude:62,longitude:-75,timezone:'UTC'},date=new Date('2026-08-28T04:28:36.001Z'),event=nextLunarEclipses(date)[0];
+ assert.equal(event.peak.date.toISOString(),'2026-08-28T04:12:49.076Z');assert(isAstronomicalNight(date,place));assert(lunarEclipseContacts(event).every(contact=>!isAstronomicalNight(contact.time,place)));
+ assert.equal(+lunarEclipseDarkInstant(event,date,place),+date);
+ const start=lunarEclipseContacts(event)[0].time,next=lunarEclipseDarkInstant(event,start,place);assert(next&&+next>+start&&+next<+lunarEclipseContacts(event).at(-1).time);assert(isAstronomicalNight(next,place));
+ const html=renderToStaticMarkup(createElement(Eclipses,{date,place,onDate:()=>{}}));
+ assert(html.includes('Use dark eclipse time'));assert(html.includes('Dark eclipse interval'));assert(!html.includes(`dateTime="${event.peak.date.toISOString()}"`));
+ const after=new Date(+event.peak.date+event.sd_penum*60000+1000);assert.equal(lunarEclipseDarkInstant(event,after,place),null);
 });
 test('no lunar eclipse shortcut or calendar escapes the supported final instant',()=>{
  const html=renderToStaticMarkup(createElement(Eclipses,{date:new Date('9999-12-31T23:59:59.999Z'),place:sites[0],onDate:()=>{}}));
@@ -86,11 +95,11 @@ test('an eclipse with a bright peak still offers its actual dark contact',async(
  const download=[...html.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)].map(match=>match[0]).find(button=>button.includes('Download eclipse calendar'));assert(download.includes('disabled=""'));
 });
 
-test('an elapsed dark contact does not keep a bright-peak event in the upcoming list',()=>{
+test('an elapsed dark contact is not used as a shortcut when the eclipse remains dark',()=>{
  const place={name:'Equatorial Atlantic',latitude:0,longitude:-30,timezone:'UTC'},date=new Date('2027-08-17T05:25:00Z'),event=nextLunarEclipses(date)[0];
  assert.equal(event.peak.date.toISOString(),'2027-08-17T07:13:44.931Z');assert(isAstronomicalNight(date,place));
  const html=renderToStaticMarkup(createElement(Eclipses,{date,place,onDate:()=>{}}));
- assert(!html.includes('Set observing time: Penumbral begins'));assert(!html.includes('2027-08-17T05:23:58.869Z'));
+ assert(!html.includes('Set observing time: Penumbral begins'));assert(html.includes('Use dark eclipse time'));
 });
 
 test('an ongoing eclipse remains accessible after a bright peak if a later contact is dark',()=>{

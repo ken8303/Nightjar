@@ -275,7 +275,7 @@ test('offline diary search filters the rendered snapshot across Unicode, notes a
 });
 test('offline diary catalogue index stays in sync with all bundled names and cross-references',()=>{
  const index=JSON.parse(html.match(/const diaryCatalogueNames=([^\n]*);/)[1]);
- const catalogues=['../data/messier.json','../data/additional-deep-sky.json'].flatMap(name=>JSON.parse(readFileSync(new URL(name,import.meta.url),'utf8')));
+ const catalogues=['../data/messier.json','../data/additional-deep-sky.json','../data/opengc-planning-candidates.json'].flatMap(name=>JSON.parse(readFileSync(new URL(name,import.meta.url),'utf8')));
  assert.deepEqual(index,Object.fromEntries(catalogues.map(target=>[target.id,[target.name,target.catalogue,...(target.crossReferences??[])].join(' ')])));
  const entry={target:'NGC253',observedAt:'2026-10-08T20:00:00.000Z',place:{name:'Site',latitude:51.5,longitude:0},outcome:'seen'};
  const page=load({'nightjar-observing-diary-v1':[entry,{...entry,target:'NGC281'}]});
@@ -303,6 +303,15 @@ test('offline deep-sky search filters the snapshot without storage reads or writ
  find('Messier 31');assert.deepEqual(rows.map(row=>row.hidden),[false,true,true]);find('NGC9999');assert.equal(page.elements.get('deep-search-empty').hidden,false);
  clear.listeners.get('click')();assert(rows.every(row=>!row.hidden));assert(search.focused);assert(clear.disabled);assert.deepEqual(page.reads,before);assert.deepEqual([...page.raw],raw);
  for(const empty of [load(),load({},true),load({'nightjar-deep-targets-v1':[{}]})])assert.equal(empty.elements.get('deep-search-tools').hidden,true);
+});
+
+test('offline saved deep-sky search finds catalogue names and alternate identifiers',()=>{
+ const page=load({'nightjar-deep-targets-v1':['M31','IC2220','NGC7000']});
+ const search=page.elements.get('deep-search'),rows=page.elements.get('deep-targets').children,before=[...page.raw];
+ const find=query=>{search.value=query;search.listeners.get('input')()};
+ for(const query of ['Andromeda','NGC 00224']){find(query);assert.deepEqual(rows.map(row=>row.hidden),[false,true,true])}
+ for(const query of ['Toby Jug Nebula','IC 02220']){find(query);assert.deepEqual(rows.map(row=>row.hidden),[true,false,true])}
+ find('北美洲星雲');assert.deepEqual(rows.map(row=>row.hidden),[true,true,false]);assert.deepEqual([...page.raw],before);
 });
 
 test('offline darkness uses the saved site and time without changing stored plans',async()=>{
@@ -372,4 +381,13 @@ test('offline Chinese daylight preview reports the next dark time without exposi
  const page=load({'nightjar-observing-time':time,'nightjar-place':site,'nightjar-deep-targets-v1':['M31']},false,{rawOverrides:{'nightjar-language-v1':'zh-Hant'}});
  await page.elements.get('check-offline-darkness').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/所選時間不在完全天文黑夜。下一個完全天文黑夜時間 UTC：/);assert.equal(page.elements.get('offline-target-tools').hidden,true);
  await page.elements.get('check-offline-preview').listeners.get('click')();assert.match(page.elements.get('offline-darkness-status').textContent,/預覽的完全天文黑夜時間：.*剩餘完全天文黑夜/);
+});
+test('offline recovery accepts expanded catalogue IDs and keeps the saved-list limit',()=>{
+ const curated=JSON.parse(readFileSync(new URL('../data/additional-deep-sky-ids.json',import.meta.url),'utf8'));
+ const expanded=JSON.parse(readFileSync(new URL('../data/opengc-planning-ids.json',import.meta.url),'utf8'));
+ const bundled=JSON.parse(html.match(/const extraDeepSkyIds=new Set\(([^\n]*)\);/)[1]);
+ assert.deepEqual(bundled,[...curated,...expanded]);
+ const ids=['M31','NGC1','IC3322A','IC275 NED01'],entry={id:'expanded',target:'NGC1',observedAt:'2026-10-27T00:00:00.000Z',place:{name:'Site',latitude:51.5,longitude:0},outcome:'seen'};
+ const page=load({'nightjar-deep-targets-v1':ids,'nightjar-observing-diary-v1':[entry]});
+ assert.equal(page.elements.get('deep-targets').children.length,ids.length);assert.equal(page.elements.get('diary').children.length,1);assert.equal(page.elements.get('coverage-warning').hidden,true);
 });

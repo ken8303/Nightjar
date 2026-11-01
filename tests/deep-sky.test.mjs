@@ -16,7 +16,7 @@ test('saved-target scope composes with catalogue filters without changing saved 
  assert.deepEqual(findDeepSky('','Galaxy',{savedIds:['M45']}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:[]}),[]);
  assert.deepEqual(findDeepSky('','',{savedIds:['M102','not-a-target']}),[]);
- assert.equal(findDeepSky('','',{savedIds:undefined}).length,469);
+ assert.equal(findDeepSky('','',{savedIds:undefined}).length,13311);
  assert.deepEqual(saved,before);
 });
 test('full constellation names and Unicode identifiers work without losing catalogue codes',async()=>{
@@ -173,9 +173,9 @@ test('survey display previews bound decoded pixels while preserving fields, cent
  for(const id of ['M13','M31'])assert.equal(deepSkyPhoto(messierCatalogue.find(target=>target.id===id)).previewSrc,undefined,'featured NASA references keep their existing image');
  assert.deepEqual(messierCatalogue,before);
 });
-test('all curated catalogue objects have bounded, correctly centred survey thumbnails',async()=>{
+test('all planning catalogue objects have bounded, correctly centred survey thumbnails',async()=>{
  const {deepSkyPhoto}=await vite.ssrLoadModule('/lib/deep-sky.ts');
- assert.equal(deepSkyCatalogue.length,469);
+ assert.equal(deepSkyCatalogue.length,13311);
  for(const target of deepSkyCatalogue){
   const photo=deepSkyPhoto(target,'survey'),url=new URL(photo.thumbnailSrc);
   assert.equal(url.hostname,'alasky.cds.unistra.fr');assert.equal(url.searchParams.get('width'),'200');assert.equal(url.searchParams.get('height'),'200');

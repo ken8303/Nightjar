@@ -2,10 +2,11 @@ import {validObservingDate} from './observing-time';
 
 // Use the same dated labels for deep-sky peaks, hourly samples and comparisons.
 // UTC year 1 can begin in local 1 BC.
-export function deepSkyTimestampFormatter(start:Date,timezone:string,locale='en-GB'){
+export function deepSkyTimestampFormatter(start:Date,timezone:string,locale='en-GB',precision:'minute'|'millisecond'='minute'){
  if(!validObservingDate(start))throw Error('Invalid deep-sky planning date.');
  return new Intl.DateTimeFormat(locale,{
   day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',
+  ...(precision==='millisecond'?{second:'2-digit' as const,fractionalSecondDigits:3 as const}:{}),
   hourCycle:'h23',timeZone:timezone,timeZoneName:'shortOffset',
   ...(start.getUTCFullYear()<=1?{era:'short' as const}:{}),
  });

@@ -36,3 +36,11 @@ test('endpoint coalesces same-site requests and limits oversized responses',asyn
   globalThis.fetch=async()=>new Response('x'.repeat(100001));assert.equal((await GET(new Request('https://example.test/api/astronomy-forecast?lat=46&lon=2'))).status,502);
  }finally{globalThis.fetch=fetch;if(original===undefined)delete process.env.ASTRONOMY_FORECAST_VERIFIED;else process.env.ASTRONOMY_FORECAST_VERIFIED=original}
 });
+test('provider requests handle zero coordinates without altering other coordinates',async()=>{
+ const original=process.env.ASTRONOMY_FORECAST_VERIFIED,fetch=globalThis.fetch,requests=[];
+ try{
+  process.env.ASTRONOMY_FORECAST_VERIFIED='true';globalThis.fetch=async url=>{requests.push(new URL(url).searchParams);return Response.json(fixture())};
+  for(const site of ['lat=0&lon=30','lat=15&lon=0','lat=0&lon=0','lat=-0.25&lon=30'])assert.equal((await GET(new Request('https://example.test/api?'+site))).status,200);
+  assert.deepEqual(requests.map(params=>[params.get('lat'),params.get('lon')]),[['0.000001','30'],['15','0.000001'],['0.000001','0.000001'],['-0.25','30']]);
+ }finally{globalThis.fetch=fetch;if(original===undefined)delete process.env.ASTRONOMY_FORECAST_VERIFIED;else process.env.ASTRONOMY_FORECAST_VERIFIED=original}
+});

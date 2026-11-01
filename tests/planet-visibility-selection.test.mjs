@@ -8,9 +8,9 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const vite=await createServer({configFile:false,root,resolve:{alias:{'@':root}},esbuild:{jsx:'automatic'},server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
 after(()=>vite.close());
 const {default:PlanetVisibility}=await vite.ssrLoadModule('/components/planet-visibility.tsx');
-const {createBrightTargetBrowsing}=await vite.ssrLoadModule('/lib/target-browsing.ts');
+const {createBrightTargetBrowsing,createDeepSkyBrowsing}=await vite.ssrLoadModule('/lib/target-browsing.ts');
 const place={name:'London',latitude:51.5085,longitude:-.1257,timezone:'Europe/London'};
-const render=(selected,instant='2026-10-18T19:00:00.000Z',body=null)=>{const browsing=createBrightTargetBrowsing().visibility;browsing.update({body});return renderToStaticMarkup(createElement(PlanetVisibility,{date:new Date(instant),place,selected,browsing,onPlan:()=>{}}))};
+const render=(selected,instant='2026-10-18T19:00:00.000Z',body=null)=>{const browsing=createBrightTargetBrowsing().visibility;browsing.update({body});return renderToStaticMarkup(createElement(PlanetVisibility,{date:new Date(instant),place,selected,browsing,horizonBrowsing:createDeepSkyBrowsing().comparison,onPlan:()=>{}}))};
 const pressed=html=>[...html.matchAll(/<button\b[^>]*>/g)].map(match=>match[0]).filter(button=>/aria-pressed="true"/.test(button)).map(button=>button.match(/aria-label="([^"]*)"/)?.[1]);
 test('visibility selection requires both object and exact observing instant',()=>{
  assert.deepEqual(pressed(render('')),[],'a time alone must not select every object');

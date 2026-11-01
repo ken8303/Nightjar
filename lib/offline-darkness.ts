@@ -1,10 +1,8 @@
 /*! Deep-sky coordinates adapted from OpenNGC by Mattia Verga and contributors, CC BY-SA 4.0: https://github.com/mattiaverga/OpenNGC ; https://creativecommons.org/licenses/by-sa/4.0/ */
 import {darknessSummaryLines,remainingDarkness} from './darkness-remaining';
-import {bestDeepSkyTime,deepSkySampleTimes} from './deep-sky';
+import {bestDeepSkyTime,deepSkySampleTimes,deepSkyCatalogue} from './deep-sky';
 import {validObservingDate} from './observing-time';
 import {A,bodyPosition,isAstronomicalNight,j2000Position,nextAstronomicalDarkness,skyBodies,stars,sunAltitude,type Place} from './sky';
-import messier from '../data/messier.json';
-import additional from '../data/additional-deep-sky.json';
 
 // The offline page supplies an explicitly selected saved snapshot, not live weather.
 export function offlineDarknessDetails(time:string,place:Place){
@@ -23,7 +21,7 @@ export function offlineDarkness(time:string,place:Place){return offlineDarknessD
 export function offlineDeepSkyPosition(time:string,place:Place,id:string){
  const {dark}=offlineDarknessDetails(time,place);
  if(!dark)throw Error('Target positions are available only during full astronomical darkness.');
- const target=[...messier,...additional].find(item=>item.id===id);
+ const target=deepSkyCatalogue.find(item=>item.id===id);
  if(!target)throw Error('This target is not in the offline catalogue.');
  return j2000Position(target.ra,target.dec,new Date(time),place);
 }
@@ -44,7 +42,7 @@ export function offlineBrightPosition(time:string,place:Place,name:string){
 export function offlineDeepSkyBest(time:string,place:Place,id:string){
  const {dark}=offlineDarknessDetails(time,place);
  if(!dark)throw Error('Start from a time during full astronomical darkness.');
- const target=[...messier,...additional].find(item=>item.id===id);
+ const target=deepSkyCatalogue.find(item=>item.id===id);
  if(!target)throw Error('This target is not in the offline catalogue.');
  const best=bestDeepSkyTime(target,new Date(time),place);
  return best?{time:best.date.toISOString(),altitude:best.altitude,azimuth:best.azimuth}:null;
