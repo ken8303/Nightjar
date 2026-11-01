@@ -77,7 +77,7 @@ Completed locally:
 
 Required release acceptance, still pending:
 
-- [ ] Verify the 7Timer! HTTPS response and UTC issue/timepoint semantics at representative sites, confirm deployment access and provider terms, and only then enable `ASTRONOMY_FORECAST_VERIFIED=true`. Until then the seeing/transparency panel reports unavailable.
+- [ ] Verify the 7Timer! UTC issue/timepoint semantics across model runs, confirm deployment access and provider terms, and only then enable `ASTRONOMY_FORECAST_VERIFIED=true`. On 31 October 2026, HTTPS returned plausible three-hour ASTRO series for London, Sydney and Atacama from this environment; the published documentation confirms category ranges but does not establish the JSON initialization time zone. Until then the seeing/transparency panel reports unavailable.
 
 - [ ] Test touch navigation, rotation/split view, native form entry/coordinate-pair paste, Apple Maps handoff, GPS permission/cancellation/retry and large text/VoiceOver on physical iPhone/iPad devices.
 - [ ] Verify home-screen installation, standalone reopening, background/resume, reconnect and a real installed-app update without losing saved plans or unfinished text.
@@ -92,7 +92,7 @@ Additional functions outside the current beta implementation:
 - [ ] Cloud accounts and automatic cross-device synchronization.
 - [ ] Push notifications and automatic aurora alerts.
 - [x] Selected-time multi-model comparison for cloud cover, temperature and humidity. Astronomical seeing and transparency forecasts remain unavailable.
-- [x] Deep-sky catalogue expansion: 469 objects, comprising the original 109 Messier objects plus 360 curated NGC/IC records. Comprehensive NGC/IC coverage remains future work.
+- [x] Deep-sky planning includes 13,311 entries, with all 13,309 positioned, non-historical OpenNGC source records represented. The complete 13,970-record reference index also includes historical duplicates and unidentified entries; saved lists remain limited to 469 targets.
 
 These additional functions are scope choices rather than required first-release acceptance gates. Keyboard-control and photo enhancements remain paused at the user’s request. Use [PHONE-TEST-REPORT.md](./PHONE-TEST-REPORT.md) to record physical-device results; unrun checks must stay pending.
 

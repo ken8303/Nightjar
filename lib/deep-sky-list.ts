@@ -1,5 +1,6 @@
 import additional from '../data/additional-deep-sky-ids.json';
-const additionalIds=new Set(additional);
+import openNgcIds from '../data/opengc-planning-ids.json';
+const additionalIds=new Set([...additional,...openNgcIds]);
 export const deepSkyListLimit=109+additional.length;
 export const deepSkyListKey='nightjar-deep-targets-v1';
 export function validMessierId(value:unknown):value is string{return typeof value==='string'&&/^M(?:[1-9]|[1-9]\d|10[013-9]|110)$/.test(value)}
@@ -10,7 +11,9 @@ export function readDeepSkyList(storage:Pick<Storage,'getItem'>):string[]{
  if(raw!==null&&raw.length>5*1024*1024)throw Error('Saved deep-sky targets are too large to read.');
  const value:unknown=JSON.parse(raw===null?'[]':raw);
  if(!Array.isArray(value)||!value.every(validDeepSkyId))throw Error('Saved deep-sky targets could not be read.');
- return [...new Set(value)];
+ const unique=[...new Set(value)];
+ if(unique.length>deepSkyListLimit)throw Error('Saved deep-sky targets exceed the supported list limit. Existing data was not changed.');
+ return unique;
 }
 export function saveDeepSkyList(value:string[],storage:Pick<Storage,'setItem'>){
  if(!validDeepSkyList(value))throw Error('The deep-sky list is invalid.');

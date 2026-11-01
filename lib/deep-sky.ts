@@ -1,5 +1,7 @@
 import catalogue from '@/data/messier.json';
 import additional from '@/data/additional-deep-sky.json';
+import openNgcCandidates from '@/data/opengc-planning-candidates.json';
+import {aboveLocalHorizon,type LocalHorizon} from './local-horizon';
 import {validObservingDate} from './observing-time';
 import {constellationName,constellationLabel,traditionalChineseConstellationName} from './constellations';
 import {deepSkyTypeLabel,type Language} from './language';
@@ -9,7 +11,7 @@ import {skySurveyPhoto} from '@/lib/object-photos';
 import {j2000Position,j2000Projector,type Place,sunAltitude} from '@/lib/sky';
 export type DeepSkyObject={id:string;catalogue:string;name:string;type:string;constellation:string;ra:number;dec:number;magnitude:number|null;major:number|null;minor:number|null;positionAngle:number|null;crossReferences?:string[]};
 export const messierCatalogue:DeepSkyObject[]=catalogue;
-export const deepSkyCatalogue:DeepSkyObject[]=[...catalogue,...additional];
+export const deepSkyCatalogue:DeepSkyObject[]=[...catalogue,...additional,...openNgcCandidates];
 
 import {deepSkyName,deepSkyNames,deepSkyLabel,deepSkyChineseName} from './deep-sky-names';
 export {deepSkyName,deepSkyNames,deepSkyLabel,deepSkyChineseName};
@@ -45,8 +47,8 @@ export function deepSkyWindow(target:DeepSkyObject,date:Date,place:Place){
  });
 }
 export type DeepSkySample=ReturnType<typeof deepSkyWindow>[number];
-export function bestDeepSkySample(samples:DeepSkySample[]){
- return samples.reduce<DeepSkySample|null>((best,sample)=>sample.sun<-18&&sample.altitude>30&&(!best||sample.altitude>best.altitude)?sample:best,null);
+export function bestDeepSkySample(samples:DeepSkySample[],horizon?:LocalHorizon){
+ return samples.reduce<DeepSkySample|null>((best,sample)=>sample.sun<-18&&sample.altitude>30&&aboveLocalHorizon(sample.altitude,sample.azimuth,horizon)&&(!best||sample.altitude>best.altitude)?sample:best,null);
 }
 export function bestDeepSkyTime(target:DeepSkyObject,date:Date,place:Place){
  const best=bestDeepSkySample(deepSkyWindow(target,date,place));
@@ -61,17 +63,28 @@ export function deepSkyPhoto(target:DeepSkyObject,mode:'reference'|'survey'='ref
 
 // Share the Sun samples across the catalogue; search text does not need to
 // recalculate the same 24-hour opportunity window for each keystroke.
-export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place){
+export type DeepSkyRecommendation={date:Date;altitude:number;azimuth:number};
+// The UI advances this job in small scheduled batches so a full catalogue
+// search does not monopolize the main thread on mobile.
+export function createDeepSkyRecommendationJob(targets:DeepSkyObject[],date:Date,place:Place,horizon?:LocalHorizon){
  if(targets.length>deepSkyCatalogue.length)throw Error(`Plan up to ${deepSkyCatalogue.length} deep-sky targets at once.`);
- if(!targets.length)return new Map<string,{date:Date;altitude:number;azimuth:number}>();
- const darkTimes=deepSkySampleTimes(date).filter(time=>sunAltitude(time,place)<-18).map(time=>({time,project:j2000Projector(time,place)}));
- const recommendations=new Map<string,{date:Date;altitude:number;azimuth:number}>();
- for(const target of targets){
-  let best:{date:Date;altitude:number;azimuth:number}|null=null;
-  for(const {time,project} of darkTimes){const position=project(target.ra,target.dec);if(position.altitude>30&&(!best||position.altitude>best.altitude))best={date:time,altitude:position.altitude,azimuth:position.azimuth}}
-  if(best)recommendations.set(target.id,best);
- }
- return recommendations;
+ const darkTimes=targets.length?deepSkySampleTimes(date).filter(time=>sunAltitude(time,place)<-18).map(time=>({time,project:j2000Projector(time,place)})):[];
+ const recommendations=new Map<string,DeepSkyRecommendation>();let index=0;
+ return {recommendations,step(limit:number){
+  if(!Number.isInteger(limit)||limit<1)throw Error('Invalid recommendation batch size.');
+  const stop=Math.min(index+limit,targets.length);
+  for(;index<stop;index++){
+   const target=targets[index];let best:DeepSkyRecommendation|null=null;
+   for(const {time,project} of darkTimes){const position=project(target.ra,target.dec);if(position.altitude>30&&aboveLocalHorizon(position.altitude,position.azimuth,horizon)&&(!best||position.altitude>best.altitude))best={date:time,altitude:position.altitude,azimuth:position.azimuth}}
+   if(best)recommendations.set(target.id,best);
+  }
+  return index===targets.length;
+ }};
+}
+export function deepSkyRecommendations(targets:DeepSkyObject[],date:Date,place:Place,horizon?:LocalHorizon){
+ const job=createDeepSkyRecommendationJob(targets,date,place,horizon);
+ if(targets.length)job.step(targets.length);
+ return job.recommendations;
 }
 
 export function deepSkyPlanNotes(target:DeepSkyObject,language:Language='en'){

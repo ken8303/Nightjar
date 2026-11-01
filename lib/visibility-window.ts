@@ -1,18 +1,18 @@
 import {A,bodyPosition,skyBodies,type Place,sunAltitude} from '@/lib/sky';
+import {aboveLocalHorizon,type LocalHorizon} from './local-horizon';
 import {validObservingDate} from './observing-time';
 export const minimumTargetAltitude=30;
 export type VisibilitySample={time:Date;sun:number;altitude:number;azimuth:number};
 export type VisibilitySamples={body:A.Body;positions:VisibilitySample[]};
 
 // Rank only samples in full astronomical darkness, using the geometric Sun centre.
-export function rankVisibilitySamples(rows:VisibilitySamples[]){
+export function rankVisibilitySamples(rows:VisibilitySamples[],horizon?:LocalHorizon){
  return rows.map(row=>({...row,positions:row.positions.filter(sample=>sample.sun< -18)})).flatMap(row=>{
   if(!row.positions.length)return [];
-  const peakSample=row.positions.reduce((best,sample)=>sample.altitude>best.altitude?sample:best);
-  if(!(peakSample.altitude>minimumTargetAltitude))return [];
-  const best=row.positions.reduce<VisibilitySample|null>((best,sample)=>
-   sample.sun< -18&&sample.altitude>minimumTargetAltitude&&(!best||sample.altitude>best.altitude)?sample:best,null);
-  return [{...row,peak:peakSample.altitude,peakSample,best}];
+  const eligible=row.positions.filter(sample=>sample.altitude>minimumTargetAltitude&&aboveLocalHorizon(sample.altitude,sample.azimuth,horizon));
+  if(!eligible.length)return [];
+  const peakSample=eligible.reduce((best,sample)=>sample.altitude>best.altitude?sample:best);
+  return [{...row,peak:peakSample.altitude,peakSample,best:peakSample}];
  }).sort((a,b)=>b.peak-a.peak||a.body.localeCompare(b.body));
 }
 // Twilight opportunities have their own ranking: a high daytime peak must
@@ -21,7 +21,7 @@ export function visibilityOpportunities(rows:ReturnType<typeof rankVisibilitySam
  return rows.flatMap(row=>row.best?[{body:row.body,best:row.best}]:[])
   .sort((a,b)=>b.best.altitude-a.best.altitude||a.body.localeCompare(b.body));
 }
-export function planetVisibilityWindow(start:number,place:Place){
+export function planetVisibilityWindow(start:number,place:Place,horizon?:LocalHorizon){
  if(!validObservingDate(new Date(start)))throw Error('Choose an observing time within UTC years 1–9999.');
  const times=Array.from({length:12},(_,i)=>new Date(start+i*3600000)).filter(validObservingDate);
  const hours=times.map(time=>{
@@ -30,5 +30,5 @@ export function planetVisibilityWindow(start:number,place:Place){
  const samples=skyBodies.map(body=>({
   body,positions:hours.map(hour=>({...hour,...bodyPosition(body,hour.time,place)}))
  }));
- return {sampleCount:times.length,hours,rows:rankVisibilitySamples(samples)};
+ return {sampleCount:times.length,hours,rows:rankVisibilitySamples(samples,horizon)};
 }

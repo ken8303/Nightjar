@@ -19,6 +19,10 @@ test('diary search finds additional NGC and IC objects by names, aliases and cat
  assert.deepEqual(filterDiary(records,{...emptyDiaryFilters,query:'IC11',outcome:'seen'}).entries,[]);
  assert.deepEqual(records,before);
 });
+test('diary search indexes names and catalogue identifiers of newly available objects',()=>{
+ const nebula={...first,id:'new-nebula',target:'IC2220',notes:''};
+ for(const query of ['Toby Jug Nebula','IC02220','ic 2220'])assert.deepEqual(filterDiary([nebula],{...emptyDiaryFilters,query}).entries,[nebula]);
+});
 test('inclusive UTC date filters distinguish site-local next-day observations and combine with results',()=>{
  assert.deepEqual(filterDiary(entries,{...emptyDiaryFilters,from:'2026-10-05',through:'2026-10-05'}).entries,[first]);
  assert.equal(filterDiary(entries,{...emptyDiaryFilters,from:'2026-10-05',through:'2026-10-06',outcome:'not-seen'}).entries[0].id,'night-2');

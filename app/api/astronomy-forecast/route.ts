@@ -26,7 +26,11 @@ export async function GET(request:Request){
  let task=pending.get(key);
  if(!task){
   if(pending.size>=16)return Response.json({error:'Astronomy forecast is temporarily unavailable'},{status:502,headers});
-  const params=new URLSearchParams({lat:String(site.latitude),lon:String(site.longitude),product:'astro',output:'json',tzshift:'0'});
+  // 7Timer currently treats an exact zero coordinate as missing. Its grid is
+  // much coarser than this approximately 11 cm adjustment; retain the exact
+  // site everywhere else, including cache keys and darkness calculations.
+  const providerCoordinate=(value:number)=>String(value===0?0.000001:value);
+  const params=new URLSearchParams({lat:providerCoordinate(site.latitude),lon:providerCoordinate(site.longitude),product:'astro',output:'json',tzshift:'0'});
   task=fetch(`https://www.7timer.info/bin/api.pl?${params}`,{signal:AbortSignal.timeout(12000)}).then(readForecast);
   pending.set(key,task);
  }

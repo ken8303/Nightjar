@@ -7,15 +7,18 @@ import {lightPollutionAtlas,mapTileHealth,createMapTileTracker,mapCentreSite,sav
 import type {Place} from '@/lib/sky';
 import {deferFocusAndScroll} from '@/lib/deferred-focus';
 import LightPollutionReading from './light-pollution-sample';
+import MapAuroraLayer from './map-aurora-layer';
+import MapCloudLayer from './map-cloud-layer';
 import {lightPollutionCell} from '@/lib/light-pollution-sample';
 import {watchForegroundDelay} from '@/lib/foreground-delay';
 import {useLanguage} from '@/components/language-provider';
 
 type Health=ReturnType<typeof mapTileHealth>;
 const emptyHealth=():Health=>({loading:0,loaded:0,failed:0});
-export default function LightPollutionMap({latitude,longitude,name,onChoose,savedSites,savedUnavailable}:{latitude:number;longitude:number;name:string;onChoose:(place:Place)=>void;savedSites:Place[];savedUnavailable:boolean}){
+export default function LightPollutionMap({latitude,longitude,name,onChoose,savedSites,savedUnavailable,date}:{latitude:number;longitude:number;name:string;onChoose:(place:Place)=>void;savedSites:Place[];savedUnavailable:boolean;date:Date}){
  const {t}=useLanguage();
  const host=useRef<HTMLDivElement>(null),map=useRef<LeafletMap|null>(null),overlay=useRef<TileLayer|null>(null);
+ const [activeMap,setActiveMap]=useState<LeafletMap|null>(null);
  const [opacity,setOpacity]=useState(60),[attempt,setAttempt]=useState(0),[error,setError]=useState(''),[ready,setReady]=useState(false),[slow,setSlow]=useState(false);
  const [baseHealth,setBaseHealth]=useState(emptyHealth),[modelHealth,setModelHealth]=useState(emptyHealth);
  const [moving,setMoving]=useState(false),[selectionError,setSelectionError]=useState('');
@@ -54,7 +57,7 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose,save
    instance.on('moveend zoomend',moved);
    instance.on('movestart zoomstart',()=>{if(!disposed){setMoving(true);setSelectionError('')}});
    resize=new ResizeObserver(()=>{if(container.clientWidth&&container.clientHeight)instance?.invalidateSize({pan:true,animate:false})});resize.observe(container);
-   setReady(true);
+   setActiveMap(instance);setReady(true);
   }).catch(()=>{if(!disposed){resize?.disconnect();trackers.forEach(tracker=>tracker.dispose());instance?.remove();instance=null;map.current=null;overlay.current=null;setError('The map could not start. Reconnect and try loading it again.')}});
   return()=>{disposed=true;stopDelay();resize?.disconnect();trackers.forEach(tracker=>tracker.dispose());instance?.remove();map.current=null;overlay.current=null};
  },[latitude,longitude,attempt]);
@@ -72,7 +75,7 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose,save
   }).catch(()=>{if(!disposed)setMarkerError(true)});
   return()=>{disposed=true;layer?.remove()};
  },[ready,showSaved,savedMarkers,attempt,t]);
- const retry=(owner:Element)=>{setMoving(false);setSelectionError('');setCentre({latitude,longitude,zoom:7});setError('');setReady(false);setSlow(false);setBaseHealth(emptyHealth());setModelHealth(emptyHealth());setAttempt(value=>value+1);deferFocusAndScroll(()=>host.current,{owner})};
+ const retry=(owner:Element)=>{setMoving(false);setSelectionError('');setCentre({latitude,longitude,zoom:7});setError('');setActiveMap(null);setReady(false);setSlow(false);setBaseHealth(emptyHealth());setModelHealth(emptyHealth());setAttempt(value=>value+1);deferFocusAndScroll(()=>host.current,{owner})};
  const cell=lightPollutionCell(centre.latitude,centre.longitude);
  const candidate=mapCentreSite(centre.latitude,centre.longitude);
  const chooseCentre=()=>{const point=map.current?.getCenter(),site=point?mapCentreSite(point.lat,point.lng):null;if(!site){setSelectionError('The map centre is outside valid coordinates. Return to the selected site and try again.');return}setSelectionError('');onChoose(site)};
@@ -89,7 +92,7 @@ export default function LightPollutionMap({latitude,longitude,name,onChoose,save
   <label className="light-pollution-saved-toggle"><input type="checkbox" checked={showSaved} onChange={event=>{setMarkerError(false);setShowSaved(event.target.checked)}}/> {t('light.showSaved')}</label>
   {showSaved&&!markerError&&<p className="footnote" role="status">{t(savedMarkers.markers.length===1?'light.savedDotsOne':'light.savedDotsMany',{count:savedMarkers.markers.length})}{savedMarkers.outside?t(savedMarkers.outside===1?'light.savedOutsideOne':'light.savedOutsideMany',{count:savedMarkers.outside}):''}{savedMarkers.omitted?t('light.savedOmitted',{count:savedMarkers.omitted}):''}{savedUnavailable?t('light.savedUnavailable'):''}{t('light.savedHelp')}</p>}
   {showSaved&&markerError&&<p className="error" role="status">{t('light.markerFailed')}</p>}
-  <div className="light-pollution-map-frame"><div ref={host} tabIndex={0} role="region" aria-label={t('light.mapLabel',{name})} aria-describedby={instructions} className="light-pollution-map-canvas"/><span className="light-pollution-crosshair" aria-hidden="true"/></div>
+  {ready&&activeMap&&<MapAuroraLayer map={activeMap}/>}{ready&&activeMap&&<MapCloudLayer map={activeMap} date={date}/>}<div className="light-pollution-map-frame"><div ref={host} tabIndex={0} role="region" aria-label={t('light.mapLabel',{name})} aria-describedby={instructions} className="light-pollution-map-canvas"/><span className="light-pollution-crosshair" aria-hidden="true"/></div>
   <p className="light-pollution-attribution">{t('light.mapCredit')} <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors<span className="sr-only">{t('light.newTab')}</span></a> · {t('light.brightnessCredit')} <a href={lightPollutionAtlas.source} target="_blank" rel="noreferrer">David Lorenz<span className="sr-only">{t('light.newTab')}</span></a>, 2025 · <a href="/licenses/leaflet.txt" target="_blank" rel="noreferrer">{t('light.leafletLicense')}<span className="sr-only">{t('light.newTab')}</span></a></p>
   <label className="light-pollution-opacity" htmlFor={opacityId}>{t('light.opacity',{opacity})}<input id={opacityId} type="range" min="0" max="100" step="10" value={opacity} onChange={event=>setOpacity(Number(event.target.value))}/></label>
   <p className="footnote">{t('light.centre',{latitude:centre.latitude.toFixed(3),longitude:centre.longitude.toFixed(3),zoom:centre.zoom})} {t(opacity===0?'light.hidden':opacity===100?'light.fullOpacity':'light.blended')}</p>
